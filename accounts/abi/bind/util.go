@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/log"
 )
 
 // WaitMined waits for tx to be mined on the blockchain.
