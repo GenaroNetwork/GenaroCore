@@ -21,7 +21,7 @@ package p2p
 import (
 	"net"
 
-	"github.com/GenaroNetwork/Genaro-Core/metrics"
+	"github.com/GenaroNetwork/GenaroCore/metrics"
 )
 
 var (
