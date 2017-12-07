@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/common"
 )
 
 // reads the integer based on its kind
