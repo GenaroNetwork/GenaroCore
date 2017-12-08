@@ -19,7 +19,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/core/vm"
+	"github.com/GenaroNetwork/GenaroCore/core/vm"
 )
 
 func TestVM(t *testing.T) {
