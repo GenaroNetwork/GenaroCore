@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"github.com/GenaroNetwork/Genaro-Core/common/math"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/params"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/common/math"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
 )
 
 // TransactionTest checks RLP decoding and sender derivation of transactions.
