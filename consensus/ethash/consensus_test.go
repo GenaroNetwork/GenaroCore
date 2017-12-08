@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/common/math"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/params"
+	"github.com/GenaroNetwork/GenaroCore/common/math"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/params"
 )
 
 type diffTest struct {
