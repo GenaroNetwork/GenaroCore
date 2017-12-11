@@ -28,12 +28,12 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/GenaroCore/accounts"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
 )
 
 // ledgerOpcode is an enumeration encoding the supported Ledger opcodes.
