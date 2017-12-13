@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
 	"gopkg.in/fatih/set.v0"
 )
 
