@@ -25,8 +25,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/testutil"
+	"github.com/GenaroNetwork/GenaroCore/swarm/api"
+	"github.com/GenaroNetwork/GenaroCore/swarm/testutil"
 )
 
 // TestClientUploadDownloadRaw test uploading and downloading raw data to swarm
