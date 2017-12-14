@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/p2p"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/p2p"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
 	set "gopkg.in/fatih/set.v0"
 )
 
