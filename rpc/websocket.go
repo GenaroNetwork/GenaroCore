@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/log"
 	"golang.org/x/net/websocket"
 	"gopkg.in/fatih/set.v0"
 )
