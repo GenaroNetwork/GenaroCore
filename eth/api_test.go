@@ -21,9 +21,9 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/state"
-	"github.com/GenaroNetwork/Genaro-Core/ethdb"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core/state"
+	"github.com/GenaroNetwork/GenaroCore/ethdb"
 )
 
 var dumper = spew.ConfigState{Indent: "    "}
