@@ -33,7 +33,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
+	"github.com/GenaroNetwork/GenaroCore/swarm/api"
 )
 
 var (
