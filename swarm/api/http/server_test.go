@@ -26,11 +26,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
-	swarm "github.com/GenaroNetwork/Genaro-Core/swarm/api/client"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/storage"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/testutil"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/swarm/api"
+	swarm "github.com/GenaroNetwork/GenaroCore/swarm/api/client"
+	"github.com/GenaroNetwork/GenaroCore/swarm/storage"
+	"github.com/GenaroNetwork/GenaroCore/swarm/testutil"
 )
 
 func TestBzzGetPath(t *testing.T) {
