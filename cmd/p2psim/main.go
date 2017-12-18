@@ -45,12 +45,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/p2p"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/simulations"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/simulations/adapters"
-	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/GenaroCore/p2p"
+	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
+	"github.com/GenaroNetwork/GenaroCore/p2p/simulations"
+	"github.com/GenaroNetwork/GenaroCore/p2p/simulations/adapters"
+	"github.com/GenaroNetwork/GenaroCore/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 
