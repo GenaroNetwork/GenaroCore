@@ -19,8 +19,8 @@
 package whisperv6
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
 )
 
 // TopicType represents a cryptographically secure, probabilistic partial
