@@ -21,7 +21,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/GenaroNetwork/Genaro-Core/p2p"
+	"github.com/GenaroNetwork/GenaroCore/p2p"
 )
 
 // NodeInfo represents pi short summary of the information known about the host.
