@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"github.com/GenaroNetwork/Genaro-Core/trie"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/GenaroCore/trie"
 )
 
 // NodeIterator is an iterator to traverse the entire state trie post-order,
