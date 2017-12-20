@@ -26,8 +26,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/log"
 )
 
 // nodeDockerfile is the Dockerfile required to run an Ethereum node.
