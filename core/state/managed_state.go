@@ -19,7 +19,7 @@ package state
 import (
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/common"
 )
 
 type account struct {
