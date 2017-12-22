@@ -24,9 +24,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/netutil"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
+	"github.com/GenaroNetwork/GenaroCore/p2p/netutil"
 )
 
 const (
