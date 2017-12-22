@@ -25,11 +25,11 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"github.com/GenaroNetwork/Genaro-Core/core/vm"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/core/vm"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/GenaroCore/log"
 	duktape "gopkg.in/olebedev/go-duktape.v3"
 )
 
