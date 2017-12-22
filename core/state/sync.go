@@ -19,9 +19,9 @@ package state
 import (
 	"bytes"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"github.com/GenaroNetwork/Genaro-Core/trie"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/GenaroCore/trie"
 )
 
 // NewStateSync create a new state trie download scheduler.
