@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroCore"
-	"github.com/GenaroNetwork/GenaroCore/accounts/abi"
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
-	"github.com/GenaroNetwork/GenaroCore/crypto"
-	"github.com/GenaroNetwork/GenaroCore/event"
+	"github.com/GenaroNetwork/Genaro"
+	"github.com/GenaroNetwork/Genaro/accounts/abi"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/event"
 )
 
 // SignerFn is a signer function callback when a contract requires a method to
