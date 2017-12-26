@@ -23,10 +23,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/p2p"
-	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
-	"github.com/GenaroNetwork/GenaroCore/p2p/simulations/adapters"
-	p2ptest "github.com/GenaroNetwork/GenaroCore/p2p/testing"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/p2p/simulations/adapters"
+	p2ptest "github.com/GenaroNetwork/Genaro/p2p/testing"
 )
 
 // handshake message type
