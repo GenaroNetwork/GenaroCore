@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 func TestTransaction(t *testing.T) {
