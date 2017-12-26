@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GenaroNetwork/GenaroCore/cmd/utils"
-	"github.com/GenaroNetwork/GenaroCore/swarm/storage"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 
