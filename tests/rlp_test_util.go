@@ -24,7 +24,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 // RLPTest is the JSON structure of a single RLP test.
