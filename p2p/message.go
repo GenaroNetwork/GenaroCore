@@ -25,9 +25,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/event"
-	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
-	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 // Msg defines the structure of a p2p message.
