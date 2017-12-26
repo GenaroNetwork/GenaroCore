@@ -22,9 +22,9 @@ import (
 	"io"
 	"unsafe"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
-	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/hexutil"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 //go:generate gencodec -type Receipt -field-override receiptMarshaling -out gen_receipt_json.go
