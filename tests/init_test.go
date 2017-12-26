@@ -29,7 +29,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 var (
