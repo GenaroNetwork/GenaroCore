@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/common/mclock"
+	"github.com/GenaroNetwork/Genaro/common/mclock"
 )
 
 const fcTimeConst = time.Millisecond
