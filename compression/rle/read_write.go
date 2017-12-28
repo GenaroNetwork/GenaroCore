@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/Genaro/crypto"
 )
 
 const (
