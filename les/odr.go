@@ -19,10 +19,10 @@ package les
 import (
 	"context"
 
-	"github.com/GenaroNetwork/GenaroCore/core"
-	"github.com/GenaroNetwork/GenaroCore/ethdb"
-	"github.com/GenaroNetwork/GenaroCore/light"
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/light"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // LesOdr implements light.OdrBackend
