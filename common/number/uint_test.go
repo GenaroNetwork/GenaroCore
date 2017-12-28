@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 func TestSet(t *testing.T) {
