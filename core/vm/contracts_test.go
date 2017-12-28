@@ -21,7 +21,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 // precompiledTest defines the input/output pairs for precompiled contract tests.
