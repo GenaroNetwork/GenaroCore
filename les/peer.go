@@ -26,13 +26,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
-	"github.com/GenaroNetwork/GenaroCore/eth"
-	"github.com/GenaroNetwork/GenaroCore/les/flowcontrol"
-	"github.com/GenaroNetwork/GenaroCore/light"
-	"github.com/GenaroNetwork/GenaroCore/p2p"
-	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/eth"
+	"github.com/GenaroNetwork/Genaro/les/flowcontrol"
+	"github.com/GenaroNetwork/Genaro/light"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 var (
