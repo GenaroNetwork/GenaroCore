@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
 )
 
 // Simulation provides a framework for running actions in a simulated network
