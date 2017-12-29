@@ -18,11 +18,11 @@
 package consensus
 
 import (
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/state"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
-	"github.com/GenaroNetwork/GenaroCore/params"
-	"github.com/GenaroNetwork/GenaroCore/rpc"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/state"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro/rpc"
 	"math/big"
 )
 
