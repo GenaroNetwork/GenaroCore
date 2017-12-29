@@ -27,9 +27,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/accounts"
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/accounts"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/log"
 	"gopkg.in/fatih/set.v0"
 )
 
