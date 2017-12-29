@@ -19,8 +19,8 @@ package vm
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // StateDB is an EVM database for full state querying.
