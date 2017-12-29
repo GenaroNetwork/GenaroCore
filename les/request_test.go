@@ -21,12 +21,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core"
-	"github.com/GenaroNetwork/GenaroCore/crypto"
-	"github.com/GenaroNetwork/GenaroCore/eth"
-	"github.com/GenaroNetwork/GenaroCore/ethdb"
-	"github.com/GenaroNetwork/GenaroCore/light"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/eth"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/light"
 )
 
 var testBankSecureTrieKey = secAddr(testBankAddress)
