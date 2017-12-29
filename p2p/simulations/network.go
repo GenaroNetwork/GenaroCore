@@ -24,11 +24,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/event"
-	"github.com/GenaroNetwork/GenaroCore/log"
-	"github.com/GenaroNetwork/GenaroCore/p2p"
-	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
-	"github.com/GenaroNetwork/GenaroCore/p2p/simulations/adapters"
+	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/p2p/simulations/adapters"
 )
 
 var dialBanTimeout = 200 * time.Millisecond
