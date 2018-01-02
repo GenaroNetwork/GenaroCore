@@ -28,9 +28,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/GenaroNetwork/GenaroCore/internal/jsre"
-	"github.com/GenaroNetwork/GenaroCore/internal/web3ext"
-	"github.com/GenaroNetwork/GenaroCore/rpc"
+	"github.com/GenaroNetwork/Genaro/internal/jsre"
+	"github.com/GenaroNetwork/Genaro/internal/web3ext"
+	"github.com/GenaroNetwork/Genaro/rpc"
 	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
 	"github.com/robertkrimen/otto"
