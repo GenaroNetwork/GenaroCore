@@ -21,11 +21,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/accounts/abi"
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/state"
-	"github.com/GenaroNetwork/GenaroCore/core/vm"
-	"github.com/GenaroNetwork/GenaroCore/ethdb"
+	"github.com/GenaroNetwork/Genaro/accounts/abi"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/state"
+	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/Genaro/ethdb"
 )
 
 func TestDefaults(t *testing.T) {
