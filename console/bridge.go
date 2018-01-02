@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/accounts/usbwallet"
-	"github.com/GenaroNetwork/GenaroCore/log"
-	"github.com/GenaroNetwork/GenaroCore/rpc"
+	"github.com/GenaroNetwork/Genaro/accounts/usbwallet"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/rpc"
 	"github.com/robertkrimen/otto"
 )
 
