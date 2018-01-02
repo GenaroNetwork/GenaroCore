@@ -19,7 +19,7 @@ package whisperv5
 import (
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/Genaro/crypto"
 )
 
 func BenchmarkDeriveKeyMaterial(b *testing.B) {
