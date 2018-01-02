@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // CreateIPCListener creates an listener, on Unix platforms this is a unix socket, on
