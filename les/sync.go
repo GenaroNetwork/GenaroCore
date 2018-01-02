@@ -20,9 +20,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/core"
-	"github.com/GenaroNetwork/GenaroCore/eth/downloader"
-	"github.com/GenaroNetwork/GenaroCore/light"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/eth/downloader"
+	"github.com/GenaroNetwork/Genaro/light"
 )
 
 const (
