@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 const (
