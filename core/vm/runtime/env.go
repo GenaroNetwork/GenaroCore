@@ -17,9 +17,9 @@
 package runtime
 
 import (
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core"
-	"github.com/GenaroNetwork/GenaroCore/core/vm"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/core/vm"
 )
 
 func NewEnv(cfg *Config) *vm.EVM {
