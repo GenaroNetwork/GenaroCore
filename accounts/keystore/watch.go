@@ -21,7 +21,7 @@ package keystore
 import (
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/log"
 	"github.com/rjeczalik/notify"
 )
 
