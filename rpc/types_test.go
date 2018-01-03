@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common/math"
+	"github.com/GenaroNetwork/Genaro/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {
