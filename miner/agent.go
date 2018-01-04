@@ -21,8 +21,8 @@ import (
 
 	"sync/atomic"
 
-	"github.com/GenaroNetwork/GenaroCore/consensus"
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/consensus"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 type CpuAgent struct {
