@@ -6,10 +6,10 @@ package contract
 import (
 	"strings"
 
-	"github.com/GenaroNetwork/GenaroCore/accounts/abi"
-	"github.com/GenaroNetwork/GenaroCore/accounts/abi/bind"
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/Genaro/accounts/abi"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // FIFSRegistrarABI is the input ABI used to generate the binding from.
