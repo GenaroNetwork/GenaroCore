@@ -20,7 +20,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/Genaro/crypto"
 	"golang.org/x/crypto/pbkdf2"
 )
 
