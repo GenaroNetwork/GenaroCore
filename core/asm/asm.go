@@ -21,7 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/GenaroNetwork/GenaroCore/core/vm"
+	"github.com/GenaroNetwork/Genaro/core/vm"
 )
 
 // Iterator for disassembled EVM instructions
