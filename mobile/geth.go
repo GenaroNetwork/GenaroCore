@@ -24,17 +24,17 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/GenaroNetwork/GenaroCore/core"
-	"github.com/GenaroNetwork/GenaroCore/eth"
-	"github.com/GenaroNetwork/GenaroCore/eth/downloader"
-	"github.com/GenaroNetwork/GenaroCore/ethclient"
-	"github.com/GenaroNetwork/GenaroCore/ethstats"
-	"github.com/GenaroNetwork/GenaroCore/les"
-	"github.com/GenaroNetwork/GenaroCore/node"
-	"github.com/GenaroNetwork/GenaroCore/p2p"
-	"github.com/GenaroNetwork/GenaroCore/p2p/nat"
-	"github.com/GenaroNetwork/GenaroCore/params"
-	whisper "github.com/GenaroNetwork/GenaroCore/whisper/whisperv6"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/eth"
+	"github.com/GenaroNetwork/Genaro/eth/downloader"
+	"github.com/GenaroNetwork/Genaro/ethclient"
+	"github.com/GenaroNetwork/Genaro/ethstats"
+	"github.com/GenaroNetwork/Genaro/les"
+	"github.com/GenaroNetwork/Genaro/node"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/p2p/nat"
+	"github.com/GenaroNetwork/Genaro/params"
+	whisper "github.com/GenaroNetwork/Genaro/whisper/whisperv6"
 )
 
 // NodeConfig represents the collection of configuration values to fine tune the Geth
