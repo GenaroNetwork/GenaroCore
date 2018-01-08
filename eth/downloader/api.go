@@ -20,9 +20,9 @@ import (
 	"context"
 	"sync"
 
-	ethereum "github.com/GenaroNetwork/GenaroCore"
-	"github.com/GenaroNetwork/GenaroCore/event"
-	"github.com/GenaroNetwork/GenaroCore/rpc"
+	ethereum "github.com/GenaroNetwork/Genaro"
+	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro/rpc"
 )
 
 // PublicDownloaderAPI provides an API which gives information about the current synchronisation status.
