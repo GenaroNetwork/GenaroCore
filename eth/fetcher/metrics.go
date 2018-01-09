@@ -19,7 +19,7 @@
 package fetcher
 
 import (
-	"github.com/GenaroNetwork/GenaroCore/metrics"
+	"github.com/GenaroNetwork/Genaro/metrics"
 )
 
 var (
