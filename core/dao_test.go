@@ -20,10 +20,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/consensus/ethash"
-	"github.com/GenaroNetwork/GenaroCore/core/vm"
-	"github.com/GenaroNetwork/GenaroCore/ethdb"
-	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/Genaro/consensus/ethash"
+	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 // Tests that DAO-fork enabled clients can properly filter out fork-commencing
