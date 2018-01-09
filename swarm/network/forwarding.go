@@ -21,8 +21,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/log"
-	"github.com/GenaroNetwork/GenaroCore/swarm/storage"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/swarm/storage"
 )
 
 const requesterCount = 3
