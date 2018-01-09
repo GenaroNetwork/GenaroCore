@@ -21,11 +21,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
-	"github.com/GenaroNetwork/GenaroCore/crypto/sha3"
-	"github.com/GenaroNetwork/GenaroCore/ethdb"
-	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/crypto/sha3"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 // Tests block header storage and retrieval operations.
