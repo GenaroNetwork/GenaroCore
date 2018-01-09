@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 const (
