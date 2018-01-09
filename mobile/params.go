@@ -21,9 +21,9 @@ package geth
 import (
 	"encoding/json"
 
-	"github.com/GenaroNetwork/GenaroCore/core"
-	"github.com/GenaroNetwork/GenaroCore/p2p/discv5"
-	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/p2p/discv5"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 // MainnetGenesis returns the JSON spec to use for the main Ethereum network. It
