@@ -24,10 +24,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/GenaroNetwork/GenaroCore/cmd/utils"
-	"github.com/GenaroNetwork/GenaroCore/console"
-	"github.com/GenaroNetwork/GenaroCore/node"
-	"github.com/GenaroNetwork/GenaroCore/rpc"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/console"
+	"github.com/GenaroNetwork/Genaro/node"
+	"github.com/GenaroNetwork/Genaro/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -43,7 +43,7 @@ var (
 		Description: `
 The Geth console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://github.com/GenaroNetwork/GenaroCore/wiki/JavaScript-Console.`,
+See https://github.com/GenaroNetwork/Genaro/wiki/JavaScript-Console.`,
 	}
 
 	attachCommand = cli.Command{
@@ -56,7 +56,7 @@ See https://github.com/GenaroNetwork/GenaroCore/wiki/JavaScript-Console.`,
 		Description: `
 The Geth console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://github.com/GenaroNetwork/GenaroCore/wiki/JavaScript-Console.
+See https://github.com/GenaroNetwork/Genaro/wiki/JavaScript-Console.
 This command allows to open a console on a running geth node.`,
 	}
 
@@ -69,7 +69,7 @@ This command allows to open a console on a running geth node.`,
 		Category:  "CONSOLE COMMANDS",
 		Description: `
 The JavaScript VM exposes a node admin interface as well as the Ðapp
-JavaScript API. See https://github.com/GenaroNetwork/GenaroCore/wiki/JavaScript-Console`,
+JavaScript API. See https://github.com/GenaroNetwork/Genaro/wiki/JavaScript-Console`,
 	}
 )
 
