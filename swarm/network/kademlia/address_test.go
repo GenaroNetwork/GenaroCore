@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 func (Address) Generate(rand *rand.Rand, size int) reflect.Value {
