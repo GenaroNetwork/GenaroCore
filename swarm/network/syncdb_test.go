@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/crypto"
-	"github.com/GenaroNetwork/GenaroCore/log"
-	"github.com/GenaroNetwork/GenaroCore/swarm/storage"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/swarm/storage"
 )
 
 func init() {
