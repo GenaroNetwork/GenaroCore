@@ -5,12 +5,12 @@ package eth
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
-	"github.com/GenaroNetwork/GenaroCore/consensus/ethash"
-	"github.com/GenaroNetwork/GenaroCore/core"
-	"github.com/GenaroNetwork/GenaroCore/eth/downloader"
-	"github.com/GenaroNetwork/GenaroCore/eth/gasprice"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/hexutil"
+	"github.com/GenaroNetwork/Genaro/consensus/ethash"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/eth/downloader"
+	"github.com/GenaroNetwork/Genaro/eth/gasprice"
 )
 
 var _ = (*configMarshaling)(nil)
