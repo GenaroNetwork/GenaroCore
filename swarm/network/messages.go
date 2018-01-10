@@ -21,11 +21,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/contracts/chequebook"
-	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
-	"github.com/GenaroNetwork/GenaroCore/swarm/network/kademlia"
-	"github.com/GenaroNetwork/GenaroCore/swarm/services/swap"
-	"github.com/GenaroNetwork/GenaroCore/swarm/storage"
+	"github.com/GenaroNetwork/Genaro/contracts/chequebook"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/swarm/network/kademlia"
+	"github.com/GenaroNetwork/Genaro/swarm/services/swap"
+	"github.com/GenaroNetwork/Genaro/swarm/storage"
 )
 
 /*
