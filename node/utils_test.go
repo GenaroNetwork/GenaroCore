@@ -22,8 +22,8 @@ package node
 import (
 	"reflect"
 
-	"github.com/GenaroNetwork/GenaroCore/p2p"
-	"github.com/GenaroNetwork/GenaroCore/rpc"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/rpc"
 )
 
 // NoopService is a trivial implementation of the Service interface.
