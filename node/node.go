@@ -26,13 +26,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GenaroNetwork/GenaroCore/accounts"
-	"github.com/GenaroNetwork/GenaroCore/ethdb"
-	"github.com/GenaroNetwork/GenaroCore/event"
-	"github.com/GenaroNetwork/GenaroCore/internal/debug"
-	"github.com/GenaroNetwork/GenaroCore/log"
-	"github.com/GenaroNetwork/GenaroCore/p2p"
-	"github.com/GenaroNetwork/GenaroCore/rpc"
+	"github.com/GenaroNetwork/Genaro/accounts"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro/internal/debug"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/rpc"
 	"github.com/prometheus/prometheus/util/flock"
 )
 
