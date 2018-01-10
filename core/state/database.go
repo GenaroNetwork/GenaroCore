@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/ethdb"
-	"github.com/GenaroNetwork/GenaroCore/trie"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/trie"
 	lru "github.com/hashicorp/golang-lru"
 )
 
