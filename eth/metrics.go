@@ -17,8 +17,8 @@
 package eth
 
 import (
-	"github.com/GenaroNetwork/GenaroCore/metrics"
-	"github.com/GenaroNetwork/GenaroCore/p2p"
+	"github.com/GenaroNetwork/Genaro/metrics"
+	"github.com/GenaroNetwork/Genaro/p2p"
 )
 
 var (
