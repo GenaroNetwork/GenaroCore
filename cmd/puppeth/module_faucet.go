@@ -26,8 +26,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // faucetDockerfile is the Dockerfile required to build an faucet container to
