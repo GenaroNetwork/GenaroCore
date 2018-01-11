@@ -25,7 +25,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 const (
