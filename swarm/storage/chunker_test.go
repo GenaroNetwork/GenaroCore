@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/crypto/sha3"
+	"github.com/GenaroNetwork/Genaro/crypto/sha3"
 )
 
 /*
