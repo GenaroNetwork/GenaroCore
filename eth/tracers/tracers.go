@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/GenaroNetwork/GenaroCore/eth/tracers/internal/tracers"
+	"github.com/GenaroNetwork/Genaro/eth/tracers/internal/tracers"
 )
 
 // all contains all the built in JavaScript tracers by name.
