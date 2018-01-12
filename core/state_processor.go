@@ -17,14 +17,14 @@
 package core
 
 import (
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/consensus"
-	"github.com/GenaroNetwork/GenaroCore/consensus/misc"
-	"github.com/GenaroNetwork/GenaroCore/core/state"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
-	"github.com/GenaroNetwork/GenaroCore/core/vm"
-	"github.com/GenaroNetwork/GenaroCore/crypto"
-	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/consensus"
+	"github.com/GenaroNetwork/Genaro/consensus/misc"
+	"github.com/GenaroNetwork/Genaro/core/state"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
