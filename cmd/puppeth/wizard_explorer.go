@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // deployExplorer creates a new block explorer based on some user input.
