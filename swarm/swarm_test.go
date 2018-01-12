@@ -19,7 +19,7 @@ package swarm
 import (
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 func TestParseEnsAPIAddress(t *testing.T) {
