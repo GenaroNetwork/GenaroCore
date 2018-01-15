@@ -20,8 +20,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // senderFromServer is a types.Signer that remembers the sender address returned by the RPC
