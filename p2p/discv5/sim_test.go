@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 // In this test, nodes try to randomly resolve each other.
