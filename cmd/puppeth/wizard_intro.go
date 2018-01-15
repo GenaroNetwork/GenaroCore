@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // makeWizard creates and returns a new puppeth wizard.
