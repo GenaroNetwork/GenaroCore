@@ -17,9 +17,9 @@
 package core
 
 import (
-	"github.com/GenaroNetwork/GenaroCore/core/state"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
-	"github.com/GenaroNetwork/GenaroCore/core/vm"
+	"github.com/GenaroNetwork/Genaro/core/state"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/core/vm"
 )
 
 // Validator is an interface which defines the standard for block validation. It
