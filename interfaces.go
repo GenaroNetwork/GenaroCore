@@ -22,8 +22,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // NotFound is returned by API methods if the requested item does not exist.
