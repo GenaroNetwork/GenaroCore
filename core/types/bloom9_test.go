@@ -54,7 +54,7 @@ func TestBloom(t *testing.T) {
 import (
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/core/state"
+	"github.com/GenaroNetwork/Genaro/core/state"
 )
 
 func TestBloom9(t *testing.T) {
