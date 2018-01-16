@@ -23,8 +23,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 // from bcValidBlockTest.json, "SimpleTx"
