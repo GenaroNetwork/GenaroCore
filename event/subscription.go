@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common/mclock"
+	"github.com/GenaroNetwork/Genaro/common/mclock"
 )
 
 // Subscription represents a stream of events. The carrier of the events is typically a
