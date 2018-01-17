@@ -22,10 +22,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/GenaroNetwork/Genaro/accounts/keystore"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/accounts/keystore"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
 )
 
 // NewTransactor is a utility method to easily create a transaction signer from
