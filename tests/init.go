@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 // This table defines supported forks and their chain config.
