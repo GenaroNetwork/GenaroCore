@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/GenaroGNX/event"
+	"github.com/GenaroNetwork/Genaro/event"
 )
 
 func ExampleNewSubscription() {
