@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/Genaro/common/hexutil"
+	"github.com/GenaroNetwork/Genaro/crypto"
 )
 
 type bytesBacked interface {
