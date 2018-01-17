@@ -21,9 +21,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/Genaro"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 var (
