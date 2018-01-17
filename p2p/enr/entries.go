@@ -22,8 +22,8 @@ import (
 	"io"
 	"net"
 
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/rlp"
 )
 
 // Entry is implemented by known node record entry types.
