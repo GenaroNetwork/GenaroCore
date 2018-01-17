@@ -22,9 +22,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/GenaroNetwork/Genaro/cmd/utils"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/swarm/storage"
+	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
+	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/GenaroGNX/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 
