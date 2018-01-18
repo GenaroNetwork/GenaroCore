@@ -27,7 +27,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/GenaroGNX/common/math"
 	"gopkg.in/urfave/cli.v1"
 )
 
