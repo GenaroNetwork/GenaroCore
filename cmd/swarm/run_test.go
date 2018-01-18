@@ -27,13 +27,13 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/GenaroNetwork/Genaro/accounts"
-	"github.com/GenaroNetwork/Genaro/accounts/keystore"
-	"github.com/GenaroNetwork/Genaro/internal/cmdtest"
-	"github.com/GenaroNetwork/Genaro/node"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/rpc"
-	"github.com/GenaroNetwork/Genaro/swarm"
+	"github.com/GenaroNetwork/GenaroGNX/accounts"
+	"github.com/GenaroNetwork/GenaroGNX/accounts/keystore"
+	"github.com/GenaroNetwork/GenaroGNX/internal/cmdtest"
+	"github.com/GenaroNetwork/GenaroGNX/node"
+	"github.com/GenaroNetwork/GenaroGNX/p2p"
+	"github.com/GenaroNetwork/GenaroGNX/rpc"
+	"github.com/GenaroNetwork/GenaroGNX/swarm"
 )
 
 func init() {
