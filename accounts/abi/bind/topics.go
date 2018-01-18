@@ -22,9 +22,9 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/GenaroNetwork/GenaroGNX/accounts/abi"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/Genaro/accounts/abi"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/crypto"
 )
 
 // makeTopics converts a filter query argument list into a filter topic set.
