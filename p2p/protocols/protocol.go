@@ -34,7 +34,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/GenaroGNX/p2p"
 )
 
 // error codes used by this  protocol scheme
