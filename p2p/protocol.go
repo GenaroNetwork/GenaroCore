@@ -19,7 +19,7 @@ package p2p
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
 )
 
 // Protocol represents a P2P subprotocol implementation.
