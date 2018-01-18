@@ -21,17 +21,17 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX/accounts"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core"
-	"github.com/GenaroNetwork/GenaroGNX/core/state"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/core/vm"
-	"github.com/GenaroNetwork/GenaroGNX/eth/downloader"
-	"github.com/GenaroNetwork/GenaroGNX/ethdb"
-	"github.com/GenaroNetwork/GenaroGNX/event"
-	"github.com/GenaroNetwork/GenaroGNX/params"
-	"github.com/GenaroNetwork/GenaroGNX/rpc"
+	"github.com/GenaroNetwork/Genaro/accounts"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/core/state"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/Genaro/eth/downloader"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro/rpc"
 )
 
 // Backend interface provides the common API services (that are provided by
