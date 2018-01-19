@@ -21,9 +21,9 @@ import (
 	"hash"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/crypto/sha3"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/crypto/sha3"
+	"github.com/GenaroNetwork/GenaroGNX/rlp"
 )
 
 type hasher struct {
