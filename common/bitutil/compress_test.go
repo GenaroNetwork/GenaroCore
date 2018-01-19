@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
+	"github.com/GenaroNetwork/Genaro/common/hexutil"
 )
 
 // Tests that data bitset encoding and decoding works and is bijective.
