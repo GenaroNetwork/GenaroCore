@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -244,7 +244,7 @@ func unpackTestEventData(dest interface{}, hexData string, jsonEvent []byte, ass
 
 /*
 Taken from
-https://github.com/GenaroNetwork/GenaroGNX/pull/15568
+https://github.com/GenaroNetwork/Genaro/pull/15568
 */
 
 type testResult struct {
