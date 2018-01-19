@@ -19,7 +19,7 @@ package trie
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 // MissingNodeError is returned by the trie functions (TryGet, TryUpdate, TryDelete)
