@@ -21,11 +21,11 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/math"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/crypto/bn256"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/math"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/crypto/bn256"
+	"github.com/GenaroNetwork/GenaroGNX/params"
 	"golang.org/x/crypto/ripemd160"
 )
 
