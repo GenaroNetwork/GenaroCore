@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 func TestPack(t *testing.T) {
