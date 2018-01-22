@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/ethdb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.
