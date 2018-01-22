@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common/mclock"
+	"github.com/GenaroNetwork/Genaro/common/mclock"
 )
 
 const rcConst = 1000000
