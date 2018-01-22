@@ -20,8 +20,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/ethdb"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/ethdb"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
 )
 
