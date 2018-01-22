@@ -36,11 +36,11 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/node"
-	"github.com/GenaroNetwork/GenaroGNX/p2p"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
-	"github.com/GenaroNetwork/GenaroGNX/rpc"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/node"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/rpc"
 	"golang.org/x/net/websocket"
 )
 
