@@ -25,11 +25,11 @@ import (
 	"os"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/node"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/node"
+	"github.com/GenaroNetwork/GenaroGNX/p2p"
+	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
+	"github.com/GenaroNetwork/GenaroGNX/rpc"
 )
 
 // Node represents a node in a simulation network which is created by a
