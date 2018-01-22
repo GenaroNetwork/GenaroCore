@@ -27,12 +27,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/event"
-	"github.com/GenaroNetwork/Genaro/node"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
-	"github.com/GenaroNetwork/Genaro/p2p/simulations/adapters"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/GenaroGNX/event"
+	"github.com/GenaroNetwork/GenaroGNX/node"
+	"github.com/GenaroNetwork/GenaroGNX/p2p"
+	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
+	"github.com/GenaroNetwork/GenaroGNX/p2p/simulations/adapters"
+	"github.com/GenaroNetwork/GenaroGNX/rpc"
 )
 
 // testService implements the node.Service interface and provides protocols
