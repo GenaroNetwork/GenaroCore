@@ -20,12 +20,12 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/rlp"
-	whisper "github.com/GenaroNetwork/GenaroGNX/whisper/whisperv6"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/rlp"
+	whisper "github.com/GenaroNetwork/Genaro/whisper/whisperv6"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
