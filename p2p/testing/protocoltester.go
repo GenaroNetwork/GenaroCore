@@ -32,14 +32,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/node"
-	"github.com/GenaroNetwork/GenaroGNX/p2p"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/simulations"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/simulations/adapters"
-	"github.com/GenaroNetwork/GenaroGNX/rlp"
-	"github.com/GenaroNetwork/GenaroGNX/rpc"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/node"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/p2p/simulations"
+	"github.com/GenaroNetwork/Genaro/p2p/simulations/adapters"
+	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro/rpc"
 )
 
 // ProtocolTester is the tester environment used for unit testing protocol
