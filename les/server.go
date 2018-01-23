@@ -23,17 +23,17 @@ import (
 	"math"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/eth"
-	"github.com/GenaroNetwork/Genaro/ethdb"
-	"github.com/GenaroNetwork/Genaro/les/flowcontrol"
-	"github.com/GenaroNetwork/Genaro/light"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/p2p/discv5"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/core"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/eth"
+	"github.com/GenaroNetwork/GenaroGNX/ethdb"
+	"github.com/GenaroNetwork/GenaroGNX/les/flowcontrol"
+	"github.com/GenaroNetwork/GenaroGNX/light"
+	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/GenaroGNX/p2p"
+	"github.com/GenaroNetwork/GenaroGNX/p2p/discv5"
+	"github.com/GenaroNetwork/GenaroGNX/rlp"
 )
 
 type LesServer struct {
