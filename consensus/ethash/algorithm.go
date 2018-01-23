@@ -27,11 +27,11 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/bitutil"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/crypto/sha3"
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/bitutil"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/crypto/sha3"
+	"github.com/GenaroNetwork/GenaroGNX/log"
 )
 
 const (
