@@ -25,9 +25,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
 )
 
 // Tests whether the dataset size calculator works correctly by cross checking the
