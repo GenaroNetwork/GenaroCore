@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/GenaroGNX/common"
 )
 
 type keyStorePlain struct {
