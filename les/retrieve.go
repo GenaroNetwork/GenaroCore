@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common/mclock"
+	"github.com/GenaroNetwork/GenaroGNX/common/mclock"
 )
 
 var (
