@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/GenaroGNX/common/math"
 )
 
 func memorySha3(stack *Stack) *big.Int {
