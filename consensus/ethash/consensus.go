@@ -24,13 +24,13 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/common/math"
-	"github.com/GenaroNetwork/GenaroGNX/consensus"
-	"github.com/GenaroNetwork/GenaroGNX/consensus/misc"
-	"github.com/GenaroNetwork/GenaroGNX/core/state"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/Genaro/consensus"
+	"github.com/GenaroNetwork/Genaro/consensus/misc"
+	"github.com/GenaroNetwork/Genaro/core/state"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/params"
 	set "gopkg.in/fatih/set.v0"
 )
 
