@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/GenaroGNX/params"
 )
 
 type (
