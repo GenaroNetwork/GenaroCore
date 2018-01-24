@@ -19,7 +19,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/GenaroGNX/params"
 )
 
 func makeStackFunc(pop, push int) stackValidationFunc {
