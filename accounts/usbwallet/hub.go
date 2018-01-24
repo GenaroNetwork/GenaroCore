@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/accounts"
-	"github.com/GenaroNetwork/GenaroGNX/event"
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/Genaro/accounts"
+	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro/log"
 	"github.com/karalabe/hid"
 )
 
