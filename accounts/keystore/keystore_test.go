@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/accounts"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/GenaroGNX/accounts"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/event"
 )
 
 var testSigData = make([]byte, 32)
