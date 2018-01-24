@@ -19,7 +19,7 @@ package params
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/GenaroGNX/common"
 )
 
 // DAOForkBlockExtra is the block header extra-data field to set for the DAO fork
