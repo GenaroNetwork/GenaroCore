@@ -25,8 +25,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/accounts"
-	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/accounts"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 )
