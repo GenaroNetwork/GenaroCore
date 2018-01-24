@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	ethereum "github.com/GenaroNetwork/GenaroGNX"
-	"github.com/GenaroNetwork/GenaroGNX/accounts"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	ethereum "github.com/GenaroNetwork/Genaro"
+	"github.com/GenaroNetwork/Genaro/accounts"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/log"
 	"github.com/karalabe/hid"
 )
 
