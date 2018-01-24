@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/consensus/ethash"
-	"github.com/GenaroNetwork/GenaroGNX/core"
-	"github.com/GenaroNetwork/GenaroGNX/eth"
-	"github.com/GenaroNetwork/GenaroGNX/internal/jsre"
-	"github.com/GenaroNetwork/GenaroGNX/node"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/consensus/ethash"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/eth"
+	"github.com/GenaroNetwork/Genaro/internal/jsre"
+	"github.com/GenaroNetwork/Genaro/node"
 )
 
 const (
