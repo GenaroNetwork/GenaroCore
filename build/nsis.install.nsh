@@ -3,9 +3,9 @@ InstallDir "$InstDir"
 OutFile "${OUTPUTFILE}" # set through command line arguments
 
 # Links for "Add/Remove Programs"
-!define HELPURL "https://github.com/GenaroNetwork/Genaro/issues"
-!define UPDATEURL "https://github.com/GenaroNetwork/Genaro/releases"
-!define ABOUTURL "https://github.com/GenaroNetwork/Genaro#ethereum-go"
+!define HELPURL "https://github.com/GenaroNetwork/GenaroGNX/issues"
+!define UPDATEURL "https://github.com/GenaroNetwork/GenaroGNX/releases"
+!define ABOUTURL "https://github.com/GenaroNetwork/GenaroGNX#ethereum-go"
 !define /date NOW "%Y%m%d"
 
 PageEx license
