@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 const Version = "1.0"
