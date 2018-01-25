@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/metrics"
+	"github.com/GenaroNetwork/Genaro/metrics"
 )
 
 // a regexp for extracting the unit from time.Duration.String
