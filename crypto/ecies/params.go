@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"hash"
 
-	ethcrypto "github.com/GenaroNetwork/Genaro/crypto"
+	ethcrypto "github.com/GenaroNetwork/GenaroGNX/crypto"
 )
 
 var (
