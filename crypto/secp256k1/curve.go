@@ -36,7 +36,7 @@ import (
 	"math/big"
 	"unsafe"
 
-	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/GenaroGNX/common/math"
 )
 
 /*
