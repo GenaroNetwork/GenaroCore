@@ -24,8 +24,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/common/math"
-	"github.com/GenaroNetwork/GenaroGNX/crypto/randentropy"
+	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/Genaro/crypto/randentropy"
 )
 
 const TestCount = 1000
