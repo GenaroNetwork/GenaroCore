@@ -36,14 +36,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/accounts/abi/bind"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
-	"github.com/GenaroNetwork/GenaroGNX/contracts/chequebook/contract"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/swarm/services/swap/swap"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/hexutil"
+	"github.com/GenaroNetwork/Genaro/contracts/chequebook/contract"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/swarm/services/swap/swap"
 )
 
 // TODO(zelig): watch peer solvency and notify of bouncing cheques
