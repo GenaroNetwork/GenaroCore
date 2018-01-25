@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/GenaroNetwork/GenaroGNX/metrics"
+	"github.com/GenaroNetwork/Genaro/metrics"
 )
 
 type exp struct {
