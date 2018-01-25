@@ -26,11 +26,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/common/math"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
-	"github.com/GenaroNetwork/GenaroGNX/crypto/ecies"
-	"github.com/GenaroNetwork/GenaroGNX/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/crypto/ecies"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 // Envelope represents a clear-text data packet to transmit through the Whisper
