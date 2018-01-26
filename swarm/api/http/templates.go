@@ -20,7 +20,7 @@ import (
 	"html/template"
 	"path"
 
-	"github.com/GenaroNetwork/GenaroGNX/swarm/api"
+	"github.com/GenaroNetwork/Genaro/swarm/api"
 )
 
 type htmlListData struct {
