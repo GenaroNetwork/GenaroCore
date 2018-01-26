@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/GenaroNetwork/GenaroGNX/accounts/keystore"
-	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/Genaro/accounts/keystore"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 
