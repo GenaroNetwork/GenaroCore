@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro/common/math"
-	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/GenaroGNX/common/math"
+	"github.com/GenaroNetwork/GenaroGNX/core/vm"
 )
 
 // Compiler contains information about the parsed source
