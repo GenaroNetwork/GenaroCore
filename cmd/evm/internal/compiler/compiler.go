@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/core/asm"
+	"github.com/GenaroNetwork/GenaroGNX/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {
