@@ -24,13 +24,13 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/consensus/ethash"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/eth/downloader"
-	"github.com/GenaroNetwork/Genaro/eth/gasprice"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
+	"github.com/GenaroNetwork/GenaroGNX/consensus/ethash"
+	"github.com/GenaroNetwork/GenaroGNX/core"
+	"github.com/GenaroNetwork/GenaroGNX/eth/downloader"
+	"github.com/GenaroNetwork/GenaroGNX/eth/gasprice"
+	"github.com/GenaroNetwork/GenaroGNX/params"
 )
 
 // DefaultConfig contains default settings for use on the Ethereum main net.
