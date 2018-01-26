@@ -22,9 +22,9 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro/cmd/utils"
-	"github.com/GenaroNetwork/Genaro/console"
-	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
+	"github.com/GenaroNetwork/GenaroGNX/console"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 
