@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/GenaroNetwork/Genaro/cmd/evm/internal/compiler"
+	"github.com/GenaroNetwork/GenaroGNX/cmd/evm/internal/compiler"
 
 	cli "gopkg.in/urfave/cli.v1"
 )
