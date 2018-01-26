@@ -25,7 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/swarm/storage"
+	"github.com/GenaroNetwork/GenaroGNX/swarm/storage"
 )
 
 func manifest(paths ...string) (manifestReader storage.LazySectionReader) {
