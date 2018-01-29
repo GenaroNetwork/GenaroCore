@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 
