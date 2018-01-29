@@ -19,7 +19,7 @@
 package downloader
 
 import (
-	"github.com/GenaroNetwork/GenaroGNX/metrics"
+	"github.com/GenaroNetwork/Genaro/metrics"
 )
 
 var (
