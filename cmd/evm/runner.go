@@ -27,16 +27,16 @@ import (
 
 	goruntime "runtime"
 
-	"github.com/GenaroNetwork/GenaroGNX/cmd/evm/internal/compiler"
-	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core"
-	"github.com/GenaroNetwork/GenaroGNX/core/state"
-	"github.com/GenaroNetwork/GenaroGNX/core/vm"
-	"github.com/GenaroNetwork/GenaroGNX/core/vm/runtime"
-	"github.com/GenaroNetwork/GenaroGNX/ethdb"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/cmd/evm/internal/compiler"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/core/state"
+	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/Genaro/core/vm/runtime"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/params"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
