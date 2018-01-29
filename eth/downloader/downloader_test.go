@@ -25,15 +25,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/consensus/ethash"
-	"github.com/GenaroNetwork/GenaroGNX/core"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
-	"github.com/GenaroNetwork/GenaroGNX/ethdb"
-	"github.com/GenaroNetwork/GenaroGNX/event"
-	"github.com/GenaroNetwork/GenaroGNX/params"
-	"github.com/GenaroNetwork/GenaroGNX/trie"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/consensus/ethash"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro/trie"
 )
 
 var (
