@@ -1,4 +1,4 @@
-export ROOT="${GOPATH}/src/github.com/GenaroNetwork/GenaroGNX"
+export ROOT="${GOPATH}/src/github.com/GenaroNetwork/Genaro"
 export PATH="${ROOT}/swarm/dev/bin:${PATH}"
 
 cd "${ROOT}/swarm/dev"
