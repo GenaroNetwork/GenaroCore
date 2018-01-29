@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/GenaroNetwork/Genaro/core/state"
-	"github.com/GenaroNetwork/Genaro/core/vm"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/tests"
+	"github.com/GenaroNetwork/GenaroGNX/core/state"
+	"github.com/GenaroNetwork/GenaroGNX/core/vm"
+	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/GenaroGNX/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )
