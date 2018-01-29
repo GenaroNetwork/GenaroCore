@@ -19,7 +19,7 @@ package bloombits
 import (
 	"errors"
 
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // errSectionOutOfBounds is returned if the user tried to add more bloom filters
