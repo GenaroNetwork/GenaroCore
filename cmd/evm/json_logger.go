@@ -22,9 +22,9 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/common/math"
-	"github.com/GenaroNetwork/GenaroGNX/core/vm"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/Genaro/core/vm"
 )
 
 type JSONLogger struct {
