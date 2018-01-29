@@ -41,23 +41,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/accounts"
-	"github.com/GenaroNetwork/GenaroGNX/accounts/keystore"
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/eth"
-	"github.com/GenaroNetwork/GenaroGNX/eth/downloader"
-	"github.com/GenaroNetwork/GenaroGNX/ethclient"
-	"github.com/GenaroNetwork/GenaroGNX/ethstats"
-	"github.com/GenaroNetwork/GenaroGNX/les"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/node"
-	"github.com/GenaroNetwork/GenaroGNX/p2p"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/discv5"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/nat"
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/accounts"
+	"github.com/GenaroNetwork/Genaro/accounts/keystore"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/eth"
+	"github.com/GenaroNetwork/Genaro/eth/downloader"
+	"github.com/GenaroNetwork/Genaro/ethclient"
+	"github.com/GenaroNetwork/Genaro/ethstats"
+	"github.com/GenaroNetwork/Genaro/les"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/node"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/p2p/discv5"
+	"github.com/GenaroNetwork/Genaro/p2p/nat"
+	"github.com/GenaroNetwork/Genaro/params"
 	"golang.org/x/net/websocket"
 )
 
@@ -450,7 +450,7 @@ func (f *faucet) apiHandler(conn *websocket.Conn) {
 		case *noauthFlag:
 			username, avatar, address, err = authNoAuth(msg.URL)
 		default:
-			err = errors.New("Something funky happened, please open an issue at https://github.com/GenaroNetwork/GenaroGNX/issues")
+			err = errors.New("Something funky happened, please open an issue at https://github.com/GenaroNetwork/Genaro/issues")
 		}
 		if err != nil {
 			if err = sendError(conn, err); err != nil {
