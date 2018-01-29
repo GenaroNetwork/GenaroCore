@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // Tests that batched bloom bits are correctly rotated from the input bloom
