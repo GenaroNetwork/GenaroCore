@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/GenaroGNX/common"
 )
 
 // Interface represents a wrapped version of Go's interface{}, with the capacity
