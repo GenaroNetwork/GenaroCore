@@ -24,7 +24,7 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/GenaroGNX/log"
 )
 
 func externalUnmount(mountPoint string) error {
