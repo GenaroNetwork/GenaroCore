@@ -19,10 +19,10 @@ package metrics
 import (
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/cmd/utils"
-	"github.com/GenaroNetwork/Genaro/log"
-	gethmetrics "github.com/GenaroNetwork/Genaro/metrics"
-	"github.com/GenaroNetwork/Genaro/metrics/influxdb"
+	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
+	"github.com/GenaroNetwork/GenaroGNX/log"
+	gethmetrics "github.com/GenaroNetwork/GenaroGNX/metrics"
+	"github.com/GenaroNetwork/GenaroGNX/metrics/influxdb"
 	"gopkg.in/urfave/cli.v1"
 )
 
