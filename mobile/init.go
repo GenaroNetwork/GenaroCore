@@ -22,7 +22,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/GenaroGNX/log"
 )
 
 func init() {
