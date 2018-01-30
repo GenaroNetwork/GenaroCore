@@ -24,13 +24,13 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/ethdb"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/metrics"
-	"github.com/GenaroNetwork/GenaroGNX/params"
-	"github.com/GenaroNetwork/GenaroGNX/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/metrics"
+	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 // DatabaseReader wraps the Get method of a backing data store.
