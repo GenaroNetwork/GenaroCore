@@ -26,10 +26,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/GenaroNetwork/GenaroGNX/cmd/internal/browser"
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/cmd/internal/browser"
+	"github.com/GenaroNetwork/Genaro/params"
 
-	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -41,7 +41,7 @@ var bugCommand = cli.Command{
 	Category:  "MISCELLANEOUS COMMANDS",
 }
 
-const issueUrl = "https://github.com/GenaroNetwork/GenaroGNX/issues/new"
+const issueUrl = "https://github.com/GenaroNetwork/Genaro/issues/new"
 
 // reportBug reports a bug by opening a new URL to the go-ethereum GH issue
 // tracker and setting default values as the issue body.
