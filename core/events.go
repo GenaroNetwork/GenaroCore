@@ -17,8 +17,8 @@
 package core
 
 import (
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // TxPreEvent is posted when a transaction enters the transaction pool.
