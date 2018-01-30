@@ -23,9 +23,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/rlp"
 )
 
 // A Nonce is a 64-bit hash which proves (combined with the mix-hash) that
