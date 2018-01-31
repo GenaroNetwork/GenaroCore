@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/GenaroNetwork/GenaroGNX/p2p"
-	"github.com/GenaroNetwork/GenaroGNX/p2p/nat"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	"github.com/GenaroNetwork/Genaro/p2p/nat"
 )
 
 const (
