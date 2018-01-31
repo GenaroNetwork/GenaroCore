@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/rpc"
 )
 
 func TestUnmarshalJSONNewFilterArgs(t *testing.T) {
