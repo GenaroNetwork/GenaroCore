@@ -7,10 +7,10 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/common/math"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
+	"github.com/GenaroNetwork/GenaroGNX/common/math"
+	"github.com/GenaroNetwork/GenaroGNX/params"
 )
 
 var _ = (*genesisSpecMarshaling)(nil)
