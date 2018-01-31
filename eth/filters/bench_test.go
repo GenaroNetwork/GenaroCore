@@ -23,14 +23,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/bitutil"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/core/bloombits"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/ethdb"
-	"github.com/GenaroNetwork/Genaro/event"
-	"github.com/GenaroNetwork/Genaro/node"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/bitutil"
+	"github.com/GenaroNetwork/GenaroGNX/core"
+	"github.com/GenaroNetwork/GenaroGNX/core/bloombits"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/ethdb"
+	"github.com/GenaroNetwork/GenaroGNX/event"
+	"github.com/GenaroNetwork/GenaroGNX/node"
 )
 
 func BenchmarkBloomBits512(b *testing.B) {
