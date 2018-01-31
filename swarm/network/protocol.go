@@ -37,13 +37,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/contracts/chequebook"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/metrics"
-	"github.com/GenaroNetwork/GenaroGNX/p2p"
-	bzzswap "github.com/GenaroNetwork/GenaroGNX/swarm/services/swap"
-	"github.com/GenaroNetwork/GenaroGNX/swarm/services/swap/swap"
-	"github.com/GenaroNetwork/GenaroGNX/swarm/storage"
+	"github.com/GenaroNetwork/Genaro/contracts/chequebook"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/metrics"
+	"github.com/GenaroNetwork/Genaro/p2p"
+	bzzswap "github.com/GenaroNetwork/Genaro/swarm/services/swap"
+	"github.com/GenaroNetwork/Genaro/swarm/services/swap/swap"
+	"github.com/GenaroNetwork/Genaro/swarm/storage"
 )
 
 //metrics variables
