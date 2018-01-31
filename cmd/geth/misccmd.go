@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GenaroNetwork/GenaroGNX/cmd/utils"
-	"github.com/GenaroNetwork/GenaroGNX/consensus/ethash"
-	"github.com/GenaroNetwork/GenaroGNX/eth"
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/consensus/ethash"
+	"github.com/GenaroNetwork/Genaro/eth"
+	"github.com/GenaroNetwork/Genaro/params"
 	"gopkg.in/urfave/cli.v1"
 )
 
