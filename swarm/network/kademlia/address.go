@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/GenaroGNX/common"
 )
 
 type Address common.Hash
