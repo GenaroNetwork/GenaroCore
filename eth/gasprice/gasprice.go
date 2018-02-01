@@ -22,11 +22,11 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/internal/ethapi"
-	"github.com/GenaroNetwork/Genaro/params"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/internal/ethapi"
+	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/GenaroGNX/rpc"
 )
 
 var maxPrice = big.NewInt(500 * params.Shannon)
