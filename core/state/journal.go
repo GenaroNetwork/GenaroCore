@@ -19,7 +19,7 @@ package state
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/GenaroGNX/common"
 )
 
 type journalEntry interface {
