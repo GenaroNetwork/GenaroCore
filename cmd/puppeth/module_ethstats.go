@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // ethstatsDockerfile is the Dockerfile required to build an ethstats backend
