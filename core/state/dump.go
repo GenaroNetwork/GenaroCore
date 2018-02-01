@@ -20,9 +20,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/rlp"
-	"github.com/GenaroNetwork/Genaro/trie"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/rlp"
+	"github.com/GenaroNetwork/GenaroGNX/trie"
 )
 
 type DumpAccount struct {
