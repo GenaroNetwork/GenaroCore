@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/metrics"
+	"github.com/GenaroNetwork/Genaro/metrics"
 )
 
 /*
