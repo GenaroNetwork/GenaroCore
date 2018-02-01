@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/GenaroGNX/log"
 )
 
 // SwAP Swarm Accounting Protocol with
