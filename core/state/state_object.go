@@ -22,9 +22,9 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
-	"github.com/GenaroNetwork/GenaroGNX/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
