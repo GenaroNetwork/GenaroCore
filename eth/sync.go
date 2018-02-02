@@ -21,11 +21,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/eth/downloader"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/eth/downloader"
+	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
 )
 
 const (
