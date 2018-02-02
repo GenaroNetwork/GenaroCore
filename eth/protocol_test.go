@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/eth/downloader"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/crypto"
+	"github.com/GenaroNetwork/GenaroGNX/eth/downloader"
+	"github.com/GenaroNetwork/GenaroGNX/p2p"
+	"github.com/GenaroNetwork/GenaroGNX/rlp"
 )
 
 func init() {
