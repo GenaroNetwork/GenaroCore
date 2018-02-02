@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/Genaro/log"
 	"gopkg.in/urfave/cli.v1"
 )
 
