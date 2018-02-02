@@ -21,9 +21,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/eth/downloader"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/GenaroGNX/eth/downloader"
+	"github.com/GenaroNetwork/GenaroGNX/p2p"
+	"github.com/GenaroNetwork/GenaroGNX/p2p/discover"
 )
 
 // Tests that fast sync gets disabled as soon as a real block is successfully
