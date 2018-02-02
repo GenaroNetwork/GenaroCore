@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // walletDockerfile is the Dockerfile required to run a web wallet.
