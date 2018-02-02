@@ -23,12 +23,12 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core/types"
-	"github.com/GenaroNetwork/GenaroGNX/crypto"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/rlp"
-	"github.com/GenaroNetwork/GenaroGNX/trie"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro/trie"
 )
 
 type revision struct {
