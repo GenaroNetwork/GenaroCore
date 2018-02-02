@@ -24,7 +24,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 type brokenLimitedReader struct {
