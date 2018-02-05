@@ -25,10 +25,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/core"
+	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/GenaroGNX/params"
 )
 
 // makeGenesis creates a new genesis struct based on some user input.
