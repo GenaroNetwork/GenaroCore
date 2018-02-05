@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/metrics"
+	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/GenaroGNX/metrics"
 )
 
 //metrics variables
