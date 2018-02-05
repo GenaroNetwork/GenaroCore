@@ -21,10 +21,10 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core/vm"
-	"github.com/GenaroNetwork/GenaroGNX/log"
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 var (
