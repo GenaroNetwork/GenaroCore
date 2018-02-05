@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/rlp"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/GenaroGNX"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/rlp"
+	"github.com/GenaroNetwork/GenaroGNX/rpc"
 )
 
 // Client defines typed wrappers for the Ethereum RPC API.
