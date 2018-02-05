@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GenaroNetwork/GenaroGNX/core"
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/log"
 	"github.com/olekukonko/tablewriter"
 )
 
