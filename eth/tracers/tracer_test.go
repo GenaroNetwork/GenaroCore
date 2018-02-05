@@ -24,9 +24,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
-	"github.com/GenaroNetwork/GenaroGNX/core/vm"
-	"github.com/GenaroNetwork/GenaroGNX/params"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/vm"
+	"github.com/GenaroNetwork/Genaro/params"
 )
 
 type account struct{}
