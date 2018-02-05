@@ -16,7 +16,7 @@
 
 package ethclient
 
-import "github.com/GenaroNetwork/GenaroGNX"
+import "github.com/GenaroNetwork/Genaro"
 
 // Verify that Client implements the ethereum interfaces.
 var (
