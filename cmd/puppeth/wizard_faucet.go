@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/accounts/keystore"
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/GenaroGNX/accounts/keystore"
+	"github.com/GenaroNetwork/GenaroGNX/log"
 )
 
 // deployFaucet queries the user for various input on deploying a faucet, after
