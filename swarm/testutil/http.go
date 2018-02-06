@@ -22,9 +22,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/GenaroNetwork/GenaroGNX/swarm/api"
-	httpapi "github.com/GenaroNetwork/GenaroGNX/swarm/api/http"
-	"github.com/GenaroNetwork/GenaroGNX/swarm/storage"
+	"github.com/GenaroNetwork/Genaro/swarm/api"
+	httpapi "github.com/GenaroNetwork/Genaro/swarm/api/http"
+	"github.com/GenaroNetwork/Genaro/swarm/storage"
 )
 
 func NewTestSwarmServer(t *testing.T) *TestSwarmServer {
