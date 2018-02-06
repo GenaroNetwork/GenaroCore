@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/GenaroGNX/log"
 )
 
 // ensureVirtualHost checks whether a reverse-proxy is running on the specified
