@@ -23,8 +23,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/GenaroNetwork/GenaroGNX/common/mclock"
-	"github.com/GenaroNetwork/GenaroGNX/log"
+	"github.com/GenaroNetwork/Genaro/common/mclock"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 const (
