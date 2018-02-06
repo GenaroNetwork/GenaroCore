@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/accounts/keystore"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/GenaroGNX/accounts/keystore"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/log"
 )
 
 // deployNode creates a new node configuration based on some user input.
