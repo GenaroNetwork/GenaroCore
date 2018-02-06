@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/common/math"
-	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/GenaroGNX/common/hexutil"
+	"github.com/GenaroNetwork/GenaroGNX/common/math"
+	"github.com/GenaroNetwork/GenaroGNX/core/types"
 )
 
 var _ = (*btHeaderMarshaling)(nil)
