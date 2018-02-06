@@ -20,7 +20,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/GenaroNetwork/GenaroGNX/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 /*
