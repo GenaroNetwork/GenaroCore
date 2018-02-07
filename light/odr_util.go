@@ -20,11 +20,11 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
 var sha3_nil = crypto.Keccak256Hash(nil)
