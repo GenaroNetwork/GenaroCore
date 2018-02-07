@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro/common"
 	"golang.org/x/crypto/pbkdf2"
 )
 
