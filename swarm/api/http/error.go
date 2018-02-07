@@ -28,9 +28,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/metrics"
-	"github.com/GenaroNetwork/Genaro/swarm/api"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/metrics"
+	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
 )
 
 //templateMap holds a mapping of an HTTP error code to a template
