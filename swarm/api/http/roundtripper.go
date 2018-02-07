@@ -20,17 +20,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 /*
 http roundtripper to register for bzz url scheme
-see https://github.com/GenaroNetwork/Genaro/issues/2040
+see https://github.com/GenaroNetwork/Genaro-Core/issues/2040
 Usage:
 
 import (
- "github.com/GenaroNetwork/Genaro/common/httpclient"
- "github.com/GenaroNetwork/Genaro/swarm/api/http"
+ "github.com/GenaroNetwork/Genaro-Core/common/httpclient"
+ "github.com/GenaroNetwork/Genaro-Core/swarm/api/http"
 )
 client := httpclient.New()
 // for (private) swarm proxy running locally
