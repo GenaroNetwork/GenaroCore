@@ -19,7 +19,7 @@ package number
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro-Core/common"
 )
 
 var tt256 = new(big.Int).Lsh(big.NewInt(1), 256)
