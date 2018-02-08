@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind/backends"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind/backends"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/crypto"
 )
 
 var testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
