@@ -16,7 +16,7 @@
 
 package bind
 
-import "github.com/GenaroNetwork/Genaro-Core/accounts/abi"
+import "github.com/GenaroNetwork/Genaro/accounts/abi"
 
 // tmplData is the data structure required to fill the binding template.
 type tmplData struct {
