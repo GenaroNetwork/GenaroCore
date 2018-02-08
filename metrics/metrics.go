@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 // Enabled is checked by the constructor functions for all of the
