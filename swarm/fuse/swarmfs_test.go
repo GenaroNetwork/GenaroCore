@@ -27,8 +27,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/storage"
+	"github.com/GenaroNetwork/Genaro/swarm/api"
+	"github.com/GenaroNetwork/Genaro/swarm/storage"
 )
 
 type fileInfo struct {
