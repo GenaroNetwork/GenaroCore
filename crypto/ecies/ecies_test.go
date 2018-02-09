@@ -40,7 +40,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
 )
 
 var dumpEnc bool
