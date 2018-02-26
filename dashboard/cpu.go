@@ -21,7 +21,7 @@ package dashboard
 import (
 	"syscall"
 
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // getProcessCPUTime retrieves the process' CPU time since program startup.
