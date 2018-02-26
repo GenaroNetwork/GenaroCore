@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro-Core/common"
 )
 
 // A BigInt represents a signed multi-precision integer.
