@@ -22,10 +22,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro/accounts/abi"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // Signer is an interaface defining the callback when a contract requires a
