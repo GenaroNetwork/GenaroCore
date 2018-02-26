@@ -29,8 +29,8 @@ import (
 
 	"github.com/cespare/cp"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/GenaroNetwork/Genaro/accounts"
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro-Core/accounts"
+	"github.com/GenaroNetwork/Genaro-Core/common"
 )
 
 var (
