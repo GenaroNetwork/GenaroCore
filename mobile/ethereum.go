@@ -21,8 +21,8 @@ package geth
 import (
 	"errors"
 
-	ethereum "github.com/GenaroNetwork/Genaro-Core"
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	ethereum "github.com/GenaroNetwork/Genaro"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 // Subscription represents an event subscription where events are
