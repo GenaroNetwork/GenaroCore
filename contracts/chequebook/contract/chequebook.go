@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"strings"
 
-	ethereum "github.com/GenaroNetwork/Genaro-Core"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/event"
+	ethereum "github.com/GenaroNetwork/Genaro"
+	"github.com/GenaroNetwork/Genaro/accounts/abi"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro/event"
 )
 
 // ChequebookABI is the input ABI used to generate the binding from.
