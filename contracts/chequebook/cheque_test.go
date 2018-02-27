@@ -24,12 +24,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro/accounts/abi/bind/backends"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/contracts/chequebook/contract"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
+	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind/backends"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/contracts/chequebook/contract"
+	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
 )
 
 var (
