@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 type testInPayment struct {
