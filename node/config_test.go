@@ -24,8 +24,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/p2p"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/p2p"
 )
 
 // Tests that datadirs can be successfully created, be them manually configured
