@@ -22,7 +22,7 @@ package storage
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro-Core/compression/rle"
+	"github.com/GenaroNetwork/Genaro/compression/rle"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
