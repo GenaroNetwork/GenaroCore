@@ -20,11 +20,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind/backends"
-	"github.com/GenaroNetwork/Genaro-Core/contracts/ens/contract"
-	"github.com/GenaroNetwork/Genaro-Core/core"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind"
+	"github.com/GenaroNetwork/Genaro/accounts/abi/bind/backends"
+	"github.com/GenaroNetwork/Genaro/contracts/ens/contract"
+	"github.com/GenaroNetwork/Genaro/core"
+	"github.com/GenaroNetwork/Genaro/crypto"
 )
 
 var (
