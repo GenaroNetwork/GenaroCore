@@ -19,7 +19,7 @@ package storage
 import (
 	"encoding/binary"
 
-	"github.com/GenaroNetwork/Genaro-Core/metrics"
+	"github.com/GenaroNetwork/Genaro/metrics"
 )
 
 //metrics variables
