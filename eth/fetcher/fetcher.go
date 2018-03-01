@@ -22,10 +22,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/consensus"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
 )
 
