@@ -24,13 +24,13 @@ import (
 	"net"
 	"os"
 
-	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discv5"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/nat"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/netutil"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/p2p/discv5"
+	"github.com/GenaroNetwork/Genaro/p2p/nat"
+	"github.com/GenaroNetwork/Genaro/p2p/netutil"
 )
 
 func main() {
