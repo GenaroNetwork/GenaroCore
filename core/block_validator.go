@@ -19,10 +19,10 @@ package core
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/consensus"
-	"github.com/GenaroNetwork/Genaro/core/state"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/params"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and
