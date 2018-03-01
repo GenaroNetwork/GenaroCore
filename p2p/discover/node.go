@@ -31,9 +31,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/secp256k1"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/crypto/secp256k1"
 )
 
 const NodeIDBits = 512
