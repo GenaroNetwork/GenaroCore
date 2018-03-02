@@ -26,8 +26,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common/bitutil"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro/common/bitutil"
+	"github.com/GenaroNetwork/Genaro/crypto"
 )
 
 // bloomIndexes represents the bit indexes inside the bloom filter that belong
