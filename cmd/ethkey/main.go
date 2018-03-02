@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 
