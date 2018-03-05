@@ -21,11 +21,11 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/event"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/event"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
 // Constants to match up protocol versions and messages
