@@ -23,10 +23,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/p2p"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"gopkg.in/fatih/set.v0"
 )
 
