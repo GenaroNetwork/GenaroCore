@@ -41,23 +41,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/accounts"
-	"github.com/GenaroNetwork/Genaro/accounts/keystore"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/eth"
-	"github.com/GenaroNetwork/Genaro/eth/downloader"
-	"github.com/GenaroNetwork/Genaro/ethclient"
-	"github.com/GenaroNetwork/Genaro/ethstats"
-	"github.com/GenaroNetwork/Genaro/les"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/node"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
-	"github.com/GenaroNetwork/Genaro/p2p/discv5"
-	"github.com/GenaroNetwork/Genaro/p2p/nat"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro-Core/accounts"
+	"github.com/GenaroNetwork/Genaro-Core/accounts/keystore"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/eth"
+	"github.com/GenaroNetwork/Genaro-Core/eth/downloader"
+	"github.com/GenaroNetwork/Genaro-Core/ethclient"
+	"github.com/GenaroNetwork/Genaro-Core/ethstats"
+	"github.com/GenaroNetwork/Genaro-Core/les"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/node"
+	"github.com/GenaroNetwork/Genaro-Core/p2p"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/discv5"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/nat"
+	"github.com/GenaroNetwork/Genaro-Core/params"
 	"golang.org/x/net/websocket"
 )
 
@@ -450,7 +450,7 @@ func (f *faucet) apiHandler(conn *websocket.Conn) {
 		case *noauthFlag:
 			username, avatar, address, err = authNoAuth(msg.URL)
 		default:
-			err = errors.New("Something funky happened, please open an issue at https://github.com/GenaroNetwork/Genaro/issues")
+			err = errors.New("Something funky happened, please open an issue at https://github.com/GenaroNetwork/Genaro-Core/issues")
 		}
 		if err != nil {
 			if err = sendError(conn, err); err != nil {
