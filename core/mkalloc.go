@@ -34,8 +34,8 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
 type allocItem struct{ Addr, Balance *big.Int }
