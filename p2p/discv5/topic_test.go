@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/mclock"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/mclock"
 )
 
 func TestTopicRadius(t *testing.T) {
