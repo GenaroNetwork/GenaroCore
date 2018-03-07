@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.
