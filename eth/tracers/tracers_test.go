@@ -25,15 +25,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/common/math"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/core/vm"
-	"github.com/GenaroNetwork/Genaro/ethdb"
-	"github.com/GenaroNetwork/Genaro/rlp"
-	"github.com/GenaroNetwork/Genaro/tests"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/common/math"
+	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/core/vm"
+	"github.com/GenaroNetwork/Genaro-Core/ethdb"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/tests"
 )
 
 // To generate a new callTracer test, copy paste the makeTest method below into
