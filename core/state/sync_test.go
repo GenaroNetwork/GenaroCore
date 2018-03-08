@@ -21,10 +21,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/ethdb"
-	"github.com/GenaroNetwork/Genaro-Core/trie"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro/trie"
 )
 
 // testAccount is the data associated with an account used by the state tests.
