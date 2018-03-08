@@ -35,12 +35,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/ecies"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/secp256k1"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/Genaro/crypto"
+	"github.com/GenaroNetwork/Genaro/crypto/ecies"
+	"github.com/GenaroNetwork/Genaro/crypto/secp256k1"
+	"github.com/GenaroNetwork/Genaro/crypto/sha3"
+	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro/rlp"
 	"github.com/golang/snappy"
 )
 
