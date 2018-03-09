@@ -30,10 +30,10 @@ import (
 	"testing/quick"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/ethdb"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/ethdb"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
 func init() {
