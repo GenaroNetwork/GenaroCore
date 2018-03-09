@@ -25,13 +25,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/node"
-	"github.com/GenaroNetwork/Genaro/p2p"
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
-	"github.com/GenaroNetwork/Genaro/p2p/simulations"
-	"github.com/GenaroNetwork/Genaro/p2p/simulations/adapters"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/node"
+	"github.com/GenaroNetwork/Genaro-Core/p2p"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/simulations"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/simulations/adapters"
+	"github.com/GenaroNetwork/Genaro-Core/rpc"
 )
 
 var adapterType = flag.String("adapter", "sim", `node adapter to use (one of "sim", "exec" or "docker")`)
