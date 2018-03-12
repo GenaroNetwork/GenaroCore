@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts/keystore"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro/accounts/keystore"
+	"github.com/GenaroNetwork/Genaro/core/types"
 )
 
 // Tests that the account management snippets work correctly.
