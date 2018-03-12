@@ -27,10 +27,10 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro/common/hexutil"
+	"github.com/GenaroNetwork/Genaro/crypto/sha3"
+	"github.com/GenaroNetwork/Genaro/rlp"
 )
 
 var (
