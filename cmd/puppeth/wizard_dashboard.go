@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // deployDashboard queries the user for various input on deploying a web-service
