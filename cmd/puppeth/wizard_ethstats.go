@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 // deployEthstats queries the user for various input on deploying an ethstats
