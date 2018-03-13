@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
-	"github.com/GenaroNetwork/Genaro/p2p/simulations/adapters"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/simulations/adapters"
 )
 
 // TestNetworkSimulation creates a multi-node simulation network with each node
