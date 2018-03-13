@@ -27,10 +27,10 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/crypto/ecies"
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/crypto/ecies"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 // Options specifies the exact way a message should be wrapped into an Envelope.
