@@ -19,8 +19,8 @@
 package whisperv5
 
 import (
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 // Topic represents a cryptographically secure, probabilistic partial
