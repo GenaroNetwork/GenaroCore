@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro/log"
 )
 
 // deployWallet creates a new web wallet based on some user input.
