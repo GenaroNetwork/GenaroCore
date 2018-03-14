@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"github.com/GenaroNetwork/Genaro/rpc"
 )
 
 // In this example, our client whishes to track the latest 'block number'
