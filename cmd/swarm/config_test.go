@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/rpc"
-	"github.com/GenaroNetwork/Genaro/swarm"
-	"github.com/GenaroNetwork/Genaro/swarm/api"
+	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"github.com/GenaroNetwork/Genaro-Core/swarm"
+	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
 
 	"github.com/docker/docker/pkg/reexec"
 )
