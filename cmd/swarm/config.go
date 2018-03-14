@@ -28,13 +28,13 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/GenaroNetwork/Genaro/cmd/utils"
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/node"
+	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/node"
 	"github.com/naoina/toml"
 
-	bzzapi "github.com/GenaroNetwork/Genaro/swarm/api"
+	bzzapi "github.com/GenaroNetwork/Genaro-Core/swarm/api"
 )
 
 var (
@@ -84,7 +84,7 @@ var tomlSettings = toml.Config{
 	MissingField: func(rt reflect.Type, field string) error {
 		link := ""
 		if unicode.IsUpper(rune(rt.Name()[0])) && rt.PkgPath() != "main" {
-			link = fmt.Sprintf(", check github.com/GenaroNetwork/Genaro/swarm/api/config.go for available fields")
+			link = fmt.Sprintf(", check github.com/GenaroNetwork/Genaro-Core/swarm/api/config.go for available fields")
 		}
 		return fmt.Errorf("field '%s' is not defined in %s%s", field, rt.String(), link)
 	},
