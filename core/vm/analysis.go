@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro/common"
 )
 
 // destinations stores one map per contract (keyed by hash of code).
