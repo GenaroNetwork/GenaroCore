@@ -25,7 +25,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 	"gopkg.in/fatih/set.v0"
 )
 
