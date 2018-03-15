@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 const (
