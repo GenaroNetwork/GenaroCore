@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/common/math"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/common/math"
 )
 
 var _ = (*structLogMarshaling)(nil)
