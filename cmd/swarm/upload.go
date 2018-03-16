@@ -30,8 +30,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
-	swarm "github.com/GenaroNetwork/Genaro-Core/swarm/api/client"
+	"github.com/GenaroNetwork/Genaro/cmd/utils"
+	swarm "github.com/GenaroNetwork/Genaro/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 
