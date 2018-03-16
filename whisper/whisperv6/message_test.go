@@ -23,9 +23,9 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common/hexutil"
-	"github.com/GenaroNetwork/Genaro/crypto"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
 func generateMessageParams() (*MessageParams, error) {
