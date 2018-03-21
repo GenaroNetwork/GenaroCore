@@ -19,9 +19,9 @@ package types
 import (
 	"bytes"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/rlp"
-	"github.com/GenaroNetwork/Genaro/trie"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/trie"
 )
 
 type DerivableList interface {
