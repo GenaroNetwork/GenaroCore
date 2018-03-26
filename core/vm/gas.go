@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro-Core/params"
 )
 
 const (
