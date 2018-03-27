@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/event"
+	"github.com/GenaroNetwork/Genaro-Core/event"
 )
 
 func ExampleFeed_acknowledgedEvents() {
