@@ -17,9 +17,9 @@
 package vm
 
 import (
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/math"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/math"
+	"github.com/GenaroNetwork/Genaro-Core/params"
 )
 
 // memoryGasCosts calculates the quadratic gas for memory expansion. It does so
