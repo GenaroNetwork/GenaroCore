@@ -33,7 +33,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/log"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 // Handler is the global debugging handler.
