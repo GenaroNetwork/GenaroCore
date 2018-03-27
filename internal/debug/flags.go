@@ -24,10 +24,10 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/log/term"
-	"github.com/GenaroNetwork/Genaro/metrics"
-	"github.com/GenaroNetwork/Genaro/metrics/exp"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/log/term"
+	"github.com/GenaroNetwork/Genaro-Core/metrics"
+	"github.com/GenaroNetwork/Genaro-Core/metrics/exp"
 	colorable "github.com/mattn/go-colorable"
 	"gopkg.in/urfave/cli.v1"
 )
