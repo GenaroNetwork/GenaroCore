@@ -19,7 +19,7 @@ package ethapi
 import (
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro-Core/common"
 )
 
 type AddrLocker struct {
