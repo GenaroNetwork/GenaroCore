@@ -28,10 +28,10 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/common/math"
-	"github.com/GenaroNetwork/Genaro/crypto/sha3"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/math"
+	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
 var (
