@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/internal/jsre/deps"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/internal/jsre/deps"
 	"github.com/robertkrimen/otto"
 )
 
