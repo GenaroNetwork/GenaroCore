@@ -19,8 +19,8 @@ package les
 import (
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common/bitutil"
-	"github.com/GenaroNetwork/Genaro/light"
+	"github.com/GenaroNetwork/Genaro-Core/common/bitutil"
+	"github.com/GenaroNetwork/Genaro-Core/light"
 )
 
 const (
