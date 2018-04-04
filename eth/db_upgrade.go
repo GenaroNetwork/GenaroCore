@@ -21,11 +21,11 @@ import (
 	"bytes"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core"
-	"github.com/GenaroNetwork/Genaro/ethdb"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/ethdb"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
 var deduplicateData = []byte("dbUpgrade_20170714deduplicateData")
