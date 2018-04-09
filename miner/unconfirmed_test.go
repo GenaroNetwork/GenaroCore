@@ -19,8 +19,8 @@ package miner
 import (
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // noopHeaderRetriever is an implementation of headerRetriever that always

@@ -29,7 +29,7 @@ import (
 	"net"
 	"sort"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro-Core/common"
 )
 
 const (

@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/p2p/discover"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
 )
 
 type TestPeer interface {

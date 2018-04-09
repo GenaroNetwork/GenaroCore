@@ -17,7 +17,7 @@
 package api
 
 import (
-	"github.com/GenaroNetwork/Genaro/swarm/network"
+	"github.com/GenaroNetwork/Genaro-Core/swarm/network"
 )
 
 type Control struct {

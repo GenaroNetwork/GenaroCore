@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro-Core/common"
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
