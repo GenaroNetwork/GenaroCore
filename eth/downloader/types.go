@@ -19,7 +19,7 @@ package downloader
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // peerDropFn is a callback type for dropping a peer detected as malicious.
