@@ -19,9 +19,9 @@ package misc
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/params"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/params"
 )
 
 // VerifyForkHashes verifies that blocks conforming to network hard-forks do have
