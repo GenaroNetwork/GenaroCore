@@ -24,8 +24,8 @@ import (
 
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro/cmd/utils"
-	"github.com/GenaroNetwork/Genaro/internal/debug"
+	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
+	"github.com/GenaroNetwork/Genaro-Core/internal/debug"
 	"gopkg.in/urfave/cli.v1"
 )
 
