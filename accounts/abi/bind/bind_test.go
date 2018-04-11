@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
+	"github.com/GenaroNetwork/Genaro-Core/common"
 	"golang.org/x/tools/imports"
 )
 
