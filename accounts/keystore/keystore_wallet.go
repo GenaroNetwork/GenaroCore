@@ -19,9 +19,9 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "github.com/GenaroNetwork/Genaro"
-	"github.com/GenaroNetwork/Genaro/accounts"
-	"github.com/GenaroNetwork/Genaro/core/types"
+	ethereum "github.com/GenaroNetwork/Genaro-Core"
+	"github.com/GenaroNetwork/Genaro-Core/accounts"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original
