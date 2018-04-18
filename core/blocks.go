@@ -16,7 +16,7 @@
 
 package core
 
-import "github.com/GenaroNetwork/Genaro/common"
+import "github.com/GenaroNetwork/Genaro-Core/common"
 
 // BadHashes represent a set of manually tracked bad hashes (usually hard forks)
 var BadHashes = map[common.Hash]bool{
