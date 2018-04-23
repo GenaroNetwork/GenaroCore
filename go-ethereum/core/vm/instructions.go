@@ -26,6 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
+	"log"
 )
 
 var (
@@ -483,6 +484,38 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
+//todo 实现自定义指令对应函数功能
+func opSenc(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	var storageSize uint64 = 3000
+	key := "senc"
+
+	evm.StateDB.StorageValue(contract.Address(), key)
+
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	return nil, nil
+}
+
+
+func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	var storageSize uint64 = 3000
+	key := "dataVerisonRead"
+
+	evm.StateDB.StorageValue(contract.Address(), key)
+
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	return nil, nil
+}
+
+func opDataVerisonWrite(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	var storageSize uint64 = 3000
+	key := "dataVerisonWrite"
+
+	evm.StateDB.StorageValue(contract.Address(), key)
+
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	return nil, nil
+}
+
 func opExtCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var (
 		addr       = common.BigToAddress(stack.pop())
@@ -499,6 +532,17 @@ func opExtCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, sta
 
 func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(evm.interpreter.intPool.get().Set(evm.GasPrice))
+	return nil, nil
+}
+
+//todo 实现自定义指令对应函数功能
+func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	var storageSize uint64 = 3000
+	key := "storageGasprice"
+
+	evm.StateDB.StorageValue(contract.Address(), key)
+
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 
@@ -537,6 +581,27 @@ func opDifficulty(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stac
 
 func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(math.U256(evm.interpreter.intPool.get().SetUint64(evm.GasLimit)))
+	return nil, nil
+}
+
+//todo 实现自定义指令对应函数功能
+func opStorageGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	var storageSize uint64 = 3000
+	key := "storageGasLimit"
+
+	evm.StateDB.StorageValue(contract.Address(), key)
+
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	return nil, nil
+}
+
+func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	var storageSize uint64 = 3000
+	key := "sentinelHeft"
+
+	evm.StateDB.StorageValue(contract.Address(), key)
+
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 
@@ -627,9 +692,32 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 	stack.push(evm.interpreter.intPool.get().SetInt64(int64(memory.Len())))
 	return nil, nil
 }
+//todo 实现自定义指令对应函数功能
+func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	var storageSize uint64 = 3000
+	key := "storageSize"
+
+	evm.StateDB.StorageValue(contract.Address(), key)
+
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	return nil, nil
+}
 
 func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(evm.interpreter.intPool.get().SetUint64(contract.Gas))
+	return nil, nil
+}
+
+// todo 实现自定义指令对应函数功能
+// 获取交易的StorageGas,获取后压入栈中
+func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	log.Println("Genaro func: opStorageGas execute")
+	var storageGas uint64 = 3000
+	key := "storageGas"
+	evm.StateDB.StorageValueW(contract.Address(), key, storageGas)
+	gasGet := evm.StateDB.StorageValue(contract.Address(), key)
+	log.Printf("Genaro storageGas :%d \n", gasGet)
+	stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
 	return nil, nil
 }
 

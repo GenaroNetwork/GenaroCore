@@ -18,7 +18,6 @@ package asm
 
 import (
 	"testing"
-
 	"encoding/hex"
 )
 
@@ -71,4 +70,30 @@ func TestInstructionIteratorEmpty(t *testing.T) {
 	if cnt != 0 {
 		t.Errorf("Expected 0, but got %v instead.", cnt)
 	}
+}
+//
+//func TestDisassemble(t *testing.T) {
+//	var bytecode []byte
+//	var err error
+//	//data := []byte("600160026003600421")
+//	data := []byte("6001600252")
+//	data = bytes.TrimSpace(data)
+//
+//	// disassemble
+//	bytecode = make([]byte, hex.DecodedLen(len(data)))
+//	_, err = hex.Decode(bytecode, data)
+//	if err != nil {
+//		panic(fmt.Sprintf("Could not decode hex string: %v", err))
+//	}
+//
+//
+//	if disassembly, err := Disassemble(bytecode); err != nil {
+//		panic(fmt.Sprintf("Unable to disassemble: %v", err))
+//	} else {
+//		fmt.Println(disassembly)
+//	}
+//}
+
+func TestPrintDisassembled(t *testing.T) {
+	PrintDisassembled("600160025c5050")
 }
