@@ -17,10 +17,10 @@
 package clique
 
 import (
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/consensus"
-	"github.com/GenaroNetwork/Genaro/core/types"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/rpc"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting
