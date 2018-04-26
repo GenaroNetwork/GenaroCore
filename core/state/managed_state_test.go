@@ -19,8 +19,8 @@ package state
 import (
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro/common"
-	"github.com/GenaroNetwork/Genaro/ethdb"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 )
 
 var addr = common.BytesToAddress([]byte("test"))
