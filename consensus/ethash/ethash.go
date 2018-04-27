@@ -33,10 +33,10 @@ import (
 	"unsafe"
 
 	mmap "github.com/edsrzf/mmap-go"
-	"github.com/GenaroNetwork/Genaro/consensus"
-	"github.com/GenaroNetwork/Genaro/log"
-	"github.com/GenaroNetwork/Genaro/metrics"
-	"github.com/GenaroNetwork/Genaro/rpc"
+	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/metrics"
+	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/hashicorp/golang-lru/simplelru"
 )
 
