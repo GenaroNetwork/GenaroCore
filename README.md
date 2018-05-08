@@ -1,4 +1,4 @@
-GitHub Genaro-Core(vm branch)
+GitHub Genaro-Core(consensus branch)
 =============
 
 do something on consensus
