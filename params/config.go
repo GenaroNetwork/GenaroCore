@@ -142,6 +142,21 @@ func (c *CliqueConfig) String() string {
 	return "clique"
 }
 
+// GenaroConfig is the consensus engine configs for SPOR/PoS.
+type GenaroConfig struct {
+	Epoch            uint64 //the number of block in one committee term
+	BlockInterval    uint64 //a peer create BlockInterval blocks one time
+	ElectionPeriod   uint64 //a committee list write time
+	ValidPeriod      uint64 //a written committee list waiting time to come into force
+	CurrencyRates    uint64 //interest rates of coin
+	CommitteeMaxSize uint64 //max number of committee member
+}
+
+// String implements the stringer interface, returning the consensus engine details.
+func (c *GenaroConfig) String() string {
+	return "genaro"
+}
+
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
