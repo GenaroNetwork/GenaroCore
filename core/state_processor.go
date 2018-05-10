@@ -68,6 +68,10 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	// Iterate over and process the individual transactions
 	for i, tx := range block.Transactions() {
 		statedb.Prepare(tx.Hash(), block.Hash(), i)
+		// if msg.To() == 2, it is a sentinel tx, we should verify the tx(trusted pubkey) and add it to stateDB. then continue
+		// invoke ProcessSentineTx function
+		// TODO think about how we create the receipt and Logs
+
 		receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, usedGas, cfg)
 		if err != nil {
 			return nil, nil, 0, err
@@ -118,9 +122,23 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	if msg.To() == nil {
 		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
 	}
+	// if msg.To() == 1, it is a stake transaction, we should add the stake to stateDB
+	// invoke ProcessStakeTxAfter function
+
 	// Set the receipt logs and create a bloom for filtering
 	receipt.Logs = statedb.GetLogs(tx.Hash())
 	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 
 	return receipt, gas, err
+}
+
+// ProcessStakeTxAfter attempts to add stake to stateDB and some global variable
+// no check because it must be invoked after tx has been processed.
+func ProcessStakeTxAfter(tx *types.Transaction, statedb *state.StateDB)(){
+
+}
+
+// verify the tx(trusted pubkey) and add sentinel to stateDB or some global variable
+func ProcessSentineTx(tx *types.Transaction, statedb *state.StateDB)(){
+
 }
