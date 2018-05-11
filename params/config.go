@@ -144,7 +144,7 @@ func (c *CliqueConfig) String() string {
 
 // GenaroConfig is the consensus engine configs for SPOR/PoS.
 type GenaroConfig struct {
-	Epoch            uint64 //the number of block in one committee term
+	Epoch            uint64 //the number of blocks in one committee term
 	BlockInterval    uint64 //a peer create BlockInterval blocks one time
 	ElectionPeriod   uint64 //a committee list write time
 	ValidPeriod      uint64 //a written committee list waiting time to come into force

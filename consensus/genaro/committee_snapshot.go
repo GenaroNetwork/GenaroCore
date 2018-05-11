@@ -1,32 +1,29 @@
 package genaro
 
 import (
-	"bytes"
 	"encoding/json"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"bytes"
 )
 
-type Genaro struct {
-	config           *params.GenaroConfig //genaro config
-	snapshotDb       ethdb.Database       // snapshot db
-	sentinelDb       ethdb.Database       //sentinel db
-	signer           common.Address       //peer address
-	signFn           SignerFn             //sign function
-	currentCommittee CommitteeSnapshot    //current snapshot
+type CommitteeSnapshot struct {
+	config           *params.GenaroConfig             //genaro config
+	WriteBlockNumber uint64                           // Block number where the snapshot was created
+	WriteBlockHash   common.Hash                      // BlockHash as the snapshot key
+	EpochNumber      uint64                           // the turn of Committee
+	CommitteeSize    uint64                           // the size of Committee
+	CommitteeRank    []common.Address                 // the rank of committee
+	Committee        map[common.Address]CommitteeInfo // committee members
 }
 
-type CommitteeSnapshot struct {
-	config        *params.GenaroConfig             //genaro config
-	BlockNumber   uint64                           // Block number where the snapshot was created
-	BlockHash     common.Hash                      // snapshot hash
-	EpochNumber   uint64                           // the tern of Committee
-	CommitteeSize uint64                           // the size of Committee
-	CommitteeRank []common.Address                 // the rank of committee
-	Committee     map[common.Address]CommitteeInfo // committee members
+type Stake struct {
+	BlockNumber uint64
+	Amount      uint64
+	Staker      common.Address
 }
 
 type CommitteeInfo struct {
@@ -38,12 +35,12 @@ type CommitteeInfo struct {
 // newSnapshot creates a new snapshot with the specified startup parameters.
 func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, epochNumber uint64, committeeRank []common.Address, committee map[common.Address]CommitteeInfo) *CommitteeSnapshot {
 	snap := &CommitteeSnapshot{
-		config:        config,
-		BlockNumber:   number,
-		BlockHash:     hash,
-		EpochNumber:   epochNumber,
-		CommitteeRank: make([]common.Address, len(committeeRank)),
-		Committee:     make(map[common.Address]CommitteeInfo),
+		config:           config,
+		WriteBlockNumber: number,
+		WriteBlockHash:   hash,
+		EpochNumber:      epochNumber,
+		CommitteeRank:    make([]common.Address, len(committeeRank)),
+		Committee:        make(map[common.Address]CommitteeInfo),
 	}
 	snap.CommitteeSize = uint64(len(snap.CommitteeRank))
 
@@ -79,19 +76,19 @@ func (s *CommitteeSnapshot) store(db ethdb.Database) error {
 	if err != nil {
 		return err
 	}
-	return db.Put(append([]byte("genaro-"), s.BlockHash[:]...), blob)
+	return db.Put(append([]byte("genaro-"), s.WriteBlockHash[:]...), blob)
 }
 
 // copy creates a deep copy of the snapshot, though not the individual votes.
 func (s *CommitteeSnapshot) copy() *CommitteeSnapshot {
 	cpy := &CommitteeSnapshot{
-		config:        s.config,
-		BlockNumber:   s.BlockNumber,
-		BlockHash:     s.BlockHash,
-		EpochNumber:   s.EpochNumber,
-		CommitteeSize: s.CommitteeSize,
-		CommitteeRank: make([]common.Address, s.CommitteeSize),
-		Committee:     make(map[common.Address]CommitteeInfo),
+		config:           s.config,
+		WriteBlockNumber: s.WriteBlockNumber,
+		WriteBlockHash:   s.WriteBlockHash,
+		EpochNumber:      s.EpochNumber,
+		CommitteeSize:    s.CommitteeSize,
+		CommitteeRank:    make([]common.Address, s.CommitteeSize),
+		Committee:        make(map[common.Address]CommitteeInfo),
 	}
 	for i, rank := range s.CommitteeRank {
 		cpy.CommitteeRank[i] = rank
@@ -104,25 +101,22 @@ func (s *CommitteeSnapshot) copy() *CommitteeSnapshot {
 	return cpy
 }
 
-// apply creates a new authorization snapshot by applying the given headers to
-// the original one.
-// TODO
-func (s *CommitteeSnapshot) apply(headers []*types.Header) (*CommitteeSnapshot, error) {
-	return nil, nil
-}
-
 //  retrieves the list of rank
 func (s *CommitteeSnapshot) rank() []common.Address {
 	return s.CommitteeRank
 }
 
-//  get the committee tern from block number
-func GetTernOfCommiteeByBlockNumber(config *params.GenaroConfig, number uint64) uint64 {
-	return number % config.Epoch
+//  get the committee turn from block number
+func GetTurnOfCommiteeByBlockNumber(config *params.GenaroConfig, number uint64) uint64 {
+	return number / config.Epoch
 }
 
-// inturn returns if a addr at a given block height is in-turn or not.
-func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
+//  get the list written BlockNumber by the turn of committee
+func GetCommiteeWrittenBlockNumberByTurn(config *params.GenaroConfig, turn uint64) uint64 {
+	return (turn-config.ValidPeriod+1)*config.Epoch - 1
+}
+
+func (s *CommitteeSnapshot) getCurrentRankIndex(addr common.Address) int {
 	pos := -1
 	for i, rank := range s.CommitteeRank {
 		if addr == rank {
@@ -130,6 +124,12 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 			break
 		}
 	}
+	return pos
+}
+
+// inturn returns if a addr at a given block height is in-turn or not (in s)
+func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
+	pos := s.getCurrentRankIndex(addr)
 	if pos == -1 {
 		return false
 	}
@@ -137,7 +137,10 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	if number < startBlock {
 		return false
 	}
-	if number == (number-startBlock)%s.CommitteeSize {
+
+	bias := (number - startBlock) % (s.CommitteeSize * s.config.BlockInterval)
+
+	if bias >= uint64(pos)*s.config.BlockInterval && bias < (uint64(pos)+1)*s.config.BlockInterval {
 		return true
 	} else {
 		return false
