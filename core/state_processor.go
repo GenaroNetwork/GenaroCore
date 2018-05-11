@@ -104,6 +104,10 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	if err != nil {
 		return nil, 0, err
 	}
+
+	// if msg.To() == 1, it is a stake transaction, we should add the stake to stateDB
+	// invoke ProcessStakeTxAfter function
+
 	// Update the state with pending changes
 	var root []byte
 	if config.IsByzantium(header.Number) {
@@ -122,8 +126,7 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	if msg.To() == nil {
 		receipt.ContractAddress = crypto.CreateAddress(vmenv.Context.Origin, tx.Nonce())
 	}
-	// if msg.To() == 1, it is a stake transaction, we should add the stake to stateDB
-	// invoke ProcessStakeTxAfter function
+
 
 	// Set the receipt logs and create a bloom for filtering
 	receipt.Logs = statedb.GetLogs(tx.Hash())
