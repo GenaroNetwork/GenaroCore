@@ -18,6 +18,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/hashicorp/golang-lru"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 const (
@@ -350,4 +351,71 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 		}
 	}
 	return nil
+}
+
+// VerifyUncles implements consensus.Engine, always returning an error for any
+// uncles as this consensus mechanism doesn't permit uncles.
+func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
+	if len(block.Uncles()) > 0 {
+		return errors.New("uncles not allowed")
+	}
+	return nil
+}
+
+// Finalize implements consensus.Engine, ensuring no uncles are set, nor block
+// rewards given, and returns the final block.
+func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+	//  coin interest reward
+	accumulateInterestRewards(g.config, state, header, chain)
+	// storage reward
+	accumulateStorageRewards(g.config, state, header, chain)
+
+	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+	header.UncleHash = types.CalcUncleHash(nil)
+
+	// Assemble and return the final block for sealing
+	return types.NewBlock(header, txs, nil, receipts), nil
+}
+
+// AccumulateInterestRewards credits the reward to the block author by coin  interest
+func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, chain consensus.ChainReader) {
+	// TODO computing coin-interesting
+	blockReward := uint64(0)
+
+	reward := new(big.Int).SetUint64(blockReward)
+	state.AddBalance(header.Coinbase, reward)
+}
+
+// AccumulateStorageRewards credits the reward to the sentinel owner
+func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, chain consensus.ChainReader) {
+	// TODO computing storage rewards
+}
+
+// VerifyHeader checks whether a header conforms to the consensus rules of a
+// given engine. Verifying the seal may be done optionally here, or explicitly
+// via the VerifySeal method.
+func (g *Genaro) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
+	return g.VerifySeal(chain, header)
+}
+
+// VerifyHeaders is similar to VerifyHeader, but verifies a batch of headers
+// concurrently. The method returns a quit channel to abort the operations and
+// a results channel to retrieve the async verifications (the order is that of
+// the input slice).
+func (g *Genaro) VerifyHeaders(chain consensus.ChainReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error) {
+	abort := make(chan struct{})
+	results := make(chan error, len(headers))
+
+	go func() {
+		for _, header := range headers {
+			err := g.VerifySeal(chain, header)
+
+			select {
+			case <-abort:
+				return
+			case results <- err:
+			}
+		}
+	}()
+	return abort, results
 }
