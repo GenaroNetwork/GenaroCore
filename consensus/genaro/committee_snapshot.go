@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"bytes"
+	"encoding/binary"
 )
 
 // Each turn has a Snapshot. EpochNumber means the "electoral materials" period.
@@ -59,8 +58,10 @@ func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, e
 }
 
 // loadSnapshot loads an existing snapshot from the database.
-func loadSnapshot(config *params.GenaroConfig, db ethdb.Database, hash common.Hash) (*CommitteeSnapshot, error) {
-	blob, err := db.Get(append([]byte("genaro-"), hash[:]...))
+func loadSnapshot(config *params.GenaroConfig, db ethdb.Database, epollNumber uint64) (*CommitteeSnapshot, error) {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, epollNumber)
+	blob, err := db.Get(append([]byte("genaro-"), b[:]...))
 	if err != nil {
 		return nil, err
 	}
@@ -79,10 +80,13 @@ func (s *CommitteeSnapshot) store(db ethdb.Database) error {
 	if err != nil {
 		return err
 	}
-	return db.Put(append([]byte("genaro-"), s.WriteBlockHash[:]...), blob)
+
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, s.EpochNumber)
+	return db.Put(append([]byte("genaro-"), b[:]...), blob)
 }
 
-// copy creates a deep copy of the snapshot, though not the individual votes.
+// copy creates a deep copy of the snapshot
 func (s *CommitteeSnapshot) copy() *CommitteeSnapshot {
 	cpy := &CommitteeSnapshot{
 		config:           s.config,
@@ -113,6 +117,12 @@ func (s *CommitteeSnapshot) rank() []common.Address {
 func GetTurnOfCommiteeByBlockNumber(config *params.GenaroConfig, number uint64) uint64 {
 	return number / config.Epoch
 }
+
+//  get the depend turn from block number
+func GetDependTurnByBlockNumber(config *params.GenaroConfig, number uint64) uint64 {
+	return GetTurnOfCommiteeByBlockNumber(config, number) - config.ElectionPeriod - config.ValidPeriod
+}
+
 
 //  get the list written BlockNumber by the turn of committee
 func GetCommiteeWrittenBlockNumberByTurn(config *params.GenaroConfig, turn uint64) uint64 {
@@ -150,6 +160,10 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	}
 }
 
-func GetLastBlockNumberOfEpoch (config *params.GenaroConfig, epochNumber uint64) uint64{
-	return config.Epoch * (epochNumber + 1) - 1
+func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
+	return config.Epoch*(epochNumber-1) + 1
+}
+
+func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
+	return config.Epoch*(epochNumber+1) - 1
 }
