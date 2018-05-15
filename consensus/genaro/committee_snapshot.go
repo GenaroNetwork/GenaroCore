@@ -10,6 +10,9 @@ import (
 	"bytes"
 )
 
+// Each turn has a Snapshot. EpochNumber means the "electoral materials" period.
+// Snapshot will not be stored immediately. It will be stored in EpochNumber + ElectionPeriod
+// Snapshot will be valid in EpochNumber + ElectionPeriod + ValidPeriod
 type CommitteeSnapshot struct {
 	config           *params.GenaroConfig             //genaro config
 	WriteBlockNumber uint64                           // Block number where the snapshot was created
@@ -145,4 +148,8 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	} else {
 		return false
 	}
+}
+
+func GetLastBlockNumberOfEpoch (config *params.GenaroConfig, epochNumber uint64) uint64{
+	return config.Epoch * (epochNumber + 1) - 1
 }

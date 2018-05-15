@@ -29,7 +29,18 @@ func ResetHeaderSignature(header *types.Header) {
 
 func SetHeaderSignature(header *types.Header, signature []byte) {
 	extraData := UnmarshalToExtra(header)
-	copy(extraData.Signature , signature)
+	copy(extraData.Signature, signature)
 	extraByte, _ := json.Marshal(extraData)
-	header.Extra = extraByte
+	copy(header.Extra, extraByte)
+}
+
+func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Address) error {
+	extraData := UnmarshalToExtra(header)
+	copy(extraData.CommitteeRank, committeeRank)
+	extraByte, err := json.Marshal(extraData)
+	if err != nil {
+		return err
+	}
+	copy(header.Extra, extraByte)
+	return nil
 }
