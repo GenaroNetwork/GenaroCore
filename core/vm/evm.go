@@ -20,6 +20,9 @@ import (
 	"math/big"
 	"sync/atomic"
 	"time"
+	"encoding/json"
+	"errors"
+
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
@@ -164,6 +167,17 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}
 		evm.StateDB.CreateAccount(addr)
 	}
+
+
+	//If transactions are special, they are treated separately according to their types.
+	if caller.Address() == addr {
+		switch addr {
+		case common.SentialHelfSyncAddress:
+			updateHeft(&evm.StateDB, input)
+			return nil, gas, nil
+		}
+	}
+
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
 
 	// Initialise a new contract and set the code that is to be used by the EVM.
@@ -193,6 +207,27 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}
 	}
 	return ret, contract.Gas, err
+}
+
+type sentail struct {
+	NodeId  string `json:"nodeid"`
+	Heft    int    `json:"heft"`
+}
+
+func updateHeft(statedb *StateDB, input []byte) error{
+	// 解析sentail数据
+	var s sentail
+	err := json.Unmarshal(input, &s)
+	if err != nil{
+		return errors.New("update sential heft error： the sentail parameters of the wrong format")
+	}
+
+	adress := common.HexToAddress(s.NodeId)
+	// 根据nodeid更新heft值
+	if !(*statedb).UpdateHeft(adress, s.Heft) {
+		return errors.New("update sentail's heft fail")
+	}
+	return nil
 }
 
 // CallCode executes the contract associated with the addr with the given input

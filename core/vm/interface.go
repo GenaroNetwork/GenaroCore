@@ -67,6 +67,9 @@ type StateDB interface {
 
 	StorageValueW(common.Address, string, uint64)
 
+	UpdateHeft(common.Address, int) bool
+	GetHeft(common.Address) (int, error)
+
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
