@@ -209,23 +209,23 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	return ret, contract.Gas, err
 }
 
-type sentail struct {
+type sentinel struct {
 	NodeId  string `json:"nodeid"`
 	Heft    int    `json:"heft"`
 }
 
 func updateHeft(statedb *StateDB, input []byte) error{
 	// 解析sentail数据
-	var s sentail
+	var s sentinel
 	err := json.Unmarshal(input, &s)
 	if err != nil{
-		return errors.New("update sential heft error： the sentail parameters of the wrong format")
+		return errors.New("update sential heft error： the sentinel parameters of the wrong format")
 	}
 
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft) {
-		return errors.New("update sentail's heft fail")
+		return errors.New("update sentinel's heft fail")
 	}
 	return nil
 }

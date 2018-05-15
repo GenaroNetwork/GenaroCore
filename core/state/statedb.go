@@ -642,7 +642,7 @@ func (self *StateDB)StorageValueW(a common.Address, key string, value uint64) {
 	}
 }
 
-// UpdateHeft updates the heft value of sentail's nodeid
+// UpdateHeft updates the heft value of sentinel's nodeid
 func (self *StateDB)UpdateHeft(id common.Address, heft int) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
@@ -652,7 +652,7 @@ func (self *StateDB)UpdateHeft(id common.Address, heft int) bool{
 	return false
 }
 
-// GetHeft gets the heft value of sentail's nodeid
+// GetHeft gets the heft value of sentinel's nodeid
 func (self *StateDB)GetHeft(id common.Address) (int, error){
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
