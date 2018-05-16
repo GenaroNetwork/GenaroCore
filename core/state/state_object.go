@@ -108,7 +108,7 @@ type Account struct {
 
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
-type GenaroDate struct {
+type GenaroData struct {
 	//StorageGas       uint64
 	//StorageGasLimit  uint64
 	//StorageGasPrice  *big.Int
@@ -424,9 +424,9 @@ func (self *stateObject)StorageValueW(db Database, key string, v uint64) {
 
 
 func (self *stateObject)UpdateHeft(heft uint64){
-	var genaroData GenaroDate
+	var genaroData GenaroData
 	if self.data.CodeHash == nil{
-		genaroData = GenaroDate{
+		genaroData = GenaroData{
 			Heft:heft,
 		}
 	}else {
@@ -446,7 +446,7 @@ func (self *stateObject)UpdateHeft(heft uint64){
 
 func (self *stateObject)GetHeft() (uint64){
 	if self.data.CodeHash != nil {
-		var genaroData GenaroDate
+		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.Heft
 	}
@@ -455,9 +455,9 @@ func (self *stateObject)GetHeft() (uint64){
 }
 
 func (self *stateObject)UpdateStake(stake uint64){
-	var genaroData GenaroDate
+	var genaroData GenaroData
 	if self.data.CodeHash == nil{
-		genaroData = GenaroDate{
+		genaroData = GenaroData{
 			Stake:stake,
 		}
 	}else {
@@ -477,7 +477,7 @@ func (self *stateObject)UpdateStake(stake uint64){
 
 func (self *stateObject)GetStake() (uint64){
 	if self.data.CodeHash != nil {
-		var genaroData GenaroDate
+		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.Stake
 	}
