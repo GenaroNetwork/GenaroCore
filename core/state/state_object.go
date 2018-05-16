@@ -462,7 +462,7 @@ func (self *stateObject)UpdateStake(stake uint64){
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		genaroData.Stake = stake
+		genaroData.Stake += stake
 	}
 
 	b, _ := json.Marshal(genaroData)
