@@ -219,7 +219,7 @@ func updateHeft(statedb *StateDB, input []byte) error{
 	var s sentinel
 	err := json.Unmarshal(input, &s)
 	if err != nil{
-		return errors.New("update sential heft error： the sentinel parameters of the wrong format")
+		return errors.New("update sentinel heft error： the sentinel parameters of the wrong format")
 	}
 
 	adress := common.HexToAddress(s.NodeId)

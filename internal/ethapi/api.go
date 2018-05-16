@@ -1111,7 +1111,7 @@ type SendTxArgs struct {
 	// newer name and should be preferred by clients.
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
-	Sential  string      `json:"sential"`
+	Sentinel  string      `json:"sentinel"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -1170,7 +1170,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	if args.From == *args.To {
 		switch args.From{
 		case common.SentialHelfSyncAddress:
-			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.Sential))
+			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.Sentinel))
 		default:
 			return nil
 		}
