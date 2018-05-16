@@ -22,11 +22,7 @@ import (
 	"io"
 	"strconv"
 	"math/big"
-<<<<<<< HEAD
-=======
 	"encoding/binary"
->>>>>>> origin/vm
-
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
@@ -93,11 +89,8 @@ type stateObject struct {
 	touched   bool
 	deleted   bool
 	onDirty   func(addr common.Address) // Callback method to mark a state object newly dirty
-<<<<<<< HEAD
-=======
 
 	genaroData Genaro
->>>>>>> origin/vm
 }
 
 // empty returns whether the account is considered empty.
@@ -114,8 +107,6 @@ type Account struct {
 	CodeHash []byte
 }
 
-<<<<<<< HEAD
-=======
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
 type Genaro struct {
@@ -131,7 +122,6 @@ type Genaro struct {
 	SentinelHEFT     uint64
 }
 
->>>>>>> origin/vm
 // newObject creates a state object.
 func newObject(db *StateDB, address common.Address, data Account, onDirty func(addr common.Address)) *stateObject {
 	if data.Balance == nil {
@@ -148,10 +138,8 @@ func newObject(db *StateDB, address common.Address, data Account, onDirty func(a
 		cachedStorage: make(Storage),
 		dirtyStorage:  make(Storage),
 		onDirty:       onDirty,
-<<<<<<< HEAD
-=======
+
 		genaroData:    Genaro{},
->>>>>>> origin/vm
 	}
 }
 
@@ -417,8 +405,6 @@ func (self *stateObject) Nonce() uint64 {
 func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
 }
-<<<<<<< HEAD
-=======
 
 func (self *stateObject)StorageValue(db Database, key string) uint64 {
 	tr := self.getTrie(db)
@@ -463,10 +449,3 @@ func (self *stateObject)GetHeft() (int){
 	// zero value should be returned
 	return 0
 }
-
-
-
-
-
-
->>>>>>> origin/vm

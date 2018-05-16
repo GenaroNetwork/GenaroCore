@@ -26,10 +26,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-<<<<<<< HEAD
-=======
 	"log"
->>>>>>> origin/vm
 )
 
 var (
@@ -487,8 +484,6 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
-<<<<<<< HEAD
-=======
 //todo 实现自定义指令对应函数功能
 func opSenc(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var storageSize uint64 = 3000
@@ -521,7 +516,6 @@ func opDataVerisonWrite(pc *uint64, evm *EVM, contract *Contract, memory *Memory
 	return nil, nil
 }
 
->>>>>>> origin/vm
 func opExtCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var (
 		addr       = common.BigToAddress(stack.pop())
@@ -541,8 +535,6 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
-<<<<<<< HEAD
-=======
 //todo 实现自定义指令对应函数功能
 func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var storageSize uint64 = 3000
@@ -554,7 +546,6 @@ func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory,
 	return nil, nil
 }
 
->>>>>>> origin/vm
 func opBlockhash(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	num := stack.pop()
 
@@ -593,8 +584,6 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
-<<<<<<< HEAD
-=======
 //todo 实现自定义指令对应函数功能
 func opStorageGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var storageSize uint64 = 3000
@@ -611,7 +600,6 @@ func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, st
 	return nil, nil
 }
 
->>>>>>> origin/vm
 func opPop(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	evm.interpreter.intPool.put(stack.pop())
 	return nil, nil
@@ -699,8 +687,7 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 	stack.push(evm.interpreter.intPool.get().SetInt64(int64(memory.Len())))
 	return nil, nil
 }
-<<<<<<< HEAD
-=======
+
 //todo 实现自定义指令对应函数功能
 func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var storageSize uint64 = 3000
@@ -711,15 +698,12 @@ func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
->>>>>>> origin/vm
 
 func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(evm.interpreter.intPool.get().SetUint64(contract.Gas))
 	return nil, nil
 }
 
-<<<<<<< HEAD
-=======
 // todo 实现自定义指令对应函数功能
 // 获取交易的StorageGas,获取后压入栈中
 func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
@@ -733,7 +717,6 @@ func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stac
 	return nil, nil
 }
 
->>>>>>> origin/vm
 func opCreate(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var (
 		value        = stack.pop()
