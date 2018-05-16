@@ -26,7 +26,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"log"
 )
 
 var (
@@ -495,7 +494,6 @@ func opSenc(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Sta
 	return nil, nil
 }
 
-
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var storageSize uint64 = 3000
 	key := "dataVerisonRead"
@@ -537,12 +535,7 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "storageGasprice"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	stack.push(evm.interpreter.intPool.get().Set(evm.StorageGasPrice))
 	return nil, nil
 }
 
@@ -585,13 +578,8 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 }
 
 //todo 实现自定义指令对应函数功能
-func opStorageGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "storageGasLimit"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGasUsed))
 	return nil, nil
 }
 
@@ -687,14 +675,10 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 	stack.push(evm.interpreter.intPool.get().SetInt64(int64(memory.Len())))
 	return nil, nil
 }
+
 //todo 实现自定义指令对应函数功能
 func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "storageSize"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	stack.push(evm.interpreter.intPool.get().SetUint64(evm.SSize))
 	return nil, nil
 }
 
@@ -706,13 +690,7 @@ func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 // todo 实现自定义指令对应函数功能
 // 获取交易的StorageGas,获取后压入栈中
 func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	log.Println("Genaro func: opStorageGas execute")
-	var storageGas uint64 = 3000
-	key := "storageGas"
-	evm.StateDB.StorageValueW(contract.Address(), key, storageGas)
-	gasGet := evm.StateDB.StorageValue(contract.Address(), key)
-	log.Printf("Genaro storageGas :%d \n", gasGet)
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
+	stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGas))
 	return nil, nil
 }
 
