@@ -96,7 +96,7 @@ const (
 	RETURNDATACOPY
 
 	// user-defined opcode
-	STORAGE_GAS_PRICE  = 0x3f
+	STORAGE_GAS_PRICE = 0x3f
 )
 
 const (
@@ -110,7 +110,7 @@ const (
 
 	// user-defined opcode
 	//0x46
-	STORAGE_GAS_LIMIT
+	STORAGE_GAS_USED
 	//0x47
 	SENTINEL_HEFT
 )
@@ -268,9 +268,9 @@ var opCodeToString = map[OpCode]string{
 	// 0x20 range - crypto
 	SHA3: "SHA3",
 	// user-defined opcode
-	SENC: "SENC",
-	DATA_VERSION_READ:"DATA_VERSION_READ",
-	DATA_VERSION_WRITE:"DATA_VERSION_WRITE",
+	SENC:               "SENC",
+	DATA_VERSION_READ:  "DATA_VERSION_READ",
+	DATA_VERSION_WRITE: "DATA_VERSION_WRITE",
 
 	// 0x30 range - closure state
 	ADDRESS:        "ADDRESS",
@@ -299,8 +299,8 @@ var opCodeToString = map[OpCode]string{
 	DIFFICULTY: "DIFFICULTY",
 	GASLIMIT:   "GASLIMIT",
 	// user-defined opcode
-	SENTINEL_HEFT: "SENTINEL_HEFT",
-	STORAGE_GAS_LIMIT: "STORAGE_GAS_LIMIT",
+	SENTINEL_HEFT:    "SENTINEL_HEFT",
+	STORAGE_GAS_USED: "STORAGE_GAS_USED",
 
 	// 0x50 range - 'storage' and execution
 	POP: "POP",
@@ -319,8 +319,8 @@ var opCodeToString = map[OpCode]string{
 	JUMPDEST: "JUMPDEST",
 
 	// user-defined opcode
-	STORAGE_GAS:"STORAGE_GAS",
-	SSIZE:"SSIZE",
+	STORAGE_GAS: "STORAGE_GAS",
+	SSIZE:       "SSIZE",
 
 	// 0x60 range - push
 	PUSH1:  "PUSH1",
@@ -559,14 +559,14 @@ var stringToOp = map[string]OpCode{
 	"SELFDESTRUCT":   SELFDESTRUCT,
 
 	// user-defined opcode
-	"SENTINEL_HEFT": SENTINEL_HEFT,
-	"STORAGE_GAS_LIMIT": STORAGE_GAS_LIMIT,
-	"STORAGE_GAS_PRICE":STORAGE_GAS_PRICE,
-	"SENC":SENC,
-	"DATA_VERSION_READ":DATA_VERSION_READ,
-	"DATA_VERSION_WRITE":DATA_VERSION_WRITE,
-	"STORAGE_GAS":  STORAGE_GAS,
-	"SSIZE":        SSIZE,
+	"SENTINEL_HEFT":      SENTINEL_HEFT,
+	"STORAGE_GAS_USED":   STORAGE_GAS_USED,
+	"STORAGE_GAS_PRICE":  STORAGE_GAS_PRICE,
+	"SENC":               SENC,
+	"DATA_VERSION_READ":  DATA_VERSION_READ,
+	"DATA_VERSION_WRITE": DATA_VERSION_WRITE,
+	"STORAGE_GAS":        STORAGE_GAS,
+	"SSIZE":              SSIZE,
 }
 
 func StringToOp(str string) OpCode {
