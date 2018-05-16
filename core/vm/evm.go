@@ -170,9 +170,15 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 
 	//If transactions are special, they are treated separately according to their types.
+
+	if to.Address() == common.SentinelStakeSyncAddress {
+		err := updateStake(evm, caller.Address(), input)
+		return nil, gas, err
+	}
+
 	if caller.Address() == addr {
 		switch addr {
-		case common.SentialHelfSyncAddress:
+		case common.SentinelHelfSyncAddress:
 			updateHeft(&evm.StateDB, input)
 			return nil, gas, nil
 		}
@@ -211,7 +217,8 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 type sentinel struct {
 	NodeId  string `json:"nodeid"`
-	Heft    int    `json:"heft"`
+	Heft    uint64 `json:"heft"`
+	Stake   uint64 `json:"stake"`
 }
 
 func updateHeft(statedb *StateDB, input []byte) error{
@@ -219,7 +226,7 @@ func updateHeft(statedb *StateDB, input []byte) error{
 	var s sentinel
 	err := json.Unmarshal(input, &s)
 	if err != nil{
-		return errors.New("update sential heft error： the sentinel parameters of the wrong format")
+		return errors.New("update sentinel heft error： the sentinel parameters of the wrong format")
 	}
 
 	adress := common.HexToAddress(s.NodeId)
@@ -227,6 +234,31 @@ func updateHeft(statedb *StateDB, input []byte) error{
 	if !(*statedb).UpdateHeft(adress, s.Heft) {
 		return errors.New("update sentinel's heft fail")
 	}
+	return nil
+}
+
+func updateStake(evm *EVM, caller common.Address, input []byte) error{
+	// 解析sentail数据
+	var s sentinel
+	err := json.Unmarshal(input, &s)
+	if err != nil{
+		return errors.New("update sentinel stake error： the sentinel parameters of the wrong format")
+	}
+
+	amount := new(big.Int)
+	amount.SetUint64(s.Stake*1000000000000000000)
+
+	// judge if there is enough balance to stake（balance must larger than stake value)
+	if !evm.Context.CanTransfer(evm.StateDB, caller, amount) {
+		return ErrInsufficientBalance
+	}
+
+	adress := common.HexToAddress(s.NodeId)
+	// 根据nodeid更新stake值
+	if !(*evm).StateDB.UpdateStake(adress, s.Stake) {
+		return errors.New("update sentinel's stake fail")
+	}
+	(*evm).StateDB.SubBalance(caller, amount)
 	return nil
 }
 

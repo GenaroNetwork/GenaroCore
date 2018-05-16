@@ -1111,9 +1111,13 @@ type SendTxArgs struct {
 	// newer name and should be preferred by clients.
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
+<<<<<<< HEAD
 	// todo 根据不同type（byte中1的个数）生成不同transaction
 	Id  byte           `json:"_"`
 	Sential  string      `json:"sential"`
+=======
+	Sentinel  string      `json:"sentinel"`
+>>>>>>> vm
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -1170,10 +1174,14 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	}
 
 	//deal special transaction
+	if *args.To == common.SentinelStakeSyncAddress {
+		return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.Sentinel))
+	}
+
 	if args.From == *args.To {
 		switch args.From{
-		case common.SentialHelfSyncAddress:
-			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.Sential))
+		case common.SentinelHelfSyncAddress:
+			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.Sentinel))
 		default:
 			return nil
 		}
