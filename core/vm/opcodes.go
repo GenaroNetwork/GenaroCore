@@ -255,9 +255,9 @@ var opCodeToString = map[OpCode]string{
 	// 0x20 range - crypto
 	SHA3: "SHA3",
 	// user-defined opcode
-	SENC:               "SENC",
-	DATA_VERSION_READ:  "DATA_VERSION_READ",
-	DATA_VERSION_WRITE: "DATA_VERSION_WRITE",
+	//SENC:               "SENC",
+	//DATA_VERSION_READ:  "DATA_VERSION_READ",
+	//DATA_VERSION_WRITE: "DATA_VERSION_WRITE",
 
 	// 0x30 range - closure state
 	ADDRESS:        "ADDRESS",
@@ -304,8 +304,8 @@ var opCodeToString = map[OpCode]string{
 	JUMPDEST: "JUMPDEST",
 
 	// user-defined opcode
-	STORAGE_GAS: "STORAGE_GAS",
-	SSIZE:       "SSIZE",
+	//STORAGE_GAS: "STORAGE_GAS",
+	//SSIZE:       "SSIZE",
 
 	// 0x60 range - push
 	PUSH1:  "PUSH1",
@@ -547,11 +547,11 @@ var stringToOp = map[string]OpCode{
 	"SENTINEL_HEFT":      SENTINEL_HEFT,
 	"STORAGE_GAS_USED":   STORAGE_GAS_USED,
 	"STORAGE_GAS_PRICE":  STORAGE_GAS_PRICE,
-	"SENC":               SENC,
-	"DATA_VERSION_READ":  DATA_VERSION_READ,
-	"DATA_VERSION_WRITE": DATA_VERSION_WRITE,
-	"STORAGE_GAS":        STORAGE_GAS,
-	"SSIZE":              SSIZE,
+	//"SENC":               SENC,
+	//"DATA_VERSION_READ":  DATA_VERSION_READ,
+	//"DATA_VERSION_WRITE": DATA_VERSION_WRITE,
+	//"STORAGE_GAS":        STORAGE_GAS,
+	//"SSIZE":              SSIZE,
 }
 
 func StringToOp(str string) OpCode {

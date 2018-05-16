@@ -1111,13 +1111,8 @@ type SendTxArgs struct {
 	// newer name and should be preferred by clients.
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
-<<<<<<< HEAD
-	// todo 根据不同type（byte中1的个数）生成不同transaction
-	Id  byte           `json:"_"`
-	Sential  string      `json:"sential"`
-=======
+
 	Sentinel  string      `json:"sentinel"`
->>>>>>> vm
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
