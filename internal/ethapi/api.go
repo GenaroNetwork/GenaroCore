@@ -1111,6 +1111,11 @@ type SendTxArgs struct {
 	// newer name and should be preferred by clients.
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
+<<<<<<< HEAD
+=======
+	// todo 根据不同type（byte中1的个数）生成不同transaction
+	Id  byte           `json:"_"`
+>>>>>>> origin/vm
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -1162,8 +1167,15 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		input = *args.Input
 	}
 	if args.To == nil {
+<<<<<<< HEAD
 		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 	}
+=======
+		//todo add code
+		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+	}
+	// todo add code
+>>>>>>> origin/vm
 	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 }
 

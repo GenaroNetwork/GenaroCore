@@ -626,3 +626,21 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads())
 	return root, err
 }
+<<<<<<< HEAD
+=======
+
+func (self *StateDB)StorageValue(a common.Address,key string) uint64{
+	stateObject := self.getStateObject(a)
+	if stateObject != nil {
+		return stateObject.StorageValue(self.db, key)
+	}
+	return uint64(0)
+}
+
+func (self *StateDB)StorageValueW(a common.Address, key string, value uint64) {
+	stateObject := self.getStateObject(a)
+	if stateObject != nil {
+		stateObject.StorageValueW(self.db, key, value)
+	}
+}
+>>>>>>> origin/vm

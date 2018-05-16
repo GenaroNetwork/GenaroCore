@@ -62,6 +62,14 @@ type StateDB interface {
 	AddPreimage(common.Hash, []byte)
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
+<<<<<<< HEAD
+=======
+
+	StorageValue(common.Address, string) uint64
+
+	StorageValueW(common.Address, string, uint64)
+
+>>>>>>> origin/vm
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

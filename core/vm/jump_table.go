@@ -348,12 +348,45 @@ func NewFrontierInstructionSet() [256]operation {
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
+<<<<<<< HEAD
+=======
+		SENC: {
+			execute:       opSenc,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(4, 0),
+			memorySize:    memoryCodeCopy,
+			valid:         true,
+		},
+		DATA_VERSION_READ: {
+			execute:       opDataVerisonRead,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(1, 0),
+			memorySize:    memoryCodeCopy,
+			valid:         true,
+		},
+		DATA_VERSION_WRITE: {
+			execute:       opDataVerisonWrite,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(1, 0),
+			memorySize:    memoryCodeCopy,
+			valid:         true,
+		},
+>>>>>>> origin/vm
 		GASPRICE: {
 			execute:       opGasprice,
 			gasCost:       constGasFunc(GasQuickStep),
 			validateStack: makeStackFunc(0, 1),
 			valid:         true,
 		},
+<<<<<<< HEAD
+=======
+		STORAGE_GAS_PRICE: {
+			execute:       opStorageGasprice,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(0, 1),
+			valid:         true,
+		},
+>>>>>>> origin/vm
 		EXTCODESIZE: {
 			execute:       opExtCodeSize,
 			gasCost:       gasExtCodeSize,
@@ -403,6 +436,21 @@ func NewFrontierInstructionSet() [256]operation {
 			validateStack: makeStackFunc(0, 1),
 			valid:         true,
 		},
+<<<<<<< HEAD
+=======
+		STORAGE_GAS_LIMIT: {
+			execute:       opStorageGasLimit,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(0, 1),
+			valid:         true,
+		},
+		SENTINEL_HEFT: {
+			execute:       opSentinelHeft,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(0, 1),
+			valid:         true,
+		},
+>>>>>>> origin/vm
 		POP: {
 			execute:       opPop,
 			gasCost:       constGasFunc(GasQuickStep),
@@ -470,12 +518,30 @@ func NewFrontierInstructionSet() [256]operation {
 			validateStack: makeStackFunc(0, 1),
 			valid:         true,
 		},
+<<<<<<< HEAD
+=======
+		SSIZE: {
+			execute:       opSsize,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(0, 1),
+			valid:         true,
+		},
+>>>>>>> origin/vm
 		GAS: {
 			execute:       opGas,
 			gasCost:       constGasFunc(GasQuickStep),
 			validateStack: makeStackFunc(0, 1),
 			valid:         true,
 		},
+<<<<<<< HEAD
+=======
+		STORAGE_GAS: {
+			execute:       opStorageGas,
+			gasCost:       constGasFunc(GasQuickStep),
+			validateStack: makeStackFunc(0, 1),
+			valid:         true,
+		},
+>>>>>>> origin/vm
 		JUMPDEST: {
 			execute:       opJumpdest,
 			gasCost:       constGasFunc(params.JumpdestGas),

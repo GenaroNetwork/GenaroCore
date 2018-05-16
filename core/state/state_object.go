@@ -21,6 +21,10 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+<<<<<<< HEAD
+=======
+	"encoding/binary"
+>>>>>>> origin/vm
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
@@ -88,6 +92,11 @@ type stateObject struct {
 	touched   bool
 	deleted   bool
 	onDirty   func(addr common.Address) // Callback method to mark a state object newly dirty
+<<<<<<< HEAD
+=======
+
+	genaroData Genaro
+>>>>>>> origin/vm
 }
 
 // empty returns whether the account is considered empty.
@@ -104,6 +113,24 @@ type Account struct {
 	CodeHash []byte
 }
 
+<<<<<<< HEAD
+=======
+// Genaro is the Ethereum consensus representation of Genaro's data.
+// these objects are stored in the main genaro trie.
+type Genaro struct {
+	StorageGas       uint64
+	StorageGasLimit  uint64
+	StorageGasPrice  *big.Int
+
+	DataVersionR     string
+	DataVersionW     string
+
+	// Ssize represents Storage Size
+	Ssize            uint64
+	SentinelHEFT     uint64
+}
+
+>>>>>>> origin/vm
 // newObject creates a state object.
 func newObject(db *StateDB, address common.Address, data Account, onDirty func(addr common.Address)) *stateObject {
 	if data.Balance == nil {
@@ -120,6 +147,10 @@ func newObject(db *StateDB, address common.Address, data Account, onDirty func(a
 		cachedStorage: make(Storage),
 		dirtyStorage:  make(Storage),
 		onDirty:       onDirty,
+<<<<<<< HEAD
+=======
+		genaroData:    Genaro{},
+>>>>>>> origin/vm
 	}
 }
 
@@ -385,3 +416,94 @@ func (self *stateObject) Nonce() uint64 {
 func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
 }
+<<<<<<< HEAD
+=======
+
+func (self *stateObject)StorageValue(db Database, key string) uint64 {
+	tr := self.getTrie(db)
+	b, err := tr.TryGet([]byte(key))
+	if err != nil {
+		self.setError(err)
+		return 0
+	}
+	return binary.BigEndian.Uint64(b)
+}
+
+func (self *stateObject)StorageValueW(db Database, key string, v uint64) {
+	setKey := []byte(key)
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, v)
+	tr := self.getTrie(db)
+	self.setError(tr.TryUpdate(setKey[:], b))
+}
+
+/*
+func (self *stateObject)StorageGasLimit(db Database, key string) uint64 {
+	tr := self.getTrie(db)
+	b, err := tr.TryGet([]byte(key))
+	if err != nil {
+		self.setError(err)
+		return 0
+	}
+	return binary.BigEndian.Uint64(b)
+}
+
+func (self *stateObject)StorageGasPrice(db Database, key string) *big.Int {
+	tr := self.getTrie(db)
+	b, err := tr.TryGet([]byte(key))
+	if err != nil {
+		self.setError(err)
+		return big.NewInt(0)
+	}
+	ret, _ := new(big.Int).SetString(string(b),10)
+	return ret
+}
+
+func (self *stateObject)DataVersionR(db Database, key string) string {
+	tr := self.getTrie(db)
+	b, err := tr.TryGet([]byte(key))
+	if err != nil {
+		self.setError(err)
+		return ""
+	}
+	return  string(b)
+}
+
+func (self *stateObject)DataVersionW(db Database, key string) string {
+	tr := self.getTrie(db)
+	b, err := tr.TryGet([]byte(key))
+	if err != nil {
+		self.setError(err)
+		return ""
+	}
+	return string(b)
+}
+
+func (self *stateObject)Ssize(db Database, key string) uint64 {
+	tr := self.getTrie(db)
+	b, err := tr.TryGet([]byte(key))
+	if err != nil {
+		self.setError(err)
+		return 0
+	}
+	return binary.BigEndian.Uint64(b)
+}
+
+func (self *stateObject)SentinelHEFT(db Database, key string) uint64 {
+	tr := self.getTrie(db)
+	b, err := tr.TryGet([]byte(key))
+	if err != nil {
+		self.setError(err)
+		return 0
+	}
+	return binary.BigEndian.Uint64(b)
+}
+*/
+
+
+
+
+
+
+
+>>>>>>> origin/vm

@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"bytes"
 )
 
 // Each turn has a Snapshot. EpochNumber means the "electoral materials" period.
