@@ -20,13 +20,13 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"strconv"
 	"math/big"
 	"encoding/binary"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"encoding/json"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -90,8 +90,6 @@ type stateObject struct {
 	touched   bool
 	deleted   bool
 	onDirty   func(addr common.Address) // Callback method to mark a state object newly dirty
-
-	genaroData Genaro
 }
 
 // empty returns whether the account is considered empty.
@@ -110,17 +108,18 @@ type Account struct {
 
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
-type Genaro struct {
-	StorageGas       uint64
-	StorageGasLimit  uint64
-	StorageGasPrice  *big.Int
-
-	DataVersionR     string
-	DataVersionW     string
-
-	// Ssize represents Storage Size
-	Ssize            uint64
-	SentinelHEFT     uint64
+type GenaroDate struct {
+	//StorageGas       uint64
+	//StorageGasLimit  uint64
+	//StorageGasPrice  *big.Int
+	//
+	//DataVersionR     string
+	//DataVersionW     string
+	//
+	//// Ssize represents Storage Size
+	//Ssize            uint64
+	Heft       uint64   `json:"heft"`
+	Stake      uint64   `json:"stake"`
 }
 
 // newObject creates a state object.
@@ -139,7 +138,6 @@ func newObject(db *StateDB, address common.Address, data Account, onDirty func(a
 		cachedStorage: make(Storage),
 		dirtyStorage:  make(Storage),
 		onDirty:       onDirty,
-		genaroData:    Genaro{},
 	}
 }
 
@@ -425,8 +423,18 @@ func (self *stateObject)StorageValueW(db Database, key string, v uint64) {
 }
 
 
-func (self *stateObject)UpdateHeft(heft int){
-	b := []byte(strconv.Itoa(heft))
+func (self *stateObject)UpdateHeft(heft uint64){
+	var genaroData GenaroDate
+	if self.data.CodeHash == nil{
+		genaroData = GenaroDate{
+			Heft:heft,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.Heft = heft
+	}
+
+	b, _ := json.Marshal(genaroData)
 	self.code = nil
 	self.data.CodeHash = b[:]
 	self.dirtyCode = true
@@ -436,17 +444,44 @@ func (self *stateObject)UpdateHeft(heft int){
 	}
 }
 
-func (self *stateObject)GetHeft() (int){
-	heftbyte := self.data.CodeHash
-	if heftbyte != nil {
-		heft, err := strconv.Atoi(string(heftbyte))
-		if err != nil{
-			return 0
-		}
-		return heft
+func (self *stateObject)GetHeft() (uint64){
+	if self.data.CodeHash != nil {
+		var genaroData GenaroDate
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.Heft
 	}
-	// if the CodeHash of the current Account is null, which means the heft of the Account has not been synchronize.
-	// zero value should be returned
+
+	return 0
+}
+
+func (self *stateObject)UpdateStake(stake uint64){
+	var genaroData GenaroDate
+	if self.data.CodeHash == nil{
+		genaroData = GenaroDate{
+			Stake:stake,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.Stake = stake
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)GetStake() (uint64){
+	if self.data.CodeHash != nil {
+		var genaroData GenaroDate
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.Stake
+	}
+
 	return 0
 }
 

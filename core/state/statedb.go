@@ -643,7 +643,7 @@ func (self *StateDB)StorageValueW(a common.Address, key string, value uint64) {
 }
 
 // UpdateHeft updates the heft value of sentinel's nodeid
-func (self *StateDB)UpdateHeft(id common.Address, heft int) bool{
+func (self *StateDB)UpdateHeft(id common.Address, heft uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
 		stateObject.UpdateHeft(heft)
@@ -653,10 +653,29 @@ func (self *StateDB)UpdateHeft(id common.Address, heft int) bool{
 }
 
 // GetHeft gets the heft value of sentinel's nodeid
-func (self *StateDB)GetHeft(id common.Address) (int, error){
+func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
 		return stateObject.GetHeft(), nil
+	}
+	return 0, nil
+}
+
+// UpdateStake updates the stake value of sentinel's nodeid
+func (self *StateDB)UpdateStake(id common.Address, heft uint64) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateStake(heft)
+		return true
+	}
+	return false
+}
+
+// GetStake gets the stake value of sentinel's nodeid
+func (self *StateDB)GetStake(id common.Address) (uint64, error){
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetStake(), nil
 	}
 	return 0, nil
 }

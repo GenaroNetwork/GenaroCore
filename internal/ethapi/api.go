@@ -1167,9 +1167,13 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	}
 
 	//deal special transaction
+	if *args.To == common.SentinelStakeSyncAddress {
+		return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.Sentinel))
+	}
+
 	if args.From == *args.To {
 		switch args.From{
-		case common.SentialHelfSyncAddress:
+		case common.SentinelHelfSyncAddress:
 			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.Sentinel))
 		default:
 			return nil

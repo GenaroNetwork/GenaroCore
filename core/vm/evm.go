@@ -170,9 +170,15 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 
 	//If transactions are special, they are treated separately according to their types.
+
+	if to.Address() == common.SentinelStakeSyncAddress {
+		updateStake(&evm.StateDB, input)
+		return nil, gas, nil
+	}
+
 	if caller.Address() == addr {
 		switch addr {
-		case common.SentialHelfSyncAddress:
+		case common.SentinelHelfSyncAddress:
 			updateHeft(&evm.StateDB, input)
 			return nil, gas, nil
 		}
@@ -211,7 +217,8 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 type sentinel struct {
 	NodeId  string `json:"nodeid"`
-	Heft    int    `json:"heft"`
+	Heft    uint64 `json:"heft"`
+	Stake   uint64 `json:"stake"`
 }
 
 func updateHeft(statedb *StateDB, input []byte) error{
@@ -226,6 +233,22 @@ func updateHeft(statedb *StateDB, input []byte) error{
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft) {
 		return errors.New("update sentinel's heft fail")
+	}
+	return nil
+}
+
+func updateStake(statedb *StateDB, input []byte) error{
+	// 解析sentail数据
+	var s sentinel
+	err := json.Unmarshal(input, &s)
+	if err != nil{
+		return errors.New("update sentinel stake error： the sentinel parameters of the wrong format")
+	}
+
+	adress := common.HexToAddress(s.NodeId)
+	// 根据nodeid更新stake值
+	if !(*statedb).UpdateStake(adress, s.Stake) {
+		return errors.New("update sentinel's stake fail")
 	}
 	return nil
 }
