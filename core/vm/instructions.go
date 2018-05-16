@@ -607,12 +607,7 @@ func opStorageGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory,
 }
 
 func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "sentinelHeft"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
+	// use evm.StateDB.GetHeft() to get the heft value of designation account
 	return nil, nil
 }
 

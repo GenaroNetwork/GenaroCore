@@ -626,8 +626,6 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads())
 	return root, err
 }
-<<<<<<< HEAD
-=======
 
 func (self *StateDB)StorageValue(a common.Address,key string) uint64{
 	stateObject := self.getStateObject(a)
@@ -643,4 +641,22 @@ func (self *StateDB)StorageValueW(a common.Address, key string, value uint64) {
 		stateObject.StorageValueW(self.db, key, value)
 	}
 }
->>>>>>> origin/vm
+
+// UpdateHeft updates the heft value of sentinel's nodeid
+func (self *StateDB)UpdateHeft(id common.Address, heft int) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateHeft(heft)
+		return true
+	}
+	return false
+}
+
+// GetHeft gets the heft value of sentinel's nodeid
+func (self *StateDB)GetHeft(id common.Address) (int, error){
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetHeft(), nil
+	}
+	return 0, nil
+}

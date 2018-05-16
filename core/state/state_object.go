@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strconv"
 	"math/big"
 <<<<<<< HEAD
 =======
@@ -437,69 +438,31 @@ func (self *stateObject)StorageValueW(db Database, key string, v uint64) {
 	self.setError(tr.TryUpdate(setKey[:], b))
 }
 
-/*
-func (self *stateObject)StorageGasLimit(db Database, key string) uint64 {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return 0
+
+func (self *stateObject)UpdateHeft(heft int){
+	b := []byte(strconv.Itoa(heft))
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
 	}
-	return binary.BigEndian.Uint64(b)
 }
 
-func (self *stateObject)StorageGasPrice(db Database, key string) *big.Int {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return big.NewInt(0)
+func (self *stateObject)GetHeft() (int){
+	heftbyte := self.data.CodeHash
+	if heftbyte != nil {
+		heft, err := strconv.Atoi(string(heftbyte))
+		if err != nil{
+			return 0
+		}
+		return heft
 	}
-	ret, _ := new(big.Int).SetString(string(b),10)
-	return ret
+	// if the CodeHash of the current Account is null, which means the heft of the Account has not been synchronize.
+	// zero value should be returned
+	return 0
 }
-
-func (self *stateObject)DataVersionR(db Database, key string) string {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return ""
-	}
-	return  string(b)
-}
-
-func (self *stateObject)DataVersionW(db Database, key string) string {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return ""
-	}
-	return string(b)
-}
-
-func (self *stateObject)Ssize(db Database, key string) uint64 {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return 0
-	}
-	return binary.BigEndian.Uint64(b)
-}
-
-func (self *stateObject)SentinelHEFT(db Database, key string) uint64 {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return 0
-	}
-	return binary.BigEndian.Uint64(b)
-}
-*/
-
 
 
 
