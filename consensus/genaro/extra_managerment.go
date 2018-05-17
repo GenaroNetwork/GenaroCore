@@ -44,3 +44,10 @@ func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Add
 	copy(header.Extra, extraByte)
 	return nil
 }
+
+func CreateCommitteeRankByte(address []common.Address) []byte {
+	extra := new(ExtraData)
+	copy(extra.CommitteeRank, address)
+	extraByte, _ := json.Marshal(extra)
+	return extraByte
+}
