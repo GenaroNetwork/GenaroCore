@@ -666,6 +666,11 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 }
 
 func (self *StateDB)UpdateFileProperties(userid common.Address, filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64) bool {
+	stateObject := self.GetOrNewStateObject(userid)
+	if stateObject != nil {
+		stateObject.UpdateFileProperties(filename, sSzie, sGasPrice, sUsed, sGas)
+		return true
+	}
 	return true
 }
 
