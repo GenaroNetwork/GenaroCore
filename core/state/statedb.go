@@ -679,3 +679,27 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 	}
 	return 0, nil
 }
+
+func (self *StateDB)UpdateFileProperties(userid common.Address, filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64) bool {
+	return true
+}
+
+// GetStorageSize gets the "SSIZE" value of user's file
+func (self *StateDB)GetStorageSize(userid common.Address, filename string)  (uint64, error) {
+	return 0, nil
+}
+
+// GetStorageGasPrice gets the "STORAGEGASPRICE" value of user's file
+func (self *StateDB)GetStorageGasPrice(userid common.Address, filename string)  (uint64, error) {
+	return 0, nil
+}
+
+// GetStorageUsed gets the the "STORAGEGASUSED" value of user's file
+func (self *StateDB)GetStorageGasUsed(userid common.Address, filename string)  (uint64, error) {
+	return 0, nil
+}
+
+// GetStorageGas gets the the "STORAGEGAS" value of user's file
+func (self *StateDB)GetStorageGas(userid common.Address, filename string)  (uint64, error) {
+	return 0, nil
+}
