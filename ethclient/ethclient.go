@@ -394,6 +394,7 @@ func (ec *Client) PendingCodeAt(ctx context.Context, account common.Address) ([]
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_getCode", account, "pending")
 	return result, err
+
 }
 
 // PendingNonceAt returns the account nonce of the given account in the pending state.
