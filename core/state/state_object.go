@@ -505,6 +505,50 @@ func (self *stateObject)UpdateFileProperties(filename string, sSzie uint64, sGas
 	}
 }
 
+func (self *stateObject)getFilePropertie(filename string) *FilePropertie {
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.FielProperties != nil {
+			if fp, ok := genaroData.FielProperties[filename]; ok {
+				return fp
+			}
+		}
+	}
+
+	return nil
+}
+
+func (self *stateObject)GetStorageSize(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.Ssize
+	}
+	return 0
+}
+
+
+func (self *stateObject)GetStorageGasPrice(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.StorageGasPrice
+	}
+	return 0
+}
+
+
+func (self *stateObject)GetStorageGasUsed(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.StorageGasUsed
+	}
+	return 0
+}
+
+func (self *stateObject)GetStorageGas(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.StorageGas
+	}
+	return 0
+}
+
 
 
 
