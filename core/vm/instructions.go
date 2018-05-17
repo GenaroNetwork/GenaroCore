@@ -517,7 +517,7 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(evm.interpreter.intPool.get().Set(evm.StorageGasPrice))
+	//stack.push(evm.interpreter.intPool.get().Set(evm.StorageGasPrice))
 	return nil, nil
 }
 
@@ -561,7 +561,7 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGasUsed))
+	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGasUsed))
 	return nil, nil
 }
 
@@ -660,7 +660,7 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 
 //todo 实现自定义指令对应函数功能
 func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(evm.interpreter.intPool.get().SetUint64(evm.SSize))
+	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.SSize))
 	return nil, nil
 }
 
@@ -672,7 +672,7 @@ func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 // todo 实现自定义指令对应函数功能
 // 获取交易的StorageGas,获取后压入栈中
 func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGas))
+	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGas))
 	return nil, nil
 }
 
