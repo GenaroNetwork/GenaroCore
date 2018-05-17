@@ -63,10 +63,6 @@ type StateDB interface {
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
 
-	StorageValue(common.Address, string) uint64
-
-	StorageValueW(common.Address, string, uint64)
-
 	UpdateHeft(common.Address, uint64) bool
 	GetHeft(common.Address) (uint64, error)
 

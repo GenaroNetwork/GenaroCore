@@ -485,32 +485,14 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opSenc(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "senc"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "dataVerisonRead"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 
 func opDataVerisonWrite(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "dataVerisonWrite"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 

@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"encoding/binary"
+	"encoding/json"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"encoding/json"
+
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -402,24 +402,6 @@ func (self *stateObject) Nonce() uint64 {
 // interface. Interfaces are awesome.
 func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
-}
-
-func (self *stateObject)StorageValue(db Database, key string) uint64 {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return 0
-	}
-	return binary.BigEndian.Uint64(b)
-}
-
-func (self *stateObject)StorageValueW(db Database, key string, v uint64) {
-	setKey := []byte(key)
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, v)
-	tr := self.getTrie(db)
-	self.setError(tr.TryUpdate(setKey[:], b))
 }
 
 
