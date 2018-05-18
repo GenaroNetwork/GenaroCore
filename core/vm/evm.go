@@ -179,7 +179,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	if caller.Address() == addr {
 		switch addr {
 		case common.SentinelHelfSyncAddress:
-			updateHeft(&evm.StateDB, input)
+			dispatchHandler(&evm.StateDB, input)
 			return nil, gas, nil
 		}
 	}
@@ -215,20 +215,54 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	return ret, contract.Gas, err
 }
 
-type sentinel struct {
+type specialTxInput struct {
 	NodeId  string `json:"nodeid"`
+	Type    int `json:"type"`
 	Heft    uint64 `json:"heft"`
 	Stake   uint64 `json:"stake"`
+	Files   []filePropertie `json:"files"`
 }
 
-func updateHeft(statedb *StateDB, input []byte) error{
-	// 解析sentail数据
-	var s sentinel
-	err := json.Unmarshal(input, &s)
+type filePropertie struct {
+	Name             string `name:"name"`
+	StorageGas       uint64	`json:"sgas"`
+	StorageGasUsed   uint64	`json:"sgasused"`
+	StorageGasPrice  uint64 `josn:"sgasprice"`
+	// Ssize represents Storage Size
+	Ssize            uint64 `json:"ssize"`
+}
+
+func dispatchHandler(statedb *StateDB, input []byte) error{
+	var err error
+	// 解析数据
+	var s specialTxInput
+	err = json.Unmarshal(input, &s)
 	if err != nil{
 		return errors.New("update sentinel heft error： the sentinel parameters of the wrong format")
 	}
 
+	switch s.Type {
+	case 0:
+		err = updateHeft(statedb, s)
+	case 1:
+		err = updateStorageProperties(statedb,  s)
+	}
+	return err
+}
+
+func updateStorageProperties(statedb *StateDB,  s specialTxInput) error {
+	adress := common.HexToAddress(s.NodeId)
+
+	for _, f := range s.Files {
+		// 根据nodeid更新heft值
+		if !(*statedb).UpdateFileProperties(adress, f.Name, f.Ssize, f.StorageGasPrice, f.StorageGasUsed, f.StorageGas) {
+			return errors.New("update sentinel's heft fail")
+		}
+	}
+	return nil
+}
+
+func updateHeft(statedb *StateDB, s specialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft) {
@@ -237,9 +271,9 @@ func updateHeft(statedb *StateDB, input []byte) error{
 	return nil
 }
 
-func updateStake(evm *EVM, caller common.Address, input []byte) error{
-	// 解析sentail数据
-	var s sentinel
+func updateStake(evm *EVM, caller common.Address, input []byte) error {
+	// 解析数据
+	var s specialTxInput
 	err := json.Unmarshal(input, &s)
 	if err != nil{
 		return errors.New("update sentinel stake error： the sentinel parameters of the wrong format")
