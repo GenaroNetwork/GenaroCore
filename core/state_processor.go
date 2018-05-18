@@ -60,7 +60,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 		header   = block.Header()
 		allLogs  []*types.Log
 		gp       = new(GasPool).AddGas(block.GasLimit())
-	    sentinelHeft *uint64
+	    sentinelHeft uint64
 	)
 	// Mutate the the block and state according to any hard-fork specs
 	if p.config.DAOForkSupport && p.config.DAOForkBlock != nil && p.config.DAOForkBlock.Cmp(block.Number()) == 0 {
@@ -69,13 +69,17 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	// Iterate over and process the individual transactions
 	for i, tx := range block.Transactions() {
 		statedb.Prepare(tx.Hash(), block.Hash(), i)
-		receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, usedGas, cfg, sentinelHeft)
+		receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, usedGas, cfg, &sentinelHeft)
 		if err != nil {
 			return nil, nil, 0, err
 		}
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, receipt.Logs...)
 	}
+
+	//TODO if need to vertify the sentinelHeft
+	sentinelHeft = 0 //reset 0
+
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
 	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts)
 

@@ -338,7 +338,7 @@ func (self *worker) wait(sentinelHeft *uint64) {
 			self.unconfirmed.Insert(block.NumberU64(), block.Hash())
 
 			if mustCommitNewWork {
-				self.commitNewWork()
+				self.commitNewWork(sentinelHeft)
 			}
 		}
 	}
@@ -485,6 +485,11 @@ func (self *worker) commitNewWork( sentinelHeft *uint64) {
 		log.Error("Failed to finalize block for sealing", "err", err)
 		return
 	}
+
+	//TODO reflush blcok's extra[]
+
+	*sentinelHeft = 0
+
 	// We only care about logging if we're actually mining.
 	if atomic.LoadInt32(&self.mining) == 1 {
 		log.Info("Commit new mining work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))

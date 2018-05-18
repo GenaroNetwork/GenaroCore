@@ -578,7 +578,7 @@ func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, 
 }
 
 func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	// use evm.StateDB.GetHeft() to get the heft value of designation account
+	stack.push(evm.interpreter.intPool.get().SetUint64(evm.SentinelHeft))
 	return nil, nil
 }
 
