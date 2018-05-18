@@ -24,30 +24,38 @@ func ResetHeaderSignature(header *types.Header) {
 	extraData := UnmarshalToExtra(header)
 	extraData.Signature = nil
 	extraByte, _ := json.Marshal(extraData)
-	header.Extra = extraByte
+
+	header.Extra = make([]byte, len(extraByte))
+	copy(header.Extra, extraByte)
 }
 
 func SetHeaderSignature(header *types.Header, signature []byte) {
 	extraData := UnmarshalToExtra(header)
+	extraData.Signature = make([]byte, len(signature))
 	copy(extraData.Signature, signature)
 	extraByte, _ := json.Marshal(extraData)
+	header.Extra = make([]byte, len(extraByte))
 	copy(header.Extra, extraByte)
 }
 
 func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Address) error {
 	extraData := UnmarshalToExtra(header)
+	extraData.CommitteeRank = make([]common.Address, len(committeeRank))
 	copy(extraData.CommitteeRank, committeeRank)
 	extraByte, err := json.Marshal(extraData)
 	if err != nil {
 		return err
 	}
+	header.Extra = make([]byte, len(extraByte))
 	copy(header.Extra, extraByte)
 	return nil
 }
 
 func CreateCommitteeRankByte(address []common.Address) []byte {
 	extra := new(ExtraData)
+	extra.CommitteeRank = make([]common.Address, len(address))
 	copy(extra.CommitteeRank, address)
 	extraByte, _ := json.Marshal(extra)
 	return extraByte
+
 }
