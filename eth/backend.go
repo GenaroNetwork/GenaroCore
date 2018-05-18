@@ -48,6 +48,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 type LesServer interface {
@@ -216,6 +217,9 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *ethash.Config, chai
 	if chainConfig.Clique != nil {
 		return clique.New(chainConfig.Clique, db)
 	}
+	if chainConfig.Genaro != nil {
+		return genaro.New(chainConfig.Genaro, db)
+	}
 	// Otherwise assume proof-of-work
 	switch {
 	case config.PowMode == ethash.ModeFake:
@@ -348,6 +352,15 @@ func (s *Ethereum) StartMining(local bool) error {
 		}
 		clique.Authorize(eb, wallet.SignHash)
 	}
+	if genaro, ok := s.engine.(*genaro.Genaro); ok {
+		wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+		if wallet == nil || err != nil {
+			log.Error("Etherbase account unavailable locally", "err", err)
+			return fmt.Errorf("signer missing: %v", err)
+		}
+		genaro.Authorize(eb, wallet.SignHash)
+	}
+
 	if local {
 		// If local (CPU) mining is started, we can disable the transaction rejection
 		// mechanism introduced to speed sync times. CPU mining on mainnet is ludicrous

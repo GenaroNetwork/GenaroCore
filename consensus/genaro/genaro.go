@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/golang-lru"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
+	"github.com/GenaroNetwork/Genaro-Core/rpc"
 )
 
 const (
@@ -101,12 +102,12 @@ func ecrecover(header *types.Header) (common.Address, error) {
 }
 
 type Genaro struct {
-	config  *params.GenaroConfig //genaro config
-	db      ethdb.Database       // Database to store and retrieve snapshot checkpoints
-	recents *lru.ARCCache        // snapshot cache
-	signer  common.Address       // Ethereum address of the signing key
-	lock    sync.RWMutex         // Protects the signer fields
-	signFn  SignerFn             //sign function
+	config     *params.GenaroConfig // genaro config
+	db         ethdb.Database       // Database to store and retrieve snapshot checkpoints
+	recents    *lru.ARCCache        // snapshot cache
+	signer     common.Address       // Ethereum address of the signing key
+	lock       sync.RWMutex         // Protects the signer fields
+	signFn     SignerFn             // sign function
 }
 
 // New creates a Genaro consensus engine
@@ -418,4 +419,14 @@ func (g *Genaro) VerifyHeaders(chain consensus.ChainReader, headers []*types.Hea
 		}
 	}()
 	return abort, results
+}
+
+// APIs implements consensus.Engine, returning the user facing RPC API
+func (g *Genaro) APIs(chain consensus.ChainReader) []rpc.API {
+	return []rpc.API{{
+		Namespace: "genaro",
+		Version:   "1.0",
+		Service:   &API{chain: chain, genaro: g},
+		Public:    false,
+	}}
 }
