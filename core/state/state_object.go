@@ -111,6 +111,8 @@ type Account struct {
 type GenaroData struct {
 	Heft       		uint64   					`json:"heft"`
 	Stake      		uint64   					`json:"stake"`
+	HeftLog			NumLogs						`json:"heftlog"`
+	StakeLog		NumLogs						`json:"stakelog"`
 	FielProperties  map[string]*FilePropertie	`json:"fileP"`
 }
 
