@@ -22,7 +22,7 @@ import (
 	"time"
 	"encoding/json"
 	"errors"
-
+	"container/list"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
@@ -219,6 +219,8 @@ type sentinel struct {
 	NodeId  string `json:"nodeid"`
 	Heft    uint64 `json:"heft"`
 	Stake   uint64 `json:"stake"`
+
+	HeftLog list.List
 }
 
 func updateHeft(statedb *StateDB, input []byte) error{
