@@ -485,32 +485,14 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opSenc(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "senc"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "dataVerisonRead"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 
 func opDataVerisonWrite(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	var storageSize uint64 = 3000
-	key := "dataVerisonWrite"
-
-	evm.StateDB.StorageValue(contract.Address(), key)
-
-	stack.push(evm.interpreter.intPool.get().SetUint64(storageSize))
 	return nil, nil
 }
 
@@ -534,10 +516,10 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 }
 
 //todo 实现自定义指令对应函数功能
-//func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-//	stack.push(evm.interpreter.intPool.get().Set(evm.StorageGasPrice))
-//	return nil, nil
-//}
+func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	//stack.push(evm.interpreter.intPool.get().Set(evm.StorageGasPrice))
+	return nil, nil
+}
 
 func opBlockhash(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	num := stack.pop()
@@ -578,10 +560,10 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 }
 
 //todo 实现自定义指令对应函数功能
-//func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-//	stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGasUsed))
-//	return nil, nil
-//}
+func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGasUsed))
+	return nil, nil
+}
 
 func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	// use evm.StateDB.GetHeft() to get the heft value of designation account
@@ -677,10 +659,10 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 }
 
 //todo 实现自定义指令对应函数功能
-//func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-//	stack.push(evm.interpreter.intPool.get().SetUint64(evm.SSize))
-//	return nil, nil
-//}
+func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.SSize))
+	return nil, nil
+}
 
 func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(evm.interpreter.intPool.get().SetUint64(contract.Gas))
@@ -689,10 +671,10 @@ func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 
 // todo 实现自定义指令对应函数功能
 // 获取交易的StorageGas,获取后压入栈中
-//func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-//	stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGas))
-//	return nil, nil
-//}
+func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGas))
+	return nil, nil
+}
 
 func opCreate(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var (

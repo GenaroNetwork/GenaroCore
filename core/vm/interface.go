@@ -63,16 +63,18 @@ type StateDB interface {
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
 
-	StorageValue(common.Address, string) uint64
-
-	StorageValueW(common.Address, string, uint64)
-
-
 	UpdateHeft(common.Address, uint64) bool
 	GetHeft(common.Address) (uint64, error)
 
 	UpdateStake(common.Address, uint64) bool
 	GetStake(common.Address) (uint64, error)
+
+	UpdateFileProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
+	GetStorageSize(common.Address, string)  (uint64, error)
+	GetStorageGasPrice(common.Address, string)  (uint64, error)
+	GetStorageGasUsed(common.Address, string)  (uint64, error)
+	GetStorageGas(common.Address, string)  (uint64, error)
+
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
