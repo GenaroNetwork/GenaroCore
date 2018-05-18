@@ -21,11 +21,12 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"encoding/binary"
+	"encoding/json"
+
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"encoding/json"
+
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -108,17 +109,17 @@ type Account struct {
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
 type GenaroData struct {
-	//StorageGas       uint64
-	//StorageGasLimit  uint64
-	//StorageGasPrice  *big.Int
-	//
-	//DataVersionR     string
-	//DataVersionW     string
-	//
-	//// Ssize represents Storage Size
-	//Ssize            uint64
-	Heft       uint64   `json:"heft"`
-	Stake      uint64   `json:"stake"`
+	Heft       		uint64   					`json:"heft"`
+	Stake      		uint64   					`json:"stake"`
+	FielProperties  map[string]*FilePropertie	`json:"fileP"`
+}
+
+type FilePropertie struct {
+	StorageGas       uint64	`json:"sgas"`
+	StorageGasUsed  uint64	`json:"sGasUsed"`
+	StorageGasPrice  uint64 `josn:"sGasPrice"`
+	// Ssize represents Storage Size
+	Ssize            uint64 `json:"sSize"`
 }
 
 // newObject creates a state object.
@@ -403,24 +404,6 @@ func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
 }
 
-func (self *stateObject)StorageValue(db Database, key string) uint64 {
-	tr := self.getTrie(db)
-	b, err := tr.TryGet([]byte(key))
-	if err != nil {
-		self.setError(err)
-		return 0
-	}
-	return binary.BigEndian.Uint64(b)
-}
-
-func (self *stateObject)StorageValueW(db Database, key string, v uint64) {
-	setKey := []byte(key)
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, v)
-	tr := self.getTrie(db)
-	self.setError(tr.TryUpdate(setKey[:], b))
-}
-
 
 func (self *stateObject)UpdateHeft(heft uint64){
 	var genaroData GenaroData
@@ -483,3 +466,91 @@ func (self *stateObject)GetStake() (uint64){
 
 	return 0
 }
+
+func (self *stateObject)UpdateFileProperties(filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64){
+	fpm := make(map[string]*FilePropertie)
+	fp := new(FilePropertie)
+	if sSzie != 0 {fp.Ssize = sSzie}
+	if sUsed != 0 {fp.StorageGasUsed = sUsed}
+	if sGas != 0 {fp.StorageGas = sGas}
+	if sGasPrice != 0 {fp.StorageGasPrice = sGasPrice}
+	fpm[filename] = fp
+
+
+	var genaroData GenaroData
+	if self.data.CodeHash == nil{
+		genaroData = GenaroData{
+			FielProperties: fpm,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.FielProperties == nil {
+			genaroData.FielProperties = fpm
+		}else {
+			if _, ok := genaroData.FielProperties[filename]; !ok {
+				genaroData.FielProperties[filename] = fp
+			}else {
+				//todo：if those properties for this file have existed ，how to deal with it
+			}
+		}
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)getFilePropertie(filename string) *FilePropertie {
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.FielProperties != nil {
+			if fp, ok := genaroData.FielProperties[filename]; ok {
+				return fp
+			}
+		}
+	}
+
+	return nil
+}
+
+func (self *stateObject)GetStorageSize(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.Ssize
+	}
+	return 0
+}
+
+
+func (self *stateObject)GetStorageGasPrice(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.StorageGasPrice
+	}
+	return 0
+}
+
+
+func (self *stateObject)GetStorageGasUsed(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.StorageGasUsed
+	}
+	return 0
+}
+
+func (self *stateObject)GetStorageGas(filename string) uint64 {
+	if fp:= self.getFilePropertie(filename); fp != nil{
+		return fp.StorageGas
+	}
+	return 0
+}
+
+
+
+
+
+

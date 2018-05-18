@@ -627,21 +627,6 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	return root, err
 }
 
-func (self *StateDB)StorageValue(a common.Address,key string) uint64{
-	stateObject := self.getStateObject(a)
-	if stateObject != nil {
-		return stateObject.StorageValue(self.db, key)
-	}
-	return uint64(0)
-}
-
-func (self *StateDB)StorageValueW(a common.Address, key string, value uint64) {
-	stateObject := self.getStateObject(a)
-	if stateObject != nil {
-		stateObject.StorageValueW(self.db, key, value)
-	}
-}
-
 // UpdateHeft updates the heft value of sentinel's nodeid
 func (self *StateDB)UpdateHeft(id common.Address, heft uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
@@ -676,6 +661,51 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
 		return stateObject.GetStake(), nil
+	}
+	return 0, nil
+}
+
+func (self *StateDB)UpdateFileProperties(userid common.Address, filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64) bool {
+	stateObject := self.GetOrNewStateObject(userid)
+	if stateObject != nil {
+		stateObject.UpdateFileProperties(filename, sSzie, sGasPrice, sUsed, sGas)
+		return true
+	}
+	return true
+}
+
+// GetStorageSize gets the "SSIZE" value of user's file
+func (self *StateDB)GetStorageSize(userid common.Address, filename string)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageSize(filename), nil
+	}
+	return 0, nil
+}
+
+// GetStorageGasPrice gets the "STORAGEGASPRICE" value of user's file
+func (self *StateDB)GetStorageGasPrice(userid common.Address, filename string)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageGasPrice(filename), nil
+	}
+	return 0, nil
+}
+
+// GetStorageUsed gets the the "STORAGEGASUSED" value of user's file
+func (self *StateDB)GetStorageGasUsed(userid common.Address, filename string)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageGasUsed(filename), nil
+	}
+	return 0, nil
+}
+
+// GetStorageGas gets the the "STORAGEGAS" value of user's file
+func (self *StateDB)GetStorageGas(userid common.Address, filename string)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageGas(filename), nil
 	}
 	return 0, nil
 }
