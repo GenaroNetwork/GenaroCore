@@ -517,7 +517,11 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//stack.push(evm.interpreter.intPool.get().Set(evm.StorageGasPrice))
+	address,fileName := stack.pop(),stack.pop()
+	storageGasPrice,err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address),string(fileName.Bytes()))
+	if err != nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasPrice))
+	}
 	return nil, nil
 }
 
@@ -561,7 +565,11 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGasUsed))
+	address,fileName := stack.pop(),stack.pop()
+	storageGasUsed,err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address),string(fileName.Bytes()))
+	if err != nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasUsed))
+	}
 	return nil, nil
 }
 
@@ -660,7 +668,11 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 
 //todo 实现自定义指令对应函数功能
 func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.SSize))
+	address,fileName := stack.pop(),stack.pop()
+	sSize,err := evm.StateDB.GetStorageSize(common.BigToAddress(address),string(fileName.Bytes()))
+	if err != nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(sSize))
+	}
 	return nil, nil
 }
 
@@ -672,7 +684,11 @@ func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 // todo 实现自定义指令对应函数功能
 // 获取交易的StorageGas,获取后压入栈中
 func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//stack.push(evm.interpreter.intPool.get().SetUint64(evm.StorageGas))
+	address,fileName := stack.pop(),stack.pop()
+	storageGas,err := evm.StateDB.GetStorageGas(common.BigToAddress(address),string(fileName.Bytes()))
+	if err != nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
+	}
 	return nil, nil
 }
 
@@ -888,6 +904,8 @@ func makePush(size uint64, pushByteSize int) executionFunc {
 
 		integer := evm.interpreter.intPool.get()
 		stack.push(integer.SetBytes(common.RightPadBytes(contract.Code[startMin:endMin], pushByteSize)))
+
+
 
 		*pc += size
 		return nil, nil
