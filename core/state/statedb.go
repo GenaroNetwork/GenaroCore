@@ -628,10 +628,10 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 }
 
 // UpdateHeft updates the heft value of sentinel's nodeid
-func (self *StateDB)UpdateHeft(id common.Address, heft uint64) bool{
+func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		stateObject.UpdateHeft(heft)
+		stateObject.UpdateHeft(heft, blockNumber)
 		return true
 	}
 	return false
@@ -646,11 +646,27 @@ func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	return 0, nil
 }
 
+func (self *StateDB)GetHeftLog(id common.Address) NumLogs{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetHeftLog()
+	}
+	return nil
+}
+
+func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetHeftRangeDiff(blockNumStart,blockNumEnd)
+	}
+	return 0
+}
+
 // UpdateStake updates the stake value of sentinel's nodeid
-func (self *StateDB)UpdateStake(id common.Address, heft uint64) bool{
+func (self *StateDB)UpdateStake(id common.Address, stake uint64, blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		stateObject.UpdateStake(heft)
+		stateObject.UpdateStake(stake,blockNumber)
 		return true
 	}
 	return false
@@ -663,6 +679,55 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 		return stateObject.GetStake(), nil
 	}
 	return 0, nil
+}
+
+func (self *StateDB)GetStakeLog(id common.Address) NumLogs{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetStakeLog()
+	}
+	return nil
+}
+
+func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetStakeRangeDiff(blockNumStart,blockNumEnd)
+	}
+	return 0
+}
+
+func (self *StateDB)AddCandidate(candidate common.Address) {
+	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		stateObject.AddCandidate(candidate)
+		return
+	}
+	return
+}
+
+func (self *StateDB)GetCandidates() Candidates{
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		return stateObject.GetCandidates()
+	}
+	return nil
+}
+
+// get CandidateInfo in given range
+func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		candidates := stateObject.GetCandidates()
+		CandidateInfoArray := make([]CandidateInfo,len(candidates))
+		for id,candidate := range candidates {
+			CandidateInfoArray[id].Signer = candidate
+			CandidateInfoArray[id].Heft = stateObject.GetHeftRangeDiff(blockNumStart,blockNumEnd)
+			CandidateInfoArray[id].Stake = stateObject.GetStakeRangeDiff(blockNumStart,blockNumEnd)
+		}
+		return CandidateInfoArray
+	}
+	return nil
 }
 
 func (self *StateDB)UpdateFileProperties(userid common.Address, filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64) bool {

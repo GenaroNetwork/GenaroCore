@@ -116,6 +116,14 @@ type GenaroData struct {
 	FielProperties  map[string]*FilePropertie	`json:"fileP"`
 }
 
+type Candidates []common.Address
+
+type CandidateInfo struct {
+	Signer       common.Address // peer address
+	Heft uint64         // the sentinel of the peer
+	Stake        uint64         // the stake of the peer
+}
+
 type FilePropertie struct {
 	StorageGas       uint64	`json:"sgas"`
 	StorageGasUsed  uint64	`json:"sGasUsed"`
@@ -406,8 +414,8 @@ func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
 }
 
-
-func (self *stateObject)UpdateHeft(heft uint64){
+// update heft and add heft log
+func (self *stateObject)UpdateHeft(heft uint64, blockNumber uint64){
 	var genaroData GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = GenaroData{
@@ -417,6 +425,13 @@ func (self *stateObject)UpdateHeft(heft uint64){
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Heft = heft
 	}
+	if genaroData.HeftLog == nil {
+		genaroData.HeftLog = *new(NumLogs)
+	}
+	var newLog NumLog
+	newLog.Num = heft
+	newLog.BlockNum = blockNumber
+	genaroData.HeftLog.add(newLog)
 
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
@@ -438,7 +453,28 @@ func (self *stateObject)GetHeft() (uint64){
 	return 0
 }
 
-func (self *stateObject)UpdateStake(stake uint64){
+func (self *stateObject)GetHeftLog() (NumLogs){
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.HeftLog
+	}
+
+	return nil
+}
+
+func (self *stateObject)GetHeftRangeDiff(blockNumStart uint64, blockNumEnd uint64) (uint64){
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.HeftLog.GetRangeDiff(blockNumStart,blockNumEnd)
+	}
+
+	return 0
+}
+
+// update stake and add stake log
+func (self *stateObject)UpdateStake(stake uint64, blockNumber uint64){
 	var genaroData GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = GenaroData{
@@ -448,6 +484,13 @@ func (self *stateObject)UpdateStake(stake uint64){
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Stake += stake
 	}
+	if genaroData.StakeLog == nil {
+		genaroData.StakeLog = *new(NumLogs)
+	}
+	var newLog NumLog
+	newLog.Num = stake
+	newLog.BlockNum = blockNumber
+	genaroData.StakeLog.add(newLog)
 
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
@@ -468,6 +511,56 @@ func (self *stateObject)GetStake() (uint64){
 
 	return 0
 }
+
+func (self *stateObject)GetStakeLog() (NumLogs){
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.StakeLog
+	}
+
+	return nil
+}
+
+func (self *stateObject)GetStakeRangeDiff(blockNumStart uint64, blockNumEnd uint64) (uint64){
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.StakeLog.GetRangeDiff(blockNumStart,blockNumEnd)
+	}
+
+	return 0
+}
+
+func (self *stateObject) AddCandidate(candidate common.Address) {
+	var candidates Candidates
+	if self.data.CodeHash == nil{
+		candidates = *new(Candidates)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &candidates)
+		candidates = append(candidates,candidate)
+	}
+
+	b, _ := json.Marshal(candidates)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)GetCandidates() (Candidates){
+	if self.data.CodeHash != nil {
+		var candidates Candidates
+		json.Unmarshal(self.data.CodeHash, &candidates)
+		return candidates
+	}
+	return nil
+}
+
+
 
 func (self *stateObject)UpdateFileProperties(filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64){
 	fpm := make(map[string]*FilePropertie)

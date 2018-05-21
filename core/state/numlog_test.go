@@ -3,6 +3,7 @@ import(
 	"math/rand"
 	"testing"
 	"time"
+	"encoding/json"
 )
 
 
@@ -69,4 +70,39 @@ func TestFindLast(t *testing.T) {
 	//t.Log(time.Since(start))
 	t.Log(time.Now())
 	t.Log(id,log)
+}
+
+func TestGetRangeDiff(t *testing.T) {
+	logs := new(NumLogs)
+	for i:=0;i<1000;i++{
+		t.Log(i)
+		log:=GenNumLog ()
+		t.Log(log)
+		logs.add(log)
+	}
+	diff := logs.GetRangeDiff(550,3300)
+	t.Log(diff)
+}
+
+func TestGenaroData(t *testing.T){
+	data := new(GenaroData)
+	data.Stake = 10000
+	data.Heft = 10000
+	logs := new(NumLogs)
+	for i:=0;i<1000;i++{
+		//t.Log(i)
+		log:=GenNumLog ()
+		//t.Log(log)
+		logs.add(log)
+	}
+	data.HeftLog = *logs
+	data.StakeLog = *logs
+
+	b,_ := json.Marshal(data)
+	t.Log(b)
+	var data2 GenaroData
+	json.Unmarshal(b, &data2)
+
+	t.Log(data2.Stake)
+	t.Log(data2.StakeLog.GetRangeDiff(200,2000))
 }

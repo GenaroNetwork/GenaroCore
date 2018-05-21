@@ -179,7 +179,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	if caller.Address() == addr {
 		switch addr {
 		case common.SentinelHelfSyncAddress:
-			updateHeft(&evm.StateDB, input)
+			updateHeft(&evm.StateDB, input, evm.BlockNumber.Uint64())
 			return nil, gas, nil
 		}
 	}
@@ -223,7 +223,7 @@ type sentinel struct {
 	HeftLog list.List
 }
 
-func updateHeft(statedb *StateDB, input []byte) error{
+func updateHeft(statedb *StateDB, input []byte, blockNumber uint64) error{
 	// 解析sentail数据
 	var s sentinel
 	err := json.Unmarshal(input, &s)
@@ -233,7 +233,7 @@ func updateHeft(statedb *StateDB, input []byte) error{
 
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
-	if !(*statedb).UpdateHeft(adress, s.Heft) {
+	if !(*statedb).UpdateHeft(adress, s.Heft, blockNumber) {
 		return errors.New("update sentinel's heft fail")
 	}
 	return nil
@@ -257,9 +257,11 @@ func updateStake(evm *EVM, caller common.Address, input []byte) error{
 
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新stake值
-	if !(*evm).StateDB.UpdateStake(adress, s.Stake) {
+	if !(*evm).StateDB.UpdateStake(adress, s.Stake, evm.BlockNumber.Uint64()) {
 		return errors.New("update sentinel's stake fail")
 	}
+	// 加入候选名单
+	(*evm).StateDB.AddCandidate(adress)
 	(*evm).StateDB.SubBalance(caller, amount)
 	return nil
 }

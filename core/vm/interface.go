@@ -21,6 +21,7 @@ import (
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 // StateDB is an EVM database for full state querying.
@@ -63,11 +64,19 @@ type StateDB interface {
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
 
-	UpdateHeft(common.Address, uint64) bool
+	UpdateHeft(common.Address, uint64, uint64) bool
 	GetHeft(common.Address) (uint64, error)
+	GetHeftLog(common.Address) state.NumLogs
+	GetHeftRangeDiff(common.Address, uint64, uint64)
 
-	UpdateStake(common.Address, uint64) bool
+	UpdateStake(common.Address, uint64, uint64) bool
 	GetStake(common.Address) (uint64, error)
+	GetStakeLog(common.Address) state.NumLogs
+	GetStakeRangeDiff(common.Address, uint64, uint64)
+
+	AddCandidate(common.Address)
+	GetCandidates() state.Candidates
+	GetCandidatesInfoInRange(uint64, uint64) []state.CandidateInfo
 
 	UpdateFileProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
 	GetStorageSize(common.Address, string)  (uint64, error)
