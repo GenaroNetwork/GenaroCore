@@ -646,6 +646,7 @@ func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	return 0, nil
 }
 
+// get heft log by sentinel's nodeid
 func (self *StateDB)GetHeftLog(id common.Address) NumLogs{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -654,6 +655,7 @@ func (self *StateDB)GetHeftLog(id common.Address) NumLogs{
 	return nil
 }
 
+// get heft change in (blockNumStart,blockNumEnd)
 func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -681,6 +683,7 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 	return 0, nil
 }
 
+// get stake log by sentinel's nodeid
 func (self *StateDB)GetStakeLog(id common.Address) NumLogs{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -689,6 +692,7 @@ func (self *StateDB)GetStakeLog(id common.Address) NumLogs{
 	return nil
 }
 
+// get stake change in (blockNumStart,blockNumEnd)
 func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -697,6 +701,7 @@ func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, b
 	return 0
 }
 
+// add a new candidate
 func (self *StateDB)AddCandidate(candidate common.Address) {
 	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
@@ -706,6 +711,7 @@ func (self *StateDB)AddCandidate(candidate common.Address) {
 	return
 }
 
+// get all Candidates
 func (self *StateDB)GetCandidates() Candidates{
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {

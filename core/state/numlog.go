@@ -106,7 +106,7 @@ func (logs NumLogs) GetRangeDiff(blockNumStart uint64, blockNumEnd uint64) uint6
 	logStart,idStart := logs.GetFirstAfterBlockNum(blockNumStart,0,lenth)
 	logEnd,_ := logs.GetLastBeforBlockNum(blockNumEnd,idStart,lenth)
 	var diff uint64
-	if logStart != nil && logEnd != nil {
+	if logStart != nil && logEnd != nil && logEnd.Num>logStart.Num{
 		diff = logEnd.Num - logStart.Num
 	}
 	return diff
