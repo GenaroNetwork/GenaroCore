@@ -519,8 +519,11 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	address,fileName := stack.pop(),stack.pop()
 	storageGasPrice,err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address),string(fileName.Bytes()))
-	if err != nil {
+	if err == nil {
+
 		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasPrice))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
 	}
 	return nil, nil
 }
@@ -567,8 +570,10 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	address,fileName := stack.pop(),stack.pop()
 	storageGasUsed,err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address),string(fileName.Bytes()))
-	if err != nil {
+	if err == nil {
 		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasUsed))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
 	}
 	return nil, nil
 }
@@ -670,8 +675,10 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	address,fileName := stack.pop(),stack.pop()
 	sSize,err := evm.StateDB.GetStorageSize(common.BigToAddress(address),string(fileName.Bytes()))
-	if err != nil {
+	if err == nil {
 		stack.push(evm.interpreter.intPool.get().SetUint64(sSize))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
 	}
 	return nil, nil
 }
@@ -686,8 +693,10 @@ func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	address,fileName := stack.pop(),stack.pop()
 	storageGas,err := evm.StateDB.GetStorageGas(common.BigToAddress(address),string(fileName.Bytes()))
-	if err != nil {
+	if err == nil {
 		stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
 	}
 	return nil, nil
 }
