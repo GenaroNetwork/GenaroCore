@@ -702,13 +702,13 @@ func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, b
 }
 
 // add a new candidate
-func (self *StateDB)AddCandidate(candidate common.Address) {
+func (self *StateDB)AddCandidate(candidate common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		stateObject.AddCandidate(candidate)
-		return
+		return true
 	}
-	return
+	return false
 }
 
 // get all Candidates

@@ -67,14 +67,14 @@ type StateDB interface {
 	UpdateHeft(common.Address, uint64, uint64) bool
 	GetHeft(common.Address) (uint64, error)
 	GetHeftLog(common.Address) state.NumLogs
-	GetHeftRangeDiff(common.Address, uint64, uint64)
+	GetHeftRangeDiff(common.Address, uint64, uint64) uint64
 
 	UpdateStake(common.Address, uint64, uint64) bool
 	GetStake(common.Address) (uint64, error)
 	GetStakeLog(common.Address) state.NumLogs
-	GetStakeRangeDiff(common.Address, uint64, uint64)
+	GetStakeRangeDiff(common.Address, uint64, uint64) uint64
 
-	AddCandidate(common.Address)
+	AddCandidate(common.Address) bool
 	GetCandidates() state.Candidates
 	GetCandidatesInfoInRange(uint64, uint64) []state.CandidateInfo
 

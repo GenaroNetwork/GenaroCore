@@ -261,7 +261,9 @@ func updateStake(evm *EVM, caller common.Address, input []byte) error{
 		return errors.New("update sentinel's stake fail")
 	}
 	// 加入候选名单
-	(*evm).StateDB.AddCandidate(adress)
+	if !(*evm).StateDB.AddCandidate(adress) {
+		return errors.New("add candidate fail")
+	}
 	(*evm).StateDB.SubBalance(caller, amount)
 	return nil
 }
