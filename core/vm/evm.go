@@ -139,7 +139,7 @@ func (evm *EVM) Cancel() {
 // parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
-func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
+func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int, sentinelHeft *uint64) (ret []byte, leftOverGas uint64, err error) {
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -179,7 +179,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	if caller.Address() == addr {
 		switch addr {
 		case common.SentinelHelfSyncAddress:
-			dispatchHandler(&evm.StateDB, input)
+			dispatchHandler(&evm.StateDB, input,sentinelHeft)
 			return nil, gas, nil
 		}
 	}
@@ -227,12 +227,12 @@ type filePropertie struct {
 	Name             string `name:"name"`
 	StorageGas       uint64	`json:"sgas"`
 	StorageGasUsed   uint64	`json:"sgasused"`
-	StorageGasPrice  uint64 `josn:"sgasprice"`
+	StorageGasPrice  uint64 `json:"sgasprice"`
 	// Ssize represents Storage Size
 	Ssize            uint64 `json:"ssize"`
 }
 
-func dispatchHandler(statedb *StateDB, input []byte) error{
+func dispatchHandler(statedb *StateDB, input []byte, sentinelHeft *uint64) error{
 	var err error
 	// 解析数据
 	var s specialTxInput
@@ -244,6 +244,7 @@ func dispatchHandler(statedb *StateDB, input []byte) error{
 	switch s.Type {
 	case 0:
 		err = updateHeft(statedb, s)
+		*sentinelHeft = *sentinelHeft + 1
 	case 1:
 		err = updateStorageProperties(statedb,  s)
 	}

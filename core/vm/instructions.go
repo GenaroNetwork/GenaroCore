@@ -520,7 +520,6 @@ func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory,
 	address,fileName := stack.pop(),stack.pop()
 	storageGasPrice,err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address),string(fileName.Bytes()))
 	if err == nil {
-
 		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasPrice))
 	}else{
 		stack.push(evm.interpreter.intPool.getZero())
