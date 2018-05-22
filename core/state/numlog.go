@@ -40,9 +40,9 @@ func (logs NumLogs) GetFirstAfterBlockNum(blockNum uint64, startId,endId uint64)
 		return nil,0
 	}
 
-	if blockNum > logs[endId].BlockNum {
-		return nil,0
-	}
+	//if blockNum > logs[endId].BlockNum {
+	//	return nil,0
+	//}
 	return  logs.getFirstAfterBlockNum(blockNum,startId,endId)
 }
 
@@ -74,9 +74,9 @@ func (logs NumLogs) GetLastBeforBlockNum(blockNum uint64, startId,endId uint64) 
 		return nil,0
 	}
 
-	if blockNum > logs[endId].BlockNum {
-		return nil,0
-	}
+	//if blockNum > logs[endId].BlockNum {
+	//	return nil,0
+	//}
 	return  logs.getLastBeforBlockNum(blockNum,startId,endId)
 }
 

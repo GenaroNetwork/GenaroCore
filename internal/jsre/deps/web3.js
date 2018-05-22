@@ -5283,11 +5283,27 @@ var methods = function () {
         outputFormatter: formatters.outputBigNumberFormatter
     });
 
+    var getStakeRangeDiff = new Method({
+        name: 'getStakeRangeDiff',
+        call: 'eth_getStakeRangeDiff',
+        params: 4,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
     var getHeft = new Method({
         name: 'getHeft',
         call: 'eth_getHeft',
         params: 2,
         inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
+    var getHeftRangeDiff = new Method({
+        name: 'getHeftRangeDiff',
+        call: 'eth_getHeftRangeDiff',
+        params: 4,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter],
         outputFormatter: formatters.outputBigNumberFormatter
     });
 
@@ -5472,7 +5488,9 @@ var methods = function () {
         submitWork,
         getWork,
         getStake,
-        getHeft
+        getStakeRangeDiff,
+        getHeft,
+        getHeftRangeDiff
     ];
 };
 

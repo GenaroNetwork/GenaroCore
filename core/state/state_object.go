@@ -488,7 +488,7 @@ func (self *stateObject)UpdateStake(stake uint64, blockNumber uint64){
 		genaroData.StakeLog = *new(NumLogs)
 	}
 	var newLog NumLog
-	newLog.Num = stake
+	newLog.Num = genaroData.Stake
 	newLog.BlockNum = blockNumber
 	genaroData.StakeLog.add(newLog)
 
