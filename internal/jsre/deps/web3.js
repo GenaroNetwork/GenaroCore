@@ -5283,6 +5283,14 @@ var methods = function () {
         outputFormatter: formatters.outputBigNumberFormatter
     });
 
+    var getHeft = new Method({
+        name: 'getHeft',
+        call: 'eth_getHeft',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
     var getStorageAt = new Method({
         name: 'getStorageAt',
         call: 'eth_getStorageAt',
@@ -5463,7 +5471,8 @@ var methods = function () {
         compileSerpent,
         submitWork,
         getWork,
-        getStake
+        getStake,
+        getHeft
     ];
 };
 
