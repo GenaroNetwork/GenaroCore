@@ -39,6 +39,7 @@ type (
 	// GetHashFunc returns the nth block hash in the blockchain
 	// and is used by the BLOCKHASH EVM op code.
 	GetHashFunc func(uint64) common.Hash
+	GetSentinelFunc func(uint64) uint64
 )
 
 // run runs the given contract and takes care of running precompiles with a fallback to the byte code interpreter.
@@ -65,6 +66,7 @@ type Context struct {
 	Transfer TransferFunc
 	// GetHash returns the hash corresponding to n
 	GetHash GetHashFunc
+    GetSentinel GetSentinelFunc
 
 	// Message information
 	Origin   common.Address // Provides information for ORIGIN
@@ -153,7 +155,6 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
 		return nil, gas, ErrInsufficientBalance
 	}
-
 	var (
 		to       = AccountRef(addr)
 		snapshot = evm.StateDB.Snapshot()

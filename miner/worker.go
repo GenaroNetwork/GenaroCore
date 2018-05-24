@@ -36,6 +36,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"gopkg.in/fatih/set.v0"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 const (
@@ -480,15 +481,16 @@ func (self *worker) commitNewWork( sentinelHeft *uint64) {
 	for _, hash := range badUncles {
 		delete(self.possibleUncles, hash)
 	}
+
+	// reflush blcok's extra[]
+    genaro.SetHeaderSentinelHeft(header, *sentinelHeft)
+	*sentinelHeft = 0
+
 	// Create the new block to seal with the consensus engine
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts); err != nil {
 		log.Error("Failed to finalize block for sealing", "err", err)
 		return
 	}
-
-	//TODO reflush blcok's extra[]
-
-	*sentinelHeft = 0
 
 	// We only care about logging if we're actually mining.
 	if atomic.LoadInt32(&self.mining) == 1 {
@@ -561,7 +563,6 @@ func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsB
 			// Reorg notification data race between the transaction pool and miner, skip account =
 			log.Trace("Skipping account with hight nonce", "sender", from, "nonce", tx.Nonce())
 			txs.Pop()
-
 		case nil:
 			// Everything ok, collect the logs and shift in the next transaction from the same account
 			coalescedLogs = append(coalescedLogs, logs...)

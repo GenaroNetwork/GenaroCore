@@ -23,6 +23,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the
@@ -48,6 +49,7 @@ func NewEVMContext(msg Message, header *types.Header, chain ChainContext, author
 		CanTransfer: CanTransfer,
 		Transfer:    Transfer,
 		GetHash:     GetHashFn(header, chain),
+		GetSentinel: GetSentinelFn(header, chain),
 		Origin:      msg.From(),
 		Coinbase:    beneficiary,
 		BlockNumber: new(big.Int).Set(header.Number),
@@ -82,6 +84,20 @@ func GetHashFn(ref *types.Header, chain ChainContext) func(n uint64) common.Hash
 		}
 		return common.Hash{}
 	}
+}
+
+// GetSentinelFn returns a GetSentinelFunc which retrieves header hashes by number
+func GetSentinelFn(ref *types.Header, chain ChainContext) func(n uint64) uint64 {
+
+	return func(n uint64) uint64 {
+		GetHashFunc := GetHashFn(ref, chain)
+		hash := GetHashFunc(n)
+		header := chain.GetHeader(hash, n)
+		sentinelHeft := genaro.GetHeaderSentinelHeft(header)
+
+		return sentinelHeft
+	}
+
 }
 
 // CanTransfer checks wether there are enough funds in the address' account to make a transfer.

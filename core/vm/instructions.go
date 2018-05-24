@@ -565,7 +565,6 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
-//todo 实现自定义指令对应函数功能
 func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	address,fileName := stack.pop(),stack.pop()
 	storageGasUsed,err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address),string(fileName.Bytes()))
@@ -578,7 +577,14 @@ func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, 
 }
 
 func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(evm.interpreter.intPool.get().SetUint64(evm.SentinelHeft))
+	num := stack.pop()
+	n := evm.interpreter.intPool.get().Sub(evm.BlockNumber, common.Big257)
+	if num.Cmp(n) > 0 && num.Cmp(evm.BlockNumber) < 0 {
+		stack.push(evm.interpreter.intPool.get().SetUint64(evm.GetSentinel(num.Uint64())))
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
+	evm.interpreter.intPool.put(num, n)
 	return nil, nil
 }
 
@@ -747,7 +753,8 @@ func opCall(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Sta
 	if value.Sign() != 0 {
 		gas += params.CallStipend
 	}
-	ret, returnGas, err := evm.Call(contract, toAddr, args, gas, value)
+
+	ret, returnGas, err := evm.Call(contract, toAddr, args, gas, value,new(uint64))
 	if err != nil {
 		stack.push(evm.interpreter.intPool.getZero())
 	} else {
