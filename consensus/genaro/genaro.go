@@ -261,24 +261,14 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		snap *CommitteeSnapshot
 	)
 	isCreateNew := false
-
-	for snap == nil {
-		// If an in-memory snapshot was found, use that
-		if s, ok := g.recents.Get(epollNumber); ok {
-			snap = s.(*CommitteeSnapshot)
-			break
-		}
-		// If an on-disk checkpoint snapshot can be found, use that
-		if s, err := loadSnapshot(g.config, g.db, epollNumber); err == nil {
-			log.Trace("Loaded voting snapshot form disk", "epollNumber", epollNumber)
-			snap = s
-			break
-		}
+	// If an in-memory snapshot was found, use that
+	if s, ok := g.recents.Get(epollNumber); ok {
+		snap = s.(*CommitteeSnapshot)
+	}else if epollNumber >= 0 && epollNumber < g.config.ElectionPeriod+g.config.ValidPeriod {
 		// If we're at block 0 ~ ElectionPeriod + ValidPeriod - 1, make a snapshot by genesis block
-		if epollNumber >= 0 && epollNumber < g.config.ElectionPeriod+g.config.ValidPeriod {
-			// TODO
-			return nil, nil
-		}
+		// TODO
+		return nil, nil
+	}else{
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
 		// TODO Computing rank in startBlock and endBlock
 		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
