@@ -678,37 +678,37 @@ func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid strin
 }
 
 // GetStorageSize gets the "SSIZE" value of user's file
-func (self *StateDB)GetStorageSize(userid common.Address, filename string)  (uint64, error) {
+func (self *StateDB)GetStorageSize(userid common.Address, bucketID string)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
-		return stateObject.GetStorageSize(filename), nil
+		return stateObject.GetStorageSize(bucketID), nil
 	}
 	return 0, nil
 }
 
 // GetStorageGasPrice gets the "STORAGEGASPRICE" value of user's file
-func (self *StateDB)GetStorageGasPrice(userid common.Address, filename string)  (uint64, error) {
+func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID string)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
-		return stateObject.GetStorageGasPrice(filename), nil
+		return stateObject.GetStorageGasPrice(bucketID), nil
 	}
 	return 0, nil
 }
 
 // GetStorageUsed gets the the "STORAGEGASUSED" value of user's file
-func (self *StateDB)GetStorageGasUsed(userid common.Address, filename string)  (uint64, error) {
+func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID string)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
-		return stateObject.GetStorageGasUsed(filename), nil
+		return stateObject.GetStorageGasUsed(bucketID), nil
 	}
 	return 0, nil
 }
 
 // GetStorageGas gets the the "STORAGEGAS" value of user's file
-func (self *StateDB)GetStorageGas(userid common.Address, filename string)  (uint64, error) {
+func (self *StateDB)GetStorageGas(userid common.Address, bucketID string)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
-		return stateObject.GetStorageGas(filename), nil
+		return stateObject.GetStorageGas(bucketID), nil
 	}
 	return 0, nil
 }

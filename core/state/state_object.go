@@ -512,12 +512,12 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	}
 }
 
-func (self *stateObject)getBucketPropertie(filename string) *bucketPropertie {
+func (self *stateObject)getBucketPropertie(bucketID string) *bucketPropertie {
 	if self.data.CodeHash != nil {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if genaroData.BucketProperties != nil {
-			if fp, ok := genaroData.BucketProperties[filename]; ok {
+			if fp, ok := genaroData.BucketProperties[bucketID]; ok {
 				return fp
 			}
 		}
@@ -526,31 +526,31 @@ func (self *stateObject)getBucketPropertie(filename string) *bucketPropertie {
 	return nil
 }
 
-func (self *stateObject)GetStorageSize(filename string) uint64 {
-	if bp:= self.getBucketPropertie(filename); bp != nil{
+func (self *stateObject)GetStorageSize(bucketID string) uint64 {
+	if bp:= self.getBucketPropertie(bucketID); bp != nil{
 		return bp.Size
 	}
 	return 0
 }
 
 
-func (self *stateObject)GetStorageGasPrice(filename string) uint64 {
-	if bp:= self.getBucketPropertie(filename); bp != nil{
+func (self *stateObject)GetStorageGasPrice(bucketID string) uint64 {
+	if bp:= self.getBucketPropertie(bucketID); bp != nil{
 		return bp.Backup
 	}
 	return 0
 }
 
 
-func (self *stateObject)GetStorageGasUsed(filename string) uint64 {
-	if bp:= self.getBucketPropertie(filename); bp != nil{
+func (self *stateObject)GetStorageGasUsed(bucketID string) uint64 {
+	if bp:= self.getBucketPropertie(bucketID); bp != nil{
 		return bp.Backup * bp.Size
 	}
 	return 0
 }
 
-func (self *stateObject)GetStorageGas(filename string) uint64 {
-	if bp:= self.getBucketPropertie(filename); bp != nil{
+func (self *stateObject)GetStorageGas(bucketID string) uint64 {
+	if bp:= self.getBucketPropertie(bucketID); bp != nil{
 		return bp.TimeEnd-bp.TimeStart
 	}
 	return 0
