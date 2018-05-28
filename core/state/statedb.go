@@ -665,10 +665,13 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 	return 0, nil
 }
 
-func (self *StateDB)UpdateFileProperties(userid common.Address, filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64) bool {
+func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid string, size uint64, backup uint64, timestart uint64, timeend uint64) bool {
+	if timestart >= timeend {
+		return false
+	}
 	stateObject := self.GetOrNewStateObject(userid)
 	if stateObject != nil {
-		stateObject.UpdateFileProperties(filename, sSzie, sGasPrice, sUsed, sGas)
+		stateObject.UpdateBucketProperties(bucketid, size, backup, timestart, timeend)
 		return true
 	}
 	return true

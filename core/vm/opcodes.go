@@ -270,7 +270,7 @@ var opCodeToString = map[OpCode]string{
 	// user-defined opcode
 	SENC:               "SENC",
 	DATA_VERSION_READ:  "DATA_VERSION_READ",
-	DATA_VERSION_WRITE: "DATA_VERSION_WRITE",
+	DATA_VERSION_UPDATE: "DATA_VERSION_UPDATE",
 
 	// 0x30 range - closure state
 	ADDRESS:        "ADDRESS",
@@ -564,7 +564,7 @@ var stringToOp = map[string]OpCode{
 	"STORAGE_GAS_PRICE":  STORAGE_GAS_PRICE,
 	"SENC":               SENC,
 	"DATA_VERSION_READ":  DATA_VERSION_READ,
-	"DATA_VERSION_WRITE": DATA_VERSION_WRITE,
+	"DATA_VERSION_UPDATE": DATA_VERSION_UPDATE,
 	"STORAGE_GAS":        STORAGE_GAS,
 	"SSIZE":              SSIZE,
 }

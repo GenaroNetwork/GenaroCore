@@ -24,5 +24,5 @@ import (
 // mechanisms of the proof-of-authority scheme.
 type API struct {
 	chain  consensus.ChainReader
-	genaro *Genaro
+	//genaro *Genaro
 }

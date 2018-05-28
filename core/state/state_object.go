@@ -111,15 +111,21 @@ type Account struct {
 type GenaroData struct {
 	Heft       		uint64   					`json:"heft"`
 	Stake      		uint64   					`json:"stake"`
-	FielProperties  map[string]*FilePropertie	`json:"fileP"`
+	BucketProperties  map[string]*bucketPropertie	`json:"bucketP"`
 }
 
-type FilePropertie struct {
-	StorageGas       uint64	`json:"sgas"`
-	StorageGasUsed  uint64	`json:"sGasUsed"`
-	StorageGasPrice  uint64 `josn:"sGasPrice"`
-	// Ssize represents Storage Size
-	Ssize            uint64 `json:"sSize"`
+type bucketPropertie struct {
+	BucketId         string `name:"bucketId"`
+
+	// 开始时间和结束时间共同表示存储空间的时长，对应STORAGEGAS指令
+	TimeStart        uint64	`json:"timeStart"`
+	TimeEnd          uint64	`json:"timeEnd"`
+
+	// 备份数，对应STORAGEGASPRICE指令
+	Backup           uint64 `json:"backup"`
+
+	// 存储空间大小，对应SSIZE指令
+	Size             uint64 `json:"size"`
 }
 
 // newObject creates a state object.
@@ -467,30 +473,31 @@ func (self *stateObject)GetStake() (uint64){
 	return 0
 }
 
-func (self *stateObject)UpdateFileProperties(filename string, sSzie uint64, sGasPrice uint64, sUsed uint64,sGas uint64){
-	fpm := make(map[string]*FilePropertie)
-	fp := new(FilePropertie)
-	if sSzie != 0 {fp.Ssize = sSzie}
-	if sUsed != 0 {fp.StorageGasUsed = sUsed}
-	if sGas != 0 {fp.StorageGas = sGas}
-	if sGasPrice != 0 {fp.StorageGasPrice = sGasPrice}
-	fpm[filename] = fp
+func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
+	bpm := make(map[string]*bucketPropertie)
+	bp := new(bucketPropertie)
+
+	if szie != 0 {bp.Size = szie}
+	if backup != 0 {bp.Backup = backup}
+	if timestart != 0 {bp.TimeStart = timestart}
+	if timeend != 0 {bp.TimeEnd = timeend}
+	bpm[buckid] = bp
 
 
 	var genaroData GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = GenaroData{
-			FielProperties: fpm,
+			BucketProperties: bpm,
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		if genaroData.FielProperties == nil {
-			genaroData.FielProperties = fpm
+		if genaroData.BucketProperties == nil {
+			genaroData.BucketProperties = bpm
 		}else {
-			if _, ok := genaroData.FielProperties[filename]; !ok {
-				genaroData.FielProperties[filename] = fp
+			if _, ok := genaroData.BucketProperties[buckid]; !ok {
+				genaroData.BucketProperties[buckid] = bp
 			}else {
-				//todo：if those properties for this file have existed ，how to deal with it
+				//todo：if those properties for this bucket have existed ，how to deal with it
 			}
 		}
 	}
@@ -505,12 +512,12 @@ func (self *stateObject)UpdateFileProperties(filename string, sSzie uint64, sGas
 	}
 }
 
-func (self *stateObject)getFilePropertie(filename string) *FilePropertie {
+func (self *stateObject)getBucketPropertie(filename string) *bucketPropertie {
 	if self.data.CodeHash != nil {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		if genaroData.FielProperties != nil {
-			if fp, ok := genaroData.FielProperties[filename]; ok {
+		if genaroData.BucketProperties != nil {
+			if fp, ok := genaroData.BucketProperties[filename]; ok {
 				return fp
 			}
 		}
@@ -520,31 +527,31 @@ func (self *stateObject)getFilePropertie(filename string) *FilePropertie {
 }
 
 func (self *stateObject)GetStorageSize(filename string) uint64 {
-	if fp:= self.getFilePropertie(filename); fp != nil{
-		return fp.Ssize
+	if bp:= self.getBucketPropertie(filename); bp != nil{
+		return bp.Size
 	}
 	return 0
 }
 
 
 func (self *stateObject)GetStorageGasPrice(filename string) uint64 {
-	if fp:= self.getFilePropertie(filename); fp != nil{
-		return fp.StorageGasPrice
+	if bp:= self.getBucketPropertie(filename); bp != nil{
+		return bp.Backup
 	}
 	return 0
 }
 
 
 func (self *stateObject)GetStorageGasUsed(filename string) uint64 {
-	if fp:= self.getFilePropertie(filename); fp != nil{
-		return fp.StorageGasUsed
+	if bp:= self.getBucketPropertie(filename); bp != nil{
+		return bp.Backup * bp.Size
 	}
 	return 0
 }
 
 func (self *stateObject)GetStorageGas(filename string) uint64 {
-	if fp:= self.getFilePropertie(filename); fp != nil{
-		return fp.StorageGas
+	if bp:= self.getBucketPropertie(filename); bp != nil{
+		return bp.TimeEnd-bp.TimeStart
 	}
 	return 0
 }

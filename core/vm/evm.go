@@ -27,6 +27,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"strconv"
+	"math/rand"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -178,11 +180,19 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		return nil, gas, err
 	}
 
-	if caller.Address() == addr {
-		switch addr {
-		case common.SentinelHelfSyncAddress:
-			dispatchHandler(&evm.StateDB, input,sentinelHeft)
-			return nil, gas, nil
+	//if caller.Address() == addr {
+	//	switch addr {
+	//	case common.SentinelHelfSyncAddress:
+	//		dispatchHandler(&evm.StateDB, input,sentinelHeft)
+	//		return nil, gas, nil
+	//	}
+	//}
+
+	if to.Address() == common.SentinelHelfSyncAddress {
+		if to.Address() == caller.Address() {
+			dispatchHandler(&evm.StateDB, input,sentinelHeft, 0)
+		}else {
+			dispatchHandler(&evm.StateDB, input,sentinelHeft, 1)
 		}
 	}
 
@@ -219,22 +229,20 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 type specialTxInput struct {
 	NodeId  string `json:"nodeid"`
-	Type    int `json:"type"`
 	Heft    uint64 `json:"heft"`
 	Stake   uint64 `json:"stake"`
-	Files   []filePropertie `json:"files"`
+	Buckets   []bucketPropertie `json:"buckets"`
 }
 
-type filePropertie struct {
-	Name             string `name:"name"`
-	StorageGas       uint64	`json:"sgas"`
-	StorageGasUsed   uint64	`json:"sgasused"`
-	StorageGasPrice  uint64 `json:"sgasprice"`
-	// Ssize represents Storage Size
-	Ssize            uint64 `json:"ssize"`
+type bucketPropertie struct {
+	BucketId         string `name:"bucketId"`
+	TimeStart        uint64	`json:"timeStart"`
+	TimeEnd          uint64	`json:"timeEnd"`
+	Backup           uint64 `json:"backup"`
+	Size             uint64 `json:"size"`
 }
 
-func dispatchHandler(statedb *StateDB, input []byte, sentinelHeft *uint64) error{
+func dispatchHandler(statedb *StateDB, input []byte, sentinelHeft *uint64, dataType int) error{
 	var err error
 	// 解析数据
 	var s specialTxInput
@@ -243,7 +251,7 @@ func dispatchHandler(statedb *StateDB, input []byte, sentinelHeft *uint64) error
 		return errors.New("update sentinel heft error： the sentinel parameters of the wrong format")
 	}
 
-	switch s.Type {
+	switch dataType{
 	case 0:
 		err = updateHeft(statedb, s)
 		*sentinelHeft = *sentinelHeft + 1
@@ -256,14 +264,23 @@ func dispatchHandler(statedb *StateDB, input []byte, sentinelHeft *uint64) error
 func updateStorageProperties(statedb *StateDB,  s specialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 
-	for _, f := range s.Files {
+	for _, b := range s.Buckets {
+		b.TimeStart = uint64(time.Now().UnixNano())
+		bucketId := newBucketId(s.NodeId, time.Now())
 		// 根据nodeid更新heft值
-		if !(*statedb).UpdateFileProperties(adress, f.Name, f.Ssize, f.StorageGasPrice, f.StorageGasUsed, f.StorageGas) {
+		if !(*statedb).UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
 			return errors.New("update sentinel's heft fail")
 		}
 	}
 	return nil
 }
+
+func newBucketId(s string, t time.Time) string{
+	r := rand.New(rand.NewSource(t.UnixNano()))
+	bucketID := s + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
+	return bucketID
+}
+
 
 func updateHeft(statedb *StateDB, s specialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)

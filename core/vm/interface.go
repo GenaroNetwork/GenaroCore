@@ -69,7 +69,7 @@ type StateDB interface {
 	UpdateStake(common.Address, uint64) bool
 	GetStake(common.Address) (uint64, error)
 
-	UpdateFileProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
+	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
 	GetStorageSize(common.Address, string)  (uint64, error)
 	GetStorageGasPrice(common.Address, string)  (uint64, error)
 	GetStorageGasUsed(common.Address, string)  (uint64, error)
