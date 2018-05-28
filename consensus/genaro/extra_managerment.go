@@ -51,6 +51,12 @@ func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Add
 	return nil
 }
 
+
+func GetHeaderCommitteeRankList(header *types.Header) []common.Address {
+	extraData := UnmarshalToExtra(header)
+	return extraData.CommitteeRank
+}
+
 func CreateCommitteeRankByte(address []common.Address) []byte {
 	extra := new(ExtraData)
 	extra.CommitteeRank = make([]common.Address, len(address))

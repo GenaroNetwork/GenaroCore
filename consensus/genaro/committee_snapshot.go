@@ -124,9 +124,9 @@ func GetDependTurnByBlockNumber(config *params.GenaroConfig, number uint64) uint
 }
 
 
-//  get the list written BlockNumber by the turn of committee
+//  get the  written BlockNumber by the turn of committee
 func GetCommiteeWrittenBlockNumberByTurn(config *params.GenaroConfig, turn uint64) uint64 {
-	return (turn-config.ValidPeriod+1)*config.Epoch - 1
+	return (turn - config.ValidPeriod + 1)*config.Epoch - 1
 }
 
 func (s *CommitteeSnapshot) getCurrentRankIndex(addr common.Address) int {
