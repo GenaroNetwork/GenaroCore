@@ -74,7 +74,7 @@ const (
 	// 0x21 range - user-defined opcode
 	SENC OpCode = 0x21 + iota
 	DATA_VERSION_READ
-	DATA_VERSION_WRITE
+	DATA_VERSION_UPDATE
 )
 
 const (

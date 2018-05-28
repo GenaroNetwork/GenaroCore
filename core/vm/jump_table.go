@@ -362,8 +362,8 @@ func NewFrontierInstructionSet() [256]operation {
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
-		DATA_VERSION_WRITE: {
-			execute:       opDataVerisonWrite,
+		DATA_VERSION_UPDATE: {
+			execute:       opDataVerisonUpdate,
 			gasCost:       constGasFunc(GasQuickStep),
 			validateStack: makeStackFunc(1, 0),
 			memorySize:    memoryCodeCopy,

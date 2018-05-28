@@ -78,11 +78,10 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	}
 
 	//TODO if need to vertify the sentinelHeft
-	sentinelHeft = 0 //reset 0
 
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
 	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts)
-
+    sentinelHeft = 0
 	return receipts, allLogs, *usedGas, nil
 }
 
