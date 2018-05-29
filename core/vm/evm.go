@@ -174,26 +174,8 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 
 	//If transactions are special, they are treated separately according to their types.
-
-	if to.Address() == common.SentinelStakeSyncAddress {
-		err := updateStake(evm, caller.Address(), input)
-		return nil, gas, err
-	}
-
-	//if caller.Address() == addr {
-	//	switch addr {
-	//	case common.SentinelHelfSyncAddress:
-	//		dispatchHandler(&evm.StateDB, input,sentinelHeft)
-	//		return nil, gas, nil
-	//	}
-	//}
-
-	if to.Address() == common.SentinelHelfSyncAddress {
-		if to.Address() == caller.Address() {
-			dispatchHandler(&evm.StateDB, input,sentinelHeft, 0)
-		}else {
-			dispatchHandler(&evm.StateDB, input,sentinelHeft, 1)
-		}
+	if to.Address() == common.SpecialSyncAddress {
+		dispatchHandler(evm, caller.Address(), input, sentinelHeft)
 	}
 
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
@@ -229,6 +211,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 type specialTxInput struct {
 	NodeId  string `json:"nodeid"`
+	Type    int    `json:"type"`
 	Heft    uint64 `json:"heft"`
 	Stake   uint64 `json:"stake"`
 	Buckets   []bucketPropertie `json:"buckets"`
@@ -242,7 +225,7 @@ type bucketPropertie struct {
 	Size             uint64 `json:"size"`
 }
 
-func dispatchHandler(statedb *StateDB, input []byte, sentinelHeft *uint64, dataType int) error{
+func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
 	var err error
 	// 解析数据
 	var s specialTxInput
@@ -251,12 +234,16 @@ func dispatchHandler(statedb *StateDB, input []byte, sentinelHeft *uint64, dataT
 		return errors.New("update sentinel heft error： the sentinel parameters of the wrong format")
 	}
 
-	switch dataType{
-	case 0:
-		err = updateHeft(statedb, s)
+	switch s.Type{
+	case common.SpecialTxTypeStakeSync: // 同步stake
+		err = updateStake(evm,caller,input)
+
+	case common.SpecialTxTypeHeftSync: // 同步heft
+		err = updateHeft(&evm.StateDB, s)
 		*sentinelHeft = *sentinelHeft + 1
-	case 1:
-		err = updateStorageProperties(statedb,  s)
+
+	case common.SpecialTxTypeSpaceApply: // 申请存储空间
+		err = updateStorageProperties(&evm.StateDB,  s)
 	}
 	return err
 }
