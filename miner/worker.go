@@ -75,6 +75,8 @@ type Work struct {
 
 	Block *types.Block // the new block
 
+	currentSentinelHeft uint64
+
 	header   *types.Header
 	txs      []*types.Transaction
 	receipts []*types.Receipt
@@ -152,13 +154,10 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
 
-	var sentinelHeft uint64
-	sentinelHeft = 0
+	go worker.update()
 
-	go worker.update(&sentinelHeft)
-
-	go worker.wait(&sentinelHeft)
-	worker.commitNewWork(&sentinelHeft)
+	go worker.wait()
+	worker.commitNewWork()
 
 	return worker
 }
@@ -245,7 +244,7 @@ func (self *worker) unregister(agent Agent) {
 	agent.Stop()
 }
 
-func (self *worker) update(sentinelHeft *uint64) {
+func (self *worker) update() {
 	defer self.txSub.Unsubscribe()
 	defer self.chainHeadSub.Unsubscribe()
 	defer self.chainSideSub.Unsubscribe()
@@ -255,7 +254,7 @@ func (self *worker) update(sentinelHeft *uint64) {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			self.commitNewWork(sentinelHeft)
+			self.commitNewWork()
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -271,12 +270,12 @@ func (self *worker) update(sentinelHeft *uint64) {
 				acc, _ := types.Sender(self.current.signer, ev.Tx)
 				txs := map[common.Address]types.Transactions{acc: {ev.Tx}}
 				txset := types.NewTransactionsByPriceAndNonce(self.current.signer, txs)
-				self.current.commitTransactions(self.mux, txset, self.chain, self.coinbase,sentinelHeft)
+				self.current.commitTransactions(self.mux, txset, self.chain, self.coinbase)
 				self.currentMu.Unlock()
 			} else {
 				// If we're mining, but nothing is being processed, wake on new transactions
 				if self.config.Clique != nil && self.config.Clique.Period == 0 {
-					self.commitNewWork(sentinelHeft)
+					self.commitNewWork()
 				}
 			}
 
@@ -291,7 +290,7 @@ func (self *worker) update(sentinelHeft *uint64) {
 	}
 }
 
-func (self *worker) wait(sentinelHeft *uint64) {
+func (self *worker) wait() {
 	for {
 		mustCommitNewWork := true
 		for result := range self.recv {
@@ -339,7 +338,7 @@ func (self *worker) wait(sentinelHeft *uint64) {
 			self.unconfirmed.Insert(block.NumberU64(), block.Hash())
 
 			if mustCommitNewWork {
-				self.commitNewWork(sentinelHeft)
+				self.commitNewWork()
 			}
 		}
 	}
@@ -386,11 +385,12 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 
 	// Keep track of transactions which return errors so they can be removed
 	work.tcount = 0
+	work.currentSentinelHeft = 0
 	self.current = work
 	return nil
 }
 
-func (self *worker) commitNewWork( sentinelHeft *uint64) {
+func (self *worker) commitNewWork() {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.uncleMu.Lock()
@@ -458,7 +458,7 @@ func (self *worker) commitNewWork( sentinelHeft *uint64) {
 		return
 	}
 	txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
-	work.commitTransactions(self.mux, txs, self.chain, self.coinbase,sentinelHeft)
+	work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
 	// compute uncles for the new block.
 	var (
 		uncles    []*types.Header
@@ -483,8 +483,8 @@ func (self *worker) commitNewWork( sentinelHeft *uint64) {
 	}
 
 	// reflush blcok's extra[]
-    genaro.SetHeaderSentinelHeft(header, *sentinelHeft)
-	*sentinelHeft = 0
+    genaro.SetHeaderSentinelHeft(header, work.currentSentinelHeft)
+	work.currentSentinelHeft = 0
 
 	// Create the new block to seal with the consensus engine
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts); err != nil {
@@ -515,7 +515,7 @@ func (self *worker) commitUncle(work *Work, uncle *types.Header) error {
 	return nil
 }
 
-func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsByPriceAndNonce, bc *core.BlockChain, coinbase common.Address,sentinelHeft *uint64) {
+func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsByPriceAndNonce, bc *core.BlockChain, coinbase common.Address) {
 	gp := new(core.GasPool).AddGas(env.header.GasLimit)
 
 	var coalescedLogs []*types.Log
@@ -547,7 +547,7 @@ func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsB
 		// Start executing the transaction
 		env.state.Prepare(tx.Hash(), common.Hash{}, env.tcount)
 
-		err, logs := env.commitTransaction(tx, bc, coinbase, gp,sentinelHeft)
+		err, logs := env.commitTransaction(tx, bc, coinbase, gp)
 		switch err {
 		case core.ErrGasLimitReached:
 			// Pop the current out-of-gas transaction without shifting in the next from the account
@@ -597,10 +597,10 @@ func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsB
 	}
 }
 
-func (env *Work) commitTransaction(tx *types.Transaction, bc *core.BlockChain, coinbase common.Address, gp *core.GasPool,sentinelHeft *uint64) (error, []*types.Log) {
+func (env *Work) commitTransaction(tx *types.Transaction, bc *core.BlockChain, coinbase common.Address, gp *core.GasPool) (error, []*types.Log) {
 	snap := env.state.Snapshot()
 
-	receipt, _, err := core.ApplyTransaction(env.config, bc, &coinbase, gp, env.state, env.header, tx, &env.header.GasUsed, vm.Config{},sentinelHeft)
+	receipt, _, err := core.ApplyTransaction(env.config, bc, &coinbase, gp, env.state, env.header, tx, &env.header.GasUsed, vm.Config{},&(env.currentSentinelHeft))
 	if err != nil {
 		env.state.RevertToSnapshot(snap)
 		return err, nil
