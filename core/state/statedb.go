@@ -713,10 +713,19 @@ func (self *StateDB)GetStorageGas(userid common.Address, bucketID string)  (uint
 	return 0, nil
 }
 
-func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit SpecialTxTypeMortgageInit) bool{
+func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit SpecialTxTypeMortgageInit) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.SpecialTxTypeMortgageInit(specialTxTypeMortgageInit)
+		return true
+	}
+	return false
+}
+// UpdateTraffic updates the traffic value of sentinel's nodeid
+func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateTraffic(traffic)
 		return true
 	}
 	return false

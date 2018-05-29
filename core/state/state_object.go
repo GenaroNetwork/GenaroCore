@@ -111,8 +111,9 @@ type Account struct {
 type GenaroData struct {
 	Heft       		uint64   					`json:"heft"`
 	Stake      		uint64   					`json:"stake"`
-	BucketProperties  map[string]*bucketPropertie	`json:"bucketP"`
 	SpecialTxTypeMortgageInit 	SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInit"`
+	Traffic         uint64                      `json:"traffic"`
+	Buckets  map[string]*bucketPropertie	`json:"bucketP"`
 }
 
 type bucketPropertie struct {
@@ -488,15 +489,15 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	var genaroData GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = GenaroData{
-			BucketProperties: bpm,
+			Buckets: bpm,
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		if genaroData.BucketProperties == nil {
-			genaroData.BucketProperties = bpm
+		if genaroData.Buckets == nil {
+			genaroData.Buckets = bpm
 		}else {
-			if _, ok := genaroData.BucketProperties[buckid]; !ok {
-				genaroData.BucketProperties[buckid] = bp
+			if _, ok := genaroData.Buckets[buckid]; !ok {
+				genaroData.Buckets[buckid] = bp
 			}else {
 				//todo：if those properties for this bucket have existed ，how to deal with it
 			}
@@ -517,8 +518,8 @@ func (self *stateObject)getBucketPropertie(bucketID string) *bucketPropertie {
 	if self.data.CodeHash != nil {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		if genaroData.BucketProperties != nil {
-			if fp, ok := genaroData.BucketProperties[bucketID]; ok {
+		if genaroData.Buckets != nil {
+			if fp, ok := genaroData.Buckets[bucketID]; ok {
 				return fp
 			}
 		}
@@ -555,6 +556,27 @@ func (self *stateObject)GetStorageGas(bucketID string) uint64 {
 		return bp.TimeEnd-bp.TimeStart
 	}
 	return 0
+}
+
+func (self *stateObject)UpdateTraffic(traffic uint64){
+	var genaroData GenaroData
+	if self.data.CodeHash == nil{
+		genaroData = GenaroData{
+			Traffic:traffic,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.Traffic += traffic
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
 }
 
 
