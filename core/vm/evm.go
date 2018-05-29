@@ -214,7 +214,6 @@ type specialTxInput struct {
 	state.GenaroData
 	NodeId  string `json:"nodeid"`
 	Type    int    `json:"type"`
-	SpecialTxTypeMortgageInit state.SpecialTxTypeMortgageInit `json:"specialTxTypeMortgageInit"`
 }
 
 
