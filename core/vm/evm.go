@@ -29,6 +29,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"strconv"
 	"math/rand"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -215,6 +216,7 @@ type specialTxInput struct {
 	Heft    uint64 `json:"heft"`
 	Stake   uint64 `json:"stake"`
 	Buckets   []bucketPropertie `json:"buckets"`
+	SpecialTxTypeMortgageInit state.SpecialTxTypeMortgageInit `json:"specialTxTypeMortgageInit"`
 }
 
 type bucketPropertie struct {
@@ -244,8 +246,18 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 
 	case common.SpecialTxTypeSpaceApply: // 申请存储空间
 		err = updateStorageProperties(&evm.StateDB,  s)
+	case common.SpecialTxTypeMortgageInit: // 交易代表用户押注初始化交易
+		err = specialTxTypeMortgageInit(&evm.StateDB, s)
 	}
 	return err
+}
+
+func specialTxTypeMortgageInit(statedb *StateDB, s specialTxInput) error{
+	adress := common.HexToAddress(s.NodeId)
+	if !(*statedb).SpecialTxTypeMortgageInit(adress,s.SpecialTxTypeMortgageInit) {
+		return errors.New("update cross chain storage heft fail")
+	}
+	return nil
 }
 
 func updateStorageProperties(statedb *StateDB,  s specialTxInput) error {

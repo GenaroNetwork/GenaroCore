@@ -112,6 +112,7 @@ type GenaroData struct {
 	Heft       		uint64   					`json:"heft"`
 	Stake      		uint64   					`json:"stake"`
 	BucketProperties  map[string]*bucketPropertie	`json:"bucketP"`
+	SpecialTxTypeMortgageInit 	SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInit"`
 }
 
 type bucketPropertie struct {
@@ -557,7 +558,39 @@ func (self *stateObject)GetStorageGas(bucketID string) uint64 {
 }
 
 
+type fileIDArr struct {
+	MortgageTable	map[common.Address]int	`json:"mortgageTable"`
+	AuthorityTable 	map[common.Address]int	`json:"authorityTable"`
+	Dataversion	map[int]int	`json:"dataversion"`
+}
 
+//Cross-chain storage processing
+type SpecialTxTypeMortgageInit map[string]*fileIDArr
+
+//Cross-chain storage processing
+func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit SpecialTxTypeMortgageInit){
+	var genaroData GenaroData
+	if nil == self.data.CodeHash {
+		genaroData = GenaroData{
+			SpecialTxTypeMortgageInit:specialTxTypeMortgageInit,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SpecialTxTypeMortgageInit {
+			genaroData.SpecialTxTypeMortgageInit = specialTxTypeMortgageInit
+		} else {
+			//genaroData.crossChainStorage.
+		}
+	}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
 
 
 

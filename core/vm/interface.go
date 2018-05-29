@@ -21,6 +21,7 @@ import (
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 // StateDB is an EVM database for full state querying.
@@ -74,6 +75,7 @@ type StateDB interface {
 	GetStorageGasPrice(common.Address, string)  (uint64, error)
 	GetStorageGasUsed(common.Address, string)  (uint64, error)
 	GetStorageGas(common.Address, string)  (uint64, error)
+	SpecialTxTypeMortgageInit(common.Address,state.SpecialTxTypeMortgageInit) bool
 
 }
 
