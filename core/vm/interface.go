@@ -75,6 +75,7 @@ type StateDB interface {
 	GetStorageGasUsed(common.Address, string)  (uint64, error)
 	GetStorageGas(common.Address, string)  (uint64, error)
 
+	UpdateTraffic(common.Address, uint64) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

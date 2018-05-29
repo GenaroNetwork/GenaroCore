@@ -29,6 +29,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"strconv"
 	"math/rand"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -210,19 +211,9 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 }
 
 type specialTxInput struct {
+	state.GenaroData
 	NodeId  string `json:"nodeid"`
 	Type    int    `json:"type"`
-	Heft    uint64 `json:"heft"`
-	Stake   uint64 `json:"stake"`
-	Buckets   []bucketPropertie `json:"buckets"`
-}
-
-type bucketPropertie struct {
-	BucketId         string `name:"bucketId"`
-	TimeStart        uint64	`json:"timeStart"`
-	TimeEnd          uint64	`json:"timeEnd"`
-	Backup           uint64 `json:"backup"`
-	Size             uint64 `json:"size"`
 }
 
 func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
@@ -231,7 +222,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	var s specialTxInput
 	err = json.Unmarshal(input, &s)
 	if err != nil{
-		return errors.New("update sentinel heft error： the sentinel parameters of the wrong format")
+		return errors.New("update user's heft error： the sentinel parameters of the wrong format")
 	}
 
 	switch s.Type{
@@ -244,6 +235,9 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 
 	case common.SpecialTxTypeSpaceApply: // 申请存储空间
 		err = updateStorageProperties(&evm.StateDB,  s)
+
+	case common.SpecialTxTypeTrafficApply: //用户申购流量
+		err = updateTraffic(&evm.StateDB, s)
 	}
 	return err
 }
@@ -256,7 +250,7 @@ func updateStorageProperties(statedb *StateDB,  s specialTxInput) error {
 		bucketId := newBucketId(s.NodeId, time.Now())
 		// 根据nodeid更新heft值
 		if !(*statedb).UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
-			return errors.New("update sentinel's heft fail")
+			return errors.New("update user's heft fail")
 		}
 	}
 	return nil
@@ -273,17 +267,27 @@ func updateHeft(statedb *StateDB, s specialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft) {
-		return errors.New("update sentinel's heft fail")
+		return errors.New("update user's heft fail")
 	}
 	return nil
 }
+
+func updateTraffic(statedb *StateDB, s specialTxInput) error {
+	adress := common.HexToAddress(s.NodeId)
+	// 根据nodeid更新heft值
+	if !(*statedb).UpdateTraffic(adress, s.Traffic) {
+		return errors.New("update user's teraffic fail")
+	}
+	return nil
+}
+
 
 func updateStake(evm *EVM, caller common.Address, input []byte) error {
 	// 解析数据
 	var s specialTxInput
 	err := json.Unmarshal(input, &s)
 	if err != nil{
-		return errors.New("update sentinel stake error： the sentinel parameters of the wrong format")
+		return errors.New("update user's stake error： the sentinel parameters of the wrong format")
 	}
 
 	amount := new(big.Int)
@@ -297,7 +301,7 @@ func updateStake(evm *EVM, caller common.Address, input []byte) error {
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新stake值
 	if !(*evm).StateDB.UpdateStake(adress, s.Stake) {
-		return errors.New("update sentinel's stake fail")
+		return errors.New("update user's stake fail")
 	}
 	(*evm).StateDB.SubBalance(caller, amount)
 	return nil
