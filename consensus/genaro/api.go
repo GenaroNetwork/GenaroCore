@@ -18,7 +18,7 @@ package genaro
 
 import (
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
-	"github.com/GenaroNetwork/Genaro-Core/common/number"
+	//"github.com/GenaroNetwork/Genaro-Core/common/number"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 )
 
