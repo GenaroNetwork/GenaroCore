@@ -89,5 +89,6 @@ func TestExtraData(t *testing.T){
 	if extra.Signature != nil {
 		t.Error("TestExtraData ResetHeaderSignature error")
 	}
+
 }
 
