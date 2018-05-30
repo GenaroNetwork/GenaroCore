@@ -666,9 +666,6 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 }
 
 func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid string, size uint64, backup uint64, timestart uint64, timeend uint64) bool {
-	if timestart >= timeend {
-		return false
-	}
 	stateObject := self.GetOrNewStateObject(userid)
 	if stateObject != nil {
 		stateObject.UpdateBucketProperties(bucketid, size, backup, timestart, timeend)
@@ -737,6 +734,14 @@ func (self *StateDB) GetTraffic(addr common.Address) uint64{
 		return stateObject.GetTraffic()
 	}
 	return 0
+}
+
+func (self *StateDB) GetBuckets(addr common.Address) (map[string]interface{}, error) {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetBuckets(), nil
+	}
+	return nil, nil
 }
 
 //根据用户id和fileID,dataVersion获取交易日志
