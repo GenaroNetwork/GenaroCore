@@ -485,7 +485,6 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	if timeend != 0 {bp.TimeEnd = timeend}
 	bpm[buckid] = bp
 
-
 	var genaroData GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = GenaroData{
@@ -577,6 +576,30 @@ func (self *stateObject)UpdateTraffic(traffic uint64){
 		self.onDirty(self.Address())
 		self.onDirty = nil
 	}
+}
+
+func (self *stateObject)GetTraffic() uint64 {
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.Traffic
+	}
+
+	return 0
+}
+
+func (self *stateObject)GetBuckets() map[string]interface{} {
+	rtMap := make(map[string]interface{})
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.Buckets != nil {
+			for k, v := range genaroData.Buckets {
+				rtMap[k] = *v
+			}
+		}
+	}
+	return  rtMap
 }
 
 

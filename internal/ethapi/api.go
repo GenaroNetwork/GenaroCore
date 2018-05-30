@@ -730,6 +730,23 @@ func (s *PublicBlockChainAPI) EstimateGas(ctx context.Context, args CallArgs) (h
 	return hexutil.Uint64(hi), nil
 }
 
+func (s *PublicBlockChainAPI) GetTraffic(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (uint64, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return 0, err
+	}
+	b := state.GetTraffic(address)
+	return b, state.Error()
+}
+
+func (s *PublicBlockChainAPI)GetBuckets(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]interface{}, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return state.GetBuckets(address)
+}
+
 // ExecutionResult groups all structured logs emitted by the EVM
 // while replaying a transaction in debug mode as well as transaction
 // execution status, the amount of gas used and the return value

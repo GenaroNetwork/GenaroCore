@@ -223,7 +223,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	var s specialTxInput
 	err = json.Unmarshal(input, &s)
 	if err != nil{
-		return errors.New("update user's heft error： the sentinel parameters of the wrong format")
+		return errors.New("special tx error： the extraData parameters of the wrong format")
 	}
 
 	switch s.Type{
@@ -266,9 +266,12 @@ func updateStorageProperties(statedb *StateDB,  s specialTxInput) error {
 	for _, b := range s.Buckets {
 		b.TimeStart = uint64(time.Now().UnixNano())
 		bucketId := newBucketId(s.NodeId, time.Now())
+		if b.TimeStart >= b.TimeEnd {
+			return errors.New("endTime must larger then startTime")
+		}
 		// 根据nodeid更新heft值
 		if !(*statedb).UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
-			return errors.New("update user's heft fail")
+			return errors.New("update user's bucket fail")
 		}
 	}
 	return nil

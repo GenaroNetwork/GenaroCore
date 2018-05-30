@@ -78,6 +78,11 @@ type StateDB interface {
 	SpecialTxTypeMortgageInit(common.Address,state.SpecialTxTypeMortgageInit) bool
 
 	UpdateTraffic(common.Address, uint64) bool
+
+	GetTraffic(common.Address)uint64
+
+	GetBuckets(common.Address) (map[string]interface{}, error)
+
 	//根据用户id和fileID,dataVersion获取交易日志
 	TxLogByDataVersionRead(common.Address,string,string) (string,error)
 	//根据用户id和fileID开启定时同步日志接口

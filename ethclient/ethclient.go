@@ -476,6 +476,18 @@ func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) er
 	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", common.ToHex(data))
 }
 
+func (ec *Client) GetTraffic(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_getTraffic", account, toBlockNumArg(blockNumber))
+	return (*big.Int)(&result), err
+}
+
+func (ec *Client) GetBuckets(ctx context.Context, account common.Address, blockNumber *big.Int) (map[string]interface{}, error) {
+	result :=  make(map[string]interface{})
+	err := ec.c.CallContext(ctx, &result, "eth_getBuckets", account, toBlockNumArg(blockNumber))
+	return result, err
+}
+
 func toCallArg(msg ethereum.CallMsg) interface{} {
 	arg := map[string]interface{}{
 		"from": msg.From,
