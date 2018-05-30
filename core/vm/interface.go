@@ -78,6 +78,10 @@ type StateDB interface {
 	SpecialTxTypeMortgageInit(common.Address,state.SpecialTxTypeMortgageInit) bool
 
 	UpdateTraffic(common.Address, uint64) bool
+	//根据用户id和fileID,dataVersion获取交易日志
+	TxLogByDataVersionRead(common.Address,string,string) (string,error)
+	//根据用户id和fileID开启定时同步日志接口
+	TxLogBydataVersionUpdate(common.Address,string,bool) (bool,error)
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

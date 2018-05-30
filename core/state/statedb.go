@@ -730,3 +730,23 @@ func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
 	}
 	return false
 }
+//根据用户id和fileID,dataVersion获取交易日志
+func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID,dataVersion string) (string,error){
+	stateObject := self.getStateObject(address)
+	if stateObject != nil {
+		//@todo
+		return "xxx", nil
+		//return stateObject.TxLogByDataVersionRead(), nil
+	}
+	return "xxx", nil
+}
+//根据用户id和fileID开启定时同步日志接口
+func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID string,switchValue bool) (bool,error){
+	stateObject := self.getStateObject(address)
+	if stateObject != nil {
+		//@todo
+		return true, nil
+		//return stateObject.TxLogByDataVersionRead(), nil
+	}
+	return true, nil
+}
