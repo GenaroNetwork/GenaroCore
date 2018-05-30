@@ -593,7 +593,7 @@ func (self *stateObject)GetTraffic() uint64 {
 type fileIDArr struct {
 	MortgageTable	map[common.Address]int	`json:"mortgageTable"`
 	AuthorityTable 	map[common.Address]int	`json:"authorityTable"`
-	Dataversion	map[int]int	`json:"dataversion"`
+	Dataversion	map[int]string	`json:"dataversion"`
 }
 
 //Cross-chain storage processing
