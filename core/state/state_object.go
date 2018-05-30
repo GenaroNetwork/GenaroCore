@@ -26,7 +26,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
-
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -112,6 +111,7 @@ type GenaroData struct {
 	Heft       		uint64   					`json:"heft"`
 	Stake      		uint64   					`json:"stake"`
 	SpecialTxTypeMortgageInit 	SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInit"`
+	SpecialTxTypeMortgageInitArr 	map[string]SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInitArr"`
 	Traffic         uint64                      `json:"traffic"`
 	Buckets  map[string]*bucketPropertie	`json:"bucketP"`
 }
@@ -580,30 +580,31 @@ func (self *stateObject)UpdateTraffic(traffic uint64){
 }
 
 
-type fileIDArr struct {
-	MortgageTable	map[common.Address]int	`json:"mortgageTable"`
+type FileIDArr struct {
+	MortgageTable	map[common.Address] *big.Int	`json:"mortgageTable"`
 	AuthorityTable 	map[common.Address]int	`json:"authorityTable"`
 	Dataversion	map[int]string	`json:"dataversion"`
+	MortgagTmt	*big.Int	`json:"mortgagTmt"`
+	LogSwitch 	bool	`json:"logSwitch"`
 }
 
 //Cross-chain storage processing
-type SpecialTxTypeMortgageInit map[string]*fileIDArr
+type SpecialTxTypeMortgageInit FileIDArr
 
 //Cross-chain storage processing
 func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit SpecialTxTypeMortgageInit){
 	var genaroData GenaroData
 	if nil == self.data.CodeHash {
 		genaroData = GenaroData{
-			SpecialTxTypeMortgageInit:specialTxTypeMortgageInit,
+			SpecialTxTypeMortgageInitArr:map[string]SpecialTxTypeMortgageInit {"xxxx":specialTxTypeMortgageInit},
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		if nil == genaroData.SpecialTxTypeMortgageInit {
-			genaroData.SpecialTxTypeMortgageInit = specialTxTypeMortgageInit
-		} else {
-			//genaroData.crossChainStorage.
-		}
+		specialTxTypeMortgageInitArrTmp := genaroData.SpecialTxTypeMortgageInitArr
+		specialTxTypeMortgageInitArrTmp["xxx"] = specialTxTypeMortgageInit
+		genaroData.SpecialTxTypeMortgageInitArr = specialTxTypeMortgageInitArrTmp
 	}
+	genaroData.SpecialTxTypeMortgageInit = SpecialTxTypeMortgageInit{}
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -612,6 +613,7 @@ func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit Spec
 		self.onDirty(self.Address())
 		self.onDirty = nil
 	}
+
 }
 
 
