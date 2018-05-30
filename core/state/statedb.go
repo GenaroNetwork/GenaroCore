@@ -730,3 +730,11 @@ func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
 	}
 	return false
 }
+
+func (self *StateDB) GetTraffic(addr common.Address) uint64{
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetTraffic()
+	}
+	return 0
+}

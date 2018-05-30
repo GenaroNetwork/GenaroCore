@@ -78,6 +78,7 @@ type StateDB interface {
 	SpecialTxTypeMortgageInit(common.Address,state.SpecialTxTypeMortgageInit) bool
 
 	UpdateTraffic(common.Address, uint64) bool
+	GetTraffic(common.Address)uint64
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

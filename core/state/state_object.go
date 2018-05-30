@@ -579,6 +579,16 @@ func (self *stateObject)UpdateTraffic(traffic uint64){
 	}
 }
 
+func (self *stateObject)GetTraffic() uint64 {
+	if self.data.CodeHash != nil {
+		var genaroData GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.Traffic
+	}
+
+	return 0
+}
+
 
 type fileIDArr struct {
 	MortgageTable	map[common.Address]int	`json:"mortgageTable"`
