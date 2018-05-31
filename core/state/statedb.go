@@ -764,3 +764,13 @@ func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID strin
 	}
 	return true, nil
 }
+
+
+func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]SpecialTxTypeMortgageInit {
+	stateObject := self.getStateObject(addr)
+	fmt.Println(stateObject)
+	if stateObject != nil {
+		return stateObject.GetAccountAttributes()
+	}
+	return nil
+}

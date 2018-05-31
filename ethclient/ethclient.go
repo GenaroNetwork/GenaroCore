@@ -507,3 +507,13 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 	}
 	return arg
 }
+
+
+// Forking tool's client for the Ethereum RPC API
+func (ec *Client) AccountAttributes(ctx context.Context, account common.Address)(*big.Int, error){
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_accountAttributes", account, "pending")
+	return (*big.Int)(&result), err
+}
+
+

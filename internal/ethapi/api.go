@@ -42,6 +42,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 const (
@@ -1500,4 +1501,14 @@ func (s *PublicNetAPI) PeerCount() hexutil.Uint {
 // Version returns the current ethereum protocol version.
 func (s *PublicNetAPI) Version() string {
 	return fmt.Sprintf("%d", s.networkVersion)
+}
+
+
+func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]state.SpecialTxTypeMortgageInit, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	result := state.GetAccountAttributes(address)
+	return result, state.Error()
 }
