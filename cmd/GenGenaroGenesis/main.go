@@ -9,6 +9,10 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"time"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
+	"fmt"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"io/ioutil"
 )
 
 func main(){
@@ -37,12 +41,32 @@ func main(){
 	genesis.Mixhash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
 	genesis.ParentHash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
 	genesis.Timestamp = uint64(time.Now().Unix())
+	genesis.Nonce = 0
+	genesis.Coinbase = common.HexToAddress("0x0000000000000000000000000000000000000000")
+
+	n := 10
+	addrs := genAddrs(n)
+	byt := genaro.CreateCommitteeRankByte(addrs)
+	genesis.ExtraData = byt
+
+	genesis.Alloc = make(core.GenesisAlloc,1)
+	account0 := core.GenesisAccount {
+		Balance: big.NewInt(1),
+	}
+	account1 := core.GenesisAccount {
+		Balance: big.NewInt(2),
+	}
+
+	genesis.Alloc[addrs[0]] = account0
+	genesis.Alloc[addrs[1]] = account1
 
 	byt,err := json.Marshal(genesis)
 	if err != nil {
 		log.Fatal(err)
 	}
-	genesisPath := "/opt/Genesis.json"
+	dirname, err := ioutil.TempDir(os.TempDir(), "genaro_test")
+	genesisPath := dirname + "Genesis.json"
+	fmt.Println(genesisPath)
 	file, err := os.Create(genesisPath)
 	if err != nil {
 		log.Fatal(err)
@@ -51,4 +75,15 @@ func main(){
 	file.Close()
 }
 
+func genAddrs(n int)[]common.Address{
+	addrs := make([]common.Address, 0)
 
+	for i := 0; i < n; i++ {
+		prikey, _ := crypto.GenerateKey()
+		addr := crypto.PubkeyToAddress(prikey.PublicKey)
+
+		fmt.Println(addr.String())
+		addrs = append(addrs, addr)
+	}
+	return addrs
+}
