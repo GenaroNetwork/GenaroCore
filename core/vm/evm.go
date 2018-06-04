@@ -237,7 +237,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	case common.SpecialTxTypeSpaceApply: // 申请存储空间
 		err = updateStorageProperties(&evm.StateDB,  s)
 	case common.SpecialTxTypeMortgageInit: // 交易代表用户押注初始化交易
-		err = specialTxTypeMortgageInit(&evm.StateDB, s)
+		err = specialTxTypeMortgageInit(evm, s,caller)
 
 	case common.SpecialTxTypeTrafficApply: //用户申购流量
 		err = updateTraffic(&evm.StateDB, s)
@@ -245,11 +245,18 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	return err
 }
 
-func specialTxTypeMortgageInit(statedb *StateDB, s SpecialTxInput) error{
-	adress := common.HexToAddress(s.NodeId)
-	if !(*statedb).SpecialTxTypeMortgageInit(adress,s.SpecialTxTypeMortgageInit) {
+func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address) error{
+
+	sumMortgageTable :=	new(big.Int)
+	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+	for _, v := range mortgageTable{
+		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v)
+	}
+	s.SpecialTxTypeMortgageInit.MortgagTmt=sumMortgageTable
+	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
 		return errors.New("update cross chain storage heft fail")
 	}
+	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
 	return nil
 }
 
