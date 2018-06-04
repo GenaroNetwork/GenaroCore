@@ -47,6 +47,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"math/rand"
 )
 
 const (
@@ -1247,13 +1248,27 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	if *args.To == common.SpecialSyncAddress {
 		var s vm.SpecialTxInput
 		json.Unmarshal([]byte(args.ExtraData), &s)
-		if 5 == s.Type {
+
+		switch s.Type {
+		case common.SpecialTxTypeMortgageInit:
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SpecialTxTypeMortgageInit.FileID = hex.EncodeToString(timeUnixSha256[:])
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		} else {
+		case common.SpecialTxTypeSpaceApply:
+			b := make(map[string]*state.BucketPropertie)
+			for k, v := range s.Buckets{
+				t := time.Now()
+				r := rand.New(rand.NewSource(t.UnixNano()))
+				bucketID := s.NodeId + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
+				v.BucketId = bucketID
+				b[k] = v
+			}
+			s.Buckets = b
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+		default:
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
 		}
 	}
