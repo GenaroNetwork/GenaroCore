@@ -24,13 +24,29 @@ func (logs *NumLogs) add(log NumLog) {
 	}
 }
 
-func (logs NumLogs) getFirst() NumLog{
+func (logs NumLogs) GetFirst() NumLog{
 	return logs[0]
 }
 
-func (logs NumLogs) getLast() NumLog{
+func (logs NumLogs) GetLast() NumLog{
 	len := len(logs)
 	return logs[len-1]
+}
+
+func (logs NumLogs) GetLastDiff() (diff,blockNum uint64){
+	len := len(logs)
+	if len == 0 {
+		diff = 0
+		blockNum = 0
+	}else if len == 1 {
+		diff = logs[len-1].Num
+		blockNum = logs[len-1].BlockNum
+	}else if len > 1 {
+		diff = logs[len-1].Num - logs[len-2].Num
+		blockNum = logs[len-1].BlockNum
+	}
+
+	return
 }
 
 // get the NumLog at or after blockNum

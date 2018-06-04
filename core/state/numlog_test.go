@@ -82,6 +82,8 @@ func TestGetRangeDiff(t *testing.T) {
 	}
 	diff := logs.GetRangeDiff(550,3300)
 	t.Log(diff)
+	diff,blockNum := logs.GetLastDiff()
+	t.Log(diff,blockNum)
 }
 
 func TestGenaroData(t *testing.T){

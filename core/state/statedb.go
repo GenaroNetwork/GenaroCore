@@ -664,6 +664,21 @@ func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, bl
 	return 0
 }
 
+// get the heft change in lastBlock
+// lastBlockNum the last block number
+func (self *StateDB)GetHeftLastDiff(id common.Address, lastBlockNum uint64) uint64{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		logs := stateObject.GetHeftLog()
+		diff,blockNum := logs.GetLastDiff()
+		if blockNum != lastBlockNum {
+			diff = 0
+		}
+		return diff
+	}
+	return 0
+}
+
 // UpdateStake updates the stake value of sentinel's nodeid
 func (self *StateDB)UpdateStake(id common.Address, stake uint64, blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
