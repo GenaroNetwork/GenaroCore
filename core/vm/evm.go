@@ -268,8 +268,7 @@ func updateStorageProperties(statedb *StateDB,  s SpecialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 
 	for _, b := range s.Buckets {
-		b.TimeStart = uint64(time.Now().UnixNano())
-		bucketId := newBucketId(s.NodeId, time.Now())
+		bucketId := b.BucketId
 		if b.TimeStart >= b.TimeEnd {
 			return errors.New("endTime must larger then startTime")
 		}

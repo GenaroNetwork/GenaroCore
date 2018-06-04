@@ -47,6 +47,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"math/rand"
 )
 
 const (
@@ -1031,6 +1032,20 @@ func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
 	return uint64(s.Type) == uint64(txType)
 }
 
+func (s *PublicTransactionPoolAPI) GetTrafficTxInfo() interface{} {
+	return nil
+}
+
+// GetBucketTxInfo get informations of special transaction of bucket apply
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) map[string]interface{} {
+	//rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
+	////retMap := make(map[string]interface{})
+	//for _, v := range rpcTx {
+	//	v.Input
+	//}
+	return nil
+}
+
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.
 func (s *PublicTransactionPoolAPI) GetTransactionByBlockHashAndIndex(ctx context.Context, blockHash common.Hash, index hexutil.Uint) *RPCTransaction {
 	if block, _ := s.b.GetBlock(ctx, blockHash); block != nil {
@@ -1233,7 +1248,8 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	if *args.To == common.SpecialSyncAddress {
 		var s vm.SpecialTxInput
 		json.Unmarshal([]byte(args.ExtraData), &s)
-		if common.SpecialTxTypeMortgageInit == s.Type {
+		switch s.Type {
+		case common.SpecialTxTypeMortgageInit:
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
@@ -1242,7 +1258,19 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			s.SpecialTxTypeMortgageInit.FromAccount = args.From
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		} else {
+		case common.SpecialTxTypeSpaceApply:
+			b := make(map[string]*state.BucketPropertie)
+			for k, v := range s.Buckets{
+				t := time.Now()
+				r := rand.New(rand.NewSource(t.UnixNano()))
+				bucketID := s.NodeId + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
+				v.BucketId = bucketID
+				b[k] = v
+			}
+			s.Buckets = b
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+		default:
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
 		}
 	}

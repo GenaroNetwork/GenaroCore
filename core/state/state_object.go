@@ -113,10 +113,10 @@ type GenaroData struct {
 	SpecialTxTypeMortgageInit 	SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInit"`
 	SpecialTxTypeMortgageInitArr 	map[string]SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInitArr"`
 	Traffic         uint64                      `json:"traffic"`
-	Buckets  map[string]*bucketPropertie	`json:"bucketP"`
+	Buckets  map[string]*BucketPropertie	`json:"bucketP"`
 }
 
-type bucketPropertie struct {
+type BucketPropertie struct {
 	BucketId         string `name:"bucketId"`
 
 	// 开始时间和结束时间共同表示存储空间的时长，对应STORAGEGAS指令
@@ -476,8 +476,8 @@ func (self *stateObject)GetStake() (uint64){
 }
 
 func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
-	bpm := make(map[string]*bucketPropertie)
-	bp := new(bucketPropertie)
+	bpm := make(map[string]*BucketPropertie)
+	bp := new(BucketPropertie)
 
 	if szie != 0 {bp.Size = szie}
 	if backup != 0 {bp.Backup = backup}
@@ -513,7 +513,7 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	}
 }
 
-func (self *stateObject)getBucketPropertie(bucketID string) *bucketPropertie {
+func (self *stateObject)getBucketPropertie(bucketID string) *BucketPropertie {
 	if self.data.CodeHash != nil {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -650,7 +650,6 @@ func (self *stateObject)GetAccountAttributes() (map[string]SpecialTxTypeMortgage
 	if self.data.CodeHash != nil {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		fmt.Println(genaroData.SpecialTxTypeMortgageInitArr)
 		return genaroData.SpecialTxTypeMortgageInitArr
 	}
 
