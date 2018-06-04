@@ -1028,6 +1028,20 @@ func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
 	return uint64(s.Type) == uint64(txType)
 }
 
+func (s *PublicTransactionPoolAPI) GetTrafficTxInfo() interface{} {
+	return nil
+}
+
+// GetBucketTxInfo get informations of special transaction of bucket apply
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) map[string]interface{} {
+	//rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
+	////retMap := make(map[string]interface{})
+	//for _, v := range rpcTx {
+	//	v.Input
+	//}
+	return nil
+}
+
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.
 func (s *PublicTransactionPoolAPI) GetTransactionByBlockHashAndIndex(ctx context.Context, blockHash common.Hash, index hexutil.Uint) *RPCTransaction {
 	if block, _ := s.b.GetBlock(ctx, blockHash); block != nil {
