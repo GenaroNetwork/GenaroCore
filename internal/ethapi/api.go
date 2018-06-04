@@ -42,6 +42,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"encoding/json"
 )
 
 const (
@@ -984,6 +985,46 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberAndIndex(ctx conte
 		return newRPCTransactionFromBlockIndex(block, uint64(index))
 	}
 	return nil
+}
+
+// GetTransactionByBlockNumberRange returns the transaction of special type from  startblocknumber to endblocknumber.
+func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType hexutil.Uint) []*RPCTransaction {
+	var specialTx []*RPCTransaction
+	if startBlockNr >= endBlockNr {
+		return nil
+	}
+	for i := startBlockNr; i< endBlockNr; i++ {
+		if block, _ := s.b.BlockByNumber(ctx, i); block != nil {
+			txs := block.Transactions()
+			currentBlockTx := dealSpecialTransactionWithType(block, txs, txType)
+			specialTx = append(specialTx, currentBlockTx...)
+		}
+	}
+	return specialTx
+}
+
+func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txType hexutil.Uint) []*RPCTransaction {
+	var specialTx []*RPCTransaction
+	for i := 0; i < len(txs); i++ {
+		if txWithType(txs[i], txType) {
+			rpcTx := newRPCTransaction(txs[i], b.Hash(), b.NumberU64(), uint64(i))
+			specialTx = append(specialTx, rpcTx)
+		}
+	}
+	fmt.Println(len(specialTx))
+	return specialTx
+}
+
+func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
+	// 解析transaction的Payload域值
+	var s vm.SpecialTxInput
+	err := json.Unmarshal(tx.Data(), &s)
+	if err != nil{
+		//return errors.New("special tx error： the extraData parameters of the wrong format")
+		fmt.Println("unmarsonal error ")
+		return false
+	}
+	return uint64(s.Type) == uint64(txType)
 }
 
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.

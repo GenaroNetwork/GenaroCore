@@ -210,7 +210,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	return ret, contract.Gas, err
 }
 
-type specialTxInput struct {
+type SpecialTxInput struct {
 	state.GenaroData
 	NodeId  string `json:"nodeid"`
 	Type    int    `json:"type"`
@@ -220,7 +220,7 @@ type specialTxInput struct {
 func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
 	var err error
 	// 解析数据
-	var s specialTxInput
+	var s SpecialTxInput
 	err = json.Unmarshal(input, &s)
 	if err != nil{
 		return errors.New("special tx error： the extraData parameters of the wrong format")
@@ -245,7 +245,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	return err
 }
 
-func specialTxTypeMortgageInit(statedb *StateDB, s specialTxInput) error{
+func specialTxTypeMortgageInit(statedb *StateDB, s SpecialTxInput) error{
 	adress := common.HexToAddress(s.NodeId)
 	if !(*statedb).SpecialTxTypeMortgageInit(adress,s.SpecialTxTypeMortgageInit) {
 		return errors.New("update cross chain storage heft fail")
@@ -253,7 +253,7 @@ func specialTxTypeMortgageInit(statedb *StateDB, s specialTxInput) error{
 	return nil
 }
 
-func updateStorageProperties(statedb *StateDB,  s specialTxInput) error {
+func updateStorageProperties(statedb *StateDB,  s SpecialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 
 	for _, b := range s.Buckets {
@@ -277,7 +277,7 @@ func newBucketId(s string, t time.Time) string{
 }
 
 
-func updateHeft(statedb *StateDB, s specialTxInput) error {
+func updateHeft(statedb *StateDB, s SpecialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft) {
@@ -286,7 +286,7 @@ func updateHeft(statedb *StateDB, s specialTxInput) error {
 	return nil
 }
 
-func updateTraffic(statedb *StateDB, s specialTxInput) error {
+func updateTraffic(statedb *StateDB, s SpecialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateTraffic(adress, s.Traffic) {
@@ -298,7 +298,7 @@ func updateTraffic(statedb *StateDB, s specialTxInput) error {
 
 func updateStake(evm *EVM, caller common.Address, input []byte) error {
 	// 解析数据
-	var s specialTxInput
+	var s SpecialTxInput
 	err := json.Unmarshal(input, &s)
 	if err != nil{
 		return errors.New("update user's stake error： the sentinel parameters of the wrong format")
