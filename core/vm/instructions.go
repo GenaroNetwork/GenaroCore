@@ -484,15 +484,34 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 }
 
 //todo 实现自定义指令对应函数功能
-func opSenc(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	return nil, nil
-}
-
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	//address,fileName,dataVersion := stack.pop(),stack.pop(),stack.pop()
+	address, offset1, size1,offset2,size2 := stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	fileName := string(memory.Get(offset1.Int64(),size1.Int64()))
+	dataVersion := string(memory.Get(offset2.Int64(),size2.Int64()))
+    txLog,err := evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileName,dataVersion)
+	if err == nil {
+		convertPara :=evm.interpreter.intPool.get()
+		convertPara.SetString(txLog,62)
+		stack.push(convertPara)
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
 func opDataVerisonUpdate(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	//address,fileName,switchValue := stack.pop(),stack.pop(),stack.pop()
+	address, offset, size ,switchValue := stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	fileName := string(memory.Get(offset.Int64(),size.Int64()))
+	var switchV bool
+	//switchVlaue (int => bool)
+	if switchValue.Cmp(new(big.Int).SetUint64(0)) == 0 {
+		switchV = true
+	}else {
+		switchV = false
+	}
+	evm.StateDB.TxLogBydataVersionUpdate(common.BigToAddress(address),fileName,switchV)
 	return nil, nil
 }
 
@@ -517,8 +536,10 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	address,fileName := stack.pop(),stack.pop()
-	storageGasPrice,err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address),string(fileName.Bytes()))
+	//address, buckerId := stack.pop(),stack.pop()
+	address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	storageGasPrice,err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address),bucketId)
 	if err == nil {
 		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasPrice))
 	}else{
@@ -566,8 +587,10 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 }
 
 func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	address,fileName := stack.pop(),stack.pop()
-	storageGasUsed,err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address),string(fileName.Bytes()))
+	//address, bucketId := stack.pop(),stack.pop()
+	address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	storageGasUsed,err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address),bucketId)
 	if err == nil {
 		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasUsed))
 	}else{
@@ -678,8 +701,10 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 
 //todo 实现自定义指令对应函数功能
 func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	address,fileName := stack.pop(),stack.pop()
-	sSize,err := evm.StateDB.GetStorageSize(common.BigToAddress(address),string(fileName.Bytes()))
+	//address, bucketId := stack.pop(),stack.pop()
+	address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	sSize,err := evm.StateDB.GetStorageSize(common.BigToAddress(address),bucketId)
 	if err == nil {
 		stack.push(evm.interpreter.intPool.get().SetUint64(sSize))
 	}else{
@@ -696,8 +721,10 @@ func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 // todo 实现自定义指令对应函数功能
 // 获取交易的StorageGas,获取后压入栈中
 func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	address,fileName := stack.pop(),stack.pop()
-	storageGas,err := evm.StateDB.GetStorageGas(common.BigToAddress(address),string(fileName.Bytes()))
+	//address, bucketId := stack.pop(),stack.pop()
+	address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	storageGas,err := evm.StateDB.GetStorageGas(common.BigToAddress(address),bucketId)
 	if err == nil {
 		stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
 	}else{
