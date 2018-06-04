@@ -1233,10 +1233,13 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	if *args.To == common.SpecialSyncAddress {
 		var s vm.SpecialTxInput
 		json.Unmarshal([]byte(args.ExtraData), &s)
-		if 5 == s.Type {
+		if common.SpecialTxTypeMortgageInit == s.Type {
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
+			s.SpecialTxTypeMortgageInit.EndTime = s.SpecialTxTypeMortgageInit.TimeLimit * 86400 + s.SpecialTxTypeMortgageInit.CreateTime
 			s.SpecialTxTypeMortgageInit.FileID = hex.EncodeToString(timeUnixSha256[:])
+			s.SpecialTxTypeMortgageInit.FromAccount = args.From
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		} else {
@@ -1565,4 +1568,19 @@ func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address com
 	}
 	result := state.GetAccountAttributes(address)
 	return result, state.Error()
+}
+
+
+func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType hexutil.Uint) []state.SpecialTxTypeMortgageInit {
+	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,txType)
+	var specialTxTypeMortgageInit vm.SpecialTxInput
+	var resultArr []state.SpecialTxTypeMortgageInit
+	for _, v := range result {
+		json.Unmarshal(v.Input, &specialTxTypeMortgageInit)
+		transactionReceipt, err:= s.GetTransactionReceipt(ctx,v.Hash)
+		if nil == err && nil != transactionReceipt {
+			resultArr = append(resultArr, specialTxTypeMortgageInit.SpecialTxTypeMortgageInit)
+		}
+	}
+	return resultArr
 }
