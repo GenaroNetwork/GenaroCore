@@ -42,8 +42,11 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
+	"strconv"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 )
 
 const (
@@ -1242,7 +1245,17 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 
 	//deal special transaction
 	if *args.To == common.SpecialSyncAddress {
-		return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
+		var s vm.SpecialTxInput
+		json.Unmarshal([]byte(args.ExtraData), &s)
+		if 5 == s.Type {
+			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
+			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+			s.SpecialTxTypeMortgageInit.FileID = hex.EncodeToString(timeUnixSha256[:])
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+		} else {
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
+		}
 	}
 
 	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)

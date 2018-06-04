@@ -26,10 +26,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"crypto/sha256"
-	"time"
-	"strconv"
-	"encoding/hex"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -608,11 +604,15 @@ func (self *stateObject)GetBuckets() map[string]interface{} {
 
 
 type FileIDArr struct {
-	MortgageTable	map[common.Address] *big.Int	`json:"mortgageTable"`
-	AuthorityTable 	map[common.Address]int	`json:"authorityTable"`
+	MortgageTable	map[common.Address] *big.Int	`json:"mortgage"`
+	AuthorityTable 	map[common.Address]int	`json:"authority"`
+	FileID 			string		`json:"fileID"`
 	Dataversion	map[int]string	`json:"dataversion"`
 	MortgagTmt	*big.Int	`json:"mortgagTmt"`
 	LogSwitch 	bool	`json:"logSwitch"`
+	TimeLimit   int64 `json:"timeLimit"`
+	CreateTime  int64	`json:"CreateTime"`
+	EndTime  int64	`json:"CreateTime"`
 }
 
 //Cross-chain storage processing
@@ -621,19 +621,16 @@ type SpecialTxTypeMortgageInit FileIDArr
 //Cross-chain storage processing
 func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit SpecialTxTypeMortgageInit){
 	var genaroData GenaroData
-	timeUnix := strconv.FormatInt(time.Now().Unix(),10)
-	timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
-	fileID := hex.EncodeToString(timeUnixSha256[:])
 	if nil == self.data.CodeHash {
 		genaroData = GenaroData{
-			SpecialTxTypeMortgageInitArr:map[string]SpecialTxTypeMortgageInit {fileID:specialTxTypeMortgageInit},
+			SpecialTxTypeMortgageInitArr:map[string]SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit},
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if nil == genaroData.SpecialTxTypeMortgageInitArr {
-			genaroData.SpecialTxTypeMortgageInitArr = map[string]SpecialTxTypeMortgageInit {fileID:specialTxTypeMortgageInit}
+			genaroData.SpecialTxTypeMortgageInitArr = map[string]SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit}
 		} else {
-			genaroData.SpecialTxTypeMortgageInitArr[fileID] = specialTxTypeMortgageInit
+			genaroData.SpecialTxTypeMortgageInitArr[specialTxTypeMortgageInit.FileID] = specialTxTypeMortgageInit
 		}
 	}
 	genaroData.SpecialTxTypeMortgageInit = SpecialTxTypeMortgageInit{}

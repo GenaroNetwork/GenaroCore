@@ -216,7 +216,6 @@ type SpecialTxInput struct {
 	Type    int    `json:"type"`
 }
 
-
 func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
 	var err error
 	// 解析数据
@@ -253,10 +252,18 @@ func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address)
 		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v)
 	}
 	s.SpecialTxTypeMortgageInit.MortgagTmt=sumMortgageTable
+	s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
+	s.SpecialTxTypeMortgageInit.EndTime = s.SpecialTxTypeMortgageInit.TimeLimit * 86400 + s.SpecialTxTypeMortgageInit.CreateTime
 	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
 		return errors.New("update cross chain storage heft fail")
 	}
+	timeLimitGas := big.NewInt(s.SpecialTxTypeMortgageInit.TimeLimit * int64(len(mortgageTable)) * common.OneDayGes)
+	//timeLimitGas = (*big.Int)()s.SpecialTxTypeMortgageInit.TimeLimit *
+	//扣除抵押表全部费用+按照时间期限收费
+	sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
 	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
+	//时间期限收取的费用转账到官方账号
+	(*evm).StateDB.AddBalance(common.OfficialAddress, timeLimitGas)
 	return nil
 }
 
