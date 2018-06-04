@@ -38,6 +38,7 @@ var (
 
 )
 //费用
+
 var OneDayGes  int64 = int64(5000)
 //官方账号
 var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
