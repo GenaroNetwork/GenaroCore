@@ -72,8 +72,8 @@ const (
 
 const (
 	// 0x21 range - user-defined opcode
-	SENC OpCode = 0x21 + iota
-	DATA_VERSION_READ
+	//SENC OpCode = 0x21 + iota
+	DATA_VERSION_READ OpCode = 0x21 + iota
 	DATA_VERSION_UPDATE
 )
 
@@ -268,7 +268,7 @@ var opCodeToString = map[OpCode]string{
 	// 0x20 range - crypto
 	SHA3: "SHA3",
 	// user-defined opcode
-	SENC:               "SENC",
+	//SENC:               "SENC",
 	DATA_VERSION_READ:  "DATA_VERSION_READ",
 	DATA_VERSION_UPDATE: "DATA_VERSION_UPDATE",
 
@@ -562,7 +562,7 @@ var stringToOp = map[string]OpCode{
 	"SENTINEL_HEFT":      SENTINEL_HEFT,
 	"STORAGE_GAS_USED":   STORAGE_GAS_USED,
 	"STORAGE_GAS_PRICE":  STORAGE_GAS_PRICE,
-	"SENC":               SENC,
+	//"SENC":               SENC,
 	"DATA_VERSION_READ":  DATA_VERSION_READ,
 	"DATA_VERSION_UPDATE": DATA_VERSION_UPDATE,
 	"STORAGE_GAS":        STORAGE_GAS,
