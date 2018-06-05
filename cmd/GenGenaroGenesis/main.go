@@ -16,7 +16,7 @@ import (
 )
 
 func main(){
-	enaroConfig := &params.ChainConfig{
+	genaroConfig := &params.ChainConfig{
 		ChainId:             big.NewInt(300),
 		HomesteadBlock:      big.NewInt(1),
 		EIP150Block:         big.NewInt(2),
@@ -34,7 +34,7 @@ func main(){
 		},
 	}
 	genesis := new(core.Genesis)
-	genesis.Config = enaroConfig
+	genesis.Config = genaroConfig
 	genesis.Difficulty = big.NewInt(1)
 	genesis.GasLimit = 5000000
 	genesis.GasUsed = 0
