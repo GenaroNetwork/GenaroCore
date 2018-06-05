@@ -348,24 +348,17 @@ func NewFrontierInstructionSet() [256]operation {
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
-		SENC: {
-			execute:       opSenc,
-			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(4, 0),
-			memorySize:    memoryCodeCopy,
-			valid:         true,
-		},
 		DATA_VERSION_READ: {
 			execute:       opDataVerisonRead,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(1, 0),
+			validateStack: makeStackFunc(5, 1),
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
 		DATA_VERSION_UPDATE: {
 			execute:       opDataVerisonUpdate,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(1, 0),
+			validateStack: makeStackFunc(5, 0),
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
@@ -378,7 +371,7 @@ func NewFrontierInstructionSet() [256]operation {
 		STORAGE_GAS_PRICE: {
 			execute:       opStorageGasprice,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(0, 1),
+			validateStack: makeStackFunc(3, 1),
 			valid:         true,
 		},
 		EXTCODESIZE: {
@@ -433,13 +426,13 @@ func NewFrontierInstructionSet() [256]operation {
 		STORAGE_GAS_USED: {
 			execute:       opStorageGasUsed,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(0, 1),
+			validateStack: makeStackFunc(3, 1),
 			valid:         true,
 		},
 		SENTINEL_HEFT: {
 			execute:       opSentinelHeft,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(0, 1),
+			validateStack: makeStackFunc(1, 1),
 			valid:         true,
 		},
 		POP: {
@@ -512,7 +505,7 @@ func NewFrontierInstructionSet() [256]operation {
 		SSIZE: {
 			execute:       opSsize,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(0, 1),
+			validateStack: makeStackFunc(3, 1),
 			valid:         true,
 		},
 		GAS: {
@@ -524,7 +517,7 @@ func NewFrontierInstructionSet() [256]operation {
 		STORAGE_GAS: {
 			execute:       opStorageGas,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(0, 1),
+			validateStack: makeStackFunc(3, 1),
 			valid:         true,
 		},
 		JUMPDEST: {

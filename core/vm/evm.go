@@ -251,11 +251,8 @@ func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address)
 	for _, v := range mortgageTable{
 		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v)
 	}
-	s.SpecialTxTypeMortgageInit.MortgagTmt=sumMortgageTable
-	s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
-	s.SpecialTxTypeMortgageInit.EndTime = s.SpecialTxTypeMortgageInit.TimeLimit * 86400 + s.SpecialTxTypeMortgageInit.CreateTime
 	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
-		return errors.New("update cross chain storage heft fail")
+		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
 	}
 	timeLimitGas := big.NewInt(s.SpecialTxTypeMortgageInit.TimeLimit * int64(len(mortgageTable)) * common.OneDayGes)
 	//timeLimitGas = (*big.Int)()s.SpecialTxTypeMortgageInit.TimeLimit *

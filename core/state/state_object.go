@@ -608,11 +608,12 @@ type FileIDArr struct {
 	AuthorityTable 	map[common.Address]int	`json:"authority"`
 	FileID 			string		`json:"fileID"`
 	Dataversion	map[int]string	`json:"dataversion"`
-	MortgagTmt	*big.Int	`json:"mortgagTmt"`
+	MortgagTotal	*big.Int	`json:"MortgagTotal"`
 	LogSwitch 	bool	`json:"logSwitch"`
 	TimeLimit   int64 `json:"timeLimit"`
 	CreateTime  int64	`json:"CreateTime"`
-	EndTime  int64	`json:"CreateTime"`
+	EndTime  int64	`json:"EndTime"`
+	FromAccount common.Address 	`json:"fromAccount"`
 }
 
 //Cross-chain storage processing
@@ -649,7 +650,6 @@ func (self *stateObject)GetAccountAttributes() (map[string]SpecialTxTypeMortgage
 	if self.data.CodeHash != nil {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		fmt.Println(genaroData.SpecialTxTypeMortgageInitArr)
 		return genaroData.SpecialTxTypeMortgageInitArr
 	}
 
