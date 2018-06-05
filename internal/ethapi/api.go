@@ -1016,34 +1016,48 @@ func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txTy
 			specialTx = append(specialTx, rpcTx)
 		}
 	}
-	fmt.Println(len(specialTx))
 	return specialTx
 }
 
 func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
 	// 解析transaction的Payload域值
+	if tx.Data() == nil && len(tx.Data()) != 0{
+		return false
+	}
 	var s vm.SpecialTxInput
 	err := json.Unmarshal(tx.Data(), &s)
 	if err != nil{
-		//return errors.New("special tx error： the extraData parameters of the wrong format")
-		fmt.Println("unmarsonal error ")
+		fmt.Println("Unmarshal error ", err)
 		return false
 	}
 	return uint64(s.Type) == uint64(txType)
 }
 
-func (s *PublicTransactionPoolAPI) GetTrafficTxInfo() interface{} {
-	return nil
+// GetTrafficTxInfo get informations of special transaction of traffic apply
+func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []map[string]uint64 {
+	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeTrafficApply))
+	var retMap []map[string]uint64
+	for _, v := range rpcTx {
+		var s vm.SpecialTxInput
+		json.Unmarshal([]byte(v.Input), &s)
+		m := make(map[string]uint64)
+		m[s.NodeId] = s.Traffic
+		retMap = append(retMap, m)
+
+	}
+	return retMap
 }
 
 // GetBucketTxInfo get informations of special transaction of bucket apply
-func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) map[string]interface{} {
-	//rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
-	////retMap := make(map[string]interface{})
-	//for _, v := range rpcTx {
-	//	v.Input
-	//}
-	return nil
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []map[string]*state.BucketPropertie {
+	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
+	var retMap []map[string]*state.BucketPropertie
+	for _, v := range rpcTx {
+		var s vm.SpecialTxInput
+		json.Unmarshal([]byte(v.Input), &s)
+		retMap = append(retMap, s.Buckets)
+	}
+	return retMap
 }
 
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.
