@@ -62,7 +62,8 @@ func TestExtraData(t *testing.T){
 	}
 
 	addrs2 := genAddrs(n)
-	SetHeaderCommitteeRankList(&data,addrs2)
+	proportion := genProportion(10)
+	SetHeaderCommitteeRankList(&data,addrs2,proportion)
 	extra = UnmarshalToExtra(&data)
 	for i:=0;i<n;i++ {
 		if bytes.Compare(extra.CommitteeRank[i].Bytes(), addrs2[i].Bytes()) !=0 {
@@ -70,7 +71,7 @@ func TestExtraData(t *testing.T){
 		}
 	}
 
-	addr3 := GetHeaderCommitteeRankList(&data)
+	addr3,proportion := GetHeaderCommitteeRankList(&data)
 	for i:=0;i<n;i++ {
 		if bytes.Compare(addr3[i].Bytes(), addrs2[i].Bytes()) !=0 {
 			t.Error("TestExtraData GetHeaderCommitteeRankList error")

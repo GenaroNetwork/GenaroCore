@@ -36,7 +36,7 @@ type Stake struct {
 
 // newSnapshot creates a new snapshot with the specified startup parameters.
 func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, epochNumber uint64,
-	committeeRank []common.Address, committee map[common.Address]uint64, proportion []uint64) *CommitteeSnapshot {
+	committeeRank []common.Address, proportion []uint64) *CommitteeSnapshot {
 	snap := &CommitteeSnapshot{
 		config:				config,
 		WriteBlockNumber:	number,
