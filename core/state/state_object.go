@@ -113,7 +113,7 @@ type GenaroData struct {
 	SpecialTxTypeMortgageInit 	SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInit"`
 	SpecialTxTypeMortgageInitArr 	map[string]SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInitArr"`
 	Traffic         uint64                      `json:"traffic"`
-	Buckets  map[string]*BucketPropertie	`json:"bucketP"`
+	Buckets         []*BucketPropertie	`json:"buckets"`
 }
 
 type BucketPropertie struct {
@@ -476,30 +476,26 @@ func (self *stateObject)GetStake() (uint64){
 }
 
 func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
-	bpm := make(map[string]*BucketPropertie)
+	var bpArr []*BucketPropertie
 	bp := new(BucketPropertie)
 
 	if szie != 0 {bp.Size = szie}
 	if backup != 0 {bp.Backup = backup}
 	if timestart != 0 {bp.TimeStart = timestart}
 	if timeend != 0 {bp.TimeEnd = timeend}
-	bpm[buckid] = bp
+	bpArr = append(bpArr, bp)
 
 	var genaroData GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = GenaroData{
-			Buckets: bpm,
+			Buckets: bpArr,
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if genaroData.Buckets == nil {
-			genaroData.Buckets = bpm
+			genaroData.Buckets = bpArr
 		}else {
-			if _, ok := genaroData.Buckets[buckid]; !ok {
-				genaroData.Buckets[buckid] = bp
-			}else {
-				//todo：if those properties for this bucket have existed ，how to deal with it
-			}
+			genaroData.Buckets = append(genaroData.Buckets, bpArr...)
 		}
 	}
 
@@ -518,8 +514,10 @@ func (self *stateObject)getBucketPropertie(bucketID string) *BucketPropertie {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if genaroData.Buckets != nil {
-			if fp, ok := genaroData.Buckets[bucketID]; ok {
-				return fp
+			for _, v := range genaroData.Buckets {
+				if v.BucketId == bucketID {
+					return v
+				}
 			}
 		}
 	}
@@ -594,8 +592,8 @@ func (self *stateObject)GetBuckets() map[string]interface{} {
 		var genaroData GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if genaroData.Buckets != nil {
-			for k, v := range genaroData.Buckets {
-				rtMap[k] = *v
+			for _, v := range genaroData.Buckets {
+				rtMap[v.BucketId] = *v
 			}
 		}
 	}

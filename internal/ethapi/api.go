@@ -1049,13 +1049,13 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 }
 
 // GetBucketTxInfo get informations of special transaction of bucket apply
-func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []map[string]*state.BucketPropertie {
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*state.BucketPropertie {
 	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
-	var retMap []map[string]*state.BucketPropertie
+	var retMap []*state.BucketPropertie
 	for _, v := range rpcTx {
 		var s vm.SpecialTxInput
 		json.Unmarshal([]byte(v.Input), &s)
-		retMap = append(retMap, s.Buckets)
+		retMap = append(retMap, s.Buckets...)
 	}
 	return retMap
 }
@@ -1273,13 +1273,13 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		case common.SpecialTxTypeSpaceApply:
-			b := make(map[string]*state.BucketPropertie)
-			for k, v := range s.Buckets{
+			var b []*state.BucketPropertie
+			for _, v := range s.Buckets{
 				t := time.Now()
 				r := rand.New(rand.NewSource(t.UnixNano()))
 				bucketID := s.NodeId + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
 				v.BucketId = bucketID
-				b[k] = v
+				b = append(b, v)
 			}
 			s.Buckets = b
 			input,_ := json.Marshal(s)
