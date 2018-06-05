@@ -35,6 +35,8 @@ var (
 
 	//SpecialTxTypeMortgageTerminate类型的交易代表用户押注结束时的结算交易
 	SpecialTxTypeMortgageTerminate int = 6
+	//SpecialTxTypeSyncSidechainStatus类型的交易代表同步侧链状态
+	SpecialTxTypeSyncSidechainStatus int = 7
 
 )
 //费用

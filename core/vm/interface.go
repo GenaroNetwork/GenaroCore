@@ -76,7 +76,7 @@ type StateDB interface {
 	GetStorageGasUsed(common.Address, string)  (uint64, error)
 	GetStorageGas(common.Address, string)  (uint64, error)
 	SpecialTxTypeMortgageInit(common.Address,state.SpecialTxTypeMortgageInit) bool
-
+	SpecialTxTypeSyncSidechainStatus(common.Address,state.SpecialTxTypeMortgageInit) bool
 	UpdateTraffic(common.Address, uint64) bool
 
 	GetTraffic(common.Address)uint64

@@ -237,11 +237,19 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateStorageProperties(&evm.StateDB,  s)
 	case common.SpecialTxTypeMortgageInit: // 交易代表用户押注初始化交易
 		err = specialTxTypeMortgageInit(evm, s,caller)
-
+	case common.SpecialTxTypeSyncSidechainStatus: // 交易代表用户押注初始化交易
+		err = SpecialTxTypeSyncSidechainStatus(evm, s)
 	case common.SpecialTxTypeTrafficApply: //用户申购流量
 		err = updateTraffic(&evm.StateDB, s)
 	}
 	return err
+}
+
+func SpecialTxTypeSyncSidechainStatus(evm *EVM, s SpecialTxInput) error  {
+	if !(*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit) {
+		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+	}
+	return nil
 }
 
 func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address) error{
