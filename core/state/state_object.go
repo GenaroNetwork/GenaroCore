@@ -122,6 +122,30 @@ type CandidateInfo struct {
 	Signer       common.Address // peer address
 	Heft uint64         // the sentinel of the peer
 	Stake        uint64         // the stake of the peer
+	Point		 uint64
+}
+
+type CandidateInfos []CandidateInfo
+
+func (c CandidateInfos) Len() int {
+	return len(c)
+}
+
+func (c CandidateInfos) Swap(i, j int) {
+	c[i].Signer, c[j].Signer = c[j].Signer, c[i].Signer
+	c[i].Heft, c[j].Heft = c[j].Heft, c[i].Heft
+	c[i].Stake, c[j].Stake = c[j].Stake, c[i].Stake
+}
+
+func (c CandidateInfos) Less(i, j int) bool {
+	return c[i].Point < c[j].Point
+}
+
+func (c CandidateInfos) Apply() {
+	//TODO define how to get point
+	for _, candidate := range c{
+		candidate.Point = candidate.Stake + candidate.Heft
+	}
 }
 
 type FilePropertie struct {

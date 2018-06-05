@@ -20,12 +20,27 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"sort"
 )
 
 const (
-	wiggleTime        = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
-	inmemorySnapshots = 128                    // Number of recent snapshots to keep in memory
-	epochLength       = uint64(5000)           // Default number of blocks a turn
+	wiggleTime					= 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
+	inmemorySnapshots			= 128                    // Number of recent snapshots to keep in memory
+	epochLength					= uint64(5000)           // Default number of blocks a turn
+	epochPerYear				= uint64(12)
+	SurplusCoinAddress			= "aaa"
+	CoinActualRewardsAddress	= "bbb"
+	StorageActualRewardsAddress	= "ccc"
+	Pre							= "pre"
+	TotalActualRewardsAddress	= "ggg"
+)
+
+var (
+	totalRewards			*big.Int = big.NewInt(700000000e+18)
+	coinRewardsRatio				 = 1250
+	storageRewardsRatio				 = 1250
+	ratioPerYear					 = 700
+	base							 = 10000
 )
 
 var (
@@ -89,6 +104,7 @@ func ecrecover(header *types.Header) (common.Address, error) {
 		return common.Address{}, errEmptyExtra
 	}
 	signature := extraData.Signature
+	//Why reset??
 	ResetHeaderSignature(header)
 	// Recover the public key and the Ethereum address
 	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
@@ -152,20 +168,20 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, g.signer, number)
 	// if we reach the point that should get Committee written in the block
-	if number == GetLastBlockNumberOfEpoch(g.config, currEpochNumber) {
-		// get committee rank material period
-		materialPeriod := currEpochNumber - g.config.ElectionPeriod
-		// load committee rank from db or generateCommittee from material period
-		writeSnap, err := g.snapshot(chain, materialPeriod)
-		if err != nil {
-			return err
-		}
-		// write the committee rank into Block's Extra
-		err = SetHeaderCommitteeRankList(header, writeSnap.CommitteeRank)
-		if err != nil {
-			return err
-		}
-	}
+	//if number == GetLastBlockNumberOfEpoch(g.config, currEpochNumber) {
+	//	// get committee rank material period
+	//	materialPeriod := currEpochNumber - g.config.ElectionPeriod
+	//	// load committee rank from db or generateCommittee from material period
+	//	writeSnap, err := g.snapshot(chain, materialPeriod)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	// write the committee rank into Block's Extra
+	//	err = SetHeaderCommitteeRankList(header, writeSnap.CommitteeRank)
+	//	if err != nil {
+	//		return err
+	//	}
+	//}
 	// Mix digest is reserved for now, set to empty
 	header.MixDigest = common.Hash{}
 	// Ensure the timestamp has the correct delay
@@ -270,9 +286,16 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		return nil, nil
 	}else{
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
-		// TODO Computing rank in startBlock and endBlock
 		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
 		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
+		h := chain.GetHeaderByNumber(endBlock+1)
+		var proportion []uint64
+		snap.CommitteeRank, proportion = GetHeaderCommitteeRankList(h)
+		snap.Committee = make(map[common.Address]uint64, len(proportion))
+		for i := 0; i < len(proportion); i++{
+			snap.Committee[snap.CommitteeRank[i]] = proportion[i]
+		}
+
 		log.Trace("computing rank from", startBlock, "to", endBlock)
 		isCreateNew = true
 	}
@@ -306,7 +329,6 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 		if committeeSize == 0 || committeeSize > g.config.CommitteeMaxSize {
 			return errInvalidEpochBlock
 		}
-		//TODO check committee
 	}
 	// get current committee snapshot
 	currentEpochNumber := GetTurnOfCommiteeByBlockNumber(g.config, blockNumber)
@@ -353,13 +375,82 @@ func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 	return nil
 }
 
+func (g *Genaro) rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
+	candidateInfos.Apply()
+	sort.Sort(candidateInfos)
+	committeeRank := make([]common.Address, len(candidateInfos))
+	proportion := make([]uint64, len(candidateInfos))
+	total := uint64(0)
+	for _, c := range candidateInfos{
+		total += c.Stake
+	}
+	for i, c := range candidateInfos{
+		committeeRank[i] = c.Signer
+		proportion[i] = c.Stake*uint64(base)/total
+	}
+
+	return committeeRank, proportion
+}
+
+func updateEpochRewards(state *state.StateDB)  {
+	//reset CoinActualRewards and StorageActualRewards, add TotalActualRewards
+	coinrewards := state.GetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)))
+	storagerewards := state.GetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)))
+
+	state.SetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)), coinrewards)
+	state.SetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)), storagerewards)
+
+	state.SetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), big.NewInt(0))
+	state.SetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), big.NewInt(0))
+
+	state.AddBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), coinrewards)
+	state.AddBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), storagerewards)
+}
+
+func updateEpochYearRewards(state *state.StateDB)  {
+	surplusrewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+	state.SetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)), surplusrewards)
+
+	totalRewards := state.GetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)))
+	state.SubBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), totalRewards)
+	state.SetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), big.NewInt(0))
+}
+
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+	//commit rank
+	blockNumber := header.Number.Uint64()
+	if blockNumber%g.config.Epoch == 0 {
+		//rank
+		epochStartBlockNumber := blockNumber - g.config.Epoch
+		epochEndBlockNumber := blockNumber
+		candidateInfos := state.GetCandidatesInfoInRange(epochStartBlockNumber, epochEndBlockNumber)
+		commiteeRank, proportion := g.rank(candidateInfos)
+		if uint64(len(candidateInfos)) <= g.config.CommitteeMaxSize {
+			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
+		}else{
+			SetHeaderCommitteeRankList(header, commiteeRank[:g.config.CommitteeMaxSize],proportion[:g.config.CommitteeMaxSize])
+		}
+		//CoinActualRewards and StorageActualRewards should update per epoch
+		updateEpochRewards(state)
+	}
+	if blockNumber%(epochPerYear*g.config.Epoch) == 0 {
+		//CoinActualRewards and StorageActualRewards should update per epoch, surplusCoin should update per year
+		updateEpochYearRewards(state)
+	}
+
+	currEpochNumber := GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64())
+
+	snap, err := g.snapshot(chain, currEpochNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
+	if err != nil {
+		return nil, err
+	}
+	proportion := snap.Committee[header.Coinbase]
 	//  coin interest reward
-	accumulateInterestRewards(g.config, state, header, chain)
+	accumulateInterestRewards(g.config, state, header, chain, proportion, blockNumber)
 	// storage reward
-	accumulateStorageRewards(g.config, state, header, chain)
+	accumulateStorageRewards(g.config, state, header, chain, blockNumber)
 
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
@@ -368,18 +459,114 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	return types.NewBlock(header, txs, nil, receipts), nil
 }
 
-// AccumulateInterestRewards credits the reward to the block author by coin  interest
-func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, chain consensus.ChainReader) {
-	// TODO computing coin-interesting
-	blockReward := uint64(0)
+func getCoinCofficient(coinrewards, surplusRewards *big.Int) uint64 {
+	planrewards := big.NewInt(0)
+	//get total coinReward
+	planrewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
+	planrewards.Div(planrewards, big.NewInt(int64(base)))
+	//get coinReward perYear
+	planrewards.Div(planrewards, big.NewInt(int64(ratioPerYear)))
+	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	//get coinReward perEpoch
+	planrewards.Div(planrewards, big.NewInt(int64(epochLength)))
+	//get coefficient
+	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	coinRatio := planrewards.Div(planrewards, coinrewards).Uint64()
+	return coinRatio
+}
 
-	reward := new(big.Int).SetUint64(blockReward)
+func getStorageCoefficient(storagerewards, surplusRewards *big.Int) uint64 {
+	planrewards := big.NewInt(0)
+	//get total storageReward
+	planrewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
+	planrewards.Div(planrewards, big.NewInt(int64(base)))
+	//get storageReward perYear
+	planrewards.Div(planrewards, big.NewInt(int64(ratioPerYear)))
+	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	//get storageReward perEpoch
+	planrewards.Div(planrewards, big.NewInt(int64(epochLength)))
+	//get coefficient
+	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	storageRatio := planrewards.Div(planrewards, storagerewards).Uint64()
+	return storageRatio
+}
+
+// AccumulateInterestRewards credits the reward to the block author by coin  interest
+func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, chain consensus.ChainReader, proportion uint64, blockNumber uint64) error {
+	preCoinRewards := state.GetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)))
+	preSurplusRewards := big.NewInt(0)
+	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
+	if blockNumber%(epochLength*epochPerYear) == 0 {
+		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)))
+	}else{
+		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+	}
+	coefficient := getCoinCofficient(preCoinRewards, preSurplusRewards)
+
+	surplusRewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+	//plan rewards per year
+	planRewards := surplusRewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
+	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	//plan rewards per epoch
+	planRewards.Div(planRewards, big.NewInt(int64(epochPerYear)))
+	//Coefficient adjustment
+	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
+	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	//this addr should get
+	planRewards.Mul(planRewards, big.NewInt(int64(proportion)))
+	planRewards.Div(planRewards, big.NewInt(int64(base)))
+
+	blockReward := big.NewInt(0)
+	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch)))
+
+	reward := new(big.Int).SetUint64(blockReward.Uint64())
 	state.AddBalance(header.Coinbase, reward)
+	state.AddBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), reward)
+	return nil
 }
 
 // AccumulateStorageRewards credits the reward to the sentinel owner
-func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, chain consensus.ChainReader) {
-	// TODO computing storage rewards
+func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, chain consensus.ChainReader, blockNumber uint64) error {
+	preStorageRewards := state.GetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)))
+	preSurplusRewards := big.NewInt(0)
+	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
+	if blockNumber%(epochLength*epochPerYear) == 0 {
+		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)))
+	}else{
+		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+	}
+	coefficient := getCoinCofficient(preStorageRewards, preSurplusRewards)
+
+	surplusRewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+	//plan rewards per year
+	planRewards := surplusRewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
+	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	//plan rewards per epoch
+	planRewards.Div(planRewards, big.NewInt(int64(epochPerYear)))
+	//Coefficient adjustment
+	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
+	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	//plan rewards per block
+	blockReward := big.NewInt(0)
+	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch)))
+
+	//allocate blockReward
+	cs := state.GetCandidates()
+	total := uint64(0)
+	contributes := make([]uint64, len(cs))
+	for i, c := range cs{
+		contributes[i] = state.GetHeftLastDiff(c, blockNumber)
+		total += contributes[i]
+	}
+
+	for i, c := range cs{
+		reward := big.NewInt(0)
+		reward.Mul(blockReward, big.NewInt(int64(contributes[i])))
+		reward.Div(blockReward, big.NewInt(int64(total)))
+		state.AddBalance(c, reward)
+		state.AddBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), reward)
+	}
+	return nil
 }
 
 // VerifyHeader checks whether a header conforms to the consensus rules of a

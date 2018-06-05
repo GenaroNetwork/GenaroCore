@@ -13,13 +13,13 @@ import (
 // Snapshot will not be stored immediately. It will be stored in EpochNumber + ElectionPeriod
 // Snapshot will be valid in EpochNumber + ElectionPeriod + ValidPeriod
 type CommitteeSnapshot struct {
-	config           *params.GenaroConfig             //genaro config
-	WriteBlockNumber uint64                           // Block number where the snapshot was created
-	WriteBlockHash   common.Hash                      // BlockHash as the snapshot key
-	EpochNumber      uint64                           // the turn of Committee
-	CommitteeSize    uint64                           // the size of Committee
-	CommitteeRank    []common.Address                 // the rank of committee
-	Committee        map[common.Address]CommitteeInfo // committee members
+	config					*params.GenaroConfig             //genaro config
+	WriteBlockNumber		uint64                           // Block number where the snapshot was created
+	WriteBlockHash			common.Hash                      // BlockHash as the snapshot key
+	EpochNumber				uint64                           // the turn of Committee
+	CommitteeSize			uint64                           // the size of Committee
+	CommitteeRank			[]common.Address                 // the rank of committee
+	Committee				map[common.Address]uint64		 // committee members
 }
 
 type Stake struct {
@@ -28,31 +28,33 @@ type Stake struct {
 	Staker      common.Address
 }
 
-type CommitteeInfo struct {
-	Signer       common.Address // peer address
-	SentinelHEFT uint64         // the sentinel of the peer
-	Stake        uint64         // the stake of the peer
-}
+//type CommitteeInfo struct {
+//	Signer       common.Address // peer address
+//	SentinelHEFT uint64         // the sentinel of the peer
+//	Stake        uint64         // the stake of the peer
+//}
 
 // newSnapshot creates a new snapshot with the specified startup parameters.
-func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, epochNumber uint64, committeeRank []common.Address, committee map[common.Address]CommitteeInfo) *CommitteeSnapshot {
+func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, epochNumber uint64,
+	committeeRank []common.Address, committee map[common.Address]uint64, proportion []uint64) *CommitteeSnapshot {
 	snap := &CommitteeSnapshot{
-		config:           config,
-		WriteBlockNumber: number,
-		WriteBlockHash:   hash,
-		EpochNumber:      epochNumber,
-		CommitteeRank:    make([]common.Address, len(committeeRank)),
-		Committee:        make(map[common.Address]CommitteeInfo),
+		config:				config,
+		WriteBlockNumber:	number,
+		WriteBlockHash:		hash,
+		EpochNumber:		epochNumber,
+		CommitteeRank:		make([]common.Address, len(committeeRank)),
+		Committee:			make(map[common.Address]uint64, len(committeeRank)),
 	}
 	snap.CommitteeSize = uint64(len(snap.CommitteeRank))
 
 	for i, rank := range committeeRank {
 		snap.CommitteeRank[i] = rank
+		snap.Committee[rank] = proportion[i]
 	}
 
-	for key, val := range committee {
-		snap.Committee[key] = val
-	}
+	//for key, val := range committee {
+	//	snap.Committee[key] = val
+	//}
 
 	return snap
 }
@@ -95,7 +97,7 @@ func (s *CommitteeSnapshot) copy() *CommitteeSnapshot {
 		EpochNumber:      s.EpochNumber,
 		CommitteeSize:    s.CommitteeSize,
 		CommitteeRank:    make([]common.Address, s.CommitteeSize),
-		Committee:        make(map[common.Address]CommitteeInfo),
+		Committee:        make(map[common.Address]uint64),
 	}
 	for i, rank := range s.CommitteeRank {
 		cpy.CommitteeRank[i] = rank

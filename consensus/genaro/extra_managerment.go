@@ -12,6 +12,7 @@ type ExtraData struct {
 	CommitteeRank []common.Address `json:"committeeRank"` // rank of committee
 	EVMData       []byte           `json:"eVMData"`       // evm data
 	Signature     []byte           `json:"signature"`     // the signature of block broadcaster
+	Proportion	  []uint64		   `json:"ratio"`
 }
 
 func UnmarshalToExtra(header *types.Header) *ExtraData {
@@ -38,10 +39,12 @@ func SetHeaderSignature(header *types.Header, signature []byte) {
 	copy(header.Extra, extraByte)
 }
 
-func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Address) error {
+func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Address, proportion []uint64) error {
 	extraData := UnmarshalToExtra(header)
 	extraData.CommitteeRank = make([]common.Address, len(committeeRank))
 	copy(extraData.CommitteeRank, committeeRank)
+	extraData.Proportion = make([]uint64, len(proportion))
+	copy(extraData.Proportion, proportion)
 	extraByte, err := json.Marshal(extraData)
 	if err != nil {
 		return err
@@ -52,9 +55,9 @@ func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Add
 }
 
 
-func GetHeaderCommitteeRankList(header *types.Header) []common.Address {
+func GetHeaderCommitteeRankList(header *types.Header) ([]common.Address, []uint64) {
 	extraData := UnmarshalToExtra(header)
-	return extraData.CommitteeRank
+	return extraData.CommitteeRank, extraData.Proportion
 }
 
 func CreateCommitteeRankByte(address []common.Address) []byte {
