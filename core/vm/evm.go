@@ -244,8 +244,12 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 }
 
 func SpecialTxTypeSyncSidechainStatus(evm *EVM, s SpecialTxInput) error  {
-	if !(*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit) {
+	restlt,flag := (*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit)
+	if  false == flag{
 		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+	}
+	for k,v := range restlt {
+		(*evm).StateDB.AddBalance(k, v)
 	}
 	return nil
 }
@@ -257,6 +261,7 @@ func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address)
 	for _, v := range mortgageTable{
 		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v)
 	}
+	s.SpecialTxTypeMortgageInit.MortgagTotal = sumMortgageTable
 	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
 		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
 	}

@@ -662,43 +662,47 @@ func (self *stateObject)GetAccountAttributes() (map[string]SpecialTxTypeMortgage
 
 
 
-func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit) bool {
+func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit)(Sidechain, bool) {
 	var genaroData GenaroData
-	fmt.Println(SpecialTxTypeSyncSidechainStatus.Sidechain)
-	fmt.Println(SpecialTxTypeSyncSidechainStatus.FileID)
-	fmt.Println(SpecialTxTypeSyncSidechainStatus.FromAccount)
-	fmt.Println(SpecialTxTypeSyncSidechainStatus.Terminate)
-	fmt.Println(SpecialTxTypeSyncSidechainStatus.Dataversion)
-
-
+	AddBalance :=make(Sidechain)
 	if nil == self.data.CodeHash {
-		return  false
+		return  nil,false
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		fileID := SpecialTxTypeSyncSidechainStatus.FileID
 		result := genaroData.SpecialTxTypeMortgageInitArr[fileID]
 		if 0 == len(result.MortgageTable) || len(result.MortgageTable) != len(result.AuthorityTable) ||
 			len(result.MortgageTable) != len(SpecialTxTypeSyncSidechainStatus.Sidechain){
-			return false
+			return nil,false
 		}
-		if result.EndTime > time.Now().Unix() && false == SpecialTxTypeSyncSidechainStatus.Terminate{
-			for k,v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
-				genaroData.SpecialTxTypeMortgageInitArr[fileID].SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion][k] = v
+		if result.EndTime > time.Now().Unix() && false == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate{
+			if 0 == len(result.SidechainStatus) {
+				result.SidechainStatus = make(map[string] map[common.Address] *big.Int)
 			}
-		}else if (result.EndTime > time.Now().Unix() && true == SpecialTxTypeSyncSidechainStatus.Terminate) ||
-			(result.EndTime < time.Now().Unix() && true == SpecialTxTypeSyncSidechainStatus.Terminate){
-			for k,v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
-				fmt.Println("#############")
-				fmt.Println(k)
-				fmt.Println(v)
-				fmt.Println(SpecialTxTypeSyncSidechainStatus.Dataversion)
-				fmt.Println(genaroData.SpecialTxTypeMortgageInitArr[fileID].SidechainStatus)
-				//fmt.Println(genaroData.SpecialTxTypeMortgageInitArr[fileID].SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion][k])
-				//genaroData.SpecialTxTypeMortgageInitArr[fileID].SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion][k] = v
+			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
+		}else if  true == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate{
+			if 0 == len(result.SidechainStatus) {
+				result.SidechainStatus = make(map[string] map[common.Address] *big.Int)
 			}
+			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
+			useMortgagTotal	:= new(big.Int)
+			for k,v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
+				if common.ReadWrite == result.AuthorityTable[k] || common.Write == result.AuthorityTable[k] {
+					if result.MortgageTable[k].Cmp(v) > -1{
+						AddBalance[k] = v
+						useMortgagTotal.Add(useMortgagTotal,v)
+					} else {
+						AddBalance[k] = result.MortgageTable[k]
+						useMortgagTotal.Add(useMortgagTotal,result.MortgageTable[k])
+					}
+				}
+			}
+			AddBalance[result.FromAccount] = result.MortgagTotal.Sub(result.MortgagTotal,useMortgagTotal)
+			result.Terminate = true
 		}else {
-			return false
+			return nil, false
 		}
+		genaroData.SpecialTxTypeMortgageInitArr[fileID] = result
 	}
 	genaroData.SpecialTxTypeMortgageInit = SpecialTxTypeMortgageInit{}
 	b, _ := json.Marshal(genaroData)
@@ -709,5 +713,5 @@ func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidech
 		self.onDirty(self.Address())
 		self.onDirty = nil
 	}
-	return  true
+	return AddBalance, true
 }

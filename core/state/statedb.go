@@ -775,13 +775,13 @@ func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]Specia
 }
 
 
-func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit) bool {
+func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit) (Sidechain, bool) {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
-		restlt := stateObject.SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus)
-		if true == restlt {
-			return  true
+		restlt,flag := stateObject.SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus)
+		if true == flag {
+			return restlt, true
 		}
 	}
-	return false
+	return nil,false
 }
