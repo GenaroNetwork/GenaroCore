@@ -1033,19 +1033,28 @@ func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
 	return uint64(s.Type) == uint64(txType)
 }
 
+
+type rpcTrafficInfo struct {
+	NodeId  string  `json:"nodeId"`
+	Traffic uint64  `json:"traffic"`
+	//Hash    common.Hash  `json:"hash"`
+}
+
 // GetTrafficTxInfo get informations of special transaction of traffic apply
-func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []map[string]uint64 {
+func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcTrafficInfo {
 	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeTrafficApply))
-	var retMap []map[string]uint64
+	var retArr[]*rpcTrafficInfo
 	for _, v := range rpcTx {
 		var s vm.SpecialTxInput
 		json.Unmarshal([]byte(v.Input), &s)
-		m := make(map[string]uint64)
-		m[s.NodeId] = s.Traffic
-		retMap = append(retMap, m)
+		r := new(rpcTrafficInfo)
+		r.NodeId = s.NodeId
+		r.Traffic = s.Traffic
+		//r.Hash = v.Hash
+		retArr = append(retArr, r)
 
 	}
-	return retMap
+	return retArr
 }
 
 
