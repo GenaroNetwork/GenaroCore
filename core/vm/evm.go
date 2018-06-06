@@ -27,8 +27,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"strconv"
-	"math/rand"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
@@ -234,13 +232,13 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		*sentinelHeft = *sentinelHeft + 1
 
 	case common.SpecialTxTypeSpaceApply: // 申请存储空间
-		err = updateStorageProperties(&evm.StateDB,  s)
+		err = updateStorageProperties(evm, s, caller)
 	case common.SpecialTxTypeMortgageInit: // 交易代表用户押注初始化交易
 		err = specialTxTypeMortgageInit(evm, s,caller)
 	case common.SpecialTxTypeSyncSidechainStatus: // 交易代表用户押注初始化交易
 		err = SpecialTxTypeSyncSidechainStatus(evm, s)
 	case common.SpecialTxTypeTrafficApply: //用户申购流量
-		err = updateTraffic(&evm.StateDB, s)
+		err = updateTraffic(evm, s, caller)
 	}
 	return err
 }
@@ -272,8 +270,21 @@ func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address)
 	return nil
 }
 
-func updateStorageProperties(statedb *StateDB,  s SpecialTxInput) error {
+func updateStorageProperties(evm *EVM, s SpecialTxInput,caller common.Address) error {
 	adress := common.HexToAddress(s.NodeId)
+
+	var totalCost uint64
+	for _, v := range s.Buckets {
+		oneCost := v.Size/v.Duration
+		totalCost += oneCost
+	}
+
+	totalGas := big.NewInt(int64(totalCost) * common.BucketApplyGasPerGPerDay)
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
 
 	for _, b := range s.Buckets {
 		bucketId := b.BucketId
@@ -281,17 +292,16 @@ func updateStorageProperties(statedb *StateDB,  s SpecialTxInput) error {
 			return errors.New("endTime must larger then startTime")
 		}
 		// 根据nodeid更新heft值
-		if !(*statedb).UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
+		if !(*evm).StateDB.UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
 			return errors.New("update user's bucket fail")
 		}
 	}
-	return nil
-}
 
-func newBucketId(s string, t time.Time) string{
-	r := rand.New(rand.NewSource(t.UnixNano()))
-	bucketID := s + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
-	return bucketID
+	//扣除费用
+	(*evm).StateDB.SubBalance(caller, totalGas)
+	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, totalGas)
+
+	return nil
 }
 
 
@@ -304,12 +314,25 @@ func updateHeft(statedb *StateDB, s SpecialTxInput) error {
 	return nil
 }
 
-func updateTraffic(statedb *StateDB, s SpecialTxInput) error {
+func updateTraffic(evm *EVM, s SpecialTxInput,caller common.Address) error {
 	adress := common.HexToAddress(s.NodeId)
+
+
+	totalGas := big.NewInt(int64(s.Traffic) * common.TrafficApplyGasPerG)
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
+
 	// 根据nodeid更新heft值
-	if !(*statedb).UpdateTraffic(adress, s.Traffic) {
+	if !(*evm).StateDB.UpdateTraffic(adress, s.Traffic) {
 		return errors.New("update user's teraffic fail")
 	}
+
+	(*evm).StateDB.SubBalance(caller, totalGas)
+	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, totalGas)
+
 	return nil
 }
 

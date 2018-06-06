@@ -12,7 +12,7 @@ var (
 	//     四、空间流量申请:       交易发起方为用户，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为4
 	//     五、跨链交易init:      交易发起方为用户，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为5
 	//     六、跨链交易terminate: 交易发起方为用户，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为6
-	SpecialSyncAddress Address = HexToAddress("0x0000000000000000000000000000000000000000")
+	SpecialSyncAddress Address = HexToAddress("0xc1b2e1fc9d2099f5930a669c9ad65509433550d6")
 )
 
 
@@ -42,5 +42,8 @@ var (
 //费用
 
 var OneDayGes  int64 = int64(5000)
+var BucketApplyGasPerGPerDay  int64 = int64(5000)
+var TrafficApplyGasPerG	 int64 = int64(5000)
+
 //官方账号
 var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
