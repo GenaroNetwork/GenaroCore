@@ -117,11 +117,12 @@ type GenaroData struct {
 }
 
 type BucketPropertie struct {
-	BucketId         string `name:"bucketId"`
+	BucketId         string `json:"bucketId"`
 
 	// 开始时间和结束时间共同表示存储空间的时长，对应STORAGEGAS指令
 	TimeStart        uint64	`json:"timeStart"`
 	TimeEnd          uint64	`json:"timeEnd"`
+	Duration         uint64 `json:"duration"`
 
 	// 备份数，对应STORAGEGASPRICE指令
 	Backup           uint64 `json:"backup"`
