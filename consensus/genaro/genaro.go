@@ -36,7 +36,7 @@ const (
 )
 
 var (
-	totalRewards			*big.Int = big.NewInt(700000000e+18)
+	//totalRewards			*big.Int = big.NewInt(700000000e+18)
 	coinRewardsRatio				 = 1250
 	storageRewardsRatio				 = 1250
 	ratioPerYear					 = 700
