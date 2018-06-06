@@ -1048,16 +1048,35 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 	return retMap
 }
 
+
+type rpcBucketPropertie struct {
+	NodeId           string `json:"nodeId"`
+	BucketId         string `json:"bucketId"`
+	TimeStart        uint64	`json:"timeStart"`
+	TimeEnd          uint64	`json:"timeEnd"`
+	Backup           uint64 `json:"backup"`
+	Size             uint64 `json:"size"`
+}
+
 // GetBucketTxInfo get informations of special transaction of bucket apply
-func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*state.BucketPropertie {
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcBucketPropertie {
 	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
-	var retMap []*state.BucketPropertie
-	for _, v := range rpcTx {
+	var retArr []*rpcBucketPropertie
+	for _, tx := range rpcTx {
 		var s vm.SpecialTxInput
-		json.Unmarshal([]byte(v.Input), &s)
-		retMap = append(retMap, s.Buckets...)
+		json.Unmarshal([]byte(tx.Input), &s)
+		for _, v := range s.Buckets {
+			r := new(rpcBucketPropertie)
+			r.BucketId = v.BucketId
+			r.TimeStart = v.TimeStart
+			r.TimeEnd = v.TimeEnd
+			r.Backup = v.Backup
+			r.Size = v.Size
+			r.NodeId = s.NodeId
+			retArr = append(retArr, r)
+		}
 	}
-	return retMap
+	return retArr
 }
 
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.
@@ -1279,6 +1298,8 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 				r := rand.New(rand.NewSource(t.UnixNano()))
 				bucketID := s.NodeId + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
 				v.BucketId = bucketID
+				v.TimeStart = uint64(t.UnixNano())
+				v.TimeEnd = uint64(t.AddDate(0, 0, int(v.Duration)).UnixNano())
 				b = append(b, v)
 			}
 			s.Buckets = b
