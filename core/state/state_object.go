@@ -27,6 +27,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"time"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -602,14 +603,14 @@ func (self *stateObject)GetBuckets() map[string]interface{} {
 	return  rtMap
 }
 
-type Sidechain 	map[common.Address] *big.Int
+type Sidechain 	map[common.Address] *hexutil.Big
 
 type FileIDArr struct {
-	MortgageTable	map[common.Address] *big.Int	`json:"mortgage"`
+	MortgageTable	map[common.Address] *hexutil.Big	`json:"mortgage"`
 	AuthorityTable 	map[common.Address]int	`json:"authority"`
 	FileID 			string		`json:"fileID"`
 	Dataversion		string		`json:"dataversion"`
-	SidechainStatus	map[string] map[common.Address] *big.Int	`json:"SidechainStatus"`
+	SidechainStatus	map[string] map[common.Address] *hexutil.Big	`json:"SidechainStatus"`
 	MortgagTotal	*big.Int	`json:"MortgagTotal"`
 	LogSwitch 	bool	`json:"logSwitch"`
 	TimeLimit   int64 `json:"timeLimit"`
@@ -662,9 +663,9 @@ func (self *stateObject)GetAccountAttributes() (map[string]SpecialTxTypeMortgage
 
 
 
-func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit)(Sidechain, bool) {
+func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit)(map[common.Address] *big.Int, bool) {
 	var genaroData GenaroData
-	AddBalance :=make(Sidechain)
+	AddBalance :=make(map[common.Address] *big.Int)
 	if nil == self.data.CodeHash {
 		return  nil,false
 	}else {
@@ -677,23 +678,23 @@ func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidech
 		}
 		if result.EndTime > time.Now().Unix() && false == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate{
 			if 0 == len(result.SidechainStatus) {
-				result.SidechainStatus = make(map[string] map[common.Address] *big.Int)
+				result.SidechainStatus = make(map[string] map[common.Address] *hexutil.Big)
 			}
 			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
 		}else if  true == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate{
 			if 0 == len(result.SidechainStatus) {
-				result.SidechainStatus = make(map[string] map[common.Address] *big.Int)
+				result.SidechainStatus = make(map[string] map[common.Address] *hexutil.Big)
 			}
 			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
-			useMortgagTotal	:= new(big.Int)
+			useMortgagTotal := new(big.Int)
 			for k,v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
 				if common.ReadWrite == result.AuthorityTable[k] || common.Write == result.AuthorityTable[k] {
-					if result.MortgageTable[k].Cmp(v) > -1{
-						AddBalance[k] = v
-						useMortgagTotal.Add(useMortgagTotal,v)
+					if result.MortgageTable[k].ToInt().Cmp(v.ToInt()) > -1{
+						AddBalance[k] = v.ToInt()
+						useMortgagTotal.Add(useMortgagTotal,v.ToInt())
 					} else {
-						AddBalance[k] = result.MortgageTable[k]
-						useMortgagTotal.Add(useMortgagTotal,result.MortgageTable[k])
+						AddBalance[k] = result.MortgageTable[k].ToInt()
+						useMortgagTotal.Add(useMortgagTotal,result.MortgageTable[k].ToInt())
 					}
 				}
 			}

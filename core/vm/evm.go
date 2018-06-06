@@ -261,7 +261,7 @@ func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address)
 	sumMortgageTable :=	new(big.Int)
 	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
 	for _, v := range mortgageTable{
-		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v)
+		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v.ToInt())
 	}
 	s.SpecialTxTypeMortgageInit.MortgagTotal = sumMortgageTable
 	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
