@@ -775,7 +775,7 @@ func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]types.
 }
 
 
-func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (types.Sidechain, bool) {
+func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (map[common.Address] *big.Int, bool) {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		restlt,flag := stateObject.SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus)
