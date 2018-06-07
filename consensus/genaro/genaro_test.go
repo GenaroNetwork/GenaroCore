@@ -16,11 +16,11 @@ import (
 	"time"
 )
 
-func TestGenaroSign(t *testing.T){
+func TestAuthor(t *testing.T){
 	db, remove := newTestLDB()
 	defer remove()
 
-	genaro := New(params.MainnetChainConfig.Genaro,db)
+	genaro := New(params.MainnetChainConfig.Genaro, db)
 	fmt.Printf("%s\n", genaro)
 	fmt.Println(genaro.signer)
 	fmt.Println(genaro.signFn)
@@ -129,9 +129,12 @@ func TestGenaroPrepare(t *testing.T){
 	}
 
 	committeeRank := genAddrs(10)
-	proportion := genProportion(10)
+	proportion := make([]uint64, 10)
+	for i := range committeeRank{
+		proportion[i] = uint64(i)
+	}
 
-	snapshot := newSnapshot(genesis.Config.Genaro,0,hash,0,committeeRank,proportion)
+	snapshot := newSnapshot(genesis.Config.Genaro,0,hash,0,committeeRank, proportion)
 	displaySnapshot(*snapshot)
 
 	err = genaro.Prepare(chain, chain.GetHeaderByNumber(0))

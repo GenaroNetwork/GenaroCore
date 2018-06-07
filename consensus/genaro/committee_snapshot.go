@@ -45,12 +45,17 @@ func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, e
 		CommitteeRank:		make([]common.Address, len(committeeRank)),
 		Committee:			make(map[common.Address]uint64, len(committeeRank)),
 	}
-	snap.CommitteeSize = uint64(len(snap.CommitteeRank))
 
 	for i, rank := range committeeRank {
-		snap.CommitteeRank[i] = rank
-		snap.Committee[rank] = proportion[i]
+		if i < int(config.CommitteeMaxSize) {
+			snap.CommitteeRank[i] = rank
+			snap.Committee[rank] = proportion[i]
+		}
 	}
+	if config.CommitteeMaxSize < uint64(len(snap.CommitteeRank)) {
+		snap.CommitteeRank = snap.CommitteeRank[0:config.CommitteeMaxSize]
+	}
+	snap.CommitteeSize = uint64(len(snap.CommitteeRank))
 
 	//for key, val := range committee {
 	//	snap.Committee[key] = val
@@ -163,9 +168,9 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 }
 
 func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
-	return config.Epoch*(epochNumber-1) + 1
+	return config.Epoch*epochNumber
 }
 
 func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
-	return config.Epoch*(epochNumber+1) - 1
+	return config.Epoch*epochNumber
 }
