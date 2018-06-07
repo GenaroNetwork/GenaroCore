@@ -1304,7 +1304,8 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 				t := time.Now()
 				r := rand.New(rand.NewSource(t.UnixNano()))
 				bucketID := s.NodeId + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
-				v.BucketId = bucketID
+				bucketIdSha256 := sha256.Sum256([]byte(bucketID))
+				v.BucketId = hex.EncodeToString(bucketIdSha256[:])
 				v.TimeStart = uint64(t.UnixNano())
 				v.TimeEnd = uint64(t.AddDate(0, 0, int(v.Duration)).UnixNano())
 				b = append(b, v)
