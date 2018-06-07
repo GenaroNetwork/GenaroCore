@@ -535,7 +535,7 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	}else{
 		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
 	}
-	coefficient := getCoinCofficient(preStorageRewards, preSurplusRewards)
+	coefficient := getStorageCoefficient(preStorageRewards, preSurplusRewards)
 
 	surplusRewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
 	//plan rewards per year
