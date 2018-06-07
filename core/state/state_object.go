@@ -674,3 +674,42 @@ func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidech
 	}
 	return AddBalance, true
 }
+
+func (self *stateObject) TxLogBydataVersionUpdate(fileID string) types.SpecialTxTypeMortgageInit  {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		accountAttributes := genaroData.SpecialTxTypeMortgageInitArr
+		resultTmp := accountAttributes[fileID]
+		if  0 == len(resultTmp.AuthorityTable) {
+			return  types.SpecialTxTypeMortgageInit{}
+		}
+		resultTmp.LogSwitch = true
+		genaroData.SpecialTxTypeMortgageInitArr[fileID] = resultTmp
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+
+		return  resultTmp
+	}
+	return types.SpecialTxTypeMortgageInit{}
+}
+
+func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[common.Address] *hexutil.Big, error) {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		accountAttributes := genaroData.SpecialTxTypeMortgageInitArr
+		resultTmp := accountAttributes[fileID]
+		if  0 == len(resultTmp.AuthorityTable) {
+			return  nil,nil
+		}
+		return  resultTmp.SidechainStatus[dataVersion],nil
+	}
+	return nil,nil
+}

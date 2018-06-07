@@ -486,7 +486,7 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 //todo 实现自定义指令对应函数功能
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	//address,fileName,dataVersion := stack.pop(),stack.pop(),stack.pop()
-	address, offset1, size1,offset2,size2 := stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	/*address, offset1, size1,offset2,size2 := stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
 	fileName := string(memory.Get(offset1.Int64(),size1.Int64()))
 	dataVersion := string(memory.Get(offset2.Int64(),size2.Int64()))
     txLog,err := evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileName,dataVersion)
@@ -496,7 +496,7 @@ func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory,
 		stack.push(convertPara)
 	}else{
 		stack.push(evm.interpreter.intPool.getZero())
-	}
+	}*/
 	return nil, nil
 }
 

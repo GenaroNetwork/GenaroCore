@@ -29,6 +29,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/trie"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 type revision struct {
@@ -745,24 +746,25 @@ func (self *StateDB) GetBuckets(addr common.Address) (map[string]interface{}, er
 }
 
 //根据用户id和fileID,dataVersion获取交易日志
-func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID,dataVersion string) (string,error){
+func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID,dataVersion string) (map[common.Address] *hexutil.Big, error){
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
-		//@todo
-		return "xxx", nil
-		//return stateObject.TxLogByDataVersionRead(), nil
+		return stateObject.TxLogByDataVersionRead(fileID,dataVersion)
 	}
-	return "xxx", nil
+	return nil,nil
 }
 //根据用户id和fileID开启定时同步日志接口
-func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID string,switchValue bool) (bool,error){
+func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID string,switchValue bool) bool {
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
-		//@todo
-		return true, nil
-		//return stateObject.TxLogByDataVersionRead(), nil
+		resultTmp := stateObject.TxLogBydataVersionUpdate(fileID)
+		timeLimitGas := big.NewInt(resultTmp.TimeLimit * int64(len(resultTmp.MortgageTable)) * common.OneDayGes)
+		stateObject.setBalance(timeLimitGas)
+		newStateObject := self.getStateObject(common.SpecialSyncAddress)
+		newStateObject.AddBalance(timeLimitGas)
+		return true
 	}
-	return true, nil
+	return false
 }
 
 

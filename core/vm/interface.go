@@ -21,6 +21,7 @@ import (
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 // StateDB is an EVM database for full state querying.
@@ -83,9 +84,9 @@ type StateDB interface {
 	GetBuckets(common.Address) (map[string]interface{}, error)
 
 	//根据用户id和fileID,dataVersion获取交易日志
-	TxLogByDataVersionRead(common.Address,string,string) (string,error)
+	TxLogByDataVersionRead(common.Address,string,string) (map[common.Address] *hexutil.Big, error)
 	//根据用户id和fileID开启定时同步日志接口
-	TxLogBydataVersionUpdate(common.Address,string,bool) (bool,error)
+	TxLogBydataVersionUpdate(common.Address,string,bool) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
