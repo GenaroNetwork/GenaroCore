@@ -1649,8 +1649,8 @@ func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address com
 }
 
 
-func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType hexutil.Uint) []state.SpecialTxTypeMortgageInit {
-	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,txType)
+func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []state.SpecialTxTypeMortgageInit {
+	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,hexutil.Uint(common.SpecialTxTypeMortgageInit))
 	var specialTxTypeMortgageInit vm.SpecialTxInput
 	var resultArr []state.SpecialTxTypeMortgageInit
 	for _, v := range result {
