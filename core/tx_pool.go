@@ -590,7 +590,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInsufficientFunds
 	}
 
-	var totalCost *big.Int
+	totalCost := new(big.Int)
 	totalCost.Add(tx.Cost(), tx.SpecialCost())
 	if pool.currentState.GetBalance(from).Cmp(totalCost) < 0 {
 		return ErrInsufficientFundsForSpecialTx

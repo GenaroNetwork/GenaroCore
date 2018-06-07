@@ -1648,6 +1648,32 @@ func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address com
 }
 
 
+func (s *PublicBlockChainAPI) GetLogSwitchByAddressAndFileID(ctx context.Context, args string) map[common.Address]map[string]bool {
+	var addressAndFileID  map[common.Address][]string
+	var result map[common.Address]map[string]bool
+	json.Unmarshal([]byte(args), &addressAndFileID)
+	for k, v := range addressAndFileID {
+		accountAttributes,_ := s.AccountAttributes(ctx,k,rpc.BlockNumber(-1))
+		if nil == accountAttributes {
+			continue
+		}
+		for _, fileID := range v {
+			resultTmp := accountAttributes[fileID]
+			if  0 == len(resultTmp.AuthorityTable) {
+				continue
+			}
+			if nil == result {
+				result = make(map[common.Address]map[string]bool)
+			}
+			if result[k] == nil {
+				result[k] = make(map[string]bool)
+			}
+			result[k][fileID] = resultTmp.LogSwitch
+		}
+	}
+	return result
+}
+
 func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []types.SpecialTxTypeMortgageInit {
 	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,hexutil.Uint(common.SpecialTxTypeMortgageInit))
 	var specialTxTypeMortgageInit types.SpecialTxInput
