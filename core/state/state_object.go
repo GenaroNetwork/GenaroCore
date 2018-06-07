@@ -27,6 +27,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"time"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
@@ -107,31 +108,7 @@ type Account struct {
 	CodeHash []byte
 }
 
-// Genaro is the Ethereum consensus representation of Genaro's data.
-// these objects are stored in the main genaro trie.
-type GenaroData struct {
-	Heft       		uint64   					`json:"heft"`
-	Stake      		uint64   					`json:"stake"`
-	SpecialTxTypeMortgageInit 	SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInit"`
-	SpecialTxTypeMortgageInitArr 	map[string]SpecialTxTypeMortgageInit	`json:"specialTxTypeMortgageInitArr"`
-	Traffic         uint64                      `json:"traffic"`
-	Buckets         []*BucketPropertie	`json:"buckets"`
-}
 
-type BucketPropertie struct {
-	BucketId         string `json:"bucketId"`
-
-	// 开始时间和结束时间共同表示存储空间的时长，对应STORAGEGAS指令
-	TimeStart        uint64	`json:"timeStart"`
-	TimeEnd          uint64	`json:"timeEnd"`
-	Duration         uint64 `json:"duration"`
-
-	// 备份数，对应STORAGEGASPRICE指令
-	Backup           uint64 `json:"backup"`
-
-	// 存储空间大小，对应SSIZE指令
-	Size             uint64 `json:"size"`
-}
 
 // newObject creates a state object.
 func newObject(db *StateDB, address common.Address, data Account, onDirty func(addr common.Address)) *stateObject {
@@ -417,9 +394,9 @@ func (self *stateObject) Value() *big.Int {
 
 
 func (self *stateObject)UpdateHeft(heft uint64){
-	var genaroData GenaroData
+	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{
-		genaroData = GenaroData{
+		genaroData = types.GenaroData{
 			Heft:heft,
 		}
 	}else {
@@ -439,7 +416,7 @@ func (self *stateObject)UpdateHeft(heft uint64){
 
 func (self *stateObject)GetHeft() (uint64){
 	if self.data.CodeHash != nil {
-		var genaroData GenaroData
+		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.Heft
 	}
@@ -448,9 +425,9 @@ func (self *stateObject)GetHeft() (uint64){
 }
 
 func (self *stateObject)UpdateStake(stake uint64){
-	var genaroData GenaroData
+	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{
-		genaroData = GenaroData{
+		genaroData = types.GenaroData{
 			Stake:stake,
 		}
 	}else {
@@ -470,7 +447,7 @@ func (self *stateObject)UpdateStake(stake uint64){
 
 func (self *stateObject)GetStake() (uint64){
 	if self.data.CodeHash != nil {
-		var genaroData GenaroData
+		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.Stake
 	}
@@ -479,8 +456,8 @@ func (self *stateObject)GetStake() (uint64){
 }
 
 func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
-	var bpArr []*BucketPropertie
-	bp := new(BucketPropertie)
+	var bpArr []*types.BucketPropertie
+	bp := new(types.BucketPropertie)
 
 	if szie != 0 {bp.Size = szie}
 	if backup != 0 {bp.Backup = backup}
@@ -488,9 +465,9 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	if timeend != 0 {bp.TimeEnd = timeend}
 	bpArr = append(bpArr, bp)
 
-	var genaroData GenaroData
+	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{
-		genaroData = GenaroData{
+		genaroData = types.GenaroData{
 			Buckets: bpArr,
 		}
 	}else {
@@ -512,9 +489,9 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	}
 }
 
-func (self *stateObject)getBucketPropertie(bucketID string) *BucketPropertie {
+func (self *stateObject)getBucketPropertie(bucketID string) *types.BucketPropertie {
 	if self.data.CodeHash != nil {
-		var genaroData GenaroData
+		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if genaroData.Buckets != nil {
 			for _, v := range genaroData.Buckets {
@@ -559,9 +536,9 @@ func (self *stateObject)GetStorageGas(bucketID string) uint64 {
 }
 
 func (self *stateObject)UpdateTraffic(traffic uint64){
-	var genaroData GenaroData
+	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{
-		genaroData = GenaroData{
+		genaroData = types.GenaroData{
 			Traffic:traffic,
 		}
 	}else {
@@ -581,7 +558,7 @@ func (self *stateObject)UpdateTraffic(traffic uint64){
 
 func (self *stateObject)GetTraffic() uint64 {
 	if self.data.CodeHash != nil {
-		var genaroData GenaroData
+		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.Traffic
 	}
@@ -592,7 +569,7 @@ func (self *stateObject)GetTraffic() uint64 {
 func (self *stateObject)GetBuckets() map[string]interface{} {
 	rtMap := make(map[string]interface{})
 	if self.data.CodeHash != nil {
-		var genaroData GenaroData
+		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if genaroData.Buckets != nil {
 			for _, v := range genaroData.Buckets {
@@ -603,43 +580,24 @@ func (self *stateObject)GetBuckets() map[string]interface{} {
 	return  rtMap
 }
 
-type Sidechain 	map[common.Address] *hexutil.Big
 
-type FileIDArr struct {
-	MortgageTable	map[common.Address] *hexutil.Big	`json:"mortgage"`
-	AuthorityTable 	map[common.Address]int	`json:"authority"`
-	FileID 			string		`json:"fileID"`
-	Dataversion		string		`json:"dataversion"`
-	SidechainStatus	map[string] map[common.Address] *hexutil.Big	`json:"SidechainStatus"`
-	MortgagTotal	*big.Int	`json:"MortgagTotal"`
-	LogSwitch 	bool	`json:"logSwitch"`
-	TimeLimit   int64 `json:"timeLimit"`
-	CreateTime  int64	`json:"CreateTime"`
-	EndTime  int64	`json:"EndTime"`
-	FromAccount common.Address 	`json:"fromAccount"`
-	Terminate	bool			`json:"terminate"`
-	Sidechain		Sidechain `json:"sidechain"`
-}
 
 //Cross-chain storage processing
-type SpecialTxTypeMortgageInit FileIDArr
-
-//Cross-chain storage processing
-func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit SpecialTxTypeMortgageInit){
-	var genaroData GenaroData
+func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit){
+	var genaroData types.GenaroData
 	if nil == self.data.CodeHash {
-		genaroData = GenaroData{
-			SpecialTxTypeMortgageInitArr:map[string]SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit},
+		genaroData = types.GenaroData{
+			SpecialTxTypeMortgageInitArr:map[string]types.SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit},
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if nil == genaroData.SpecialTxTypeMortgageInitArr {
-			genaroData.SpecialTxTypeMortgageInitArr = map[string]SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit}
+			genaroData.SpecialTxTypeMortgageInitArr = map[string]types.SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit}
 		} else {
 			genaroData.SpecialTxTypeMortgageInitArr[specialTxTypeMortgageInit.FileID] = specialTxTypeMortgageInit
 		}
 	}
-	genaroData.SpecialTxTypeMortgageInit = SpecialTxTypeMortgageInit{}
+	genaroData.SpecialTxTypeMortgageInit = types.SpecialTxTypeMortgageInit{}
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -651,9 +609,9 @@ func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit Spec
 
 }
 
-func (self *stateObject)GetAccountAttributes() (map[string]SpecialTxTypeMortgageInit){
+func (self *stateObject)GetAccountAttributes() (map[string]types.SpecialTxTypeMortgageInit){
 	if self.data.CodeHash != nil {
-		var genaroData GenaroData
+		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.SpecialTxTypeMortgageInitArr
 	}
@@ -663,8 +621,8 @@ func (self *stateObject)GetAccountAttributes() (map[string]SpecialTxTypeMortgage
 
 
 
-func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit)(map[common.Address] *big.Int, bool) {
-	var genaroData GenaroData
+func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit)(map[common.Address] *big.Int, bool) {
+	var genaroData types.GenaroData
 	AddBalance :=make(map[common.Address] *big.Int)
 	if nil == self.data.CodeHash {
 		return  nil,false
@@ -705,7 +663,7 @@ func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidech
 		}
 		genaroData.SpecialTxTypeMortgageInitArr[fileID] = result
 	}
-	genaroData.SpecialTxTypeMortgageInit = SpecialTxTypeMortgageInit{}
+	genaroData.SpecialTxTypeMortgageInit = types.SpecialTxTypeMortgageInit{}
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
 	self.data.CodeHash = b[:]
