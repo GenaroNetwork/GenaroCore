@@ -26,6 +26,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"encoding/json"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 var (
@@ -486,17 +488,23 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 //todo 实现自定义指令对应函数功能
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	//address,fileName,dataVersion := stack.pop(),stack.pop(),stack.pop()
-	/*address, offset1, size1,offset2,size2 := stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	address, offset1, size1,offset2,size2,retOffset:= stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
 	fileName := string(memory.Get(offset1.Int64(),size1.Int64()))
 	dataVersion := string(memory.Get(offset2.Int64(),size2.Int64()))
-    txLog,err := evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileName,dataVersion)
+	var txLog map[common.Address] *hexutil.Big
+	var err error
+    txLog,err = evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileName,dataVersion)
 	if err == nil {
-		convertPara :=evm.interpreter.intPool.get()
-		convertPara.SetString(txLog,62)
-		stack.push(convertPara)
+		txLogByte ,_ := json.Marshal(txLog)
+		size := len(txLogByte)
+		memory.Set(retOffset.Uint64(),uint64(size),txLogByte)
+		stack.push(evm.interpreter.intPool.get().SetUint64(uint64(size)))
+		stack.push(evm.interpreter.intPool.get().SetUint64(1))
 	}else{
 		stack.push(evm.interpreter.intPool.getZero())
-	}*/
+		stack.push(evm.interpreter.intPool.getZero())
+	}
+	evm.interpreter.intPool.put(address, offset1, size1,offset2,size2,retOffset)
 	return nil, nil
 }
 
@@ -511,7 +519,12 @@ func opDataVerisonUpdate(pc *uint64, evm *EVM, contract *Contract, memory *Memor
 	}else {
 		switchV = false
 	}
-	evm.StateDB.TxLogBydataVersionUpdate(common.BigToAddress(address),fileName,switchV)
+	ret := evm.StateDB.TxLogBydataVersionUpdate(common.BigToAddress(address),fileName,switchV)
+	if ret == true{
+		stack.push(evm.interpreter.intPool.get().SetUint64(1))
+	}else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
