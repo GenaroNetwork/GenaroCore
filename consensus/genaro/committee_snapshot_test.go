@@ -60,9 +60,9 @@ func newTestLDB() (*ethdb.LDBDatabase, func()) {
 }
 
 func genProportion(n uint64) []uint64{
-	proportion := make([]uint64,10)
-	for i,_ := range proportion {
-		proportion[i] = uint64(rand.Int63())
+	proportion := make([]uint64,n)
+	for i := range proportion {
+		proportion[i] = rand.Uint64()
 	}
 	return proportion
 }
