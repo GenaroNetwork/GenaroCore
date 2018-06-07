@@ -28,6 +28,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"encoding/json"
 )
 
 //go:generate gencodec -type txdata -field-override txdataMarshaling -out gen_tx_json.go
@@ -256,6 +257,20 @@ func (tx *Transaction) Cost() *big.Int {
 	total := new(big.Int).Mul(tx.data.Price, new(big.Int).SetUint64(tx.data.GasLimit))
 	total.Add(total, tx.data.Amount)
 	return total
+}
+
+// SpecialCost returns total cost for special transaction
+// if current transaction is normal transaction, return zero.
+func (tx *Transaction) SpecialCost() *big.Int {
+	if tx.Data() == nil {
+		return big.NewInt(0)
+	}
+	var s SpecialTxInput
+	err := json.Unmarshal(tx.Data(), &s)
+	if err != nil {
+		return s.SpecialCost()
+	}
+	return big.NewInt(0)
 }
 
 func (tx *Transaction) RawSignatureValues() (*big.Int, *big.Int, *big.Int) {

@@ -710,7 +710,7 @@ func (self *StateDB)GetStorageGas(userid common.Address, bucketID string)  (uint
 	return 0, nil
 }
 
-func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit SpecialTxTypeMortgageInit) bool {
+func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.SpecialTxTypeMortgageInit(specialTxTypeMortgageInit)
@@ -766,7 +766,7 @@ func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID strin
 }
 
 
-func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]SpecialTxTypeMortgageInit {
+func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]types.SpecialTxTypeMortgageInit {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.GetAccountAttributes()
@@ -775,7 +775,7 @@ func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]Specia
 }
 
 
-func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus SpecialTxTypeMortgageInit) (Sidechain, bool) {
+func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (types.Sidechain, bool) {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		restlt,flag := stateObject.SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus)

@@ -27,7 +27,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"github.com/GenaroNetwork/Genaro-Core/core/state"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -208,16 +208,12 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	return ret, contract.Gas, err
 }
 
-type SpecialTxInput struct {
-	state.GenaroData
-	NodeId  string `json:"nodeid"`
-	Type    int    `json:"type"`
-}
+
 
 func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
 	var err error
 	// 解析数据
-	var s SpecialTxInput
+	var s types.SpecialTxInput
 	err = json.Unmarshal(input, &s)
 	if err != nil{
 		return errors.New("special tx error： the extraData parameters of the wrong format")
@@ -243,7 +239,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	return err
 }
 
-func SpecialTxTypeSyncSidechainStatus(evm *EVM, s SpecialTxInput) error  {
+func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
 	restlt,flag := (*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit)
 	if  false == flag{
 		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
@@ -254,7 +250,7 @@ func SpecialTxTypeSyncSidechainStatus(evm *EVM, s SpecialTxInput) error  {
 	return nil
 }
 
-func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address) error{
+func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Address) error{
 
 	sumMortgageTable :=	new(big.Int)
 	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
@@ -275,16 +271,10 @@ func specialTxTypeMortgageInit(evm *EVM, s SpecialTxInput,caller common.Address)
 	return nil
 }
 
-func updateStorageProperties(evm *EVM, s SpecialTxInput,caller common.Address) error {
+func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	adress := common.HexToAddress(s.NodeId)
 
-	var totalCost uint64
-	for _, v := range s.Buckets {
-		oneCost := v.Size/v.Duration
-		totalCost += oneCost
-	}
-
-	totalGas := big.NewInt(int64(totalCost) * common.BucketApplyGasPerGPerDay)
+	totalGas := s.SpecialCost()
 
 	// Fail if we're trying to use more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
@@ -310,7 +300,7 @@ func updateStorageProperties(evm *EVM, s SpecialTxInput,caller common.Address) e
 }
 
 
-func updateHeft(statedb *StateDB, s SpecialTxInput) error {
+func updateHeft(statedb *StateDB, s types.SpecialTxInput) error {
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft) {
@@ -319,11 +309,10 @@ func updateHeft(statedb *StateDB, s SpecialTxInput) error {
 	return nil
 }
 
-func updateTraffic(evm *EVM, s SpecialTxInput,caller common.Address) error {
+func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	adress := common.HexToAddress(s.NodeId)
 
-
-	totalGas := big.NewInt(int64(s.Traffic) * common.TrafficApplyGasPerG)
+	totalGas := s.SpecialCost()
 
 	// Fail if we're trying to use more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
@@ -344,7 +333,7 @@ func updateTraffic(evm *EVM, s SpecialTxInput,caller common.Address) error {
 
 func updateStake(evm *EVM, caller common.Address, input []byte) error {
 	// 解析数据
-	var s SpecialTxInput
+	var s types.SpecialTxInput
 	err := json.Unmarshal(input, &s)
 	if err != nil{
 		return errors.New("update user's stake error： the sentinel parameters of the wrong format")

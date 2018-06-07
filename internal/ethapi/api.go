@@ -42,7 +42,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"strconv"
 	"crypto/sha256"
 	"encoding/hex"
@@ -998,7 +997,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.
 	if startBlockNr >= endBlockNr {
 		return nil
 	}
-	for i := startBlockNr; i< endBlockNr; i++ {
+	for i := startBlockNr; i<= endBlockNr; i++ {
 		if block, _ := s.b.BlockByNumber(ctx, i); block != nil {
 			txs := block.Transactions()
 			currentBlockTx := dealSpecialTransactionWithType(block, txs, txType)
@@ -1021,13 +1020,12 @@ func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txTy
 
 func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
 	// 解析transaction的Payload域值
-	if tx.Data() == nil && len(tx.Data()) != 0{
+	if tx.Data() == nil || len(tx.Data()) == 0{
 		return false
 	}
-	var s vm.SpecialTxInput
+	var s types.SpecialTxInput
 	err := json.Unmarshal(tx.Data(), &s)
 	if err != nil{
-		fmt.Println("Unmarshal error ", err)
 		return false
 	}
 	return uint64(s.Type) == uint64(txType)
@@ -1045,7 +1043,7 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeTrafficApply))
 	var retArr[]*rpcTrafficInfo
 	for _, v := range rpcTx {
-		var s vm.SpecialTxInput
+		var s types.SpecialTxInput
 		json.Unmarshal([]byte(v.Input), &s)
 		r := new(rpcTrafficInfo)
 		r.NodeId = s.NodeId
@@ -1072,7 +1070,7 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
 	var retArr []*rpcBucketPropertie
 	for _, tx := range rpcTx {
-		var s vm.SpecialTxInput
+		var s types.SpecialTxInput
 		json.Unmarshal([]byte(tx.Input), &s)
 		for _, v := range s.Buckets {
 			r := new(rpcBucketPropertie)
@@ -1288,7 +1286,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 
 	//deal special transaction
 	if *args.To == common.SpecialSyncAddress {
-		var s vm.SpecialTxInput
+		var s types.SpecialTxInput
 		json.Unmarshal([]byte(args.ExtraData), &s)
 		switch s.Type {
 		case common.SpecialTxTypeMortgageInit:
@@ -1301,7 +1299,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		case common.SpecialTxTypeSpaceApply:
-			var b []*state.BucketPropertie
+			var b []*types.BucketPropertie
 			for _, v := range s.Buckets{
 				t := time.Now()
 				r := rand.New(rand.NewSource(t.UnixNano()))
@@ -1639,7 +1637,7 @@ func (s *PublicNetAPI) Version() string {
 }
 
 
-func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]state.SpecialTxTypeMortgageInit, error) {
+func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]types.SpecialTxTypeMortgageInit, error) {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
@@ -1649,10 +1647,10 @@ func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address com
 }
 
 
-func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType hexutil.Uint) []state.SpecialTxTypeMortgageInit {
+func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType hexutil.Uint) []types.SpecialTxTypeMortgageInit {
 	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,txType)
-	var specialTxTypeMortgageInit vm.SpecialTxInput
-	var resultArr []state.SpecialTxTypeMortgageInit
+	var specialTxTypeMortgageInit types.SpecialTxInput
+	var resultArr []types.SpecialTxTypeMortgageInit
 	for _, v := range result {
 		json.Unmarshal(v.Input, &specialTxTypeMortgageInit)
 		transactionReceipt, err:= s.GetTransactionReceipt(ctx,v.Hash)
