@@ -129,13 +129,9 @@ func TestGenaroPrepare(t *testing.T){
 	}
 
 	committeeRank := genAddrs(10)
-	committee := make(map[common.Address]CommitteeInfo)
-	for _,addr := range committeeRank{
-		info := *(new(CommitteeInfo))
-		committee[addr] = info
-	}
+	proportion := genProportion(10)
 
-	snapshot := newSnapshot(genesis.Config.Genaro,0,hash,0,committeeRank,committee)
+	snapshot := newSnapshot(genesis.Config.Genaro,0,hash,0,committeeRank,proportion)
 	displaySnapshot(*snapshot)
 
 	err = genaro.Prepare(chain, chain.GetHeaderByNumber(0))

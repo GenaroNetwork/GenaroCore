@@ -45,5 +45,6 @@ func (api *API) GetBlockCommittee(epochNumber uint64) ([] common.Address) {
 	}
 	turn := GetTurnOfCommiteeByBlockNumber(api.genaro.config, header.Number.Uint64())
 	writeNo := GetCommiteeWrittenBlockNumberByTurn(api.genaro.config, turn)
-	return GetHeaderCommitteeRankList(api.chain.GetHeaderByNumber(writeNo))
+	committee,_ := GetHeaderCommitteeRankList(api.chain.GetHeaderByNumber(writeNo))
+	return committee
 }

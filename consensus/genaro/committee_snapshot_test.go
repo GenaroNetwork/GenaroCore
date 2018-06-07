@@ -59,19 +59,23 @@ func newTestLDB() (*ethdb.LDBDatabase, func()) {
 	}
 }
 
+func genProportion(n uint64) []uint64{
+	proportion := make([]uint64,10)
+	for i,_ := range proportion {
+		proportion[i] = uint64(rand.Int63())
+	}
+	return proportion
+}
+
 func TestSnapshot(t *testing.T){
 	db, remove := newTestLDB()
 	defer remove()
 	blockHash := new(common.Hash)
 	blockHash.SetBytes(genHash(32))
 	committeeRank := genAddrs(10)
-	committee := make(map[common.Address]CommitteeInfo)
-	for _,addr := range committeeRank{
-		info := *(new(CommitteeInfo))
-		committee[addr] = info
-	}
+	proportion := genProportion(10)
 
-	snapshot := newSnapshot(params.MainnetChainConfig.Genaro,0,*blockHash,0,committeeRank,committee)
+	snapshot := newSnapshot(params.MainnetChainConfig.Genaro,0,*blockHash,0,committeeRank,proportion)
 	displaySnapshot(*snapshot)
 
 
