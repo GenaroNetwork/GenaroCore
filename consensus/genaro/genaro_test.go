@@ -139,3 +139,17 @@ func TestGenaroPrepare(t *testing.T){
 		log.Fatal(err)
 	}
 }
+
+func TestCalcDifficulty(t *testing.T) {
+	db, remove := newTestLDB()
+	defer remove()
+
+	genesis := getGenesis()
+
+	genaro := New(genesis.Config.Genaro,db)
+	turn := GetTurnOfCommiteeByBlockNumber(genaro.config, 120)
+	fmt.Println(turn)
+	turn = GetDependTurnByBlockNumber(genaro.config, 120)
+	fmt.Println(turn)
+
+}
