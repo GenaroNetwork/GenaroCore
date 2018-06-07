@@ -3,6 +3,7 @@ package types
 import (
 	"math/big"
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 type SpecialTxInput struct {
@@ -60,14 +61,14 @@ type BucketPropertie struct {
 	Size             uint64 `json:"size"`
 }
 
-type Sidechain 	map[common.Address] *big.Int
+type Sidechain 	map[common.Address] *hexutil.Big
 
 type FileIDArr struct {
-	MortgageTable	map[common.Address] *big.Int	`json:"mortgage"`
+	MortgageTable	map[common.Address] *hexutil.Big	`json:"mortgage"`
 	AuthorityTable 	map[common.Address]int	`json:"authority"`
 	FileID 			string		`json:"fileID"`
 	Dataversion		string		`json:"dataversion"`
-	SidechainStatus	map[string] map[common.Address] *big.Int	`json:"SidechainStatus"`
+	SidechainStatus	map[string] map[common.Address] *hexutil.Big	`json:"SidechainStatus"`
 	MortgagTotal	*big.Int	`json:"MortgagTotal"`
 	LogSwitch 	bool	`json:"logSwitch"`
 	TimeLimit   int64 `json:"timeLimit"`
