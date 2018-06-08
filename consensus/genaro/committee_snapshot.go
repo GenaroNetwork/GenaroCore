@@ -46,21 +46,21 @@ func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, e
 		Committee:			make(map[common.Address]uint64, len(committeeRank)),
 	}
 
+	total := uint64(0)
+	for i := 0; i <len(proportion); i++ {
+		total += proportion[i]
+	}
+
 	for i, rank := range committeeRank {
 		if i < int(config.CommitteeMaxSize) {
 			snap.CommitteeRank[i] = rank
-			snap.Committee[rank] = proportion[i]
+			snap.Committee[rank] = proportion[i]*uint64(base)/total
 		}
 	}
 	if config.CommitteeMaxSize < uint64(len(snap.CommitteeRank)) {
 		snap.CommitteeRank = snap.CommitteeRank[0:config.CommitteeMaxSize]
 	}
 	snap.CommitteeSize = uint64(len(snap.CommitteeRank))
-
-	//for key, val := range committee {
-	//	snap.Committee[key] = val
-	//}
-
 	return snap
 }
 

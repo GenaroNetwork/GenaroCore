@@ -25,9 +25,9 @@ func genProportion(n uint64) []uint64{
 	proportion := make([]uint64,10)
 	for i, _ := range proportion {
 		proportion[i] = uint64(rand.Int63())
-		}
-	return proportion
 	}
+	return proportion
+}
 
 func displaySnapshot(snapshot CommitteeSnapshot){
 	fmt.Print("CommitteeSize:")
@@ -95,7 +95,7 @@ func TestNewSnapshot(t *testing.T){
 		t.Errorf("WriteBlockNumber get %v but expect 0", snapshot.CommitteeSize)
 	}
 	if !bytes.Equal(snapshot.WriteBlockHash.Bytes(), blockHash.Bytes()) {
-		t.Errorf("WriteBlockHash get %v bute expect %v", snapshot.WriteBlockHash.Bytes(), blockHash.Bytes())
+		t.Errorf("WriteBlockHash get %v but expect %v", snapshot.WriteBlockHash.Bytes(), blockHash.Bytes())
 	}
 	pre := snapshot.Committee[snapshot.CommitteeRank[0]]
 	for i := 1; i < len(snapshot.CommitteeRank); i++ {
@@ -110,34 +110,6 @@ func TestNewSnapshot(t *testing.T){
 	if snapshot.CommitteeSize != 10 {
 		t.Errorf("commitee size get %v but expect 10", snapshot.CommitteeSize)
 	}
-	//snapshot.store(db)
-	//
-	//snapshot2,err := loadSnapshot(params.MainnetChainConfig.Genaro,db,0)
-	//if err != nil {
-	//	t.Error(err)
-	//}
-	//displaySnapshot(*snapshot2)
-	//
-	//snapshot3 := snapshot2.copy()
-	//displaySnapshot(*snapshot3)
-	//
-	//fmt.Println(snapshot3.getCurrentRankIndex(committeeRank[5]))
-	//for _,addr := range snapshot3.rank() {
-	//	fmt.Println(addr.String())
-	//}
-	//
-	//fmt.Println(GetDependTurnByBlockNumber(params.MainnetChainConfig.Genaro,300000))
-	//
-	//fmt.Println(GetCommiteeWrittenBlockNumberByTurn(params.MainnetChainConfig.Genaro,100))
-	//
-	//for i,addr := range committeeRank{
-	//	fmt.Print(i)
-	//	fmt.Print("   ")
-	//	fmt.Println(snapshot3.inturn(456, addr))
-	//}
-	//
-	//fmt.Println(GetFirstBlockNumberOfEpoch(params.MainnetChainConfig.Genaro, 20))
-	//fmt.Println(GetLastBlockNumberOfEpoch(params.MainnetChainConfig.Genaro, 20))
 }
 
 func TestStoreAndLoadSnapshot(t *testing.T){
