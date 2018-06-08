@@ -583,8 +583,16 @@ func (self *stateObject)GetBuckets() map[string]interface{} {
 
 
 //Cross-chain storage processing
-func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit){
+func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
 	var genaroData types.GenaroData
+	if len(specialTxTypeMortgageInit.AuthorityTable) != len(specialTxTypeMortgageInit.MortgageTable) {
+		return false
+	}
+	for k,_ := range  specialTxTypeMortgageInit.AuthorityTable {
+		if _, ok := specialTxTypeMortgageInit.MortgageTable[k]; !ok {
+			return false
+		}
+	}
 	if nil == self.data.CodeHash {
 		genaroData = types.GenaroData{
 			SpecialTxTypeMortgageInitArr:map[string]types.SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit},
@@ -606,7 +614,7 @@ func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit type
 		self.onDirty(self.Address())
 		self.onDirty = nil
 	}
-
+	return true
 }
 
 func (self *stateObject)GetAccountAttributes() (map[string]types.SpecialTxTypeMortgageInit){

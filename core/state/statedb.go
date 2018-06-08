@@ -715,8 +715,7 @@ func (self *StateDB)GetStorageGas(userid common.Address, bucketID string)  (uint
 func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
-		stateObject.SpecialTxTypeMortgageInit(specialTxTypeMortgageInit)
-		return true
+		return stateObject.SpecialTxTypeMortgageInit(specialTxTypeMortgageInit)
 	}
 	return false
 }
