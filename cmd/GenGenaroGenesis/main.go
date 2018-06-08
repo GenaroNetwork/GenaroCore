@@ -12,6 +12,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"io/ioutil"
 	"encoding/json"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 func main() {
@@ -43,6 +44,9 @@ func main() {
 	genesis.Nonce = 0
 	genesis.Coinbase = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	genesis.Alloc = make(core.GenesisAlloc, 1)
+	ertra := new(genaro.ExtraData)
+	extraByte, _ := json.Marshal(ertra)
+	genesis.ExtraData = extraByte
 
 	// To write init Committee
 	committees := make([]common.Address, 0)
