@@ -127,7 +127,7 @@ func GetTurnOfCommiteeByBlockNumber(config *params.GenaroConfig, number uint64) 
 
 //  get the depend turn from block number
 func GetDependTurnByBlockNumber(config *params.GenaroConfig, number uint64) uint64 {
-	return GetTurnOfCommiteeByBlockNumber(config, number) - config.ElectionPeriod - config.ValidPeriod
+	return GetTurnOfCommiteeByBlockNumber(config, number)
 }
 
 
@@ -172,5 +172,5 @@ func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64)
 }
 
 func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
-	return config.Epoch*epochNumber
+	return (config.Epoch + 1)*epochNumber - 1
 }

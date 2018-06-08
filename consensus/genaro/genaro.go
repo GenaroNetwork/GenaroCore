@@ -278,7 +278,7 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 	// If an in-memory snapshot was found, use that
 	if s, ok := g.recents.Get(epollNumber); ok {
 		snap = s.(*CommitteeSnapshot)
-	}else if epollNumber < 0 {
+	}else if epollNumber < g.config.ValidPeriod + g.config.ElectionPeriod {
 		// If we're at block 0 ~ ElectionPeriod + ValidPeriod - 1, make a snapshot by genesis block
 		// TODO
 		committeeRank := make([]common.Address, 10)
@@ -306,11 +306,12 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		return snap, nil
 	}else{
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
-		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber)
-		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber)
+		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
+		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
 		h := chain.GetHeaderByNumber(endBlock+1)
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
-		snap = newSnapshot(params.MainnetChainConfig.Genaro, h.Number.Uint64(), h.Hash(), epollNumber, committeeRank, proportion)
+		snap = newSnapshot(params.MainnetChainConfig.Genaro, h.Number.Uint64(), h.Hash(), epollNumber -
+			g.config.ValidPeriod - g.config.ElectionPeriod, committeeRank, proportion)
 
 		log.Trace("computing rank from", startBlock, "to", endBlock)
 		isCreateNew = true
