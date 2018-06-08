@@ -62,6 +62,30 @@ func TestAuthor(t *testing.T){
 
 }
 
+func TestNew(t *testing.T) {
+	db, remove := newTestLDB()
+	defer remove()
+	genaroConfig := &params.GenaroConfig{
+		BlockInterval:		10,
+		ElectionPeriod:		1,
+		ValidPeriod:		1,
+		CurrencyRates:		10,
+		CommitteeMaxSize:	5,
+	}
+	genaro := New(genaroConfig, db)
+	if genaro.config.Epoch != epochLength {
+		t.Errorf("the genaro config epoch get %v but except %v", genaro.config.Epoch, epochLength)
+	}
+	if genaro.recents.Len() != 0 {
+		t.Errorf("the genaro recents len get %v, but except %v", genaro.recents.Len(), inmemorySnapshots)
+	}
+	genaroConfig.Epoch = 200
+	genaro = New(genaroConfig, db)
+	if genaro.config.Epoch != 200 {
+		t.Errorf("the genaro config epoch get %v but except 200", genaro.config.Epoch)
+	}
+}
+
 func getGenesis() *core.Genesis{
 	genaroConfig := &params.ChainConfig{
 		ChainId:             big.NewInt(300),

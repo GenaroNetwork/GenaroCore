@@ -158,9 +158,7 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	header.Nonce = types.BlockNonce{}
 	number := header.Number.Uint64()
 
-	currEpochNumber := GetTurnOfCommiteeByBlockNumber(g.config, number)
-
-	snap, err := g.snapshot(chain, currEpochNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
+	snap, err := g.snapshot(chain, GetDependTurnByBlockNumber(g.config, number))
 	if err != nil {
 		return err
 	}
@@ -280,21 +278,39 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 	// If an in-memory snapshot was found, use that
 	if s, ok := g.recents.Get(epollNumber); ok {
 		snap = s.(*CommitteeSnapshot)
-	}else if epollNumber >= 0 && epollNumber < g.config.ElectionPeriod+g.config.ValidPeriod {
+	}else if epollNumber < 0 {
 		// If we're at block 0 ~ ElectionPeriod + ValidPeriod - 1, make a snapshot by genesis block
 		// TODO
-		return nil, nil
+		committeeRank := make([]common.Address, 10)
+		committeeRank[0] = common.HexToAddress("0xB8Dc5B004367f32F9E025469c7c22379A6DbD29D")
+		committeeRank[1] = common.HexToAddress("0xed19295615336ee56D4889BcdB90563b7abA02F7")
+		committeeRank[2] = common.HexToAddress("0x4180B3a9059cb43dc93e72e641B466fEBeFEa902")
+		committeeRank[3] = common.HexToAddress("0x8d024417f284B10B1fE8f6b02533F5aeFb7C8e23")
+		committeeRank[4] = common.HexToAddress("0xCc3b246d887435490409eC9037B7320e797B195a")
+		committeeRank[5] = common.HexToAddress("0xE45815411FBE2607C7E944C2E94baFc4BD7c7163")
+		committeeRank[6] = common.HexToAddress("0x51AAddb5f44525151D3554d1876bbc9d6E9Bff1F")
+		committeeRank[7] = common.HexToAddress("0x3C3DD12E1F11d56423adF3dC204E91e78a1f1FCa")
+		committeeRank[8] = common.HexToAddress("0x53Bd332D7c34f8ca0bFCA3f51c71BC1C523F6B4A")
+		committeeRank[9] = common.HexToAddress("0xdFc387187b63af2Ed108b153187d7B2cfDD93F73")
+		proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+		genaroConfig := &params.GenaroConfig{
+			Epoch:				5000,
+			BlockInterval:		10,
+			ElectionPeriod:		1,
+			ValidPeriod:		1,
+			CurrencyRates:		10,
+			CommitteeMaxSize:	5,
+		}
+		blockHash := new(common.Hash)
+		snap = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+		return snap, nil
 	}else{
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
-		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
-		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
+		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber)
+		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber)
 		h := chain.GetHeaderByNumber(endBlock+1)
-		var proportion []uint64
-		snap.CommitteeRank, proportion = GetHeaderCommitteeRankList(h)
-		snap.Committee = make(map[common.Address]uint64, len(proportion))
-		for i := 0; i < len(proportion); i++{
-			snap.Committee[snap.CommitteeRank[i]] = proportion[i]
-		}
+		committeeRank, proportion := GetHeaderCommitteeRankList(h)
+		snap = newSnapshot(params.MainnetChainConfig.Genaro, h.Number.Uint64(), h.Hash(), epollNumber, committeeRank, proportion)
 
 		log.Trace("computing rank from", startBlock, "to", endBlock)
 		isCreateNew = true
@@ -331,8 +347,7 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 		}
 	}
 	// get current committee snapshot
-	currentEpochNumber := GetTurnOfCommiteeByBlockNumber(g.config, blockNumber)
-	snap, err := g.snapshot(chain, currentEpochNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
+	snap, err := g.snapshot(chain, GetDependTurnByBlockNumber(g.config, blockNumber))
 	if err != nil {
 		return err
 	}
@@ -440,9 +455,7 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 		updateEpochYearRewards(state)
 	}
 
-	currEpochNumber := GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64())
-
-	snap, err := g.snapshot(chain, currEpochNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
+	snap, err := g.snapshot(chain, GetDependTurnByBlockNumber(g.config, header.Number.Uint64()))
 	if err != nil {
 		return nil, err
 	}

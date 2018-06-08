@@ -121,6 +121,7 @@ type Candidates []common.Address
 type CandidateInfo struct {
 	Signer       common.Address // peer address
 	Heft uint64         // the sentinel of the peer
+	//TODO May need to convert big int
 	Stake        uint64         // the stake of the peer
 	Point		 uint64
 }
