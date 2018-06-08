@@ -29,6 +29,15 @@ func (s SpecialTxInput) SpecialCost() *big.Int {
 	case common.SpecialTxTypeTrafficApply:
 		totalGas := big.NewInt(int64(s.Traffic) * common.TrafficApplyGasPerG)
 		return totalGas
+	case common.SpecialTxTypeMortgageInit:
+		sumMortgageTable :=	new(big.Int)
+		mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+		for _, v := range mortgageTable{
+			sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v.ToInt())
+		}
+		timeLimitGas := big.NewInt(s.SpecialTxTypeMortgageInit.TimeLimit * int64(len(mortgageTable)) * common.OneDayGes)
+		sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
+		return sumMortgageTable
 	default:
 		return big.NewInt(0)
 	}

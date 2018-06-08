@@ -351,14 +351,14 @@ func NewFrontierInstructionSet() [256]operation {
 		DATA_VERSION_READ: {
 			execute:       opDataVerisonRead,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(5, 1),
+			validateStack: makeStackFunc(6, 2),
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
 		DATA_VERSION_UPDATE: {
 			execute:       opDataVerisonUpdate,
 			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(5, 0),
+			validateStack: makeStackFunc(4, 1),
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
