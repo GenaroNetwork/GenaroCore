@@ -675,14 +675,17 @@ func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidech
 	return AddBalance, true
 }
 
-func (self *stateObject) TxLogBydataVersionUpdate(fileID string) types.SpecialTxTypeMortgageInit  {
+func (self *stateObject) TxLogBydataVersionUpdate(fileID string) (types.SpecialTxTypeMortgageInit, bool)  {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		accountAttributes := genaroData.SpecialTxTypeMortgageInitArr
 		resultTmp := accountAttributes[fileID]
+		if true == resultTmp.Terminate || resultTmp.EndTime < time.Now().Unix() {
+			return types.SpecialTxTypeMortgageInit{},false
+		}
 		if  0 == len(resultTmp.AuthorityTable) {
-			return  types.SpecialTxTypeMortgageInit{}
+			return  types.SpecialTxTypeMortgageInit{},false
 		}
 		resultTmp.LogSwitch = true
 		genaroData.SpecialTxTypeMortgageInitArr[fileID] = resultTmp
@@ -694,10 +697,9 @@ func (self *stateObject) TxLogBydataVersionUpdate(fileID string) types.SpecialTx
 			self.onDirty(self.Address())
 			self.onDirty = nil
 		}
-
-		return  resultTmp
+		return  resultTmp, true
 	}
-	return types.SpecialTxTypeMortgageInit{}
+	return types.SpecialTxTypeMortgageInit{},false
 }
 
 func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[common.Address] *hexutil.Big, error) {

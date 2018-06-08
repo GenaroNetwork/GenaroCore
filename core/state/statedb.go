@@ -30,6 +30,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/trie"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"time"
 )
 
 type revision struct {
@@ -757,8 +758,12 @@ func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID,dataVer
 func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID string,switchValue bool) bool {
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
-		resultTmp := stateObject.TxLogBydataVersionUpdate(fileID)
-		timeLimitGas := big.NewInt(resultTmp.TimeLimit * int64(len(resultTmp.MortgageTable)) * common.OneDayGes)
+		resultTmp,tag := stateObject.TxLogBydataVersionUpdate(fileID)
+		if !tag {
+			return false
+		}
+		TimeLimit := (resultTmp.EndTime - time.Now().Unix())/86400
+		timeLimitGas := big.NewInt(TimeLimit * int64(len(resultTmp.MortgageTable)) * common.OneDaySyncLogGsa)
 		stateObject.setBalance(timeLimitGas)
 		newStateObject := self.getStateObject(common.SpecialSyncAddress)
 		newStateObject.AddBalance(timeLimitGas)

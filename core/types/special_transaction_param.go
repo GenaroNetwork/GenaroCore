@@ -68,12 +68,12 @@ type FileIDArr struct {
 	AuthorityTable 	map[common.Address]int	`json:"authority"`
 	FileID 			string		`json:"fileID"`
 	Dataversion		string		`json:"dataversion"`
-	SidechainStatus	map[string] map[common.Address] *hexutil.Big	`json:"SidechainStatus"`
+	SidechainStatus	map[string] map[common.Address] *hexutil.Big	`json:"sidechainStatus"`
 	MortgagTotal	*big.Int	`json:"MortgagTotal"`
 	LogSwitch 	bool	`json:"logSwitch"`
 	TimeLimit   int64 `json:"timeLimit"`
-	CreateTime  int64	`json:"CreateTime"`
-	EndTime  int64	`json:"EndTime"`
+	CreateTime  int64	`json:"createTime"`
+	EndTime  int64	`json:"endTime"`
 	FromAccount common.Address 	`json:"fromAccount"`
 	Terminate	bool			`json:"terminate"`
 	Sidechain		Sidechain `json:"sidechain"`

@@ -1687,3 +1687,14 @@ func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context
 	}
 	return resultArr
 }
+
+
+
+func (s *PublicBlockChainAPI) DataVersionRead(ctx context.Context, address common.Address, blockNr rpc.BlockNumber,fileID,dataVersion string)(map[common.Address] *hexutil.Big, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	result,error := state.TxLogByDataVersionRead(address,fileID,dataVersion)
+	return result, error
+}

@@ -44,7 +44,7 @@ var (
 var OneDayGes  int64 = int64(5000)
 var BucketApplyGasPerGPerDay  int64 = int64(5000)
 var TrafficApplyGasPerG	 int64 = int64(5000)
-
+var OneDaySyncLogGsa  int64 = int64(5000)
 //官方账号
 var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
 
