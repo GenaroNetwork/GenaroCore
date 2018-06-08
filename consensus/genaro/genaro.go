@@ -474,6 +474,9 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 }
 
 func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards *big.Int) uint64 {
+	if coinrewards.Cmp(big.NewInt(0)) == 0 {
+		return uint64(base)
+	}
 	planrewards := big.NewInt(0)
 	//get total coinReward
 	planrewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
@@ -490,6 +493,9 @@ func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards 
 }
 
 func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusRewards *big.Int) uint64 {
+	if storagerewards.Cmp(big.NewInt(0)) == 0 {
+		return uint64(base)
+	}
 	planrewards := big.NewInt(0)
 	//get total storageReward
 	planrewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
