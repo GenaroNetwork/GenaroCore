@@ -16,6 +16,16 @@ import (
 	"time"
 )
 
+func TestGetDependTurnByBlockNumber(t *testing.T){
+	var turn uint64 = 0
+
+	for i:=0;i<20;i++ {
+		turn = GetDependTurnByBlockNumber(params.MainnetChainConfig.Genaro,uint64(i))
+		fmt.Println(turn)
+	}
+
+}
+
 func TestAuthor(t *testing.T){
 	db, remove := newTestLDB()
 	defer remove()
