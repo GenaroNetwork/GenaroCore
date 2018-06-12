@@ -69,7 +69,7 @@ func main() {
 	icos = append(icos, common.HexToAddress("0x362AB90e24c98E3eC83AfDA2cC702a5E24e8025b")) // 200
 	icos = append(icos, common.HexToAddress("0xF3719a8EE4a18623D4dB1d879Ba605daaF509B79")) // 300
 	icos = append(icos, common.HexToAddress("0xf6Fe19Fc7310E1cBcF8Be9901fF870ddc9bB9bf8")) // 400
-	icos = append(icos, common.HexToAddress("0xd350b3f1F0B74813577BA7e68c6e5f08c917603d")) // 500
+	icos = append(icos, common.HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73")) // 500
 
 	account0 := core.GenesisAccount{
 		Balance: big.NewInt(100),
@@ -84,7 +84,7 @@ func main() {
 		Balance: big.NewInt(400),
 	}
 	account4 := core.GenesisAccount{
-		Balance: big.NewInt(500),
+		Balance: big.NewInt(3000000000000000000),
 	}
 	genesis.Alloc[icos[0]] = account0
 	genesis.Alloc[icos[1]] = account1
