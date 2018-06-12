@@ -218,7 +218,6 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	if err != nil{
 		return errors.New("special tx error： the extraData parameters of the wrong format")
 	}
-
 	switch s.Type{
 	case common.SpecialTxTypeStakeSync: // 同步stake
 		err = updateStake(evm,caller,input)
@@ -261,7 +260,8 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
 		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
 	}
-	timeLimitGas := big.NewInt(s.SpecialTxTypeMortgageInit.TimeLimit * int64(len(mortgageTable)) * common.OneDayGes)
+	temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(),big.NewInt(int64(len(mortgageTable))))
+	timeLimitGas := temp.Mul(temp,big.NewInt(common.OneDayGes))
 	//timeLimitGas = (*big.Int)()s.SpecialTxTypeMortgageInit.TimeLimit *
 	//扣除抵押表全部费用+按照时间期限收费
 	sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
