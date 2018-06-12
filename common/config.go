@@ -1,5 +1,6 @@
 package common
 
+import "math/big"
 
 /*
 Some special address prepared for special transactions.
@@ -19,24 +20,23 @@ var (
 var (
 
 	//SpecialTxTypeStakeSync类型的交易代表stake同步
-	SpecialTxTypeStakeSync         int = 1
-
+	SpecialTxTypeStakeSync          = big.NewInt(1)
 	//SpecialTxTypeHeftSync类型的交易代表heft同步
-	SpecialTxTypeHeftSync          int = 2
+	SpecialTxTypeHeftSync          = big.NewInt(2)
 
 	//SpecialTxTypeSpaceApply类型的交易代表用户申请存储空间
-	SpecialTxTypeSpaceApply        int = 3
+	SpecialTxTypeSpaceApply        = big.NewInt(3)
 
 	//SpecialTxTypeTrafficApply类型的交易代表用户给存储申请流量
-	SpecialTxTypeTrafficApply      int = 4
+	SpecialTxTypeTrafficApply      = big.NewInt(4)
 
 	//SpecialTxTypeMortgageInit类型的交易代表用户押注初始化交易
-	SpecialTxTypeMortgageInit      int = 5
+	SpecialTxTypeMortgageInit      = big.NewInt(5)
 
 	//SpecialTxTypeMortgageTerminate类型的交易代表用户押注结束时的结算交易
-	SpecialTxTypeMortgageTerminate int = 6
+	SpecialTxTypeMortgageTerminate = big.NewInt(6)
 	//SpecialTxTypeSyncSidechainStatus类型的交易代表同步侧链状态
-	SpecialTxTypeSyncSidechainStatus int = 7
+	SpecialTxTypeSyncSidechainStatus = big.NewInt(7)
 
 )
 //费用

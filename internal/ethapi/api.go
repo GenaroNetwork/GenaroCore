@@ -992,7 +992,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberAndIndex(ctx conte
 }
 
 // GetTransactionByBlockNumberRange returns the transaction of special type from  startblocknumber to endblocknumber.
-func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType hexutil.Uint) []*RPCTransaction {
+func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType *big.Int) []*RPCTransaction {
 	var specialTx []*RPCTransaction
 	if startBlockNr >= endBlockNr {
 		return nil
@@ -1007,7 +1007,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.
 	return specialTx
 }
 
-func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txType hexutil.Uint) []*RPCTransaction {
+func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txType *big.Int) []*RPCTransaction {
 	var specialTx []*RPCTransaction
 	for i := 0; i < len(txs); i++ {
 		if txWithType(txs[i], txType) {
@@ -1018,7 +1018,7 @@ func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txTy
 	return specialTx
 }
 
-func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
+func txWithType(tx *types.Transaction, txType *big.Int) bool {
 	// 解析transaction的Payload域值
 	if tx.Data() == nil || len(tx.Data()) == 0{
 		return false
@@ -1028,7 +1028,7 @@ func txWithType(tx *types.Transaction, txType hexutil.Uint) bool {
 	if err != nil{
 		return false
 	}
-	return uint64(s.Type) == uint64(txType)
+	return s.Type.ToInt().Uint64() == txType.Uint64()
 }
 
 
@@ -1040,7 +1040,7 @@ type rpcTrafficInfo struct {
 
 // GetTrafficTxInfo get informations of special transaction of traffic apply
 func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcTrafficInfo {
-	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeTrafficApply))
+	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeTrafficApply)
 	var retArr[]*rpcTrafficInfo
 	for _, v := range rpcTx {
 		var s types.SpecialTxInput
@@ -1067,7 +1067,7 @@ type rpcBucketPropertie struct {
 
 // GetBucketTxInfo get informations of special transaction of bucket apply
 func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcBucketPropertie {
-	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, hexutil.Uint(common.SpecialTxTypeSpaceApply))
+	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeSpaceApply)
 	var retArr []*rpcBucketPropertie
 	for _, tx := range rpcTx {
 		var s types.SpecialTxInput
@@ -1288,8 +1288,8 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	if *args.To == common.SpecialSyncAddress {
 		var s types.SpecialTxInput
 		json.Unmarshal([]byte(args.ExtraData), &s)
-		switch s.Type {
-		case common.SpecialTxTypeMortgageInit:
+		switch s.Type.ToInt().Uint64() {
+		case common.SpecialTxTypeMortgageInit.Uint64():
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
@@ -1301,7 +1301,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			s.SpecialTxTypeMortgageInit.FromAccount = args.From
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		case common.SpecialTxTypeSpaceApply:
+		case common.SpecialTxTypeSpaceApply.Uint64():
 			var b []*types.BucketPropertie
 			for _, v := range s.Buckets{
 				t := time.Now()
@@ -1316,7 +1316,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			s.Buckets = b
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		case common.SpecialTxTypeSyncSidechainStatus:
+		case common.SpecialTxTypeSyncSidechainStatus.Uint64():
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SpecialTxTypeMortgageInit.Dataversion = hex.EncodeToString(timeUnixSha256[:])
@@ -1678,7 +1678,7 @@ func (s *PublicBlockChainAPI) GetLogSwitchByAddressAndFileID(ctx context.Context
 }
 
 func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []types.SpecialTxTypeMortgageInit {
-	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,hexutil.Uint(common.SpecialTxTypeMortgageInit))
+	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SpecialTxTypeMortgageInit)
 	var specialTxTypeMortgageInit types.SpecialTxInput
 	var resultArr []types.SpecialTxTypeMortgageInit
 	for _, v := range result {

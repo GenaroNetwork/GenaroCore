@@ -9,12 +9,12 @@ import (
 type SpecialTxInput struct {
 	GenaroData
 	NodeId  string `json:"nodeid"`
-	Type    int    `json:"type"`
+	Type    *hexutil.Big    `json:"type"`
 }
 
 func (s SpecialTxInput) SpecialCost() *big.Int {
 	rt := new(big.Int)
-	switch s.Type {
+	switch s.Type.ToInt() {
 	case common.SpecialTxTypeStakeSync:
 		return rt.SetUint64(s.Stake)
 	case common.SpecialTxTypeSpaceApply:

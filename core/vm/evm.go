@@ -218,21 +218,21 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	if err != nil{
 		return errors.New("special tx error： the extraData parameters of the wrong format")
 	}
-	switch s.Type{
-	case common.SpecialTxTypeStakeSync: // 同步stake
+	switch s.Type.ToInt().Uint64(){
+	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
 		err = updateStake(evm,caller,input)
 
-	case common.SpecialTxTypeHeftSync: // 同步heft
+	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
 		err = updateHeft(&evm.StateDB, s)
 		*sentinelHeft = *sentinelHeft + 1
 
-	case common.SpecialTxTypeSpaceApply: // 申请存储空间
+	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		err = updateStorageProperties(evm, s, caller)
-	case common.SpecialTxTypeMortgageInit: // 交易代表用户押注初始化交易
+	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		err = specialTxTypeMortgageInit(evm, s,caller)
-	case common.SpecialTxTypeSyncSidechainStatus: // 交易代表用户押注初始化交易
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): // 交易代表用户押注初始化交易
 		err = SpecialTxTypeSyncSidechainStatus(evm, s)
-	case common.SpecialTxTypeTrafficApply: //用户申购流量
+	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		err = updateTraffic(evm, s, caller)
 	}
 	return err
@@ -250,7 +250,6 @@ func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
 }
 
 func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Address) error{
-
 	sumMortgageTable :=	new(big.Int)
 	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
 	for _, v := range mortgageTable{
