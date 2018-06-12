@@ -29,6 +29,7 @@ import (
 	"time"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/pkg/errors"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -722,4 +723,73 @@ func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[
 		return  resultTmp.SidechainStatus[dataVersion],nil
 	}
 	return nil,nil
+}
+
+func (self *stateObject)SyncStakeNode(s []string) error {
+	var err error
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{ // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
+		err = errors.New("can't sync node before stake")
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		totalNodeNumber := len(s)
+		if genaroData.Node != nil {
+			totalNodeNumber += len(genaroData.Node)
+		}
+		needStakeVale := int64(totalNodeNumber) * common.StakeValuePerNode
+		if uint64(needStakeVale) > genaroData.Stake {
+			err = errors.New("no enough stake value to sync node")
+		}else {
+			genaroData.Node = append(genaroData.Node, s...)
+			b, _ := json.Marshal(genaroData)
+			self.code = nil
+			self.data.CodeHash = b[:]
+			self.dirtyCode = true
+			if self.onDirty != nil {
+				self.onDirty(self.Address())
+				self.onDirty = nil
+			}
+		}
+	}
+	return err
+}
+
+func (self *stateObject)SyncNode2Address(s []string, address string) error {
+	d := make(map[string]string)
+	if self.data.CodeHash != nil {
+		for _, v := range s {
+			d[v] = address
+		}
+	}else{
+		json.Unmarshal(self.data.CodeHash, &d)
+		for _, v := range s {
+			d[v] = address
+		}
+	}
+	b, _ := json.Marshal(d)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return nil
+}
+
+func (self *stateObject)GetAddressByNode (s string) string{
+	if self.data.CodeHash == nil {
+		return ""
+	}else {
+		d := make(map[string]string)
+		err := json.Unmarshal(self.data.CodeHash, &d)
+		if err != nil{
+			return ""
+		}
+		if v, ok := d[s]; !ok {
+			return ""
+		}else {
+			return v
+		}
+	}
 }

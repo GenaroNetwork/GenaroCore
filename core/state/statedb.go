@@ -791,3 +791,31 @@ func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, Spe
 	}
 	return nil,false
 }
+
+func (self *StateDB)SyncStakeNode(address common.Address,s []string) error {
+	stateObject := self.GetOrNewStateObject(address)
+	var err error = nil
+	if stateObject != nil {
+		err = stateObject.SyncStakeNode(s)
+	}
+	return err
+}
+
+
+func (self *StateDB)SyncNode2Address(node2UserAccountIndexAddress common.Address, s []string, userAddress string) error {
+	stateObject := self.GetOrNewStateObject(node2UserAccountIndexAddress)
+	var err error = nil
+	if stateObject != nil {
+		err = stateObject.SyncNode2Address(s, userAddress)
+	}
+	return err
+}
+
+func (self *StateDB)GetAddressByNode(s string) string {
+	stateObject := self.GetOrNewStateObject(common.StakeNode2StakeAddress)
+	var address string
+	if stateObject != nil {
+		address = stateObject.GetAddressByNode(s)
+	}
+	return address
+}
