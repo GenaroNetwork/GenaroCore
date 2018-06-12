@@ -34,6 +34,8 @@ const (
 	StorageActualRewardsAddress	= "ccc"
 	Pre							= "pre"
 	TotalActualRewardsAddress	= "ggg"
+
+	backStakePeriod				= uint64(2)
 )
 
 var (
@@ -159,7 +161,7 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	header.Nonce = types.BlockNonce{}
 	number := header.Number.Uint64()
 
-	snap, err := g.snapshot(chain, GetDependTurnByBlockNumber(g.config, number))
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number))
 	if err != nil {
 		return err
 	}
@@ -234,7 +236,7 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 // current signer.
 func (g *Genaro) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 	blockNumber := parent.Number.Uint64() + 1
-	dependEpoch := GetDependTurnByBlockNumber(g.config, blockNumber)
+	dependEpoch := GetTurnOfCommiteeByBlockNumber(g.config, blockNumber)
 
 	snap, err := g.snapshot(chain, dependEpoch)
 	if err != nil {
@@ -258,11 +260,8 @@ func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber ui
 	if index < 0 {
 		return new(big.Int).SetUint64(max(snap.CommitteeSize, minDistance))
 	}
-	distance := blockNumber - uint64(index)
-	if distance < 0 {
-		distance = -distance
-	}
-	return new(big.Int).SetUint64(distance)
+	distance := index
+	return new(big.Int).SetUint64(uint64(distance))
 }
 
 // Authorize injects a private key into the consensus engine to mint new blocks
@@ -357,7 +356,7 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 		}
 	}
 	// get current committee snapshot
-	snap, err := g.snapshot(chain, GetDependTurnByBlockNumber(g.config, blockNumber))
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, blockNumber))
 	if err != nil {
 		return err
 	}
@@ -400,7 +399,7 @@ func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 	return nil
 }
 
-func (g *Genaro) rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
+func rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
 	candidateInfos.Apply()
 	sort.Sort(candidateInfos)
 	committeeRank := make([]common.Address, len(candidateInfos))
@@ -441,31 +440,62 @@ func updateEpochYearRewards(state *state.StateDB)  {
 	state.SetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), big.NewInt(0))
 }
 
+func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, state *state.StateDB)  {
+	blockNumber := header.Number.Uint64()
+	if blockNumber%config.Epoch == 0 {
+		//rank
+		epochStartBlockNumber := blockNumber - config.Epoch
+		epochEndBlockNumber := blockNumber
+		candidateInfos := state.GetCandidatesInfoInRange(epochStartBlockNumber, epochEndBlockNumber)
+		commiteeRank, proportion := rank(candidateInfos)
+		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
+			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
+		}else{
+			SetHeaderCommitteeRankList(header, commiteeRank[:config.CommitteeMaxSize],proportion[:config.CommitteeMaxSize])
+		}
+		//CoinActualRewards and StorageActualRewards should update per epoch
+		updateEpochRewards(state)
+	}
+	if blockNumber%(epochPerYear*config.Epoch) == 0 {
+		//CoinActualRewards and StorageActualRewards should update per epoch, surplusCoin should update per year
+		updateEpochYearRewards(state)
+	}
+}
+
+func handleAlreadyBackStakeList(config *params.GenaroConfig, header *types.Header, state *state.StateDB)  {
+	blockNumber := header.Number.Uint64()
+	backlist := state.GetAlreadyBackStakeList()
+	for i := 0; i < len(backlist); i++ {
+		back := backlist[i]
+		if IsBackStakeBlockNumber(config, back.BackBlockNumber, blockNumber) {
+			backlist = append(backlist[:i], backlist[i+1:]...)
+			i--
+		}
+	}
+	state.SetAlreadyBackStakeList(backlist)
+}
+
+func handleApplyBackStakeList(config *params.GenaroConfig, header *types.Header, state *state.StateDB)  {
+	blockNumber := header.Number.Uint64()
+	backlist := state.GetAlreadyBackStakeList()
+	for i := 0; i < len(backlist); i++ {
+		back := backlist[i]
+		if IsBackStakeBlockNumber(config, back.BackBlockNumber, blockNumber) {
+			backlist = append(backlist[:i], backlist[i+1:]...)
+			i--
+		}
+	}
+	state.SetAlreadyBackStakeList(backlist)
+}
+
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	//commit rank
 	blockNumber := header.Number.Uint64()
-	if blockNumber%g.config.Epoch == 0 {
-		//rank
-		epochStartBlockNumber := blockNumber - g.config.Epoch
-		epochEndBlockNumber := blockNumber
-		candidateInfos := state.GetCandidatesInfoInRange(epochStartBlockNumber, epochEndBlockNumber)
-		commiteeRank, proportion := g.rank(candidateInfos)
-		if uint64(len(candidateInfos)) <= g.config.CommitteeMaxSize {
-			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
-		}else{
-			SetHeaderCommitteeRankList(header, commiteeRank[:g.config.CommitteeMaxSize],proportion[:g.config.CommitteeMaxSize])
-		}
-		//CoinActualRewards and StorageActualRewards should update per epoch
-		updateEpochRewards(state)
-	}
-	if blockNumber%(epochPerYear*g.config.Epoch) == 0 {
-		//CoinActualRewards and StorageActualRewards should update per epoch, surplusCoin should update per year
-		updateEpochYearRewards(state)
-	}
+	updateSpecialBlock(g.config, header, state)
 
-	snap, err := g.snapshot(chain, GetDependTurnByBlockNumber(g.config, header.Number.Uint64()))
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()))
 	if err != nil {
 		return nil, err
 	}
@@ -474,6 +504,11 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	accumulateInterestRewards(g.config, state, header, proportion, blockNumber)
 	// storage reward
 	accumulateStorageRewards(g.config, state, blockNumber)
+
+	//handle apply back stake list
+
+	//handle already back stake list
+	handleAlreadyBackStakeList(g.config, header, state)
 
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
