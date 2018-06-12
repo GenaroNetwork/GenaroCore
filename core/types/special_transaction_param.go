@@ -35,7 +35,8 @@ func (s SpecialTxInput) SpecialCost() *big.Int {
 		for _, v := range mortgageTable{
 			sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v.ToInt())
 		}
-		timeLimitGas := big.NewInt(s.SpecialTxTypeMortgageInit.TimeLimit * int64(len(mortgageTable)) * common.OneDayGes)
+		temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(),big.NewInt(int64(len(mortgageTable))))
+		timeLimitGas := temp.Mul(temp,big.NewInt(common.OneDayGes))
 		sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
 		return sumMortgageTable
 	default:
@@ -81,7 +82,7 @@ type FileIDArr struct {
 	SidechainStatus	map[string] map[common.Address] *hexutil.Big	`json:"sidechainStatus"`
 	MortgagTotal	*big.Int	`json:"MortgagTotal"`
 	LogSwitch 	bool	`json:"logSwitch"`
-	TimeLimit   int64 `json:"timeLimit"`
+	TimeLimit   *hexutil.Big `json:"timeLimit"`
 	CreateTime  int64	`json:"createTime"`
 	EndTime  int64	`json:"endTime"`
 	FromAccount common.Address 	`json:"fromAccount"`

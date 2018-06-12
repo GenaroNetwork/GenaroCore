@@ -1303,7 +1303,10 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
-			s.SpecialTxTypeMortgageInit.EndTime = s.SpecialTxTypeMortgageInit.TimeLimit * 86400 + s.SpecialTxTypeMortgageInit.CreateTime
+			timeLimit := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt()
+			var tmp  big.Int
+			tmp.Mul(timeLimit,big.NewInt(86400))
+			s.SpecialTxTypeMortgageInit.EndTime =  tmp.Add(&tmp,big.NewInt(s.SpecialTxTypeMortgageInit.CreateTime)).Int64()
 			s.SpecialTxTypeMortgageInit.FileID = hex.EncodeToString(timeUnixSha256[:])
 			s.SpecialTxTypeMortgageInit.FromAccount = args.From
 			input,_ := json.Marshal(s)
