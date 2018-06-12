@@ -28,6 +28,7 @@ const (
 	inmemorySnapshots			= 128                    // Number of recent snapshots to keep in memory
 	epochLength					= uint64(5000)           // Default number of blocks a turn
 	epochPerYear				= uint64(12)
+	minDistance					= uint64(500)
 	SurplusCoinAddress			= "aaa"
 	CoinActualRewardsAddress	= "bbb"
 	StorageActualRewardsAddress	= "ccc"
@@ -246,12 +247,20 @@ func (g *Genaro) CalcDifficulty(chain consensus.ChainReader, time uint64, parent
 	return CalcDifficulty(snap, g.signer, blockNumber)
 }
 
+func max(x uint64, y uint64) uint64 {
+	if x > y {
+		return x
+	}else{
+		return y
+	}
+}
+
 // CalcDifficulty return the distance between my index and intern-index
 // depend on snap
 func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber uint64) *big.Int {
 	index := snap.getCurrentRankIndex(addr)
 	if index < 0 {
-		return new(big.Int).SetUint64(snap.CommitteeSize)
+		return new(big.Int).SetUint64(max(snap.CommitteeSize, minDistance))
 	}
 	distance := blockNumber - uint64(index)
 	if distance < 0 {
