@@ -84,6 +84,9 @@ type StateDB interface {
 	GetStorageGasUsed(common.Address, string)  (uint64, error)
 	GetStorageGas(common.Address, string)  (uint64, error)
 
+	AddAlreadyBackStack(refund common.AlreadyBackStake) error
+	GetAlreadyBackStakeList() []common.AlreadyBackStake
+	SetAlreadyBackStakeList([]common.AlreadyBackStake) error
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

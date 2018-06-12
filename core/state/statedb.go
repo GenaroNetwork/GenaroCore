@@ -795,3 +795,18 @@ func (self *StateDB)GetStorageGas(userid common.Address, filename string)  (uint
 	}
 	return 0, nil
 }
+
+//add one back stake to list
+func (self *StateDB)AddAlreadyBackStack(refund common.AlreadyBackStake) error {
+	return nil
+}
+
+//get all back stake
+func (self *StateDB)GetAlreadyBackStakeList() []common.AlreadyBackStake {
+	return nil
+}
+
+//set back stake list
+func (self *StateDB)SetAlreadyBackStakeList([]common.AlreadyBackStake) error {
+	return nil
+}

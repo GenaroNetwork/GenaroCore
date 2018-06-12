@@ -133,7 +133,6 @@ func GetDependTurnByBlockNumber(config *params.GenaroConfig, number uint64) uint
 	return GetTurnOfCommiteeByBlockNumber(config, number)
 }
 
-
 //  get the  written BlockNumber by the turn of committee
 func GetCommiteeWrittenBlockNumberByTurn(config *params.GenaroConfig, turn uint64) uint64 {
 	return (turn - config.ValidPeriod + 1)*config.Epoch - 1
@@ -176,4 +175,11 @@ func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64)
 
 func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
 	return (config.Epoch + 1)*epochNumber - 1
+}
+
+func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBlockNumber uint64) bool {
+	if nowBlockNumber - applyBlockNumber > (config.ElectionPeriod + config.ValidPeriod + backStakePeriod) * config.Epoch {
+		return true
+	}
+	return false
 }
