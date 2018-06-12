@@ -196,6 +196,15 @@ func (s *PublicAccountAPI) Accounts() []common.Address {
 	return addresses
 }
 
+// Candidates returns the collection of accounts who has staked
+func (s *PublicBlockChainAPI) GetCandidates(ctx context.Context,blockNr rpc.BlockNumber) []common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetCandidates()
+}
+
 // PrivateAccountAPI provides an API to access accounts managed by this node.
 // It offers methods to create, (un)lock en list accounts. Some methods accept
 // passwords and are therefore considered private by default.
