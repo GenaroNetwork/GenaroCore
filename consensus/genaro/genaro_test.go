@@ -186,7 +186,22 @@ func TestCalcDifficulty(t *testing.T) {
 	genaro := New(genesis.Config.Genaro,db)
 	turn := GetTurnOfCommiteeByBlockNumber(genaro.config, 120)
 	fmt.Println(turn)
+	if turn != 0 {
+		t.Error("GetTurnOfCommiteeByBlockNumber error")
+	}
 	turn = GetDependTurnByBlockNumber(genaro.config, 120)
 	fmt.Println(turn)
-
+	if turn != 0 {
+		t.Error("GetDependTurnByBlockNumber error")
+	}
+	turn = GetTurnOfCommiteeByBlockNumber(genaro.config, 15678)
+	fmt.Println(turn)
+	if turn != 7 {
+		t.Error("GetTurnOfCommiteeByBlockNumber error")
+	}
+	turn = GetDependTurnByBlockNumber(genaro.config, 15678)
+	fmt.Println(turn)
+	if turn != 5 {
+		t.Error("GetDependTurnByBlockNumber error")
+	}
 }
