@@ -87,6 +87,10 @@ type StateDB interface {
 	TxLogByDataVersionRead(common.Address,string,string) (map[common.Address] *hexutil.Big, error)
 	//根据用户id和fileID开启定时同步日志接口
 	TxLogBydataVersionUpdate(common.Address,string,bool) bool
+
+	SyncStakeNode(common.Address, []string) error
+	SyncNode2Address(common.Address, []string, string) error
+	GetAddressByNode(string) string
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

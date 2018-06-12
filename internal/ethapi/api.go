@@ -1086,6 +1086,16 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	return retArr
 }
 
+func (s *PublicTransactionPoolAPI) GetAccountByNode(ctx context.Context, str string) string {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	var retS string
+	if state == nil || err != nil {
+		return retS
+	}
+	retS = state.GetAddressByNode(str)
+	return retS
+}
+
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.
 func (s *PublicTransactionPoolAPI) GetTransactionByBlockHashAndIndex(ctx context.Context, blockHash common.Hash, index hexutil.Uint) *RPCTransaction {
 	if block, _ := s.b.GetBlock(ctx, blockHash); block != nil {

@@ -234,7 +234,24 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = SpecialTxTypeSyncSidechainStatus(evm, s)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		err = updateTraffic(evm, s, caller)
+	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
+		err = updateStakeNode(evm, s, caller)
 	}
+	return err
+}
+
+func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	userAdress := common.HexToAddress(s.NodeId)
+	var err error = nil
+	if s.Node != nil && len(s.Node) != 0 {
+		err = (*evm).StateDB.SyncStakeNode(userAdress, s.Node)
+
+		if err == nil { // 存储倒排索引
+			node2UserAccountIndexAddress := common.StakeNode2StakeAddress
+			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, s.NodeId)
+		}
+	}
+
 	return err
 }
 
