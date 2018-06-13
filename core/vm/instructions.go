@@ -547,15 +547,17 @@ func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//address, buckerId := stack.pop(),stack.pop()
+	address, buckerId := stack.pop(),stack.pop()
 	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
 	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
-	//storageGasPrice,err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address),bucketId)
-	//if err == nil {
-	//	stack.push(evm.interpreter.intPool.get().SetUint64(storageGasPrice))
-	//}else{
-	//	stack.push(evm.interpreter.intPool.getZero())
-	//}
+	var byteArr [32]byte
+	byteArr = ([32]byte)math.U256(buckerId)
+	storageGasPrice,err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address),byteArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasPrice))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
@@ -598,15 +600,17 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 }
 
 func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//address, bucketId := stack.pop(),stack.pop()
+	address, bucketId := stack.pop(),stack.pop()
 	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
 	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
-	//storageGasUsed,err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address),bucketId)
-	//if err == nil {
-	//	stack.push(evm.interpreter.intPool.get().SetUint64(storageGasUsed))
-	//}else{
-	//	stack.push(evm.interpreter.intPool.getZero())
-	//}
+	var byteArr [32]byte
+	byteArr = ([32]byte)math.U256(bucketId)
+	storageGasUsed,err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address),byteArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasUsed))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
@@ -712,15 +716,17 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 
 //todo 实现自定义指令对应函数功能
 func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//address, bucketId := stack.pop(),stack.pop()
+	address, bucketId := stack.pop(),stack.pop()
 	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
 	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
-	//sSize,err := evm.StateDB.GetStorageSize(common.BigToAddress(address),bucketId)
-	//if err == nil {
-	//	stack.push(evm.interpreter.intPool.get().SetUint64(sSize))
-	//}else{
-	//	stack.push(evm.interpreter.intPool.getZero())
-	//}
+	var byteArr [32]byte
+	byteArr = ([32]byte)math.U256(bucketId)
+	sSize,err := evm.StateDB.GetStorageSize(common.BigToAddress(address),byteArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(sSize))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
@@ -732,15 +738,17 @@ func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stac
 // todo 实现自定义指令对应函数功能
 // 获取交易的StorageGas,获取后压入栈中
 func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//address, bucketId := stack.pop(),stack.pop()
+	address, bucketId := stack.pop(),stack.pop()
 	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
 	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
-	//storageGas,err := evm.StateDB.GetStorageGas(common.BigToAddress(address),bucketId)
-	//if err == nil {
-	//	stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
-	//}else{
-	//	stack.push(evm.interpreter.intPool.getZero())
-	//}
+	var  byteArr [32]byte
+	byteArr = ([32]byte)math.U256(bucketId)
+	storageGas,err := evm.StateDB.GetStorageGas(common.BigToAddress(address),byteArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
+	}else{
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
