@@ -71,10 +71,10 @@ type StateDB interface {
 	GetStake(common.Address) (uint64, error)
 
 	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
-	GetStorageSize(common.Address, string)  (uint64, error)
-	GetStorageGasPrice(common.Address, string)  (uint64, error)
-	GetStorageGasUsed(common.Address, string)  (uint64, error)
-	GetStorageGas(common.Address, string)  (uint64, error)
+	GetStorageSize(common.Address, [32]byte)  (uint64, error)
+	GetStorageGasPrice(common.Address, [32]byte)  (uint64, error)
+	GetStorageGasUsed(common.Address, [32]byte)  (uint64, error)
+	GetStorageGas(common.Address, [32]byte)  (uint64, error)
 	SpecialTxTypeMortgageInit(common.Address,types.SpecialTxTypeMortgageInit) bool
 	SpecialTxTypeSyncSidechainStatus(common.Address,types.SpecialTxTypeMortgageInit) (map[common.Address] *big.Int, bool)
 	UpdateTraffic(common.Address, uint64) bool
