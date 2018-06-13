@@ -5275,6 +5275,13 @@ var methods = function () {
         outputFormatter: utils.toDecimal
     });
 
+    var getCandidates = new Method({
+        name: 'getCandidates',
+        call: 'eth_getCandidates',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getStake = new Method({
         name: 'getStake',
         call: 'eth_getStake',
@@ -5490,7 +5497,8 @@ var methods = function () {
         getStake,
         getStakeRangeDiff,
         getHeft,
-        getHeftRangeDiff
+        getHeftRangeDiff,
+        getCandidates
     ];
 };
 
