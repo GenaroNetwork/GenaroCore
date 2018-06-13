@@ -215,16 +215,18 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	g.lock.RUnlock()
 
 	// Sweet, wait some time if not in-turn
+	log.Info("[foam]seal block number", "blockNumber", common.PrettyDuration(header.Number.Uint64()))
 	delay := time.Duration(header.Difficulty.Uint64() * uint64(time.Second))
 	delay += time.Duration(rand.Int63n(int64(wiggleTime)))
 
-	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
+	log.Info("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
 
 	select {
 	case <-stop:
 		return nil, nil
 	case <-time.After(delay):
 	}
+	log.Info("Waiting over", "delay", common.PrettyDuration(delay))
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
@@ -295,7 +297,7 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		// If we're at block 0 ~ ElectionPeriod + ValidPeriod - 1, make a snapshot by genesis block
 		// TODO
 		committeeRank := make([]common.Address, 10)
-		committeeRank[0] = common.HexToAddress("0xB8Dc5B004367f32F9E025469c7c22379A6DbD29D")
+		committeeRank[0] = common.HexToAddress("0x50a7658e5155206dc78eafb80e6a94640b274648")
 		committeeRank[1] = common.HexToAddress("0xed19295615336ee56D4889BcdB90563b7abA02F7")
 		committeeRank[2] = common.HexToAddress("0x4180B3a9059cb43dc93e72e641B466fEBeFEa902")
 		committeeRank[3] = common.HexToAddress("0x8d024417f284B10B1fE8f6b02533F5aeFb7C8e23")
@@ -629,6 +631,9 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	for i, c := range cs{
 		contributes[i] = state.GetHeftLastDiff(c, blockNumber)
 		total += contributes[i]
+	}
+	if total == 0 {
+		return nil
 	}
 
 	for i, c := range cs{
