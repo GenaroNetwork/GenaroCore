@@ -756,7 +756,7 @@ func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID [32]byt
 	return nil,nil
 }
 //根据用户id和fileID开启定时同步日志接口
-func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]byte,switchValue bool) bool {
+func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]byte) bool {
 	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
