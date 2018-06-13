@@ -26,8 +26,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"encoding/json"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 var (
@@ -488,7 +486,7 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 //todo 实现自定义指令对应函数功能
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	//address,fileName,dataVersion := stack.pop(),stack.pop(),stack.pop()
-	address, offset1, size1,offset2,size2,retOffset:= stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	/*address, offset1, size1,offset2,size2,retOffset:= stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
 	fileName := string(memory.Get(offset1.Int64(),size1.Int64()))
 	dataVersion := string(memory.Get(offset2.Int64(),size2.Int64()))
 	var txLog map[common.Address] *hexutil.Big
@@ -504,13 +502,13 @@ func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory,
 		stack.push(evm.interpreter.intPool.getZero())
 		stack.push(evm.interpreter.intPool.getZero())
 	}
-	evm.interpreter.intPool.put(address, offset1, size1,offset2,size2,retOffset)
+	evm.interpreter.intPool.put(address, offset1, size1,offset2,size2,retOffset)*/
 	return nil, nil
 }
 
 func opDataVerisonUpdate(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	//address,fileName,switchValue := stack.pop(),stack.pop(),stack.pop()
-	address, offset, size ,switchValue := stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	/*address, offset, size ,switchValue := stack.pop(),stack.pop(),stack.pop(),stack.pop()
 	fileName := string(memory.Get(offset.Int64(),size.Int64()))
 	var switchV bool
 	//switchVlaue (int => bool)
@@ -524,7 +522,7 @@ func opDataVerisonUpdate(pc *uint64, evm *EVM, contract *Contract, memory *Memor
 		stack.push(evm.interpreter.intPool.get().SetUint64(1))
 	}else {
 		stack.push(evm.interpreter.intPool.getZero())
-	}
+	}*/
 	return nil, nil
 }
 
