@@ -308,6 +308,14 @@ func (self *StateDB) SetCode(addr common.Address, code []byte) {
 	}
 }
 
+// only used in genaro genesis init
+func (self *StateDB) SetCodeHash(addr common.Address, codeHash []byte) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.SetCodeHash(codeHash)
+	}
+}
+
 func (self *StateDB) SetState(addr common.Address, key common.Hash, value common.Hash) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {

@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 func main() {
@@ -55,13 +56,14 @@ func main() {
 	committees = append(committees, common.HexToAddress("0x1A7194Eb140e29e09FCe688d2E86f282D6a83E69"))
 	committees = append(committees, common.HexToAddress("0x77F7C5FDE3Ce4Fa137c48B3f722B17D7722c3924"))
 	committees = append(committees, common.HexToAddress("0xd31Eb2eA2D7bC15c5B0FE7922fAB4Db0A4F8187A"))
+	committeesData, _ := json.Marshal(committees)
 
 	specialAccount := core.GenesisAccount{
 		Balance: big.NewInt(0),
-		CommitteeRank: make([]common.Address, len(committees)),
+		CodeHash: committeesData,
 	}
 	copy(specialAccount.CommitteeRank, committees)
-	genesis.Alloc[core.GenesisSpecialAddr] = specialAccount
+	genesis.Alloc[common.CandidateSaveAddress] = specialAccount
 
 	// For ICO
 	icos := make([]common.Address, 0)
@@ -94,7 +96,7 @@ func main() {
 
 	// For stake
 	stakes := make([]common.Address, 0)
-	stakes = append(stakes, common.HexToAddress("0xf8c93eBA49Eae0D74CDA7AA794a95998A927785e")) // 100
+	stakes = append(stakes, common.HexToAddress("0xb77a75699c3707fBede9442db8451F44321ef83f")) // 100
 	stakes = append(stakes, common.HexToAddress("0x77a965FfCC8B456BF843A3bBF54971ba4B973C2C")) // 200
 	stakes = append(stakes, common.HexToAddress("0xaD8D137FbE0dDDE9E395859c45bB76508b878C2F")) // 300
 	stakes = append(stakes, common.HexToAddress("0xc132Ab73Fc66F8C890C30E13678d8Aa0145b355B")) // 400
@@ -116,19 +118,29 @@ func main() {
 		Balance: big.NewInt(0),
 		Stake: 400,
 	}
-	account04 := core.GenesisAccount{
-		Balance: big.NewInt(0),
-		Stake: 500,
-	}
+	//account04 := core.GenesisAccount{
+	//	Balance: big.NewInt(0),
+	//	Stake: 500,
+	//}
 	genesis.Alloc[stakes[0]] = account00
 	genesis.Alloc[stakes[1]] = account01
 	genesis.Alloc[stakes[2]] = account02
 	genesis.Alloc[stakes[3]] = account03
+	//genesis.Alloc[stakes[4]] = account04
+
+	stake1 := state.GenaroData{
+		Stake: 1000,
+	}
+	stake1Byte, _ := json.Marshal(stake1)
+	account04 := core.GenesisAccount{
+		Balance: big.NewInt(0),
+		CodeHash: stake1Byte,
+	}
 	genesis.Alloc[stakes[4]] = account04
 
 	// For Heft
 	hefts := make([]common.Address, 0)
-	hefts = append(hefts, common.HexToAddress("0xfd8a875eb1e3aF2E5578e638E75c36B3749c5DC2")) // 100
+	hefts = append(hefts, common.HexToAddress("0x81Cee7d346595e0552c6df38DD3F61F6e5802d10")) // 100
 	hefts = append(hefts, common.HexToAddress("0x1D0F6DD944C6a3749a38871243d2F76Dbe71886F")) // 200
 	hefts = append(hefts, common.HexToAddress("0x2aD36f60E663C4a32D45fbBc58319679BAbF3cC0")) // 300
 	hefts = append(hefts, common.HexToAddress("0x2C162771fd8174621b2B02FCA92304b6c5BF068E")) // 400
