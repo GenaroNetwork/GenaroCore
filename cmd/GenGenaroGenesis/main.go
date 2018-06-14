@@ -14,7 +14,7 @@ import (
 	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
-	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/GenaroNetwork/Genaro-Core/common/math"
 	"github.com/pkg/errors"
 )
 
@@ -61,6 +61,22 @@ func GenAccount(balanceStr string, stake,heft uint64) core.GenesisAccount {
 	return account
 }
 
+func GenesisAllocToCandidateInfos(genesisAlloc core.GenesisAlloc) state.CandidateInfos{
+	candidateInfos := make(state.CandidateInfos,0)
+	for addr,account := range genesisAlloc {
+		var genaroData state.GenaroData
+		json.Unmarshal(account.CodeHash,&genaroData)
+		if genaroData.Stake > 0 {
+			var candidateInfo state.CandidateInfo
+			candidateInfo.Stake = genaroData.Stake
+			candidateInfo.Heft = genaroData.Heft
+			candidateInfo.Signer = addr
+			candidateInfos = append(candidateInfos,candidateInfo)
+		}
+	}
+	return candidateInfos
+}
+
 func main() {
 	genaroConfig := &params.ChainConfig{
 		ChainId:        big.NewInt(300),
@@ -90,9 +106,6 @@ func main() {
 	genesis.Nonce = 0
 	genesis.Coinbase = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	genesis.Alloc = make(core.GenesisAlloc, 1)
-	ertra := new(genaro.ExtraData)
-	extraByte, _ := json.Marshal(ertra)
-	genesis.ExtraData = extraByte
 
 	// To write init Committee
 	committees := make([]common.Address, 0)
@@ -116,6 +129,13 @@ func main() {
 	genesis.Alloc[committees[3]] = accounts[3]
 	accounts[4] = GenAccount("600000000000000000000", 600,300)
 	genesis.Alloc[committees[4]] = accounts[4]
+
+	extra := new(genaro.ExtraData)
+	var candidateInfos state.CandidateInfos
+	candidateInfos = GenesisAllocToCandidateInfos(genesis.Alloc)
+	extra.CommitteeRank,extra.Proportion = genaro.Rank(candidateInfos)
+	extraByte, _ := json.Marshal(extra)
+	genesis.ExtraData = extraByte
 
     // create json file
 	byt, err := json.Marshal(genesis)

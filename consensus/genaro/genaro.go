@@ -296,28 +296,32 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 	}else if epollNumber < g.config.ValidPeriod + g.config.ElectionPeriod {
 		// If we're at block 0 ~ ElectionPeriod + ValidPeriod - 1, make a snapshot by genesis block
 		// TODO
-		committeeRank := make([]common.Address, 10)
-		committeeRank[0] = common.HexToAddress("0x50a7658e5155206dc78eafb80e6a94640b274648")
-		committeeRank[1] = common.HexToAddress("0xed19295615336ee56D4889BcdB90563b7abA02F7")
-		committeeRank[2] = common.HexToAddress("0x4180B3a9059cb43dc93e72e641B466fEBeFEa902")
-		committeeRank[3] = common.HexToAddress("0x8d024417f284B10B1fE8f6b02533F5aeFb7C8e23")
-		committeeRank[4] = common.HexToAddress("0xCc3b246d887435490409eC9037B7320e797B195a")
-		committeeRank[5] = common.HexToAddress("0xE45815411FBE2607C7E944C2E94baFc4BD7c7163")
-		committeeRank[6] = common.HexToAddress("0x51AAddb5f44525151D3554d1876bbc9d6E9Bff1F")
-		committeeRank[7] = common.HexToAddress("0x3C3DD12E1F11d56423adF3dC204E91e78a1f1FCa")
-		committeeRank[8] = common.HexToAddress("0x53Bd332D7c34f8ca0bFCA3f51c71BC1C523F6B4A")
-		committeeRank[9] = common.HexToAddress("0xdFc387187b63af2Ed108b153187d7B2cfDD93F73")
-		proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-		genaroConfig := &params.GenaroConfig{
-			Epoch:				5000,
-			BlockInterval:		10,
-			ElectionPeriod:		1,
-			ValidPeriod:		1,
-			CurrencyRates:		10,
-			CommitteeMaxSize:	5,
-		}
-		blockHash := new(common.Hash)
-		snap = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+		//committeeRank := make([]common.Address, 10)
+		//committeeRank[0] = common.HexToAddress("0x50a7658e5155206dc78eafb80e6a94640b274648")
+		//committeeRank[1] = common.HexToAddress("0xed19295615336ee56D4889BcdB90563b7abA02F7")
+		//committeeRank[2] = common.HexToAddress("0x4180B3a9059cb43dc93e72e641B466fEBeFEa902")
+		//committeeRank[3] = common.HexToAddress("0x8d024417f284B10B1fE8f6b02533F5aeFb7C8e23")
+		//committeeRank[4] = common.HexToAddress("0xCc3b246d887435490409eC9037B7320e797B195a")
+		//committeeRank[5] = common.HexToAddress("0xE45815411FBE2607C7E944C2E94baFc4BD7c7163")
+		//committeeRank[6] = common.HexToAddress("0x51AAddb5f44525151D3554d1876bbc9d6E9Bff1F")
+		//committeeRank[7] = common.HexToAddress("0x3C3DD12E1F11d56423adF3dC204E91e78a1f1FCa")
+		//committeeRank[8] = common.HexToAddress("0x53Bd332D7c34f8ca0bFCA3f51c71BC1C523F6B4A")
+		//committeeRank[9] = common.HexToAddress("0xdFc387187b63af2Ed108b153187d7B2cfDD93F73")
+		//proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+		//genaroConfig := &params.GenaroConfig{
+		//	Epoch:				5000,
+		//	BlockInterval:		10,
+		//	ElectionPeriod:		1,
+		//	ValidPeriod:		1,
+		//	CurrencyRates:		10,
+		//	CommitteeMaxSize:	5,
+		//}
+		//blockHash := new(common.Hash)
+		//snap = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+
+		h := chain.GetHeaderByNumber(0)
+		committeeRank, proportion := GetHeaderCommitteeRankList(h)
+		snap = newSnapshot(chain.Config().Genaro, 0, h.Hash(), 0, committeeRank, proportion)
 		return snap, nil
 	}else{
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
@@ -325,7 +329,7 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
 		h := chain.GetHeaderByNumber(endBlock+1)
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
-		snap = newSnapshot(params.MainnetChainConfig.Genaro, h.Number.Uint64(), h.Hash(), epollNumber -
+		snap = newSnapshot(chain.Config().Genaro, h.Number.Uint64(), h.Hash(), epollNumber -
 			g.config.ValidPeriod - g.config.ElectionPeriod, committeeRank, proportion)
 
 		log.Trace("computing rank from", startBlock, "to", endBlock)
@@ -408,7 +412,7 @@ func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 	return nil
 }
 
-func rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
+func Rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
 	candidateInfos.Apply()
 	sort.Sort(candidateInfos)
 	committeeRank := make([]common.Address, len(candidateInfos))
@@ -456,7 +460,7 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, state
 		epochStartBlockNumber := blockNumber - config.Epoch
 		epochEndBlockNumber := blockNumber
 		candidateInfos := state.GetCandidatesInfoInRange(epochStartBlockNumber, epochEndBlockNumber)
-		commiteeRank, proportion := rank(candidateInfos)
+		commiteeRank, proportion := Rank(candidateInfos)
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
 		}else{
