@@ -460,6 +460,7 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	var bpArr []*types.BucketPropertie
 	bp := new(types.BucketPropertie)
 
+	if buckid != "" {bp.BucketId = buckid}
 	if szie != 0 {bp.Size = szie}
 	if backup != 0 {bp.Backup = backup}
 	if timestart != 0 {bp.TimeStart = timestart}
