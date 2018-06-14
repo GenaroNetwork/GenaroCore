@@ -84,9 +84,6 @@ type GenesisAccount struct {
 	Storage       map[common.Hash]common.Hash `json:"storage,omitempty"`
 	Balance       *big.Int                    `json:"balance" gencodec:"required"`
 	CodeHash	  []byte                      `json:"CodeHash,omitempty"`	// genaro data
-	Stake         uint64                      `json:"stake" gencodec:"required"`
-	Heft          uint64                      `json:"heft" gencodec:"required"`
-	CommitteeRank []common.Address            `json:"committee" gencodec:"required"` // the init committee in order
 	Nonce         uint64                      `json:"nonce,omitempty"`
 	PrivateKey    []byte                      `json:"secretKey,omitempty"` // for tests
 }
