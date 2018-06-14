@@ -407,6 +407,12 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'getStorageNodes',
+			call: 'eth_getStorageNodes',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'sign',
 			call: 'eth_sign',
 			params: 2,

@@ -746,6 +746,14 @@ func (self *StateDB) GetBuckets(addr common.Address) (map[string]interface{}, er
 	return nil, nil
 }
 
+func (self *StateDB) GetStorageNodes(addr common.Address) []string {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetStorageNodes()
+	}
+	return nil
+}
+
 //根据用户id和fileID,dataVersion获取交易日志
 func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID [32]byte,dataVersion string) (map[common.Address] *hexutil.Big, error){
 	fileIDToString := hex.EncodeToString(fileID[:])

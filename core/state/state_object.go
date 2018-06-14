@@ -582,7 +582,18 @@ func (self *stateObject)GetBuckets() map[string]interface{} {
 	return  rtMap
 }
 
+func (self *stateObject)GetStorageNodes() []string {
+	if self.data.CodeHash == nil{
+		return nil
+	}
 
+	var genaroData types.GenaroData
+	if err := json.Unmarshal(self.data.CodeHash, &genaroData); err != nil {
+		return nil
+	}
+
+	return genaroData.Node
+}
 
 //Cross-chain storage processing
 func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {

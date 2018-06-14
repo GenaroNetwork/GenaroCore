@@ -752,6 +752,16 @@ func (s *PublicBlockChainAPI)GetBuckets(ctx context.Context, address common.Addr
 	return state.GetBuckets(address)
 }
 
+func (s *PublicBlockChainAPI)GetStorageNodes(ctx context.Context, address common.Address) ([]string, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil, err
+	}
+
+	nodes := state.GetStorageNodes(address)
+	return nodes, state.Error()
+}
+
 // ExecutionResult groups all structured logs emitted by the EVM
 // while replaying a transaction in debug mode as well as transaction
 // execution status, the amount of gas used and the return value
