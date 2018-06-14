@@ -31,6 +31,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/trie"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"time"
+	"encoding/hex"
 )
 
 type revision struct {
@@ -746,18 +747,20 @@ func (self *StateDB) GetBuckets(addr common.Address) (map[string]interface{}, er
 }
 
 //根据用户id和fileID,dataVersion获取交易日志
-func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID,dataVersion string) (map[common.Address] *hexutil.Big, error){
+func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID [32]byte,dataVersion string) (map[common.Address] *hexutil.Big, error){
+	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
-		return stateObject.TxLogByDataVersionRead(fileID,dataVersion)
+		return stateObject.TxLogByDataVersionRead(fileIDToString,dataVersion)
 	}
 	return nil,nil
 }
 //根据用户id和fileID开启定时同步日志接口
-func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID string,switchValue bool) bool {
+func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]byte) bool {
+	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
-		resultTmp,tag := stateObject.TxLogBydataVersionUpdate(fileID)
+		resultTmp,tag := stateObject.TxLogBydataVersionUpdate(fileIDToString)
 		if !tag {
 			return false
 		}
