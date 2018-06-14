@@ -394,6 +394,16 @@ func (self *stateObject) SetCode(codeHash common.Hash, code []byte) {
 	self.setCode(codeHash, code)
 }
 
+// only used in genaro genesis init
+func (self *stateObject) SetCodeHash(codeHash []byte) {
+	self.data.CodeHash = codeHash[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
 func (self *stateObject) setCode(codeHash common.Hash, code []byte) {
 	self.code = code
 	self.data.CodeHash = codeHash[:]

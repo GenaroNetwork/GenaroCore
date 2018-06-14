@@ -202,6 +202,7 @@ func (s *PublicBlockChainAPI) GetCandidates(ctx context.Context,blockNr rpc.Bloc
 	if state == nil || err != nil {
 		return nil
 	}
+	fmt.Println(state.GetCandidates())
 	return state.GetCandidates()
 }
 
