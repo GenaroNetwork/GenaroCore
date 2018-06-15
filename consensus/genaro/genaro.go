@@ -149,14 +149,14 @@ func New(config *params.GenaroConfig, snapshotDb ethdb.Database) *Genaro {
 // Author implements consensus.Engine, returning the Ethereum address recovered
 // from the signature in the header's extra-data section.
 func (g *Genaro) Author(header *types.Header) (common.Address, error) {
-	log.Info("Author")
+	log.Info("Author:" + header.Number.String())
 	return ecrecover(header)
 }
 
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
 func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) error {
-	log.Info("Prepare")
+	log.Info("Prepare:" + header.Number.String())
 	// set block author in Coinbase
 	// TODO It may be modified later
 	header.Coinbase = g.signer
@@ -202,7 +202,7 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 // Seal implements consensus.Engine, attempting to create a sealed block using
 // the local signing credentials.
 func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-chan struct{}) (*types.Block, error) {
-	log.Info("Seal")
+	log.Info("Seal:" + block.Number().String())
 	header := block.Header()
 	// Sealing the genesis block is not supported
 	number := header.Number.Uint64()
@@ -240,7 +240,7 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 // that a new block should have based on the previous blocks in the chain and the
 // current signer.
 func (g *Genaro) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
-	log.Info("CalcDifficulty")
+	log.Info("CalcDifficulty:" + parent.Number.String())
 	blockNumber := parent.Number.Uint64() + 1
 	dependEpoch := GetTurnOfCommiteeByBlockNumber(g.config, blockNumber)
 
@@ -322,7 +322,7 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		h := chain.GetHeaderByNumber(0)
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
 		snap = newSnapshot(chain.Config().Genaro, 0, h.Hash(), 0, committeeRank, proportion)
-		return snap, nil
+		isCreateNew = true
 	}else{
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
 		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
@@ -349,7 +349,7 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 // VerifySeal implements consensus.Engine, checking whether the signature contained
 // in the header satisfies the consensus protocol requirements.
 func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) error {
-	log.Info("VerifySeal")
+	log.Info("VerifySeal:" + header.Number.String())
 	blockNumber := header.Number.Uint64()
 	if blockNumber == 0 {
 		return errUnknownBlock
@@ -405,7 +405,7 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 // VerifyUncles implements consensus.Engine, always returning an error for any
 // uncles as this consensus mechanism doesn't permit uncles.
 func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
-	log.Info("VerifyUncles")
+	log.Info("VerifyUncles:" + block.Number().String())
 	if len(block.Uncles()) > 0 {
 		return errors.New("uncles not allowed")
 	}
@@ -504,7 +504,7 @@ func handleApplyBackStakeList(config *params.GenaroConfig, header *types.Header,
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	log.Info("Finalize")
+	log.Info("Finalize:" + header.Number.String())
 	//commit rank
 	blockNumber := header.Number.Uint64()
 	updateSpecialBlock(g.config, header, state)
@@ -654,7 +654,7 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 // given engine. Verifying the seal may be done optionally here, or explicitly
 // via the VerifySeal method.
 func (g *Genaro) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
-	log.Info("VerifyHeader")
+	log.Info("VerifyHeader:" + header.Number.String())
 	return g.VerifySeal(chain, header)
 }
 
