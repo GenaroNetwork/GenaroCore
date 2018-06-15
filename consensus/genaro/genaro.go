@@ -36,6 +36,8 @@ const (
 	TotalActualRewardsAddress	= "ggg"
 
 	backStakePeriod				= uint64(2)
+
+	IncrementDifficult			= 1
 )
 
 var (
@@ -215,18 +217,14 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	g.lock.RUnlock()
 
 	// Sweet, wait some time if not in-turn
-	log.Info("[foam]seal block number", "blockNumber", common.PrettyDuration(header.Number.Uint64()))
 	delay := time.Duration(header.Difficulty.Uint64() * uint64(time.Second))
 	delay += time.Duration(rand.Int63n(int64(wiggleTime)))
-
-	log.Info("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
 
 	select {
 	case <-stop:
 		return nil, nil
 	case <-time.After(delay):
 	}
-	log.Info("Waiting over", "delay", common.PrettyDuration(delay))
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
@@ -264,9 +262,9 @@ func max(x uint64, y uint64) uint64 {
 func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber uint64) *big.Int {
 	index := snap.getCurrentRankIndex(addr)
 	if index < 0 {
-		return new(big.Int).SetUint64(max(snap.CommitteeSize, minDistance))
+		return new(big.Int).SetUint64(max(snap.CommitteeSize, minDistance) + IncrementDifficult)
 	}
-	distance := index
+	distance := index + IncrementDifficult
 	return new(big.Int).SetUint64(uint64(distance))
 }
 
@@ -597,7 +595,7 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	blockReward := big.NewInt(0)
 	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch)))
 
-	reward := new(big.Int).SetUint64(blockReward.Uint64())
+	reward := blockReward
 	state.AddBalance(header.Coinbase, reward)
 	state.AddBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), reward)
 	return nil
