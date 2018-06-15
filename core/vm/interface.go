@@ -21,6 +21,7 @@ import (
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 // StateDB is an EVM database for full state querying.
@@ -62,6 +63,34 @@ type StateDB interface {
 	AddPreimage(common.Hash, []byte)
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
+
+	UpdateHeft(common.Address, uint64) bool
+	GetHeft(common.Address) (uint64, error)
+
+	UpdateStake(common.Address, uint64) bool
+	GetStake(common.Address) (uint64, error)
+
+	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
+	GetStorageSize(common.Address, [32]byte)  (uint64, error)
+	GetStorageGasPrice(common.Address, [32]byte)  (uint64, error)
+	GetStorageGasUsed(common.Address, [32]byte)  (uint64, error)
+	GetStorageGas(common.Address, [32]byte)  (uint64, error)
+	SpecialTxTypeMortgageInit(common.Address,types.SpecialTxTypeMortgageInit) bool
+	SpecialTxTypeSyncSidechainStatus(common.Address,types.SpecialTxTypeMortgageInit) (map[common.Address] *big.Int, bool)
+	UpdateTraffic(common.Address, uint64) bool
+
+	GetTraffic(common.Address)uint64
+
+	GetBuckets(common.Address) (map[string]interface{}, error)
+
+	//根据用户id和fileID,dataVersion获取交易日志
+	TxLogByDataVersionRead(common.Address,[32]byte,string) (map[common.Address] *hexutil.Big, error)
+	//根据用户id和fileID开启定时同步日志接口
+	TxLogBydataVersionUpdate(common.Address,[32]byte) bool
+
+	SyncStakeNode(common.Address, []string) error
+	SyncNode2Address(common.Address, []string, string) error
+	GetAddressByNode(string) string
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

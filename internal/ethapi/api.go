@@ -42,6 +42,11 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"strconv"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"math/rand"
 )
 
 const (
@@ -666,7 +671,8 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 	// Setup the gas pool (also for unmetered requests)
 	// and apply the message.
 	gp := new(core.GasPool).AddGas(math.MaxUint64)
-	res, gas, failed, err := core.ApplyMessage(evm, msg, gp)
+	var sentinelHeft uint64
+	res, gas, failed, err := core.ApplyMessage(evm, msg, gp,&sentinelHeft)
 	if err := vmError(); err != nil {
 		return nil, 0, false, err
 	}
@@ -727,6 +733,33 @@ func (s *PublicBlockChainAPI) EstimateGas(ctx context.Context, args CallArgs) (h
 		}
 	}
 	return hexutil.Uint64(hi), nil
+}
+
+func (s *PublicBlockChainAPI) GetTraffic(ctx context.Context, address common.Address) (uint64, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return 0, err
+	}
+	b := state.GetTraffic(address)
+	return b, state.Error()
+}
+
+func (s *PublicBlockChainAPI)GetBuckets(ctx context.Context, address common.Address) (map[string]interface{}, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return state.GetBuckets(address)
+}
+
+func (s *PublicBlockChainAPI)GetStorageNodes(ctx context.Context, address common.Address) ([]string, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil, err
+	}
+
+	nodes := state.GetStorageNodes(address)
+	return nodes, state.Error()
 }
 
 // ExecutionResult groups all structured logs emitted by the EVM
@@ -968,6 +1001,111 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberAndIndex(ctx conte
 	return nil
 }
 
+// GetTransactionByBlockNumberRange returns the transaction of special type from  startblocknumber to endblocknumber.
+func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType *big.Int) []*RPCTransaction {
+	var specialTx []*RPCTransaction
+	if startBlockNr >= endBlockNr {
+		return nil
+	}
+	for i := startBlockNr; i<= endBlockNr; i++ {
+		if block, _ := s.b.BlockByNumber(ctx, i); block != nil {
+			txs := block.Transactions()
+			currentBlockTx := dealSpecialTransactionWithType(block, txs, txType)
+			specialTx = append(specialTx, currentBlockTx...)
+		}
+	}
+	return specialTx
+}
+
+func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txType *big.Int) []*RPCTransaction {
+	var specialTx []*RPCTransaction
+	for i := 0; i < len(txs); i++ {
+		if txWithType(txs[i], txType) {
+			rpcTx := newRPCTransaction(txs[i], b.Hash(), b.NumberU64(), uint64(i))
+			specialTx = append(specialTx, rpcTx)
+		}
+	}
+	return specialTx
+}
+
+func txWithType(tx *types.Transaction, txType *big.Int) bool {
+	// 解析transaction的Payload域值
+	if tx.Data() == nil || len(tx.Data()) == 0{
+		return false
+	}
+	var s types.SpecialTxInput
+	err := json.Unmarshal(tx.Data(), &s)
+	if err != nil{
+		return false
+	}
+	return s.Type.ToInt().Uint64() == txType.Uint64()
+}
+
+
+type rpcTrafficInfo struct {
+	NodeId  string  `json:"nodeId"`
+	Traffic uint64  `json:"traffic"`
+	//Hash    common.Hash  `json:"hash"`
+}
+
+// GetTrafficTxInfo get informations of special transaction of traffic apply
+func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcTrafficInfo {
+	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeTrafficApply)
+	var retArr[]*rpcTrafficInfo
+	for _, v := range rpcTx {
+		var s types.SpecialTxInput
+		json.Unmarshal([]byte(v.Input), &s)
+		r := new(rpcTrafficInfo)
+		r.NodeId = s.NodeId
+		r.Traffic = s.Traffic
+		//r.Hash = v.Hash
+		retArr = append(retArr, r)
+
+	}
+	return retArr
+}
+
+
+type rpcBucketPropertie struct {
+	NodeId           string `json:"nodeId"`
+	BucketId         string `json:"bucketId"`
+	TimeStart        uint64	`json:"timeStart"`
+	TimeEnd          uint64	`json:"timeEnd"`
+	Backup           uint64 `json:"backup"`
+	Size             uint64 `json:"size"`
+}
+
+// GetBucketTxInfo get informations of special transaction of bucket apply
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcBucketPropertie {
+	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeSpaceApply)
+	var retArr []*rpcBucketPropertie
+	for _, tx := range rpcTx {
+		var s types.SpecialTxInput
+		json.Unmarshal([]byte(tx.Input), &s)
+		for _, v := range s.Buckets {
+			r := new(rpcBucketPropertie)
+			r.BucketId = v.BucketId
+			r.TimeStart = v.TimeStart
+			r.TimeEnd = v.TimeEnd
+			r.Backup = v.Backup
+			r.Size = v.Size
+			r.NodeId = s.NodeId
+			retArr = append(retArr, r)
+		}
+	}
+	return retArr
+}
+
+func (s *PublicTransactionPoolAPI) GetAccountByNode(ctx context.Context, str string) string {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	var retS string
+	if state == nil || err != nil {
+		return retS
+	}
+	retS = state.GetAddressByNode(str)
+	return retS
+}
+
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.
 func (s *PublicTransactionPoolAPI) GetTransactionByBlockHashAndIndex(ctx context.Context, blockHash common.Hash, index hexutil.Uint) *RPCTransaction {
 	if block, _ := s.b.GetBlock(ctx, blockHash); block != nil {
@@ -1111,6 +1249,7 @@ type SendTxArgs struct {
 	// newer name and should be preferred by clients.
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
+	ExtraData  string      `json:"extraData"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -1164,6 +1303,50 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	if args.To == nil {
 		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 	}
+
+	//deal special transaction
+	if *args.To == common.SpecialSyncAddress {
+		var s types.SpecialTxInput
+		json.Unmarshal([]byte(args.ExtraData), &s)
+		switch s.Type.ToInt().Uint64() {
+		case common.SpecialTxTypeMortgageInit.Uint64():
+			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
+			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
+			timeLimit := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt()
+			var tmp  big.Int
+			tmp.Mul(timeLimit,big.NewInt(86400))
+			s.SpecialTxTypeMortgageInit.EndTime =  tmp.Add(&tmp,big.NewInt(s.SpecialTxTypeMortgageInit.CreateTime)).Int64()
+			s.SpecialTxTypeMortgageInit.FileID = hex.EncodeToString(timeUnixSha256[:])
+			s.SpecialTxTypeMortgageInit.FromAccount = args.From
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+		case common.SpecialTxTypeSpaceApply.Uint64():
+			var b []*types.BucketPropertie
+			for _, v := range s.Buckets{
+				t := time.Now()
+				r := rand.New(rand.NewSource(t.UnixNano()))
+				bucketID := s.NodeId + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
+				bucketIdSha256 := sha256.Sum256([]byte(bucketID))
+				v.BucketId = hex.EncodeToString(bucketIdSha256[:])
+				v.TimeStart = uint64(t.UnixNano())
+				v.TimeEnd = uint64(t.AddDate(0, 0, int(v.Duration)).UnixNano())
+				b = append(b, v)
+			}
+			s.Buckets = b
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+		case common.SpecialTxTypeSyncSidechainStatus.Uint64():
+			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
+			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+			s.SpecialTxTypeMortgageInit.Dataversion = hex.EncodeToString(timeUnixSha256[:])
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+		default:
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
+		}
+	}
+
 	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 }
 
@@ -1475,4 +1658,66 @@ func (s *PublicNetAPI) PeerCount() hexutil.Uint {
 // Version returns the current ethereum protocol version.
 func (s *PublicNetAPI) Version() string {
 	return fmt.Sprintf("%d", s.networkVersion)
+}
+
+
+func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]types.SpecialTxTypeMortgageInit, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	result := state.GetAccountAttributes(address)
+	return result, state.Error()
+}
+
+
+func (s *PublicBlockChainAPI) GetLogSwitchByAddressAndFileID(ctx context.Context, args string) map[common.Address]map[string]bool {
+	var addressAndFileID  map[common.Address][]string
+	var result map[common.Address]map[string]bool
+	json.Unmarshal([]byte(args), &addressAndFileID)
+	for k, v := range addressAndFileID {
+		accountAttributes,_ := s.AccountAttributes(ctx,k,rpc.BlockNumber(-1))
+		if nil == accountAttributes {
+			continue
+		}
+		for _, fileID := range v {
+			resultTmp := accountAttributes[fileID]
+			if  0 == len(resultTmp.AuthorityTable) {
+				continue
+			}
+			if nil == result {
+				result = make(map[common.Address]map[string]bool)
+			}
+			if result[k] == nil {
+				result[k] = make(map[string]bool)
+			}
+			result[k][fileID] = resultTmp.LogSwitch
+		}
+	}
+	return result
+}
+
+func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []types.SpecialTxTypeMortgageInit {
+	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SpecialTxTypeMortgageInit)
+	var specialTxTypeMortgageInit types.SpecialTxInput
+	var resultArr []types.SpecialTxTypeMortgageInit
+	for _, v := range result {
+		json.Unmarshal(v.Input, &specialTxTypeMortgageInit)
+		transactionReceipt, err:= s.GetTransactionReceipt(ctx,v.Hash)
+		if nil == err && nil != transactionReceipt {
+			resultArr = append(resultArr, specialTxTypeMortgageInit.SpecialTxTypeMortgageInit)
+		}
+	}
+	return resultArr
+}
+
+
+
+func (s *PublicBlockChainAPI) DataVersionRead(ctx context.Context, address common.Address, blockNr rpc.BlockNumber,fileID [32]byte,dataVersion string)(map[common.Address] *hexutil.Big, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	result,error := state.TxLogByDataVersionRead(address,fileID,dataVersion)
+	return result, error
 }

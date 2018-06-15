@@ -46,6 +46,7 @@ type Config struct {
 
 	State     *state.StateDB
 	GetHashFn func(n uint64) common.Hash
+	GetSentinelFn func (n uint64) uint64
 }
 
 // sets defaults on the config
@@ -117,6 +118,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 		input,
 		cfg.GasLimit,
 		cfg.Value,
+		new(uint64),
 	)
 
 	return ret, cfg.State, err
@@ -166,6 +168,7 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 		input,
 		cfg.GasLimit,
 		cfg.Value,
+		new(uint64),
 	)
 
 	return ret, leftOverGas, err

@@ -29,6 +29,9 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/trie"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"time"
+	"encoding/hex"
 )
 
 type revision struct {
@@ -625,4 +628,205 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	})
 	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads())
 	return root, err
+}
+
+// UpdateHeft updates the heft value of sentinel's nodeid
+func (self *StateDB)UpdateHeft(id common.Address, heft uint64) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateHeft(heft)
+		return true
+	}
+	return false
+}
+
+// GetHeft gets the heft value of sentinel's nodeid
+func (self *StateDB)GetHeft(id common.Address) (uint64, error){
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetHeft(), nil
+	}
+	return 0, nil
+}
+
+// UpdateStake updates the stake value of sentinel's nodeid
+func (self *StateDB)UpdateStake(id common.Address, heft uint64) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateStake(heft)
+		return true
+	}
+	return false
+}
+
+// GetStake gets the stake value of sentinel's nodeid
+func (self *StateDB)GetStake(id common.Address) (uint64, error){
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetStake(), nil
+	}
+	return 0, nil
+}
+
+func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid string, size uint64, backup uint64, timestart uint64, timeend uint64) bool {
+	stateObject := self.GetOrNewStateObject(userid)
+	if stateObject != nil {
+		stateObject.UpdateBucketProperties(bucketid, size, backup, timestart, timeend)
+		return true
+	}
+	return true
+}
+
+// GetStorageSize gets the "SSIZE" value of user's file
+func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageSize(string(bucketID[:])), nil
+	}
+	return 0, nil
+}
+
+// GetStorageGasPrice gets the "STORAGEGASPRICE" value of user's file
+func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID [32]byte)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageGasPrice(string(bucketID[:])), nil
+	}
+	return 0, nil
+}
+
+// GetStorageUsed gets the the "STORAGEGASUSED" value of user's file
+func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID [32]byte)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageGasUsed(string(bucketID[:])), nil
+	}
+	return 0, nil
+}
+
+// GetStorageGas gets the the "STORAGEGAS" value of user's file
+func (self *StateDB)GetStorageGas(userid common.Address, bucketID [32]byte)  (uint64, error) {
+	stateObject := self.getStateObject(userid)
+	if stateObject != nil {
+		return stateObject.GetStorageGas(string(bucketID[:])), nil
+	}
+	return 0, nil
+}
+
+func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.SpecialTxTypeMortgageInit(specialTxTypeMortgageInit)
+	}
+	return false
+}
+// UpdateTraffic updates the traffic value of sentinel's nodeid
+func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateTraffic(traffic)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB) GetTraffic(addr common.Address) uint64{
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetTraffic()
+	}
+	return 0
+}
+
+func (self *StateDB) GetBuckets(addr common.Address) (map[string]interface{}, error) {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetBuckets(), nil
+	}
+	return nil, nil
+}
+
+func (self *StateDB) GetStorageNodes(addr common.Address) []string {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetStorageNodes()
+	}
+	return nil
+}
+
+//根据用户id和fileID,dataVersion获取交易日志
+func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID [32]byte,dataVersion string) (map[common.Address] *hexutil.Big, error){
+	fileIDToString := hex.EncodeToString(fileID[:])
+	stateObject := self.getStateObject(address)
+	if stateObject != nil {
+		return stateObject.TxLogByDataVersionRead(fileIDToString,dataVersion)
+	}
+	return nil,nil
+}
+//根据用户id和fileID开启定时同步日志接口
+func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]byte) bool {
+	fileIDToString := hex.EncodeToString(fileID[:])
+	stateObject := self.getStateObject(address)
+	if stateObject != nil {
+		resultTmp,tag := stateObject.TxLogBydataVersionUpdate(fileIDToString)
+		if !tag {
+			return false
+		}
+		TimeLimit := (resultTmp.EndTime - time.Now().Unix())/86400
+		timeLimitGas := big.NewInt(TimeLimit * int64(len(resultTmp.MortgageTable)) * common.OneDaySyncLogGsa)
+		stateObject.setBalance(timeLimitGas)
+		newStateObject := self.getStateObject(common.SpecialSyncAddress)
+		newStateObject.AddBalance(timeLimitGas)
+		return true
+	}
+	return false
+}
+
+
+func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]types.SpecialTxTypeMortgageInit {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetAccountAttributes()
+	}
+	return nil
+}
+
+
+func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (map[common.Address] *big.Int, bool) {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		restlt,flag := stateObject.SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus)
+		if true == flag {
+			return restlt, true
+		}
+	}
+	return nil,false
+}
+
+func (self *StateDB)SyncStakeNode(address common.Address,s []string) error {
+	stateObject := self.GetOrNewStateObject(address)
+	var err error = nil
+	if stateObject != nil {
+		err = stateObject.SyncStakeNode(s)
+	}
+	return err
+}
+
+
+func (self *StateDB)SyncNode2Address(node2UserAccountIndexAddress common.Address, s []string, userAddress string) error {
+	stateObject := self.GetOrNewStateObject(node2UserAccountIndexAddress)
+	var err error = nil
+	if stateObject != nil {
+		err = stateObject.SyncNode2Address(s, userAddress)
+	}
+	return err
+}
+
+func (self *StateDB)GetAddressByNode(s string) string {
+	stateObject := self.GetOrNewStateObject(common.StakeNode2StakeAddress)
+	var address string
+	if stateObject != nil {
+		address = stateObject.GetAddressByNode(s)
+	}
+	return address
 }

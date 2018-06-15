@@ -20,10 +20,14 @@ import (
 	"math/big"
 	"sync/atomic"
 	"time"
+	"encoding/json"
+	"errors"
+
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -36,6 +40,7 @@ type (
 	// GetHashFunc returns the nth block hash in the blockchain
 	// and is used by the BLOCKHASH EVM op code.
 	GetHashFunc func(uint64) common.Hash
+	GetSentinelFunc func(uint64) uint64
 )
 
 // run runs the given contract and takes care of running precompiles with a fallback to the byte code interpreter.
@@ -62,10 +67,12 @@ type Context struct {
 	Transfer TransferFunc
 	// GetHash returns the hash corresponding to n
 	GetHash GetHashFunc
+    GetSentinel GetSentinelFunc
 
 	// Message information
 	Origin   common.Address // Provides information for ORIGIN
 	GasPrice *big.Int       // Provides information for GASPRICE
+	SentinelHeft uint64     // Provides information for SentinelHeft
 
 	// Block information
 	Coinbase    common.Address // Provides information for COINBASE
@@ -136,7 +143,7 @@ func (evm *EVM) Cancel() {
 // parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
-func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
+func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int, sentinelHeft *uint64) (ret []byte, leftOverGas uint64, err error) {
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -149,7 +156,6 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
 		return nil, gas, ErrInsufficientBalance
 	}
-
 	var (
 		to       = AccountRef(addr)
 		snapshot = evm.StateDB.Snapshot()
@@ -164,6 +170,13 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}
 		evm.StateDB.CreateAccount(addr)
 	}
+
+
+	//If transactions are special, they are treated separately according to their types.
+	if to.Address() == common.SpecialSyncAddress {
+		dispatchHandler(evm, caller.Address(), input, sentinelHeft)
+	}
+
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
 
 	// Initialise a new contract and set the code that is to be used by the EVM.
@@ -193,6 +206,170 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}
 	}
 	return ret, contract.Gas, err
+}
+
+
+
+func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
+	var err error
+	// 解析数据
+	var s types.SpecialTxInput
+	err = json.Unmarshal(input, &s)
+	if err != nil{
+		return errors.New("special tx error： the extraData parameters of the wrong format")
+	}
+	switch s.Type.ToInt().Uint64(){
+	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
+		err = updateStake(evm,caller,input)
+
+	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
+		err = updateHeft(&evm.StateDB, s)
+		*sentinelHeft = *sentinelHeft + 1
+
+	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
+		err = updateStorageProperties(evm, s, caller)
+	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
+		err = specialTxTypeMortgageInit(evm, s,caller)
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): // 交易代表用户押注初始化交易
+		err = SpecialTxTypeSyncSidechainStatus(evm, s)
+	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
+		err = updateTraffic(evm, s, caller)
+	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
+		err = updateStakeNode(evm, s, caller)
+	}
+	return err
+}
+
+func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	userAdress := common.HexToAddress(s.NodeId)
+	var err error = nil
+	if s.Node != nil && len(s.Node) != 0 {
+		err = (*evm).StateDB.SyncStakeNode(userAdress, s.Node)
+
+		if err == nil { // 存储倒排索引
+			node2UserAccountIndexAddress := common.StakeNode2StakeAddress
+			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, s.NodeId)
+		}
+	}
+
+	return err
+}
+
+func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
+	restlt,flag := (*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit)
+	if  false == flag{
+		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+	}
+	for k,v := range restlt {
+		(*evm).StateDB.AddBalance(k, v)
+	}
+	return nil
+}
+
+func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Address) error{
+	sumMortgageTable :=	new(big.Int)
+	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+	for _, v := range mortgageTable{
+		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v.ToInt())
+	}
+	s.SpecialTxTypeMortgageInit.MortgagTotal = sumMortgageTable
+	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
+		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+	}
+	temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(),big.NewInt(int64(len(mortgageTable))))
+	timeLimitGas := temp.Mul(temp,big.NewInt(common.OneDayGes))
+	//timeLimitGas = (*big.Int)()s.SpecialTxTypeMortgageInit.TimeLimit *
+	//扣除抵押表全部费用+按照时间期限收费
+	sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
+	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
+	//时间期限收取的费用转账到官方账号
+	(*evm).StateDB.AddBalance(common.OfficialAddress, timeLimitGas)
+	return nil
+}
+
+func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	adress := common.HexToAddress(s.NodeId)
+
+	totalGas := s.SpecialCost()
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
+
+	for _, b := range s.Buckets {
+		bucketId := b.BucketId
+		if b.TimeStart >= b.TimeEnd {
+			return errors.New("endTime must larger then startTime")
+		}
+		// 根据nodeid更新heft值
+		if !(*evm).StateDB.UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
+			return errors.New("update user's bucket fail")
+		}
+	}
+
+	//扣除费用
+	(*evm).StateDB.SubBalance(caller, totalGas)
+	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, totalGas)
+
+	return nil
+}
+
+
+func updateHeft(statedb *StateDB, s types.SpecialTxInput) error {
+	adress := common.HexToAddress(s.NodeId)
+	// 根据nodeid更新heft值
+	if !(*statedb).UpdateHeft(adress, s.Heft) {
+		return errors.New("update user's heft fail")
+	}
+	return nil
+}
+
+func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	adress := common.HexToAddress(s.NodeId)
+
+	totalGas := s.SpecialCost()
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
+
+	// 根据nodeid更新heft值
+	if !(*evm).StateDB.UpdateTraffic(adress, s.Traffic) {
+		return errors.New("update user's teraffic fail")
+	}
+
+	(*evm).StateDB.SubBalance(caller, totalGas)
+	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, totalGas)
+
+	return nil
+}
+
+
+func updateStake(evm *EVM, caller common.Address, input []byte) error {
+	// 解析数据
+	var s types.SpecialTxInput
+	err := json.Unmarshal(input, &s)
+	if err != nil{
+		return errors.New("update user's stake error： the sentinel parameters of the wrong format")
+	}
+
+	amount := new(big.Int)
+	amount.SetUint64(s.Stake*1000000000000000000)
+
+	// judge if there is enough balance to stake（balance must larger than stake value)
+	if !evm.Context.CanTransfer(evm.StateDB, caller, amount) {
+		return ErrInsufficientBalance
+	}
+
+	adress := common.HexToAddress(s.NodeId)
+	// 根据nodeid更新stake值
+	if !(*evm).StateDB.UpdateStake(adress, s.Stake) {
+		return errors.New("update user's stake fail")
+	}
+	(*evm).StateDB.SubBalance(caller, amount)
+	return nil
 }
 
 // CallCode executes the contract associated with the addr with the given input

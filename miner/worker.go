@@ -36,6 +36,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"gopkg.in/fatih/set.v0"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 const (
@@ -73,6 +74,8 @@ type Work struct {
 	tcount    int            // tx count in cycle
 
 	Block *types.Block // the new block
+
+	currentSentinelHeft uint64
 
 	header   *types.Header
 	txs      []*types.Transaction
@@ -150,6 +153,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
+
 	go worker.update()
 
 	go worker.wait()
@@ -266,7 +270,6 @@ func (self *worker) update() {
 				acc, _ := types.Sender(self.current.signer, ev.Tx)
 				txs := map[common.Address]types.Transactions{acc: {ev.Tx}}
 				txset := types.NewTransactionsByPriceAndNonce(self.current.signer, txs)
-
 				self.current.commitTransactions(self.mux, txset, self.chain, self.coinbase)
 				self.currentMu.Unlock()
 			} else {
@@ -382,6 +385,7 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 
 	// Keep track of transactions which return errors so they can be removed
 	work.tcount = 0
+	work.currentSentinelHeft = 0
 	self.current = work
 	return nil
 }
@@ -455,7 +459,6 @@ func (self *worker) commitNewWork() {
 	}
 	txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
 	work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
-
 	// compute uncles for the new block.
 	var (
 		uncles    []*types.Header
@@ -478,11 +481,17 @@ func (self *worker) commitNewWork() {
 	for _, hash := range badUncles {
 		delete(self.possibleUncles, hash)
 	}
+
+	// reflush blcok's extra[]
+    genaro.SetHeaderSentinelHeft(header, work.currentSentinelHeft)
+	work.currentSentinelHeft = 0
+
 	// Create the new block to seal with the consensus engine
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts); err != nil {
 		log.Error("Failed to finalize block for sealing", "err", err)
 		return
 	}
+
 	// We only care about logging if we're actually mining.
 	if atomic.LoadInt32(&self.mining) == 1 {
 		log.Info("Commit new mining work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))
@@ -554,7 +563,6 @@ func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsB
 			// Reorg notification data race between the transaction pool and miner, skip account =
 			log.Trace("Skipping account with hight nonce", "sender", from, "nonce", tx.Nonce())
 			txs.Pop()
-
 		case nil:
 			// Everything ok, collect the logs and shift in the next transaction from the same account
 			coalescedLogs = append(coalescedLogs, logs...)
@@ -592,7 +600,7 @@ func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsB
 func (env *Work) commitTransaction(tx *types.Transaction, bc *core.BlockChain, coinbase common.Address, gp *core.GasPool) (error, []*types.Log) {
 	snap := env.state.Snapshot()
 
-	receipt, _, err := core.ApplyTransaction(env.config, bc, &coinbase, gp, env.state, env.header, tx, &env.header.GasUsed, vm.Config{})
+	receipt, _, err := core.ApplyTransaction(env.config, bc, &coinbase, gp, env.state, env.header, tx, &env.header.GasUsed, vm.Config{},&(env.currentSentinelHeft))
 	if err != nil {
 		env.state.RevertToSnapshot(snap)
 		return err, nil
