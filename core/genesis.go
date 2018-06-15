@@ -83,9 +83,7 @@ type GenesisAccount struct {
 	Code          []byte                      `json:"code,omitempty"`
 	Storage       map[common.Hash]common.Hash `json:"storage,omitempty"`
 	Balance       *big.Int                    `json:"balance" gencodec:"required"`
-	Stake         uint64                      `json:"stake" gencodec:"required"`
-	Heft          uint64                      `json:"heft" gencodec:"required"`
-	CommitteeRank []common.Address            `json:"committee" gencodec:"required"` // the init committee in order
+	CodeHash	  []byte                      `json:"CodeHash,omitempty"`	// genaro data
 	Nonce         uint64                      `json:"nonce,omitempty"`
 	PrivateKey    []byte                      `json:"secretKey,omitempty"` // for tests
 }
@@ -233,7 +231,13 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(db))
 	for addr, account := range g.Alloc {
 		statedb.AddBalance(addr, account.Balance)
-		statedb.SetCode(addr, account.Code)
+		// check genaro data
+		if account.CodeHash != nil {
+			statedb.SetCodeHash(addr,account.CodeHash)
+		} else {
+			statedb.SetCode(addr, account.Code)
+		}
+
 		statedb.SetNonce(addr, account.Nonce)
 		for key, value := range account.Storage {
 			statedb.SetState(addr, key, value)
