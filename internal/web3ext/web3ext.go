@@ -395,6 +395,24 @@ web3._extend({
 	property: 'eth',
 	methods: [
 		new web3._extend.Method({
+			name: 'getBuckets',
+			call: 'eth_getBuckets',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getTraffic',
+			call: 'eth_getTraffic',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getStorageNodes',
+			call: 'eth_getStorageNodes',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'sign',
 			call: 'eth_sign',
 			params: 2,
