@@ -219,7 +219,7 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	// Sweet, wait some time if not in-turn
 	delay := time.Duration(header.Difficulty.Uint64() * uint64(time.Second))
 	delay += time.Duration(rand.Int63n(int64(wiggleTime)))
-
+	log.Info("delay:"+delay.String())
 	select {
 	case <-stop:
 		return nil, nil
