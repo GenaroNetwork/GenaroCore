@@ -110,6 +110,46 @@ type Account struct {
 }
 
 
+type Candidates []common.Address
+
+type CandidateInfo struct {
+	Signer       common.Address // peer address
+	Heft uint64         // the sentinel of the peer
+	//TODO May need to convert big int
+	Stake        uint64         // the stake of the peer
+	Point		 uint64
+}
+
+type CandidateInfos []CandidateInfo
+
+func (c CandidateInfos) Len() int {
+	return len(c)
+}
+
+func (c CandidateInfos) Swap(i, j int) {
+	c[i].Signer, c[j].Signer = c[j].Signer, c[i].Signer
+	c[i].Heft, c[j].Heft = c[j].Heft, c[i].Heft
+	c[i].Stake, c[j].Stake = c[j].Stake, c[i].Stake
+}
+
+func (c CandidateInfos) Less(i, j int) bool {
+	return c[i].Point < c[j].Point
+}
+
+func (c CandidateInfos) Apply() {
+	//TODO define how to get point
+	for _, candidate := range c{
+		candidate.Point = candidate.Stake + candidate.Heft
+	}
+}
+
+type FilePropertie struct {
+	StorageGas       uint64	`json:"sgas"`
+	StorageGasUsed  uint64	`json:"sGasUsed"`
+	StorageGasPrice  uint64 `josn:"sGasPrice"`
+	// Ssize represents Storage Size
+	Ssize            uint64 `json:"sSize"`
+}
 
 // newObject creates a state object.
 func newObject(db *StateDB, address common.Address, data Account, onDirty func(addr common.Address)) *stateObject {
@@ -327,7 +367,7 @@ func (self *stateObject) Code(db Database) []byte {
 	if self.code != nil {
 		return self.code
 	}
-	if bytes.Equal(self.CodeHash(), emptyCodeHash) {
+	if bytes.Equal(self.CodeHash(), emptyCodeHash) || len(self.CodeHash())!=32 {
 		return nil
 	}
 	code, err := db.ContractCode(self.addrHash, common.BytesToHash(self.CodeHash()))
@@ -346,6 +386,16 @@ func (self *stateObject) SetCode(codeHash common.Hash, code []byte) {
 		prevcode: prevcode,
 	})
 	self.setCode(codeHash, code)
+}
+
+// only used in genaro genesis init
+func (self *stateObject) SetCodeHash(codeHash []byte) {
+	self.data.CodeHash = codeHash[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
 }
 
 func (self *stateObject) setCode(codeHash common.Hash, code []byte) {
@@ -393,8 +443,8 @@ func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
 }
 
-
-func (self *stateObject)UpdateHeft(heft uint64){
+// update heft and add heft log
+func (self *stateObject)UpdateHeft(heft uint64, blockNumber uint64){
 	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = types.GenaroData{
@@ -404,6 +454,13 @@ func (self *stateObject)UpdateHeft(heft uint64){
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Heft = heft
 	}
+	if genaroData.HeftLog == nil {
+		genaroData.HeftLog = *new(types.NumLogs)
+	}
+	var newLog types.NumLog
+	newLog.Num = heft
+	newLog.BlockNum = blockNumber
+	genaroData.HeftLog.Add(newLog)
 
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
@@ -425,7 +482,28 @@ func (self *stateObject)GetHeft() (uint64){
 	return 0
 }
 
-func (self *stateObject)UpdateStake(stake uint64){
+func (self *stateObject)GetHeftLog() (types.NumLogs){
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.HeftLog
+	}
+
+	return nil
+}
+
+func (self *stateObject)GetHeftRangeDiff(blockNumStart uint64, blockNumEnd uint64) (uint64){
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.HeftLog.GetRangeDiff(blockNumStart,blockNumEnd)
+	}
+
+	return 0
+}
+
+// update stake and add stake log
+func (self *stateObject)UpdateStake(stake uint64, blockNumber uint64){
 	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{
 		genaroData = types.GenaroData{
@@ -435,6 +513,13 @@ func (self *stateObject)UpdateStake(stake uint64){
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Stake += stake
 	}
+	if genaroData.StakeLog == nil {
+		genaroData.StakeLog = *new(types.NumLogs)
+	}
+	var newLog types.NumLog
+	newLog.Num = genaroData.Stake
+	newLog.BlockNum = blockNumber
+	genaroData.StakeLog.Add(newLog)
 
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
@@ -456,10 +541,59 @@ func (self *stateObject)GetStake() (uint64){
 	return 0
 }
 
+
+func (self *stateObject)GetStakeLog() (types.NumLogs){
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.StakeLog
+	}
+
+	return nil
+}
+
+func (self *stateObject)GetStakeRangeDiff(blockNumStart uint64, blockNumEnd uint64) (uint64){
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.StakeLog.GetRangeDiff(blockNumStart,blockNumEnd)
+	}
+
+	return 0
+}
+
+func (self *stateObject) AddCandidate(candidate common.Address) {
+	var candidates Candidates
+	if self.data.CodeHash == nil{
+		candidates = *new(Candidates)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &candidates)
+		candidates = append(candidates,candidate)
+	}
+
+	b, _ := json.Marshal(candidates)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)GetCandidates() (Candidates){
+	if self.data.CodeHash != nil {
+		var candidates Candidates
+		json.Unmarshal(self.data.CodeHash, &candidates)
+		return candidates
+	}
+	return nil
+}
+
+
 func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
 	var bpArr []*types.BucketPropertie
 	bp := new(types.BucketPropertie)
-
 	if buckid != "" {bp.BucketId = buckid}
 	if szie != 0 {bp.Size = szie}
 	if backup != 0 {bp.Backup = backup}
@@ -640,8 +774,6 @@ func (self *stateObject)GetAccountAttributes() (map[string]types.SpecialTxTypeMo
 	return nil
 }
 
-
-
 func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit)(map[common.Address] *big.Int, bool) {
 	var genaroData types.GenaroData
 	AddBalance :=make(map[common.Address] *big.Int)
@@ -805,3 +937,4 @@ func (self *stateObject)GetAddressByNode (s string) string{
 		}
 	}
 }
+

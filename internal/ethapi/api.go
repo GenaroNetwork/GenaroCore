@@ -201,6 +201,15 @@ func (s *PublicAccountAPI) Accounts() []common.Address {
 	return addresses
 }
 
+// Candidates returns the collection of accounts who has staked
+func (s *PublicBlockChainAPI) GetCandidates(ctx context.Context,blockNr rpc.BlockNumber) []common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetCandidates()
+}
+
 // PrivateAccountAPI provides an API to access accounts managed by this node.
 // It offers methods to create, (un)lock en list accounts. Some methods accept
 // passwords and are therefore considered private by default.
@@ -505,6 +514,72 @@ func (s *PublicBlockChainAPI) GetBalance(ctx context.Context, address common.Add
 	}
 	b := state.GetBalance(address)
 	return b, state.Error()
+}
+
+// GetStake returns the stake of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetStake(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i,err := state.GetStake(address)
+	if err != nil {
+		return
+	}
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// getStakeRangeDiff returns the stakeRangeDiff of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetStakeRangeDiff(ctx context.Context, address common.Address, blockNrStart rpc.BlockNumber, blockNrEnd rpc.BlockNumber, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i := state.GetStakeRangeDiff(address,uint64(blockNrStart),uint64(blockNrEnd))
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// GetHeft returns the heft of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetHeft(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i,err := state.GetHeft(address)
+	if err != nil {
+		return
+	}
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// GetHeftRangeDiff returns the HeftRangeDiff of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetHeftRangeDiff(ctx context.Context, address common.Address, blockNrStart rpc.BlockNumber, blockNrEnd rpc.BlockNumber, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i := state.GetHeftRangeDiff(address,uint64(blockNrStart),uint64(blockNrEnd))
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
 }
 
 // GetBlockByNumber returns the requested block. When blockNr is -1 the chain head is returned. When fullTx is true all
@@ -1301,6 +1376,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		input = *args.Input
 	}
 	if args.To == nil {
+		//todo add code
 		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 	}
 

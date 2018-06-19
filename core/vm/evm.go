@@ -22,8 +22,7 @@ import (
 	"time"
 	"encoding/json"
 	"errors"
-
-
+	"container/list"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
@@ -208,7 +207,13 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	return ret, contract.Gas, err
 }
 
+type sentinel struct {
+	NodeId  string `json:"nodeid"`
+	Heft    uint64 `json:"heft"`
+	Stake   uint64 `json:"stake"`
 
+	HeftLog list.List
+}
 
 func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
 	var err error
@@ -223,7 +228,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateStake(evm,caller,input)
 
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-		err = updateHeft(&evm.StateDB, s)
+		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64())
 		*sentinelHeft = *sentinelHeft + 1
 
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
@@ -316,10 +321,10 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 }
 
 
-func updateHeft(statedb *StateDB, s types.SpecialTxInput) error {
+func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64) error {
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
-	if !(*statedb).UpdateHeft(adress, s.Heft) {
+	if !(*statedb).UpdateHeft(adress, s.Heft, blockNumber) {
 		return errors.New("update user's heft fail")
 	}
 	return nil
@@ -365,8 +370,13 @@ func updateStake(evm *EVM, caller common.Address, input []byte) error {
 
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新stake值
-	if !(*evm).StateDB.UpdateStake(adress, s.Stake) {
-		return errors.New("update user's stake fail")
+	if !(*evm).StateDB.UpdateStake(adress, s.Stake, evm.BlockNumber.Uint64()) {
+		return errors.New("update sentinel's stake fail")
+
+	}
+	// 加入候选名单
+	if !(*evm).StateDB.AddCandidate(adress) {
+		return errors.New("add candidate fail")
 	}
 	(*evm).StateDB.SubBalance(caller, amount)
 	return nil

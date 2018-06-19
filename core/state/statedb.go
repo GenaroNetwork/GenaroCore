@@ -311,6 +311,14 @@ func (self *StateDB) SetCode(addr common.Address, code []byte) {
 	}
 }
 
+// only used in genaro genesis init
+func (self *StateDB) SetCodeHash(addr common.Address, codeHash []byte) {
+	stateObject := self.GetOrNewStateObject(addr)
+	if stateObject != nil {
+		stateObject.SetCodeHash(codeHash)
+	}
+}
+
 func (self *StateDB) SetState(addr common.Address, key common.Hash, value common.Hash) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
@@ -631,10 +639,10 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 }
 
 // UpdateHeft updates the heft value of sentinel's nodeid
-func (self *StateDB)UpdateHeft(id common.Address, heft uint64) bool{
+func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		stateObject.UpdateHeft(heft)
+		stateObject.UpdateHeft(heft, blockNumber)
 		return true
 	}
 	return false
@@ -649,11 +657,44 @@ func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	return 0, nil
 }
 
+// get heft log by sentinel's nodeid
+func (self *StateDB)GetHeftLog(id common.Address) types.NumLogs{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetHeftLog()
+	}
+	return nil
+}
+
+// get heft change in (blockNumStart,blockNumEnd)
+func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetHeftRangeDiff(blockNumStart,blockNumEnd)
+	}
+	return 0
+}
+
+// get the heft change in lastBlock
+// lastBlockNum the last block number
+func (self *StateDB)GetHeftLastDiff(id common.Address, lastBlockNum uint64) uint64{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		logs := stateObject.GetHeftLog()
+		diff,blockNum := logs.GetLastDiff()
+		if blockNum != lastBlockNum {
+			diff = 0
+		}
+		return diff
+	}
+	return 0
+}
+
 // UpdateStake updates the stake value of sentinel's nodeid
-func (self *StateDB)UpdateStake(id common.Address, heft uint64) bool{
+func (self *StateDB)UpdateStake(id common.Address, stake uint64, blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		stateObject.UpdateStake(heft)
+		stateObject.UpdateStake(stake,blockNumber)
 		return true
 	}
 	return false
@@ -666,6 +707,60 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 		return stateObject.GetStake(), nil
 	}
 	return 0, nil
+}
+
+
+// get stake log by sentinel's nodeid
+func (self *StateDB)GetStakeLog(id common.Address) types.NumLogs{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetStakeLog()
+	}
+	return nil
+}
+
+// get stake change in (blockNumStart,blockNumEnd)
+func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetStakeRangeDiff(blockNumStart,blockNumEnd)
+	}
+	return 0
+}
+
+// add a new candidate
+func (self *StateDB)AddCandidate(candidate common.Address) bool {
+	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		stateObject.AddCandidate(candidate)
+		return true
+	}
+	return false
+}
+
+// get all Candidates
+func (self *StateDB)GetCandidates() Candidates{
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		return stateObject.GetCandidates()
+	}
+	return nil
+}
+
+// get CandidateInfo in given range
+func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		candidates := stateObject.GetCandidates()
+		CandidateInfoArray := make([]CandidateInfo,len(candidates))
+		for id,candidate := range candidates {
+			CandidateInfoArray[id].Signer = candidate
+			CandidateInfoArray[id].Heft = stateObject.GetHeftRangeDiff(blockNumStart,blockNumEnd)
+			CandidateInfoArray[id].Stake = stateObject.GetStakeRangeDiff(blockNumStart,blockNumEnd)
+		}
+		return CandidateInfoArray
+	}
+	return nil
 }
 
 func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid string, size uint64, backup uint64, timestart uint64, timeend uint64) bool {
@@ -829,4 +924,19 @@ func (self *StateDB)GetAddressByNode(s string) string {
 		address = stateObject.GetAddressByNode(s)
 	}
 	return address
+}
+
+//add one back stake to list
+func (self *StateDB)AddAlreadyBackStack(refund common.AlreadyBackStake) error {
+	return nil
+}
+
+//get all back stake
+func (self *StateDB)GetAlreadyBackStakeList() []common.AlreadyBackStake {
+	return nil
+}
+
+//set back stake list
+func (self *StateDB)SetAlreadyBackStakeList([]common.AlreadyBackStake) error {
+	return nil
 }

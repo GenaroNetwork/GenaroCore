@@ -611,6 +611,8 @@ func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
+
+//todo 实现自定义指令对应函数功能
 func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	address, bucketId := stack.pop(),stack.pop()
 	//address, offset, size := stack.pop(),stack.pop(),stack.pop()

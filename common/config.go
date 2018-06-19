@@ -47,22 +47,29 @@ var (
 	//SpecialTxTypeSyncNodeId类型的交易代表用户同步stake时的节点到链上
 	SpecialTxTypeSyncNode =big.NewInt(8)
 )
-//费用
+	//费用
 
-var OneDayGes  int64 = int64(5000)
-var BucketApplyGasPerGPerDay  int64 = int64(5000)
-var TrafficApplyGasPerG	 int64 = int64(5000)
-var OneDaySyncLogGsa  int64 = int64(5000)
-var StakeValuePerNode   int64 = int64(1000)
+	var OneDayGes  int64 = int64(5000)
+	var BucketApplyGasPerGPerDay  int64 = int64(5000)
+	var TrafficApplyGasPerG	 int64 = int64(5000)
+	var OneDaySyncLogGsa  int64 = int64(5000)
+	var StakeValuePerNode   int64 = int64(1000)
 
-//官方账号
-var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
+	//官方账号
+	var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
 
-//特殊交易 Tx.init 格式
-//其中 allow 中的权限如下
-//0: readwrite
-//1: readonly
-//2: write
-var ReadWrite int = 0
-var ReadOnly int = 1
-var Write int = 2
+	//特殊交易 Tx.init 格式
+	//其中 allow 中的权限如下
+	//0: readwrite
+	//1: readonly
+	//2: write
+	var ReadWrite int = 0
+	var ReadOnly int = 1
+	var Write int = 2
+
+
+	// save candidate list in this address storage
+	var CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
+	var RefundListAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
+
+

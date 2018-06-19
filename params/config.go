@@ -41,7 +41,14 @@ var (
 		EIP158Block:         big.NewInt(2675000),
 		ByzantiumBlock:      big.NewInt(4370000),
 		ConstantinopleBlock: nil,
-		Ethash:              new(EthashConfig),
+		Genaro: &GenaroConfig{
+			Epoch:            2000, //the number of blocks in one committee term
+			BlockInterval:    10,   //a peer create BlockInterval blocks one time
+			ElectionPeriod:   1,    //a committee list write time
+			ValidPeriod:      1,    //a written committee list waiting time to come into force
+			CurrencyRates:    5,    //interest rates of coin
+			CommitteeMaxSize: 101,  //max number of committee member
+		},
 	}
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
@@ -82,16 +89,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -121,6 +128,7 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+	Genaro *GenaroConfig `json:"genaro,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -142,6 +150,21 @@ func (c *CliqueConfig) String() string {
 	return "clique"
 }
 
+// GenaroConfig is the consensus engine configs for SPOR/PoS.
+type GenaroConfig struct {
+	Epoch            uint64 //the number of blocks in one committee term
+	BlockInterval    uint64 //a peer create BlockInterval blocks one time
+	ElectionPeriod   uint64 //a committee list write time
+	ValidPeriod      uint64 //a written committee list waiting time to come into force
+	CurrencyRates    uint64 //interest rates of coin
+	CommitteeMaxSize uint64 //max number of committee member
+}
+
+// String implements the stringer interface, returning the consensus engine details.
+func (c *GenaroConfig) String() string {
+	return "genaro"
+}
+
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
@@ -150,6 +173,8 @@ func (c *ChainConfig) String() string {
 		engine = c.Ethash
 	case c.Clique != nil:
 		engine = c.Clique
+	case c.Genaro != nil:
+		engine = c.Genaro
 	default:
 		engine = "unknown"
 	}

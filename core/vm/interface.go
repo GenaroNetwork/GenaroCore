@@ -22,6 +22,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 // StateDB is an EVM database for full state querying.
@@ -64,11 +65,19 @@ type StateDB interface {
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
 
-	UpdateHeft(common.Address, uint64) bool
+	UpdateHeft(common.Address, uint64, uint64) bool
 	GetHeft(common.Address) (uint64, error)
+	GetHeftLog(common.Address) types.NumLogs
+	GetHeftRangeDiff(common.Address, uint64, uint64) uint64
 
-	UpdateStake(common.Address, uint64) bool
+	UpdateStake(common.Address, uint64, uint64) bool
 	GetStake(common.Address) (uint64, error)
+	GetStakeLog(common.Address) types.NumLogs
+	GetStakeRangeDiff(common.Address, uint64, uint64) uint64
+
+	AddCandidate(common.Address) bool
+	GetCandidates() state.Candidates
+	GetCandidatesInfoInRange(uint64, uint64) []state.CandidateInfo
 
 	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
 	GetStorageSize(common.Address, [32]byte)  (uint64, error)
@@ -78,6 +87,7 @@ type StateDB interface {
 	SpecialTxTypeMortgageInit(common.Address,types.SpecialTxTypeMortgageInit) bool
 	SpecialTxTypeSyncSidechainStatus(common.Address,types.SpecialTxTypeMortgageInit) (map[common.Address] *big.Int, bool)
 	UpdateTraffic(common.Address, uint64) bool
+
 
 	GetTraffic(common.Address)uint64
 
@@ -91,6 +101,11 @@ type StateDB interface {
 	SyncStakeNode(common.Address, []string) error
 	SyncNode2Address(common.Address, []string, string) error
 	GetAddressByNode(string) string
+
+	AddAlreadyBackStack(refund common.AlreadyBackStake) error
+	GetAlreadyBackStakeList() []common.AlreadyBackStake
+	SetAlreadyBackStakeList([]common.AlreadyBackStake) error
+
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

@@ -49,12 +49,15 @@ func (s SpecialTxInput) SpecialCost() *big.Int {
 type GenaroData struct {
 	Heft                         uint64                               `json:"heft"`
 	Stake                        uint64                               `json:"stake"`
+	HeftLog						 NumLogs						`json:"heftlog"`
+	StakeLog					 NumLogs						`json:"stakelog"`
 	Node                         []string                             `json:"syncNode"`
 	SpecialTxTypeMortgageInit    SpecialTxTypeMortgageInit            `json:"specialTxTypeMortgageInit"`
 	SpecialTxTypeMortgageInitArr map[string]SpecialTxTypeMortgageInit `json:"specialTxTypeMortgageInitArr"`
 	Traffic                      uint64                               `json:"traffic"`
 	Buckets                      []*BucketPropertie                   `json:"buckets"`
 }
+
 
 type BucketPropertie struct {
 	BucketId string `json:"bucketId"`

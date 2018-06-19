@@ -240,3 +240,8 @@ func (a *UnprefixedAddress) UnmarshalText(input []byte) error {
 func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 	return []byte(hex.EncodeToString(a[:])), nil
 }
+
+type AlreadyBackStake struct {
+	Addr				Address
+	BackBlockNumber		uint64
+}
