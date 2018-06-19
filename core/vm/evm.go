@@ -269,11 +269,18 @@ func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
 func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Address) error{
 	sumMortgageTable :=	new(big.Int)
 	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+	zero := big.NewInt(0)
 	for _, v := range mortgageTable{
+		if v.ToInt().Cmp(zero) < 0 {
+			return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+		}
 		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v.ToInt())
 	}
 	s.SpecialTxTypeMortgageInit.MortgagTotal = sumMortgageTable
 	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
+		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+	}
+	if s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Cmp(zero) < 0 {
 		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
 	}
 	temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(),big.NewInt(int64(len(mortgageTable))))
@@ -283,7 +290,7 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
 	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
 	//时间期限收取的费用转账到官方账号
-	(*evm).StateDB.AddBalance(common.OfficialAddress, timeLimitGas)
+	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, timeLimitGas)
 	return nil
 }
 

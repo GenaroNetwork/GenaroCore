@@ -1337,11 +1337,13 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		case common.SpecialTxTypeSyncSidechainStatus.Uint64():
-			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
-			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
-			s.SpecialTxTypeMortgageInit.Dataversion = hex.EncodeToString(timeUnixSha256[:])
-			input,_ := json.Marshal(s)
-			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+			if common.SyncLogAddress== args.From {
+				timeUnix := strconv.FormatInt(time.Now().Unix(),10)
+				timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+				s.SpecialTxTypeMortgageInit.Dataversion = hex.EncodeToString(timeUnixSha256[:])
+				input,_ := json.Marshal(s)
+				return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+			}
 		default:
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
 		}
