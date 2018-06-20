@@ -418,7 +418,12 @@ web3._extend({
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputString]
 		}),
-
+		new web3._extend.Method({
+			name: 'getSynchronizeShareKey',
+			call: 'eth_getSynchronizeShareKey',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter,web3._extend.formatters.inputBlockNumberFormatter]
+		}),
 
 		new web3._extend.Method({
 			name: 'getStorageNodes',

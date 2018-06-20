@@ -1744,3 +1744,17 @@ func (s *PublicBlockChainAPI) DataVersionRead(ctx context.Context, address commo
 	result,error := state.TxLogByDataVersionRead(address,fileID,dataVersion)
 	return result, error
 }
+
+func (s *PublicTransactionPoolAPI) GetSynchronizeShareKey(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []types.SynchronizeShareKey {
+	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SynchronizeShareKey)
+	var synchronizeShareKey types.SpecialTxInput
+	var resultArr []types.SynchronizeShareKey
+	for _, v := range result {
+		json.Unmarshal(v.Input, &synchronizeShareKey)
+		transactionReceipt, err:= s.GetTransactionReceipt(ctx,v.Hash)
+		if nil == err && nil != transactionReceipt {
+			resultArr = append(resultArr, synchronizeShareKey.SynchronizeShareKey)
+		}
+	}
+	return resultArr
+}
