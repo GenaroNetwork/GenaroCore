@@ -817,7 +817,7 @@ func (self *stateObject)SynchronizeShareKey(synchronizeShareKey types.Synchroniz
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		if nil == genaroData.SpecialTxTypeMortgageInitArr {
+		if nil == genaroData.SynchronizeShareKeyArr {
 			genaroData.SynchronizeShareKeyArr = map[string]types.SynchronizeShareKey {synchronizeShareKey.ShareKeyId:synchronizeShareKey}
 		} else {
 			genaroData.SynchronizeShareKeyArr[synchronizeShareKey.ShareKeyId] = synchronizeShareKey
