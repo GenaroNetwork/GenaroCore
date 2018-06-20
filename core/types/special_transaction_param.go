@@ -8,7 +8,7 @@ import (
 
 type SpecialTxInput struct {
 	GenaroData
-	NodeId string       `json:"nodeid"`
+	NodeId string       `json:"address"`
 	Type   *hexutil.Big `json:"type"`
 }
 
@@ -49,6 +49,7 @@ func (s SpecialTxInput) SpecialCost() *big.Int {
 type GenaroData struct {
 	Heft                         uint64                               `json:"heft"`
 	Stake                        uint64                               `json:"stake"`
+	FileSharePublicKey           string                               `json:"publicKey"`
 	Node                         []string                             `json:"syncNode"`
 	SpecialTxTypeMortgageInit    SpecialTxTypeMortgageInit            `json:"specialTxTypeMortgageInit"`
 	SpecialTxTypeMortgageInitArr map[string]SpecialTxTypeMortgageInit `json:"specialTxTypeMortgageInitArr"`

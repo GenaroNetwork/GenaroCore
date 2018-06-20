@@ -762,6 +762,16 @@ func (s *PublicBlockChainAPI)GetStorageNodes(ctx context.Context, address common
 	return nodes, state.Error()
 }
 
+func (s *PublicBlockChainAPI)GetFileSharePublicKey(ctx context.Context, address common.Address) (string, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return "", err
+	}
+
+	nodes := state.GetFileSharePublicKey(address)
+	return nodes, state.Error()
+}
+
 // ExecutionResult groups all structured logs emitted by the EVM
 // while replaying a transaction in debug mode as well as transaction
 // execution status, the amount of gas used and the return value
@@ -1043,7 +1053,7 @@ func txWithType(tx *types.Transaction, txType *big.Int) bool {
 
 
 type rpcTrafficInfo struct {
-	NodeId  string  `json:"nodeId"`
+	NodeId  string  `json:"address"`
 	Traffic uint64  `json:"traffic"`
 	//Hash    common.Hash  `json:"hash"`
 }
@@ -1067,7 +1077,7 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 
 
 type rpcBucketPropertie struct {
-	NodeId           string `json:"nodeId"`
+	NodeId           string `json:"address"`
 	BucketId         string `json:"bucketId"`
 	TimeStart        uint64	`json:"timeStart"`
 	TimeEnd          uint64	`json:"timeEnd"`
