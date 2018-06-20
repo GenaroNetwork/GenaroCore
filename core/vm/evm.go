@@ -236,8 +236,18 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateTraffic(evm, s, caller)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		err = updateStakeNode(evm, s, caller)
+	case common.SynchronizeShareKey.Uint64(): //用户stake后同步节点Id
+		err = SynchronizeShareKey(evm, s, caller)
 	}
 	return err
+}
+
+func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	s.SynchronizeShareKey.Status = 0
+	if !(*evm).StateDB.SynchronizeShareKey(s.SynchronizeShareKey.RecipientAddress,s.SynchronizeShareKey) {
+		return errors.New("update cross chain SynchronizeShareKey fail")
+	}
+	return nil
 }
 
 func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {

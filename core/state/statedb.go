@@ -720,6 +720,14 @@ func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxT
 	}
 	return false
 }
+
+func (self *StateDB) SynchronizeShareKey(address common.Address, synchronizeShareKey types.SynchronizeShareKey) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.SynchronizeShareKey(synchronizeShareKey)
+	}
+	return false
+}
 // UpdateTraffic updates the traffic value of sentinel's nodeid
 func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
@@ -783,12 +791,12 @@ func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]b
 }
 
 
-func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]types.SpecialTxTypeMortgageInit {
+func (self *StateDB) GetAccountAttributes(addr common.Address) types.GenaroData {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.GetAccountAttributes()
 	}
-	return nil
+	return types.GenaroData{}
 }
 
 

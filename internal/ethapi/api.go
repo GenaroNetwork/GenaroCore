@@ -1344,6 +1344,12 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 				input,_ := json.Marshal(s)
 				return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 			}
+		case common.SynchronizeShareKey.Uint64():
+			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
+			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+			s.SynchronizeShareKey.ShareKeyId = hex.EncodeToString(timeUnixSha256[:])
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		default:
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
 		}
@@ -1663,13 +1669,18 @@ func (s *PublicNetAPI) Version() string {
 }
 
 
-func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]types.SpecialTxTypeMortgageInit, error) {
+func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (types.GenaroData, error) {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
-		return nil, err
+		return types.GenaroData{}, err
 	}
 	result := state.GetAccountAttributes(address)
 	return result, state.Error()
+}
+
+func (s *PublicBlockChainAPI) GetLogSwitch(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) map[string]types.SpecialTxTypeMortgageInit {
+	accountAttributes,_ := s.AccountAttributes(ctx,address,rpc.BlockNumber(-1))
+	return accountAttributes.SpecialTxTypeMortgageInitArr
 }
 
 
@@ -1678,7 +1689,7 @@ func (s *PublicBlockChainAPI) GetLogSwitchByAddressAndFileID(ctx context.Context
 	var result map[common.Address]map[string]bool
 	json.Unmarshal([]byte(args), &addressAndFileID)
 	for k, v := range addressAndFileID {
-		accountAttributes,_ := s.AccountAttributes(ctx,k,rpc.BlockNumber(-1))
+		accountAttributes := s.GetLogSwitch(ctx,k,rpc.BlockNumber(-1))
 		if nil == accountAttributes {
 			continue
 		}

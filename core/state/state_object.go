@@ -630,14 +630,13 @@ func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit type
 	return true
 }
 
-func (self *stateObject)GetAccountAttributes() (map[string]types.SpecialTxTypeMortgageInit){
+func (self *stateObject)GetAccountAttributes() types.GenaroData{
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		return genaroData.SpecialTxTypeMortgageInitArr
+		return genaroData
 	}
-
-	return nil
+	return types.GenaroData{}
 }
 
 
@@ -808,4 +807,30 @@ func (self *stateObject)GetAddressByNode (s string) string{
 			return v
 		}
 	}
+}
+
+func (self *stateObject)SynchronizeShareKey(synchronizeShareKey types.SynchronizeShareKey) bool {
+	var genaroData types.GenaroData
+	if nil == self.data.CodeHash {
+		genaroData = types.GenaroData{
+			SynchronizeShareKeyArr:map[string]types.SynchronizeShareKey {synchronizeShareKey.ShareKeyId:synchronizeShareKey},
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SpecialTxTypeMortgageInitArr {
+			genaroData.SynchronizeShareKeyArr = map[string]types.SynchronizeShareKey {synchronizeShareKey.ShareKeyId:synchronizeShareKey}
+		} else {
+			genaroData.SynchronizeShareKeyArr[synchronizeShareKey.ShareKeyId] = synchronizeShareKey
+		}
+	}
+	genaroData.SynchronizeShareKey = types.SynchronizeShareKey{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
 }
