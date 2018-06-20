@@ -3768,6 +3768,9 @@ var inputTransactionFormatter = function (options){
     return options;
 };
 
+var inputString = function (options) {
+    return options
+}
 /**
  * Formats the output of a transaction to its proper values
  *
@@ -3961,6 +3964,7 @@ module.exports = {
     outputLogFormatter: outputLogFormatter,
     outputPostFormatter: outputPostFormatter,
     outputSyncingFormatter: outputSyncingFormatter
+    inputString: inputString
 };
 
 

@@ -798,8 +798,12 @@ func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidech
 			}
 			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
 			useMortgagTotal := new(big.Int)
+			zero := big.NewInt(0)
 			for k,v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
 				if common.ReadWrite == result.AuthorityTable[k] || common.Write == result.AuthorityTable[k] {
+					if v.ToInt().Cmp(zero) < 0 {
+						return nil, false
+					}
 					if result.MortgageTable[k].ToInt().Cmp(v.ToInt()) > -1{
 						AddBalance[k] = v.ToInt()
 						useMortgagTotal.Add(useMortgagTotal,v.ToInt())
