@@ -46,6 +46,9 @@ var (
 
 	//SpecialTxTypeSyncNodeId类型的交易代表用户同步stake时的节点到链上
 	SpecialTxTypeSyncNode =big.NewInt(8)
+
+	// SpecialTxTypeSyncSecretKey类型的交易代表用户同步文件分享公钥
+	SpecialTxTypeSyncFielSharePublicKey  = big.NewInt(9)
 )
 //费用
 

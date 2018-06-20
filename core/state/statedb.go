@@ -830,3 +830,22 @@ func (self *StateDB)GetAddressByNode(s string) string {
 	}
 	return address
 }
+
+
+// UpdateFileSharePublicKey updates the user's public key
+func (self *StateDB)UpdateFileSharePublicKey(id common.Address, publicKey string) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateFileSharePublicKey(publicKey)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB) GetFileSharePublicKey(addr common.Address) string {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetFileSharePublicKey()
+	}
+	return ""
+}

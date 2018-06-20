@@ -91,6 +91,8 @@ type StateDB interface {
 	SyncStakeNode(common.Address, []string) error
 	SyncNode2Address(common.Address, []string, string) error
 	GetAddressByNode(string) string
+
+	UpdateFileSharePublicKey(common.Address, string) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
