@@ -8,7 +8,7 @@ import (
 
 type SpecialTxInput struct {
 	GenaroData
-	NodeId string       `json:"nodeid"`
+	NodeId string       `json:"address"`
 	Type   *hexutil.Big `json:"type"`
 }
 
@@ -51,11 +51,23 @@ type GenaroData struct {
 	Stake                        uint64                               `json:"stake"`
 	HeftLog						 NumLogs						`json:"heftlog"`
 	StakeLog					 NumLogs						`json:"stakelog"`
+	FileSharePublicKey           string                               `json:"publicKey"`
 	Node                         []string                             `json:"syncNode"`
 	SpecialTxTypeMortgageInit    SpecialTxTypeMortgageInit            `json:"specialTxTypeMortgageInit"`
 	SpecialTxTypeMortgageInitArr map[string]SpecialTxTypeMortgageInit `json:"specialTxTypeMortgageInitArr"`
 	Traffic                      uint64                               `json:"traffic"`
 	Buckets                      []*BucketPropertie                   `json:"buckets"`
+	SynchronizeShareKeyArr 		 map[string] SynchronizeShareKey	  `json:"synchronizeShareKeyArr"`
+	SynchronizeShareKey			 SynchronizeShareKey				   `json:"synchronizeShareKey"`
+}
+
+type SynchronizeShareKey struct {
+	ShareKey 	string			`json:"shareKey"`
+	Shareprice	*hexutil.Big	`json:"shareprice"`
+	Status		int				`json:"status"`
+	ShareKeyId	string			`json:"shareKeyId"`
+	RecipientAddress   common.Address   `json:"recipientAddress"`
+	FromAccount   common.Address   `json:"fromAccount"`
 }
 
 

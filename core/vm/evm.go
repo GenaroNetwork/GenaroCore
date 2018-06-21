@@ -240,8 +240,38 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateTraffic(evm, s, caller)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		err = updateStakeNode(evm, s, caller)
+	case common.SynchronizeShareKey.Uint64(): //用户stake后同步节点Id
+		err = SynchronizeShareKey(evm, s, caller)
+	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64():
+		err = updateFileShareSecretKey(evm, s, caller)
+	case common.UnlockSharedKey.Uint64():
+		err = UnlockSharedKey(evm, s, caller)
 	}
 	return err
+}
+
+func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if !(*evm).StateDB.UnlockSharedKey(caller,s.SynchronizeShareKey.ShareKeyId) {
+		return errors.New("update  chain UnlockSharedKey fail")
+	}
+	return nil
+}
+
+func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	s.SynchronizeShareKey.Status = 0
+	s.SynchronizeShareKey.FromAccount = caller
+	if !(*evm).StateDB.SynchronizeShareKey(s.SynchronizeShareKey.RecipientAddress,s.SynchronizeShareKey) {
+		return errors.New("update  chain SynchronizeShareKey fail")
+	}
+	return nil
+}
+
+func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	adress := common.HexToAddress(s.NodeId)
+	if !(*evm).StateDB.UpdateFileSharePublicKey(adress, s.FileSharePublicKey) {
+		return errors.New("update user's public key fail")
+	}
+	return nil
 }
 
 func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
@@ -276,16 +306,16 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	zero := big.NewInt(0)
 	for _, v := range mortgageTable{
 		if v.ToInt().Cmp(zero) < 0 {
-			return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+			return errors.New("update  chain SpecialTxTypeMortgageInit fail")
 		}
 		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable,v.ToInt())
 	}
 	s.SpecialTxTypeMortgageInit.MortgagTotal = sumMortgageTable
 	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller,s.SpecialTxTypeMortgageInit) {
-		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
 	}
 	if s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Cmp(zero) < 0 {
-		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
 	}
 	temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(),big.NewInt(int64(len(mortgageTable))))
 	timeLimitGas := temp.Mul(temp,big.NewInt(common.OneDayGes))

@@ -26,6 +26,7 @@ import (
 var (
 	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Mainnet genesis hash to enforce below configs on
 	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d") // Testnet genesis hash to enforce below configs on
+	GenaronetGenesisHash = common.HexToHash("0xc0aa984d1548c40a8b9f25d4346659ebedf50b10816005fcebe0f2fbf5236c48") // Genaronet genesis hash to enforce below configs on
 )
 
 var (
@@ -41,6 +42,23 @@ var (
 		EIP158Block:         big.NewInt(2675000),
 		ByzantiumBlock:      big.NewInt(4370000),
 		ConstantinopleBlock: nil,
+		Genaro: &GenaroConfig{
+			Epoch:            2000, //the number of blocks in one committee term
+			BlockInterval:    10,   //a peer create BlockInterval blocks one time
+			ElectionPeriod:   1,    //a committee list write time
+			ValidPeriod:      1,    //a written committee list waiting time to come into force
+			CurrencyRates:    5,    //interest rates of coin
+			CommitteeMaxSize: 101,  //max number of committee member
+		},
+	}
+
+	GenaroChainConfig = &ChainConfig{
+		ChainId:             big.NewInt(300),
+		HomesteadBlock:      big.NewInt(1),
+		EIP150Block:         big.NewInt(2),
+		EIP150Hash:          common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
+		EIP155Block:         big.NewInt(3),
+		ByzantiumBlock:      big.NewInt(4),
 		Genaro: &GenaroConfig{
 			Epoch:            2000, //the number of blocks in one committee term
 			BlockInterval:    10,   //a peer create BlockInterval blocks one time
