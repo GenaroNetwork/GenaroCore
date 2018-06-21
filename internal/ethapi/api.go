@@ -837,6 +837,16 @@ func (s *PublicBlockChainAPI)GetStorageNodes(ctx context.Context, address common
 	return nodes, state.Error()
 }
 
+func (s *PublicBlockChainAPI)GetFileSharePublicKey(ctx context.Context, address common.Address) (string, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return "", err
+	}
+
+	nodes := state.GetFileSharePublicKey(address)
+	return nodes, state.Error()
+}
+
 // ExecutionResult groups all structured logs emitted by the EVM
 // while replaying a transaction in debug mode as well as transaction
 // execution status, the amount of gas used and the return value
@@ -1118,7 +1128,7 @@ func txWithType(tx *types.Transaction, txType *big.Int) bool {
 
 
 type rpcTrafficInfo struct {
-	NodeId  string  `json:"nodeId"`
+	NodeId  string  `json:"address"`
 	Traffic uint64  `json:"traffic"`
 	//Hash    common.Hash  `json:"hash"`
 }
@@ -1142,7 +1152,7 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 
 
 type rpcBucketPropertie struct {
-	NodeId           string `json:"nodeId"`
+	NodeId           string `json:"address"`
 	BucketId         string `json:"bucketId"`
 	TimeStart        uint64	`json:"timeStart"`
 	TimeEnd          uint64	`json:"timeEnd"`
@@ -1171,7 +1181,7 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	return retArr
 }
 
-func (s *PublicTransactionPoolAPI) GetAccountByNode(ctx context.Context, str string) string {
+func (s *PublicTransactionPoolAPI) GetAddressByNode(ctx context.Context, str string) string {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
 	var retS string
 	if state == nil || err != nil {
@@ -1376,7 +1386,6 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		input = *args.Input
 	}
 	if args.To == nil {
-		//todo add code
 		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 	}
 
@@ -1420,6 +1429,13 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 				input,_ := json.Marshal(s)
 				return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 			}
+		case common.SynchronizeShareKey.Uint64():
+			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
+			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+			s.SynchronizeShareKey.ShareKeyId = hex.EncodeToString(timeUnixSha256[:])
+			s.SynchronizeShareKey.FromAccount = args.From
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		default:
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
 		}
@@ -1739,13 +1755,18 @@ func (s *PublicNetAPI) Version() string {
 }
 
 
-func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]types.SpecialTxTypeMortgageInit, error) {
+func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (types.GenaroData, error) {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
-		return nil, err
+		return types.GenaroData{}, err
 	}
 	result := state.GetAccountAttributes(address)
 	return result, state.Error()
+}
+
+func (s *PublicBlockChainAPI) GetLogSwitch(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) map[string]types.SpecialTxTypeMortgageInit {
+	accountAttributes,_ := s.AccountAttributes(ctx,address,rpc.BlockNumber(-1))
+	return accountAttributes.SpecialTxTypeMortgageInitArr
 }
 
 
@@ -1754,7 +1775,7 @@ func (s *PublicBlockChainAPI) GetLogSwitchByAddressAndFileID(ctx context.Context
 	var result map[common.Address]map[string]bool
 	json.Unmarshal([]byte(args), &addressAndFileID)
 	for k, v := range addressAndFileID {
-		accountAttributes,_ := s.AccountAttributes(ctx,k,rpc.BlockNumber(-1))
+		accountAttributes := s.GetLogSwitch(ctx,k,rpc.BlockNumber(-1))
 		if nil == accountAttributes {
 			continue
 		}
@@ -1798,4 +1819,26 @@ func (s *PublicBlockChainAPI) DataVersionRead(ctx context.Context, address commo
 	}
 	result,error := state.TxLogByDataVersionRead(address,fileID,dataVersion)
 	return result, error
+}
+
+func (s *PublicTransactionPoolAPI) GetSynchronizeShareKey(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []types.SynchronizeShareKey {
+	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SynchronizeShareKey)
+	var synchronizeShareKey types.SpecialTxInput
+	var resultArr []types.SynchronizeShareKey
+	for _, v := range result {
+		json.Unmarshal(v.Input, &synchronizeShareKey)
+		transactionReceipt, err:= s.GetTransactionReceipt(ctx,v.Hash)
+		if nil == err && nil != transactionReceipt {
+			resultArr = append(resultArr, synchronizeShareKey.SynchronizeShareKey)
+		}
+	}
+	return resultArr
+}
+
+func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address common.Address, shareKeyId string) bool {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return false
+	}
+	return state.CheckUnlockSharedKey(address, shareKeyId)
 }

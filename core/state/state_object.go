@@ -764,14 +764,13 @@ func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit type
 	return true
 }
 
-func (self *stateObject)GetAccountAttributes() (map[string]types.SpecialTxTypeMortgageInit){
+func (self *stateObject)GetAccountAttributes() types.GenaroData{
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		return genaroData.SpecialTxTypeMortgageInitArr
+		return genaroData
 	}
-
-	return nil
+	return types.GenaroData{}
 }
 
 func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit)(map[common.Address] *big.Int, bool) {
@@ -942,3 +941,115 @@ func (self *stateObject)GetAddressByNode (s string) string{
 	}
 }
 
+func (self *stateObject)SynchronizeShareKey(synchronizeShareKey types.SynchronizeShareKey) bool {
+	var genaroData types.GenaroData
+	if nil == self.data.CodeHash {
+		genaroData = types.GenaroData{
+			SynchronizeShareKeyArr:map[string]types.SynchronizeShareKey {synchronizeShareKey.ShareKeyId:synchronizeShareKey},
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			genaroData.SynchronizeShareKeyArr = map[string]types.SynchronizeShareKey {synchronizeShareKey.ShareKeyId:synchronizeShareKey}
+		} else {
+			genaroData.SynchronizeShareKeyArr[synchronizeShareKey.ShareKeyId] = synchronizeShareKey
+		}
+	}
+	genaroData.SynchronizeShareKey = types.SynchronizeShareKey{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
+}
+
+func (self *stateObject)UpdateFileSharePublicKey(publicKey string){
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		genaroData = types.GenaroData{
+			FileSharePublicKey:publicKey,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.FileSharePublicKey = publicKey
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+
+func (self *stateObject)GetFileSharePublicKey() string {
+	if self.data.CodeHash == nil{
+		return ""
+	}
+
+	var genaroData types.GenaroData
+	if err := json.Unmarshal(self.data.CodeHash, &genaroData); err != nil {
+		return ""
+	}
+
+	return genaroData.FileSharePublicKey
+}
+
+
+func (self *stateObject)UnlockSharedKey(shareKeyId string) types.SynchronizeShareKey {
+	var genaroData types.GenaroData
+	var synchronizeShareKey	types.SynchronizeShareKey
+	if nil == self.data.CodeHash {
+		return types.SynchronizeShareKey{}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			return types.SynchronizeShareKey{}
+		} else {
+			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
+			if 1 == synchronizeShareKey.Status{
+				return synchronizeShareKey
+			}
+			synchronizeShareKey.Status = 1
+			genaroData.SynchronizeShareKeyArr[shareKeyId] = synchronizeShareKey
+			synchronizeShareKey.Status = 0
+		}
+	}
+	genaroData.SynchronizeShareKey = types.SynchronizeShareKey{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return synchronizeShareKey
+}
+
+func (self *stateObject)CheckUnlockSharedKey(shareKeyId string) bool {
+	var genaroData types.GenaroData
+	var synchronizeShareKey	types.SynchronizeShareKey
+	if nil == self.data.CodeHash {
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			return false
+		} else {
+			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
+			if 1 == synchronizeShareKey.Status{
+				return true
+			}
+
+		}
+	}
+	return false
+}
