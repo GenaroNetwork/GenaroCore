@@ -1106,7 +1106,7 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	return retArr
 }
 
-func (s *PublicTransactionPoolAPI) GetAccountByNode(ctx context.Context, str string) string {
+func (s *PublicTransactionPoolAPI) GetAddressByNode(ctx context.Context, str string) string {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
 	var retS string
 	if state == nil || err != nil {
