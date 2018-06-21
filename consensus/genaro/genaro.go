@@ -109,7 +109,7 @@ func ecrecover(header *types.Header) (common.Address, error) {
 		return common.Address{}, errEmptyExtra
 	}
 	signature := extraData.Signature
-	//Why reset??
+	//Why resetjQuery21109674833611916935_1529615114868
 	ResetHeaderSignature(header)
 	// Recover the public key and the Ethereum address
 	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
@@ -400,7 +400,7 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 	if !inturn {
 		bias := header.Difficulty.Uint64()
 		delay := uint64(time.Duration(bias * uint64(time.Second)))
-		if parent.Time.Uint64()+delay/uint64(time.Second) > header.Time.Uint64() {
+		if parent.Time.Uint64()+delay/uint64(time.Second) < header.Time.Uint64() {
 			return errInvalidDifficulty
 		}
 	}
