@@ -875,3 +875,11 @@ func (self *StateDB) UnlockSharedKey(address common.Address,shareKeyId string) b
 	}
 	return false
 }
+
+func (self *StateDB) CheckUnlockSharedKey(address common.Address,shareKeyId string) bool {
+	stateObject := self.getStateObject(address)
+	if stateObject != nil {
+		return stateObject.CheckUnlockSharedKey(shareKeyId)
+	}
+	return false
+}

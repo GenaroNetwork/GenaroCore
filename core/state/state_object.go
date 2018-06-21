@@ -901,3 +901,23 @@ func (self *stateObject)UnlockSharedKey(shareKeyId string) types.SynchronizeShar
 	}
 	return synchronizeShareKey
 }
+
+func (self *stateObject)CheckUnlockSharedKey(shareKeyId string) bool {
+	var genaroData types.GenaroData
+	var synchronizeShareKey	types.SynchronizeShareKey
+	if nil == self.data.CodeHash {
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			return false
+		} else {
+			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
+			if 1 == synchronizeShareKey.Status{
+				return true
+			}
+
+		}
+	}
+	return false
+}

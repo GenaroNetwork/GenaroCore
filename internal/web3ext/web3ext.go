@@ -468,6 +468,12 @@ web3._extend({
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
 		}),
+		new web3._extend.Method({
+			name: 'checkUnlockSharedKey',
+			call: 'eth_checkUnlockSharedKey',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputString]
+		}),
 	],
 	properties: [
 		new web3._extend.Property({

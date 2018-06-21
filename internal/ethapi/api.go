@@ -1758,3 +1758,11 @@ func (s *PublicTransactionPoolAPI) GetSynchronizeShareKey(ctx context.Context, s
 	}
 	return resultArr
 }
+
+func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address common.Address, shareKeyId string) bool {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return false
+	}
+	return state.CheckUnlockSharedKey(address, shareKeyId)
+}
