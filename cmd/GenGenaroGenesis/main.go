@@ -88,7 +88,7 @@ func main() {
 		EIP158Block:    big.NewInt(3),
 		ByzantiumBlock: big.NewInt(4),
 		Genaro: &params.GenaroConfig{
-			Epoch:            200, //the number of blocks in one committee term
+			Epoch:            2000, //the number of blocks in one committee term
 			BlockInterval:    10,   //a peer create BlockInterval blocks one time
 			ElectionPeriod:   1,    //a committee list write time
 			ValidPeriod:      1,    //a written committee list waiting time to come into force
@@ -114,7 +114,7 @@ func main() {
 	committees = append(committees, common.HexToAddress("0x81Cee7d346595e0552c6df38DD3F61F6e5802d10"))
 	committees = append(committees, common.HexToAddress("0x1A7194Eb140e29e09FCe688d2E86f282D6a83E69"))
 	committees = append(committees, common.HexToAddress("0x77F7C5FDE3Ce4Fa137c48B3f722B17D7722c3924"))
-	committees = append(committees, common.HexToAddress("0xd31Eb2eA2D7bC15c5B0FE7922fAB4Db0A4F8187A"))
+	committees = append(committees, common.HexToAddress("0x0de2d12fa9c0a5687b330e2de3361e632f52c643"))
 	candidateAccount := GenCandidateAccount(committees)
 	genesis.Alloc[common.CandidateSaveAddress] = candidateAccount
 
