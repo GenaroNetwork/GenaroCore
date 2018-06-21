@@ -857,3 +857,21 @@ func (self *StateDB) GetFileSharePublicKey(addr common.Address) string {
 	}
 	return ""
 }
+
+func (self *StateDB) UnlockSharedKey(address common.Address,shareKeyId string) bool{
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		synchronizeShareKey := stateObject.UnlockSharedKey(shareKeyId)
+		var synchronizeShareKeyTmp types.SynchronizeShareKey
+		if synchronizeShareKeyTmp == synchronizeShareKey {
+			return false
+		}
+		if "" != synchronizeShareKey.ShareKeyId && 0 == synchronizeShareKey.Status {
+			stateObject.SubBalance(synchronizeShareKey.Shareprice.ToInt())
+			FromAccountstateObject := self.GetOrNewStateObject(synchronizeShareKey.FromAccount)
+			FromAccountstateObject.AddBalance(synchronizeShareKey.Shareprice.ToInt())
+		}
+		return true
+	}
+	return false
+}

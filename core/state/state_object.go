@@ -869,3 +869,35 @@ func (self *stateObject)GetFileSharePublicKey() string {
 
 	return genaroData.FileSharePublicKey
 }
+
+
+func (self *stateObject)UnlockSharedKey(shareKeyId string) types.SynchronizeShareKey {
+	var genaroData types.GenaroData
+	var synchronizeShareKey	types.SynchronizeShareKey
+	if nil == self.data.CodeHash {
+		return types.SynchronizeShareKey{}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			return types.SynchronizeShareKey{}
+		} else {
+			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
+			if 1 == synchronizeShareKey.Status{
+				return synchronizeShareKey
+			}
+			synchronizeShareKey.Status = 1
+			genaroData.SynchronizeShareKeyArr[shareKeyId] = synchronizeShareKey
+			synchronizeShareKey.Status = 0
+		}
+	}
+	genaroData.SynchronizeShareKey = types.SynchronizeShareKey{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return synchronizeShareKey
+}

@@ -94,6 +94,7 @@ type StateDB interface {
 	SynchronizeShareKey(common.Address,types.SynchronizeShareKey) bool
 
 	UpdateFileSharePublicKey(common.Address, string) bool
+	UnlockSharedKey(common.Address,string) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

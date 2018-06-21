@@ -62,9 +62,10 @@ type GenaroData struct {
 type SynchronizeShareKey struct {
 	ShareKey 	string			`json:"shareKey"`
 	Shareprice	*hexutil.Big	`json:"shareprice"`
-	Status		int				`json:"Status"`
-	ShareKeyId	string			`json:"ShareKeyId"`
+	Status		int				`json:"status"`
+	ShareKeyId	string			`json:"shareKeyId"`
 	RecipientAddress   common.Address   `json:"recipientAddress"`
+	FromAccount   common.Address   `json:"fromAccount"`
 }
 
 type BucketPropertie struct {
