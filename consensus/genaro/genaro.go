@@ -217,7 +217,14 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	g.lock.RUnlock()
 
 	// Sweet, wait some time if not in-turn
-	delay := time.Duration(header.Difficulty.Uint64() * uint64(time.Second))
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number))
+	if err != nil {
+		return nil, err
+	}
+	//when address is not in committee, reverseDifficult is snap.CommitteeSize + 1,
+	//when address is in committee, reverseDifficult is index + 1, intrun address delay is about 1s
+	reverseDifficult := snap.CommitteeSize - header.Difficulty.Uint64() + 1
+	delay := time.Duration(reverseDifficult * uint64(time.Second))
 	delay += time.Duration(rand.Int63n(int64(wiggleTime)))
 	log.Info("delay:"+delay.String())
 	select {
@@ -262,10 +269,10 @@ func max(x uint64, y uint64) uint64 {
 func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber uint64) *big.Int {
 	index := snap.getCurrentRankIndex(addr)
 	if index < 0 {
-		return new(big.Int).SetUint64(max(snap.CommitteeSize, minDistance) + IncrementDifficult)
+		return new(big.Int).SetUint64(0)
 	}
-	distance := index + IncrementDifficult
-	return new(big.Int).SetUint64(uint64(distance))
+	difficult := snap.CommitteeSize - uint64(index)
+	return new(big.Int).SetUint64(uint64(difficult))
 }
 
 // Authorize injects a private key into the consensus engine to mint new blocks
@@ -295,7 +302,7 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		// If we're at block 0 ~ ElectionPeriod + ValidPeriod - 1, make a snapshot by genesis block
 		// TODO
 		//committeeRank := make([]common.Address, 10)
-		//committeeRank[0] = common.HexToAddress("0x50a7658e5155206dc78eafb80e6a94640b274648")
+		//committeeRank[0] = common.HexToAddress("0xe5f0b187f916eaee5c87074d5d185f3eaf527dc9")
 		//committeeRank[1] = common.HexToAddress("0xed19295615336ee56D4889BcdB90563b7abA02F7")
 		//committeeRank[2] = common.HexToAddress("0x4180B3a9059cb43dc93e72e641B466fEBeFEa902")
 		//committeeRank[3] = common.HexToAddress("0x8d024417f284B10B1fE8f6b02533F5aeFb7C8e23")
@@ -418,6 +425,9 @@ func Rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
 	total := uint64(0)
 	for _, c := range candidateInfos{
 		total += c.Stake
+	}
+	if total == 0 {
+		return committeeRank, proportion
 	}
 	for i, c := range candidateInfos{
 		committeeRank[i] = c.Signer
