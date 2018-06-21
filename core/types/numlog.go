@@ -25,12 +25,22 @@ func (logs *NumLogs) Add(log NumLog) {
 }
 
 func (logs NumLogs) GetFirst() NumLog{
-	return logs[0]
+	len := len(logs)
+	if len > 0 {
+		return logs[0]
+	} else {
+		return NumLog{0,0}
+	}
+
 }
 
 func (logs NumLogs) GetLast() NumLog{
 	len := len(logs)
-	return logs[len-1]
+	if len > 0 {
+		return logs[len-1]
+	} else {
+		return NumLog{0,0}
+	}
 }
 
 func (logs NumLogs) GetLastDiff() (diff,blockNum uint64){
@@ -118,6 +128,9 @@ func (logs NumLogs) getLastBeforBlockNum(blockNum uint64, startId,endId uint64) 
 
 // get the diff for given range
 func (logs NumLogs) GetRangeDiff(blockNumStart uint64, blockNumEnd uint64) uint64{
+	if len(logs) == 0 {
+		return 0
+	}
 	lenth := uint64(len(logs) -1)
 	logStart,idStart := logs.GetFirstAfterBlockNum(blockNumStart,0,lenth)
 	logEnd,_ := logs.GetLastBeforBlockNum(blockNumEnd,idStart,lenth)

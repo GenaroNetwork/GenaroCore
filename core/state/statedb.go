@@ -815,6 +815,14 @@ func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxT
 	}
 	return false
 }
+
+func (self *StateDB) SynchronizeShareKey(address common.Address, synchronizeShareKey types.SynchronizeShareKey) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.SynchronizeShareKey(synchronizeShareKey)
+	}
+	return false
+}
 // UpdateTraffic updates the traffic value of sentinel's nodeid
 func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
@@ -878,12 +886,12 @@ func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]b
 }
 
 
-func (self *StateDB) GetAccountAttributes(addr common.Address) map[string]types.SpecialTxTypeMortgageInit {
+func (self *StateDB) GetAccountAttributes(addr common.Address) types.GenaroData {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.GetAccountAttributes()
 	}
-	return nil
+	return types.GenaroData{}
 }
 
 
@@ -939,4 +947,49 @@ func (self *StateDB)GetAlreadyBackStakeList() []common.AlreadyBackStake {
 //set back stake list
 func (self *StateDB)SetAlreadyBackStakeList([]common.AlreadyBackStake) error {
 	return nil
+}
+
+
+// UpdateFileSharePublicKey updates the user's public key
+func (self *StateDB)UpdateFileSharePublicKey(id common.Address, publicKey string) bool{
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stateObject.UpdateFileSharePublicKey(publicKey)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB) GetFileSharePublicKey(addr common.Address) string {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.GetFileSharePublicKey()
+	}
+	return ""
+}
+
+func (self *StateDB) UnlockSharedKey(address common.Address,shareKeyId string) bool{
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		synchronizeShareKey := stateObject.UnlockSharedKey(shareKeyId)
+		var synchronizeShareKeyTmp types.SynchronizeShareKey
+		if synchronizeShareKeyTmp == synchronizeShareKey {
+			return false
+		}
+		if "" != synchronizeShareKey.ShareKeyId && 0 == synchronizeShareKey.Status {
+			stateObject.SubBalance(synchronizeShareKey.Shareprice.ToInt())
+			FromAccountstateObject := self.GetOrNewStateObject(synchronizeShareKey.FromAccount)
+			FromAccountstateObject.AddBalance(synchronizeShareKey.Shareprice.ToInt())
+		}
+		return true
+	}
+	return false
+}
+
+func (self *StateDB) CheckUnlockSharedKey(address common.Address,shareKeyId string) bool {
+	stateObject := self.getStateObject(address)
+	if stateObject != nil {
+		return stateObject.CheckUnlockSharedKey(shareKeyId)
+	}
+	return false
 }
