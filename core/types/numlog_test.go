@@ -33,7 +33,7 @@ func display(t *testing.T,logs NumLogs){
 func TestAddLog(t *testing.T){
 	logs := new(NumLogs)
 	for i:=0;i<100;i++{
-		logs.add(GenNumLog ())
+		logs.Add(GenNumLog ())
 	}
 	display(t ,*logs )
 }
@@ -44,7 +44,7 @@ func TestFindFirst(t *testing.T) {
 		//t.Log(i)
 		log:=GenNumLog ()
 		//t.Log(log)
-		logs.add(log)
+		logs.Add(log)
 	}
 	t.Log()
 	//start := time.Now()
@@ -61,7 +61,7 @@ func TestFindLast(t *testing.T) {
 		t.Log(i)
 		log:=GenNumLog ()
 		t.Log(log)
-		logs.add(log)
+		logs.Add(log)
 	}
 	t.Log()
 	//start := time.Now()
@@ -78,7 +78,7 @@ func TestGetRangeDiff(t *testing.T) {
 		t.Log(i)
 		log:=GenNumLog ()
 		t.Log(log)
-		logs.add(log)
+		logs.Add(log)
 	}
 	diff := logs.GetRangeDiff(550,3300)
 	t.Log(diff)
@@ -95,7 +95,7 @@ func TestGenaroData(t *testing.T){
 		//t.Log(i)
 		log:=GenNumLog ()
 		//t.Log(log)
-		logs.add(log)
+		logs.Add(log)
 	}
 	data.HeftLog = *logs
 	data.StakeLog = *logs

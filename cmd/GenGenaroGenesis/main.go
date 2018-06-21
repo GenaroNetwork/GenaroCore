@@ -88,7 +88,7 @@ func main() {
 		EIP158Block:    big.NewInt(3),
 		ByzantiumBlock: big.NewInt(4),
 		Genaro: &params.GenaroConfig{
-			Epoch:            2000, //the number of blocks in one committee term
+			Epoch:            200, //the number of blocks in one committee term
 			BlockInterval:    10,   //a peer create BlockInterval blocks one time
 			ElectionPeriod:   1,    //a committee list write time
 			ValidPeriod:      1,    //a written committee list waiting time to come into force
