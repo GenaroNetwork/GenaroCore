@@ -109,7 +109,8 @@ func main() {
 
 	// To write init Committee
 	committees := make([]common.Address, 0)
-	committees = append(committees, common.HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73"))
+	//committees = append(committees, common.HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73"))
+	committees = append(committees, common.HexToAddress("0x42c68ba130dca8e514126906add36e7c4f9204f5"))
 	committees = append(committees, common.HexToAddress("0x81Cee7d346595e0552c6df38DD3F61F6e5802d10"))
 	committees = append(committees, common.HexToAddress("0x1A7194Eb140e29e09FCe688d2E86f282D6a83E69"))
 	committees = append(committees, common.HexToAddress("0x77F7C5FDE3Ce4Fa137c48B3f722B17D7722c3924"))
