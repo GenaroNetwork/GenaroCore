@@ -16,6 +16,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/common/math"
 	"github.com/pkg/errors"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // generate first committees list special account
@@ -35,19 +36,19 @@ func GenAccount(balanceStr string, stake,heft uint64) core.GenesisAccount {
 		log.Fatal(errors.New("GenAccount ParseBig256 error"))
 	}
 
-	stakeLog := state.NumLog{
+	stakeLog := types.NumLog{
 		BlockNum: 0,
 		Num: stake,
 	}
-	stakeLogs := state.NumLogs{stakeLog}
+	stakeLogs := types.NumLogs{stakeLog}
 
-	heftLog := state.NumLog{
+	heftLog := types.NumLog{
 		BlockNum: 0,
 		Num: heft,
 	}
-	heftLogs := state.NumLogs{heftLog}
+	heftLogs := types.NumLogs{heftLog}
 
-	genaroData := state.GenaroData{
+	genaroData := types.GenaroData{
 		Stake: stake,
 		Heft: heft,
 		StakeLog:stakeLogs,
@@ -64,7 +65,7 @@ func GenAccount(balanceStr string, stake,heft uint64) core.GenesisAccount {
 func GenesisAllocToCandidateInfos(genesisAlloc core.GenesisAlloc) state.CandidateInfos{
 	candidateInfos := make(state.CandidateInfos,0)
 	for addr,account := range genesisAlloc {
-		var genaroData state.GenaroData
+		var genaroData types.GenaroData
 		json.Unmarshal(account.CodeHash,&genaroData)
 		if genaroData.Stake > 0 {
 			var candidateInfo state.CandidateInfo
@@ -98,7 +99,7 @@ func main() {
 	genesis := new(core.Genesis)
 	genesis.Config = genaroConfig
 	genesis.Difficulty = big.NewInt(1)
-	genesis.GasLimit = 5000000
+	genesis.GasLimit = 50000000
 	genesis.GasUsed = 0
 	genesis.Mixhash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
 	genesis.ParentHash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
