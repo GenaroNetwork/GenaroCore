@@ -1358,6 +1358,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SynchronizeShareKey.ShareKeyId = hex.EncodeToString(timeUnixSha256[:])
+			s.SynchronizeShareKey.FromAccount = args.From
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		default:
