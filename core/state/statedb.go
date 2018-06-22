@@ -700,6 +700,16 @@ func (self *StateDB)UpdateStake(id common.Address, stake uint64, blockNumber uin
 	return false
 }
 
+
+func (self *StateDB)DeleteStake(id common.Address, stake uint64) (bool, uint64) {
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		alreadyPunishment := stateObject.DeleteStake(stake)
+		return true, alreadyPunishment
+	}
+	return false, 0
+}
+
 // GetStake gets the stake value of sentinel's nodeid
 func (self *StateDB)GetStake(id common.Address) (uint64, error){
 	stateObject := self.getStateObject(id)
