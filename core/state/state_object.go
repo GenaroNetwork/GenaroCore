@@ -446,6 +446,32 @@ func (self *stateObject)UpdateStake(stake uint64){
 	}
 }
 
+func (self *stateObject)DeleteStake(stake uint64) uint64 {
+	var currentPunishment uint64
+	var genaroData types.GenaroData
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+
+		if genaroData.Stake <= stake {
+			currentPunishment = genaroData.Stake
+			genaroData.Stake = 0
+		}else {
+			currentPunishment = stake
+			genaroData.Stake -= stake
+		}
+
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+	return currentPunishment
+}
+
 func (self *stateObject)GetStake() (uint64){
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData

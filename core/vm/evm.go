@@ -220,7 +220,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	}
 	switch s.Type.ToInt().Uint64(){
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
-		err = updateStake(evm,caller,input)
+		err = updateStake(evm, s, caller)
 
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
 		err = updateHeft(&evm.StateDB, s)
@@ -242,8 +242,25 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateFileShareSecretKey(evm, s, caller)
 	case common.UnlockSharedKey.Uint64():
 		err = UnlockSharedKey(evm, s, caller)
+	case common.SpecialTxTypePunishment.Uint64():
+		err = userPunishment(evm, s, caller)
 	}
 	return err
+}
+
+func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	adress := common.HexToAddress(s.NodeId)
+	var actualPunishment uint64
+	var ok bool
+	// 根据nodeid扣除对应用户的stake
+	if ok, actualPunishment = (*evm).StateDB.DeleteStake(adress, s.Stake); !ok {
+		return errors.New("delete user's stake fail")
+	}
+	amount := new(big.Int)
+	amount.SetUint64(actualPunishment*1000000000000000000)
+	//将实际扣除的钱转到官方账号中
+	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, amount)
+	return nil
 }
 
 func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
@@ -384,14 +401,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 }
 
 
-func updateStake(evm *EVM, caller common.Address, input []byte) error {
-	// 解析数据
-	var s types.SpecialTxInput
-	err := json.Unmarshal(input, &s)
-	if err != nil{
-		return errors.New("update user's stake error： the sentinel parameters of the wrong format")
-	}
-
+func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	amount := new(big.Int)
 	amount.SetUint64(s.Stake*1000000000000000000)
 

@@ -650,13 +650,23 @@ func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 }
 
 // UpdateStake updates the stake value of sentinel's nodeid
-func (self *StateDB)UpdateStake(id common.Address, heft uint64) bool{
+func (self *StateDB)UpdateStake(id common.Address, stake uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		stateObject.UpdateStake(heft)
+		stateObject.UpdateStake(stake)
 		return true
 	}
 	return false
+}
+
+
+func (self *StateDB)DeleteStake(id common.Address, stake uint64) (bool, uint64) {
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		alreadyPunishment := stateObject.DeleteStake(stake)
+		return true, alreadyPunishment
+	}
+	return false, 0
 }
 
 // GetStake gets the stake value of sentinel's nodeid
