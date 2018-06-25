@@ -53,6 +53,9 @@ var (
 
 	// SpecialTxTypeSyncSecretKey类型的交易代表用户同步文件分享公钥
 	SpecialTxTypeSyncFielSharePublicKey  = big.NewInt(9)
+
+	// SpecialTxTypePunishment 类型的交易代表对用户进行stake扣除惩罚交易
+	SpecialTxTypePunishment  = big.NewInt(10)
 )
 //费用
 

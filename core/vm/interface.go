@@ -68,6 +68,7 @@ type StateDB interface {
 	GetHeft(common.Address) (uint64, error)
 
 	UpdateStake(common.Address, uint64) bool
+	DeleteStake(common.Address, uint64) (bool, uint64)
 	GetStake(common.Address) (uint64, error)
 
 	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
