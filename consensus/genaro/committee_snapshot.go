@@ -171,7 +171,7 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	}
 }
 
-func (s *CommitteeSnapshot) getInturnRank(number uint64, addr common.Address) int {
+func (s *CommitteeSnapshot) getInturnRank(number uint64) int {
 	var bias int
 	startBlock := s.EpochNumber * s.config.Epoch
 	bias = int((number - startBlock) / s.config.BlockInterval % s.CommitteeSize)
@@ -193,6 +193,17 @@ func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBl
 	return false
 }
 
+// cal block delay time
 func (s *CommitteeSnapshot) getDelayTime(header *types.Header) uint64 {
-	return s.CommitteeSize - header.Difficulty.Uint64() + 1
+	bias := s.getInturnRank(header.Number.Uint64())
+	index := s.getCurrentRankIndex(header.Coinbase)
+	if index < 0 {
+		return minDistance
+	}
+	distance := index - bias
+	if distance < 0 {
+		distance = -distance
+	}
+	return uint64(distance)
 }
+
