@@ -156,6 +156,7 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	if pos == -1 {
 		return false
 	}
+	//TODO maybe have one bug, the startBlock maybe equals (s.EpochNumber + g.config.ValidPeriod + g.config.ElectionPeriod) * s.config.Epoch
 	startBlock := s.EpochNumber * s.config.Epoch
 	if number < startBlock {
 		return false
@@ -168,6 +169,13 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	} else {
 		return false
 	}
+}
+
+func (s *CommitteeSnapshot) getInturnRank(number uint64, addr common.Address) int {
+	var bias int
+	startBlock := s.EpochNumber * s.config.Epoch
+	bias = int((number - startBlock) / s.config.BlockInterval % s.CommitteeSize)
+	return bias
 }
 
 func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
