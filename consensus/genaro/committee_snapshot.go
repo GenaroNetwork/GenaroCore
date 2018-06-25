@@ -200,9 +200,9 @@ func (s *CommitteeSnapshot) getDelayTime(header *types.Header) uint64 {
 	if index < 0 {
 		return minDistance
 	}
-	distance := index - bias
+	distance := bias - index
 	if distance < 0 {
-		distance = -distance
+		distance = int(s.CommitteeSize)+distance
 	}
 	return uint64(distance)
 }
