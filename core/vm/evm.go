@@ -174,7 +174,10 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 	//If transactions are special, they are treated separately according to their types.
 	if to.Address() == common.SpecialSyncAddress {
-		dispatchHandler(evm, caller.Address(), input, sentinelHeft)
+		err := dispatchHandler(evm, caller.Address(), input, sentinelHeft)
+		if err != nil {
+			return nil, gas, err
+		}
 	}
 
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
