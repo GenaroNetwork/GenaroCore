@@ -3,7 +3,6 @@ package genaro
 import (
 	"errors"
 	"math/big"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -56,6 +55,7 @@ var (
 	// errUnauthorized is returned if epoch block has no committee list
 	errInvalidEpochBlock = errors.New("epoch block has no committee list")
 	errInvalidDifficulty = errors.New("invalid difficulty")
+	errInvalidBlockTime = errors.New("invalid block time")
 )
 
 // Various error messages to mark blocks invalid.
@@ -199,7 +199,8 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	//if header.Time.Int64() < parent.Time.Int64() {
 	//	header.Time = new(big.Int).SetInt64(parent.Time.Int64() + 1)
 	//}
-	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(g.config.BlockInterval))
+	delayTime := snap.getDelayTime(header)
+	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(g.config.Period + delayTime))
 	if header.Time.Int64() < time.Now().Unix() {
 		header.Time = big.NewInt(time.Now().Unix())
 	}
@@ -222,15 +223,16 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	g.lock.RUnlock()
 
 	// Sweet, wait some time if not in-turn
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number))
-	if err != nil {
-		return nil, err
-	}
+	//snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number))
+	//if err != nil {
+	//	return nil, err
+	//}
 	//when address is not in committee, reverseDifficult is snap.CommitteeSize + 1,
 	//when address is in committee, reverseDifficult is index + 1, intrun address delay is about 1s
-	reverseDifficult := snap.getDelayTime(header)
-	delay := time.Duration(reverseDifficult * uint64(time.Second))
-	delay += time.Duration(rand.Int63n(int64(wiggleTime)))
+	//reverseDifficult := snap.getDelayTime(header)
+	//delay := time.Duration(reverseDifficult * uint64(time.Second))
+	//delay += time.Duration(rand.Int63n(int64(wiggleTime)))
+	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
 	log.Info("delay:"+delay.String())
 	select {
 	case <-stop:
@@ -276,10 +278,11 @@ func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber ui
 	if index < 0 {
 		return new(big.Int).SetUint64(0)
 	}
-	distance := index - (int)(snap.getInturnRank(blockNumber, addr))
+	distance := index - (int)(snap.getInturnRank(blockNumber))
 	if distance < 0 {
 		distance = -distance
 	}
+	//difficult := snap.CommitteeSize - uint64(distance)
 	difficult := snap.CommitteeSize - uint64(distance)
 	return new(big.Int).SetUint64(uint64(difficult))
 }
@@ -405,13 +408,18 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 		return errUnknownBlock
 	}
 	// Ensure that difficulty corresponds to the turn of the signer
+	diffcult := CalcDifficulty(snap,signer,blockNumber)
+	if header.Difficulty != diffcult {
+		return errInvalidDifficulty
+	}
+	// Ensure that block time corresponds to the turn of the signer
 	inturn := snap.inturn(blockNumber, signer)
 	if !inturn {
 		//bias := header.Difficulty.Uint64()
 		bias := snap.getDelayTime(header)
 		delay := uint64(time.Duration(bias * uint64(time.Second)))
-		if parent.Time.Uint64()+delay/uint64(time.Second) < header.Time.Uint64() {
-			return errInvalidDifficulty
+		if parent.Time.Uint64()+delay/uint64(time.Second) > header.Time.Uint64() {
+			return errInvalidBlockTime
 		}
 	}
 	return nil
