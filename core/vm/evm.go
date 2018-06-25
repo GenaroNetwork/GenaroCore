@@ -226,6 +226,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateStake(evm, s, caller)
 
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
+		// if the address of caller is not offical address, fail this transaction
+		//if caller != common.SyncHeftAddress {
+		//	return errors.New("current caller addrss has no permission on this operation")
+		//}
 		err = updateHeft(&evm.StateDB, s)
 		*sentinelHeft = *sentinelHeft + 1
 
@@ -406,6 +410,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 
 func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	amount := new(big.Int)
+	// the unit of stake is GNX， one stake means one GNX
 	amount.SetUint64(s.Stake*1000000000000000000)
 
 	// judge if there is enough balance to stake（balance must larger than stake value)
