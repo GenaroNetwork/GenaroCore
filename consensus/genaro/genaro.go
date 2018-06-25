@@ -194,9 +194,13 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
 	}
-	header.Time = new(big.Int).SetInt64(time.Now().Unix())
-	if header.Time.Int64() < parent.Time.Int64() {
-		header.Time = new(big.Int).SetInt64(parent.Time.Int64() + 1)
+	//header.Time = new(big.Int).SetInt64(time.Now().Unix())
+	//if header.Time.Int64() < parent.Time.Int64() {
+	//	header.Time = new(big.Int).SetInt64(parent.Time.Int64() + 1)
+	//}
+	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(g.config.BlockInterval))
+	if header.Time.Int64() < time.Now().Unix() {
+		header.Time = big.NewInt(time.Now().Unix())
 	}
 	return nil
 }

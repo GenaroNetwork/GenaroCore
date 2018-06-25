@@ -44,7 +44,7 @@ var (
 		ConstantinopleBlock: nil,
 		Genaro: &GenaroConfig{
 			Epoch:            2000, //the number of blocks in one committee term
-			BlockInterval:    10,   //a peer create BlockInterval blocks one time
+			BlockInterval:    1,    //a peer create BlockInterval blocks one time
 			ElectionPeriod:   1,    //a committee list write time
 			ValidPeriod:      1,    //a written committee list waiting time to come into force
 			CurrencyRates:    5,    //interest rates of coin
