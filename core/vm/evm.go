@@ -246,14 +246,42 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 	return err
 }
 
+
+func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) bool {
+	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
+		return false
+	}
+	return true
+}
+
 func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if !CheckUnlockSharedKeyParameter(s) {
+		return errors.New("update  chain UnlockSharedKey fail")
+	}
 	if !(*evm).StateDB.UnlockSharedKey(caller,s.SynchronizeShareKey.ShareKeyId) {
 		return errors.New("update  chain UnlockSharedKey fail")
 	}
 	return nil
 }
 
+
+func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput) bool {
+	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
+		return false
+	}
+	if len(s.SynchronizeShareKey.ShareKey) > 0 {
+		return false
+	}
+	if s.SynchronizeShareKey.Shareprice.ToInt().Cmp(big.NewInt(0)) < 0 {
+		return false
+	}
+	return true
+}
+
 func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if !CheckSynchronizeShareKeyParameter(s) {
+		return errors.New("update  chain SynchronizeShareKey fail")
+	}
 	s.SynchronizeShareKey.Status = 0
 	s.SynchronizeShareKey.FromAccount = caller
 	if !(*evm).StateDB.SynchronizeShareKey(s.SynchronizeShareKey.RecipientAddress,s.SynchronizeShareKey) {
@@ -296,7 +324,43 @@ func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
 	return nil
 }
 
+
+func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller common.Address) bool {
+	var tmp  big.Int
+	timeLimit := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt()
+	tmp.Mul(timeLimit,big.NewInt(86400))
+	endTime :=  tmp.Add(&tmp,big.NewInt(s.SpecialTxTypeMortgageInit.CreateTime)).Int64()
+	if s.SpecialTxTypeMortgageInit.CreateTime > s.SpecialTxTypeMortgageInit.EndTime ||
+		s.SpecialTxTypeMortgageInit.CreateTime > time.Now().Unix() ||
+		s.SpecialTxTypeMortgageInit.CreateTime != endTime {
+		return false
+	}
+	if caller != s.SpecialTxTypeMortgageInit.FromAccount {
+		return false
+	}
+	if len(s.SpecialTxTypeMortgageInit.FileID) != 64 {
+		return false
+	}
+	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+	authorityTable := s.SpecialTxTypeMortgageInit.AuthorityTable
+	if len(authorityTable) != len(mortgageTable) {
+		return false
+	}
+	for k,v := range authorityTable {
+		if v < 0 && v > 3 {
+			return false
+		}
+		if mortgageTable[k].ToInt().Cmp(big.NewInt(0)) < 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Address) error{
+	if !CheckspecialTxTypeMortgageInitParameter(s,caller) {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
 	sumMortgageTable :=	new(big.Int)
 	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
 	zero := big.NewInt(0)
