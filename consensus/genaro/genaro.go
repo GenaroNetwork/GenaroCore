@@ -17,7 +17,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/hashicorp/golang-lru"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	//"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"sort"
@@ -104,22 +104,23 @@ func sigHash(header *types.Header) (hash common.Hash) {
 func ecrecover(header *types.Header) (common.Address, error) {
 	// If the signature's already cached, return that
 	// Retrieve the signature from the header extra-data
-	extraData := UnmarshalToExtra(header)
-	if extraData == nil {
-		return common.Address{}, errEmptyExtra
-	}
-	signature := extraData.Signature
-	//Why resetjQuery21109674833611916935_1529615114868
-	ResetHeaderSignature(header)
-	// Recover the public key and the Ethereum address
-	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
-	SetHeaderSignature(header, signature)
-	if err != nil {
-		return common.Address{}, err
-	}
-	var signer common.Address
-	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
-	return signer, nil
+	//extraData := UnmarshalToExtra(header)
+	//if extraData == nil {
+	//	return common.Address{}, errEmptyExtra
+	//}
+	//signature := extraData.Signature
+	////Why resetjQuery21109674833611916935_1529615114868
+	//ResetHeaderSignature(header)
+	//// Recover the public key and the Ethereum address
+	//pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
+	//SetHeaderSignature(header, signature)
+	//if err != nil {
+	//	return common.Address{}, err
+	//}
+	//var signer common.Address
+	//copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
+	//return signer, nil
+	return header.Coinbase, nil
 }
 
 type Genaro struct {
@@ -217,7 +218,7 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	}
 	// Don't hold the signer fields for the entire sealing procedure
 	g.lock.RLock()
-	signer, signFn := g.signer, g.signFn
+	//signer, signFn := g.signer, g.signFn
 	g.lock.RUnlock()
 
 	// Sweet, wait some time if not in-turn
@@ -237,11 +238,11 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	case <-time.After(delay):
 	}
 	// Sign all the things!
-	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
-	if err != nil {
-		return nil, err
-	}
-	SetHeaderSignature(header, sighash)
+	//sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//SetHeaderSignature(header, sighash)
 	return block.WithSeal(header), nil
 }
 

@@ -133,13 +133,13 @@ func (c CandidateInfos) Swap(i, j int) {
 }
 
 func (c CandidateInfos) Less(i, j int) bool {
-	return c[i].Point < c[j].Point
+	return c[i].Point > c[j].Point
 }
 
 func (c CandidateInfos) Apply() {
 	//TODO define how to get point
-	for _, candidate := range c{
-		candidate.Point = candidate.Stake + candidate.Heft
+	for i, candidate := range c{
+		c[i].Point = candidate.Stake + candidate.Heft
 	}
 }
 
