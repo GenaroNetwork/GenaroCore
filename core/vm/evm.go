@@ -371,7 +371,7 @@ func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller comm
 		return false
 	}
 	for k,v := range authorityTable {
-		if v < 0 && v > 3 {
+		if v < 0 || v > 3 {
 			return false
 		}
 		if mortgageTable[k].ToInt().Cmp(big.NewInt(0)) < 0 {
