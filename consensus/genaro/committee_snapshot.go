@@ -7,6 +7,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"encoding/binary"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // Each turn has a Snapshot. EpochNumber means the "electoral materials" period.
@@ -182,4 +183,8 @@ func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBl
 		return true
 	}
 	return false
+}
+
+func (s *CommitteeSnapshot) getDelayTime(header *types.Header) uint64 {
+	return s.CommitteeSize - header.Difficulty.Uint64() + 1
 }

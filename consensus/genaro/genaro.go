@@ -223,7 +223,7 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	}
 	//when address is not in committee, reverseDifficult is snap.CommitteeSize + 1,
 	//when address is in committee, reverseDifficult is index + 1, intrun address delay is about 1s
-	reverseDifficult := snap.CommitteeSize - header.Difficulty.Uint64() + 1
+	reverseDifficult := snap.getDelayTime(header)
 	delay := time.Duration(reverseDifficult * uint64(time.Second))
 	delay += time.Duration(rand.Int63n(int64(wiggleTime)))
 	log.Info("delay:"+delay.String())
@@ -398,9 +398,10 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 	// Ensure that difficulty corresponds to the turn of the signer
 	inturn := snap.inturn(blockNumber, signer)
 	if !inturn {
-		bias := header.Difficulty.Uint64()
+		//bias := header.Difficulty.Uint64()
+		bias := snap.getDelayTime(header)
 		delay := uint64(time.Duration(bias * uint64(time.Second)))
-		if parent.Time.Uint64()+delay/uint64(time.Second) > header.Time.Uint64() {
+		if parent.Time.Uint64()+delay/uint64(time.Second) < header.Time.Uint64() {
 			return errInvalidDifficulty
 		}
 	}
