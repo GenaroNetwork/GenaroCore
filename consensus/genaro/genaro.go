@@ -470,9 +470,10 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, state
 	blockNumber := header.Number.Uint64()
 	if blockNumber%config.Epoch == 0 {
 		//rank
-		epochStartBlockNumber := blockNumber - config.Epoch
+		//epochStartBlockNumber := blockNumber - config.Epoch
 		epochEndBlockNumber := blockNumber
-		candidateInfos := state.GetCandidatesInfoInRange(epochStartBlockNumber, epochEndBlockNumber)
+		state.GetCandidates()
+		candidateInfos := state.GetCandidatesInfoInRange(0, epochEndBlockNumber)
 		commiteeRank, proportion := Rank(candidateInfos)
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
