@@ -350,14 +350,14 @@ func NewFrontierInstructionSet() [256]operation {
 		},
 		DATA_VERSION_READ: {
 			execute:       opDataVerisonRead,
-			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(4, 2),
+			gasCost:       gasDataVersion,
+			validateStack: makeStackFunc(3, 17),
 			memorySize:    memoryCodeCopy,
 			valid:         true,
 		},
 		DATA_VERSION_UPDATE: {
 			execute:       opDataVerisonUpdate,
-			gasCost:       constGasFunc(GasMidStep),
+			gasCost:       gasDataVersion,
 			validateStack: makeStackFunc(2, 1),
 			memorySize:    memoryCodeCopy,
 			valid:         true,
@@ -370,7 +370,7 @@ func NewFrontierInstructionSet() [256]operation {
 		},
 		STORAGE_GAS_PRICE: {
 			execute:       opStorageGasprice,
-			gasCost:       constGasFunc(GasMidStep),
+			gasCost:       gasStorageAttribution,
 			validateStack: makeStackFunc(2, 1),
 			valid:         true,
 		},
@@ -425,13 +425,13 @@ func NewFrontierInstructionSet() [256]operation {
 		},
 		STORAGE_GAS_USED: {
 			execute:       opStorageGasUsed,
-			gasCost:       constGasFunc(GasMidStep),
+			gasCost:       gasStorageAttribution,
 			validateStack: makeStackFunc(2, 1),
 			valid:         true,
 		},
 		SENTINEL_HEFT: {
 			execute:       opSentinelHeft,
-			gasCost:       constGasFunc(GasQuickStep),
+			gasCost:       constGasFunc(GasExtStep),
 			validateStack: makeStackFunc(1, 1),
 			valid:         true,
 		},
@@ -504,7 +504,7 @@ func NewFrontierInstructionSet() [256]operation {
 		},
 		SSIZE: {
 			execute:       opSsize,
-			gasCost:       constGasFunc(GasMidStep),
+			gasCost:       gasStorageAttribution,
 			validateStack: makeStackFunc(2, 1),
 			valid:         true,
 		},
@@ -516,7 +516,7 @@ func NewFrontierInstructionSet() [256]operation {
 		},
 		STORAGE_GAS: {
 			execute:       opStorageGas,
-			gasCost:       constGasFunc(GasMidStep),
+			gasCost:       gasStorageAttribution,
 			validateStack: makeStackFunc(2, 1),
 			valid:         true,
 		},
