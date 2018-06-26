@@ -387,6 +387,9 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	}
 	sumMortgageTable :=	new(big.Int)
 	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+	if len(mortgageTable) > 8 {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
 	zero := big.NewInt(0)
 	for _, v := range mortgageTable{
 		if v.ToInt().Cmp(zero) < 0 {
