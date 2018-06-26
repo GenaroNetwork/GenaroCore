@@ -5279,6 +5279,14 @@ var methods = function () {
         outputFormatter: formatters.outputBigNumberFormatter
     });
 
+    var getStake = new Method({
+        name: 'getStake',
+        call: 'eth_getStake',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
     var getStorageAt = new Method({
         name: 'getStorageAt',
         call: 'eth_getStorageAt',
@@ -5437,6 +5445,7 @@ var methods = function () {
 
     return [
         getBalance,
+        getStake,
         getStorageAt,
         getCode,
         getBlock,
