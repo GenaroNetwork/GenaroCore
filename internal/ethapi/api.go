@@ -582,6 +582,16 @@ func (s *PublicBlockChainAPI) GetHeftRangeDiff(ctx context.Context, address comm
 	return
 }
 
+// only use in genaro
+func (s *PublicBlockChainAPI) GetGenaroCodeHash(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (GenaroCodeHash string){
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	GenaroCodeHash = state.GetGenaroCodeHash(address)
+	return
+}
+
 // GetBlockByNumber returns the requested block. When blockNr is -1 the chain head is returned. When fullTx is true all
 // transactions in the block are returned in full detail, otherwise only the transaction hash is returned.
 func (s *PublicBlockChainAPI) GetBlockByNumber(ctx context.Context, blockNr rpc.BlockNumber, fullTx bool) (map[string]interface{}, error) {

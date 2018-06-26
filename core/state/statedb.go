@@ -238,6 +238,15 @@ func (self *StateDB) GetCodeHash(addr common.Address) common.Hash {
 	return common.BytesToHash(stateObject.CodeHash())
 }
 
+// only used in genaro
+func (self *StateDB) GetGenaroCodeHash(addr common.Address) string {
+	stateObject := self.getStateObject(addr)
+	if stateObject == nil {
+		return ""
+	}
+	return hexutil.Encode(stateObject.CodeHash())
+}
+
 func (self *StateDB) GetState(a common.Address, b common.Hash) common.Hash {
 	stateObject := self.getStateObject(a)
 	if stateObject != nil {
@@ -765,8 +774,8 @@ func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd u
 		CandidateInfoArray := make([]CandidateInfo,len(candidates))
 		for id,candidate := range candidates {
 			CandidateInfoArray[id].Signer = candidate
-			CandidateInfoArray[id].Heft = stateObject.GetHeftRangeDiff(blockNumStart,blockNumEnd)
-			CandidateInfoArray[id].Stake = stateObject.GetStakeRangeDiff(blockNumStart,blockNumEnd)
+			CandidateInfoArray[id].Heft = self.GetHeftRangeDiff(candidate, blockNumStart, blockNumEnd)
+			CandidateInfoArray[id].Stake = self.GetStakeRangeDiff(candidate, blockNumStart, blockNumEnd)
 		}
 		return CandidateInfoArray
 	}
