@@ -5318,6 +5318,13 @@ var methods = function () {
         outputFormatter: formatters.outputBigNumberFormatter
     });
 
+    var getGenaroCodeHash = new Method({
+        name: 'getGenaroCodeHash',
+        call: 'eth_getGenaroCodeHash',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getStorageAt = new Method({
         name: 'getStorageAt',
         call: 'eth_getStorageAt',
@@ -5502,7 +5509,8 @@ var methods = function () {
         getStakeRangeDiff,
         getHeft,
         getHeftRangeDiff,
-        getCandidates
+        getCandidates,
+        getGenaroCodeHash
     ];
 };
 

@@ -183,7 +183,7 @@ func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64)
 }
 
 func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
-	return (config.Epoch + 1)*epochNumber - 1
+	return config.Epoch*(epochNumber+1) - 1
 }
 
 func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBlockNumber uint64) bool {

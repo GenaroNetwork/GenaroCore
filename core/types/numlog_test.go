@@ -86,6 +86,16 @@ func TestGetRangeDiff(t *testing.T) {
 	t.Log(diff,blockNum)
 }
 
+func TestGetRangeDiff2(t *testing.T) {
+	logs := new(NumLogs)
+	numlog := NumLog{BlockNum:0,Num:200}
+	logs.Add(numlog)
+	diff := logs.GetRangeDiff(0,200)
+	t.Log(diff)
+	diff,blockNum := logs.GetLastDiff()
+	t.Log(diff,blockNum)
+}
+
 func TestGenaroData(t *testing.T){
 	data := new(GenaroData)
 	data.Stake = 10000
