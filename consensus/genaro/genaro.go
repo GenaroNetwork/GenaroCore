@@ -278,10 +278,7 @@ func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber ui
 	if index < 0 {
 		return new(big.Int).SetUint64(0)
 	}
-	distance := index - (int)(snap.getInturnRank(blockNumber))
-	if distance < 0 {
-		distance = -distance
-	}
+	distance := snap.getDistance(addr,blockNumber)
 	//difficult := snap.CommitteeSize - uint64(distance)
 	difficult := snap.CommitteeSize - uint64(distance)
 	return new(big.Int).SetUint64(uint64(difficult))

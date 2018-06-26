@@ -195,8 +195,12 @@ func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBl
 
 // cal block delay time
 func (s *CommitteeSnapshot) getDelayTime(header *types.Header) uint64 {
-	bias := s.getInturnRank(header.Number.Uint64())
-	index := s.getCurrentRankIndex(header.Coinbase)
+	return s.getDistance(header.Coinbase,header.Number.Uint64())
+}
+
+func (s *CommitteeSnapshot) getDistance(addr common.Address, blockNumber uint64) uint64 {
+	bias := s.getInturnRank(blockNumber)
+	index := s.getCurrentRankIndex(addr)
 	if index < 0 {
 		return minDistance
 	}
