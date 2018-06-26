@@ -436,7 +436,7 @@ func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 
 func Rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
 	candidateInfos.Apply()
-	sort.Sort(candidateInfos)
+	sort.Sort(sort.Reverse(candidateInfos))
 	committeeRank := make([]common.Address, len(candidateInfos))
 	proportion := make([]uint64, len(candidateInfos))
 	total := uint64(0)
