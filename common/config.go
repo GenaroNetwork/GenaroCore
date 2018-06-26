@@ -68,6 +68,7 @@ var StakeValuePerNode   int64 = int64(1000)
 //官方账号
 //var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
 var SyncLogAddress Address  = HexToAddress("0xaf7a12de8dc1de25c0541966695498074f52a1cc")
+var SyncHeftAddress Address = HexToAddress("0x1111111111111111111111111111111111111111")
 
 //特殊交易 Tx.init 格式
 //其中 allow 中的权限如下

@@ -237,7 +237,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateStorageProperties(evm, s, caller)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		err = specialTxTypeMortgageInit(evm, s,caller)
-	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): // 交易代表用户押注初始化交易
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //交易代表用户押注初始化交易
 		err = SpecialTxTypeSyncSidechainStatus(evm, s)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		err = updateTraffic(evm, s, caller)
@@ -245,11 +245,11 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateStakeNode(evm, s, caller)
 	case common.SynchronizeShareKey.Uint64(): //用户stake后同步节点Id
 		err = SynchronizeShareKey(evm, s, caller)
-	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64():
+	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
 		err = updateFileShareSecretKey(evm, s, caller)
 	case common.UnlockSharedKey.Uint64():
 		err = UnlockSharedKey(evm, s, caller)
-	case common.SpecialTxTypePunishment.Uint64():
+	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		err = userPunishment(evm, s, caller)
 	}
 	return err
@@ -427,6 +427,10 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 
 	for _, b := range s.Buckets {
 		bucketId := b.BucketId
+		if len(bucketId) != 64 {
+			return errors.New("the length of bucketId must be 64")
+		}
+
 		if b.TimeStart >= b.TimeEnd {
 			return errors.New("endTime must larger then startTime")
 		}

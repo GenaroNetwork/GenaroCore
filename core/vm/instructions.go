@@ -26,9 +26,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"strconv"
 )
 
 var (
@@ -488,7 +486,7 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 
 //todo 实现自定义指令对应函数功能
 func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	address, fileId,dataVersion,retOffset := stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	address, fileId,dataVersion:= stack.pop(),stack.pop(),stack.pop()
 	//address, offset1, size1,offset2,size2,retOffset:= stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
 	//fileId := string(memory.Get(offset1.Int64(),size1.Int64()))
 	//dataVersion := string(memory.Get(offset2.Int64(),size2.Int64()))
@@ -496,22 +494,37 @@ func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory,
 	var err error
 	var fileIdArr [32]byte
 	math.U256(fileId)
+	math.U256(dataVersion)
 	byteArr := (fileId).Bytes()
 	for i,v :=range byteArr{
 		fileIdArr[i] = v
 	}
-	txLog,err = evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileIdArr,strconv.FormatInt(dataVersion.Int64(),10))
+	//txLog,err = evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileIdArr,strconv.FormatInt(dataVersion.Int64(),10))
+	txLog,err = evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileIdArr,dataVersion.String())
+	var i int
+	var zeroAddress common.Address
 	if err == nil {
-		txLogByte ,_ := json.Marshal(txLog)
-		size := len(txLogByte)
-		memory.Set(retOffset.Uint64(),uint64(size),txLogByte)
-		stack.push(evm.interpreter.intPool.get().SetUint64(uint64(size)))
 		stack.push(evm.interpreter.intPool.get().SetUint64(1))
+        for k,v := range txLog{
+        	stack.push(evm.interpreter.intPool.get().SetUint64(v.ToInt().Uint64()))
+        	stack.push(k.Big())
+        	i++
+		}
+		for i < 8 {
+			stack.push(evm.interpreter.intPool.getZero())
+			stack.push(zeroAddress.Big())
+			i++
+		}
 	}else{
 		stack.push(evm.interpreter.intPool.getZero())
-		stack.push(evm.interpreter.intPool.getZero())
+		i = 0
+		for  i < 8 {
+			stack.push(evm.interpreter.intPool.getZero())
+			stack.push(zeroAddress.Big())
+			i++
+		}
 	}
-	evm.interpreter.intPool.put(address, fileId,dataVersion,retOffset)
+	evm.interpreter.intPool.put(address,fileId,dataVersion)
 	return nil, nil
 }
 
