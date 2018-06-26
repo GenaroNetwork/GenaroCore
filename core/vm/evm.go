@@ -243,7 +243,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateTraffic(evm, s, caller)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		err = updateStakeNode(evm, s, caller)
-	case common.SynchronizeShareKey.Uint64(): //用户stake后同步节点Id
+	case common.SynchronizeShareKey.Uint64():
 		err = SynchronizeShareKey(evm, s, caller)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
 		err = updateFileShareSecretKey(evm, s, caller)
@@ -325,10 +325,9 @@ func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Add
 }
 
 func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	userAdress := common.HexToAddress(s.NodeId)
 	var err error = nil
 	if s.Node != nil && len(s.Node) != 0 {
-		err = (*evm).StateDB.SyncStakeNode(userAdress, s.Node)
+		err = (*evm).StateDB.SyncStakeNode(caller, s.Node)
 
 		if err == nil { // 存储倒排索引
 			node2UserAccountIndexAddress := common.StakeNode2StakeAddress
