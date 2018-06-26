@@ -11,6 +11,7 @@ type SpecialTxInput struct {
 	GenaroData
 	NodeId string       `json:"address"`
 	Type   *hexutil.Big `json:"type"`
+	BlockNumber string  `json:"blockNr"`
 	Message string      `json:"msg"`
 }
 
