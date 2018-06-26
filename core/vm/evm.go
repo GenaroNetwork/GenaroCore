@@ -251,6 +251,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = UnlockSharedKey(evm, s, caller)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		err = userPunishment(evm, s, caller)
+	default:
+		err = errors.New("undefined type of special transaction")
 	}
 	return err
 }
