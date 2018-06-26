@@ -1337,6 +1337,9 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		json.Unmarshal([]byte(args.ExtraData), &s)
 		switch s.Type.ToInt().Uint64() {
 		case common.SpecialTxTypeMortgageInit.Uint64():
+			if len(s.SpecialTxTypeMortgageInit.MortgageTable) > 8 {
+				return nil
+			}
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
@@ -1789,4 +1792,40 @@ func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address 
 		return false
 	}
 	return state.CheckUnlockSharedKey(address, shareKeyId)
+}
+
+// GetStake returns the stake of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetStake(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i,err := state.GetStake(address)
+	if err != nil {
+		return
+	}
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// GetHeft returns the heft of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetHeft(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i,err := state.GetHeft(address)
+	if err != nil {
+		return
+	}
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
 }
