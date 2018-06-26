@@ -60,8 +60,8 @@ var (
 //费用
 
 var OneDayGes  int64 = int64(5000)
-var BucketApplyGasPerGPerDay  int64 = int64(5000)
-var TrafficApplyGasPerG	 int64 = int64(5000)
+var BucketApplyGasPerGPerDay  int64 = int64(5000) //单位为wei
+var TrafficApplyGasPerG	 int64 = int64(5000) //单位为wei
 var OneDaySyncLogGsa  int64 = int64(5000)
 var StakeValuePerNode   int64 = int64(1000)
 

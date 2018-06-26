@@ -436,7 +436,8 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 		if b.TimeStart >= b.TimeEnd {
 			return errors.New("endTime must larger then startTime")
 		}
-		// 根据nodeid更新heft值
+
+		// 根据nodeid更新storage属性
 		if !(*evm).StateDB.UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
 			return errors.New("update user's bucket fail")
 		}

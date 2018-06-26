@@ -1091,7 +1091,6 @@ type rpcBucketPropertie struct {
 	BucketId         string `json:"bucketId"`
 	TimeStart        uint64	`json:"timeStart"`
 	TimeEnd          uint64	`json:"timeEnd"`
-	Duration         uint64 `json:"duration"`
 	Backup           uint64 `json:"backup"`
 	Size             uint64 `json:"size"`
 	Hash    		 common.Hash  `json:"hash"`
@@ -1116,7 +1115,6 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 			r.Size = v.Size
 			r.NodeId = s.NodeId
 			r.Hash = tx.Hash
-			r.Duration = v.Duration
 			retArr = append(retArr, r)
 		}
 	}
@@ -1359,8 +1357,6 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 				bucketID := s.NodeId + strconv.FormatInt(t.Unix(),10) + strconv.Itoa(r.Int())
 				bucketIdSha256 := sha256.Sum256([]byte(bucketID))
 				v.BucketId = hex.EncodeToString(bucketIdSha256[:])
-				v.TimeStart = uint64(t.Unix())
-				v.TimeEnd = uint64(t.AddDate(0, 0, int(v.Duration)).Unix())
 				b = append(b, v)
 			}
 			s.Buckets = b
