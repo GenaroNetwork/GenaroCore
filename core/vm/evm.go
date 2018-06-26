@@ -331,7 +331,7 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 
 		if err == nil { // 存储倒排索引
 			node2UserAccountIndexAddress := common.StakeNode2StakeAddress
-			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, s.NodeId)
+			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, caller.String())
 		}
 	}
 
