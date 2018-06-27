@@ -17,7 +17,16 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common/math"
 	"github.com/pkg/errors"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"flag"
 )
+
+var accountfile string
+
+
+func initarg() {
+	flag.StringVar(&accountfile, "f", "account.json", "account file")
+	flag.Parse()
+}
 
 // generate first committees list special account
 func GenCandidateAccount(committees []common.Address) core.GenesisAccount{
@@ -78,7 +87,33 @@ func GenesisAllocToCandidateInfos(genesisAlloc core.GenesisAlloc) state.Candidat
 	return candidateInfos
 }
 
+type account struct {
+	Balance 	string		`json:"balance"`
+	Heft 		uint64		`json:"heft"`
+	Stake 		uint64		`json:"stake"`
+}
+type MyAlloc map[common.Address]account
+
+//type firstAccounts struct {
+//	Alloc      FirstAlloc        `json:"alloc"      gencodec:"required"`
+//}
+
+type header struct {
+	Encryption  string `json:"encryption"`
+	Timestamp   int64  `json:"timestamp"`
+	Key         string `json:"key"`
+	Partnercode int    `json:"partnercode"`
+}
+
+
 func main() {
+	initarg()
+	accountfile, err := os.Open(accountfile)
+	myAccounts := new(MyAlloc)
+	if err := json.NewDecoder(accountfile).Decode(myAccounts); err != nil {
+		log.Fatalf("invalid account file: %v", err)
+	}
+
 	genaroConfig := &params.ChainConfig{
 		ChainId:        big.NewInt(300),
 		HomesteadBlock: big.NewInt(1),
@@ -88,7 +123,7 @@ func main() {
 		EIP158Block:    big.NewInt(3),
 		ByzantiumBlock: big.NewInt(4),
 		Genaro: &params.GenaroConfig{
-			Epoch:            200, //the number of blocks in one committee term
+			Epoch:            2000, //the number of blocks in one committee term
 			Period:			  1,	// Number of seconds between blocks to enforce
 			BlockInterval:    10,    //a peer create BlockInterval blocks one time
 			ElectionPeriod:   1,    //a committee list write time
@@ -111,27 +146,19 @@ func main() {
 
 	// To write init Committee
 	committees := make([]common.Address, 0)
-	committees = append(committees, common.HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73"))
-	//committees = append(committees, common.HexToAddress("0x42c68ba130dca8e514126906add36e7c4f9204f5"))
-	committees = append(committees, common.HexToAddress("0x81Cee7d346595e0552c6df38DD3F61F6e5802d10"))
-	committees = append(committees, common.HexToAddress("0x1A7194Eb140e29e09FCe688d2E86f282D6a83E69"))
-	committees = append(committees, common.HexToAddress("0x77F7C5FDE3Ce4Fa137c48B3f722B17D7722c3924"))
-	committees = append(committees, common.HexToAddress("0x0de2d12fa9c0a5687b330e2de3361e632f52c643"))
+	for addr := range *myAccounts {
+		if (*myAccounts)[addr].Stake > 0 {
+			committees = append(committees, addr)
+		}
+	}
 	candidateAccount := GenCandidateAccount(committees)
 	genesis.Alloc[common.CandidateSaveAddress] = candidateAccount
 
-	accounts := make([]core.GenesisAccount,5)
-
-	accounts[0] = GenAccount("200000000000000000000", 200,200)
-	genesis.Alloc[committees[0]] = accounts[0]
-	accounts[1] = GenAccount("300000000000000000000", 300,400)
-	genesis.Alloc[committees[1]] = accounts[1]
-	accounts[2] = GenAccount("400000000000000000000", 400,500)
-	genesis.Alloc[committees[2]] = accounts[2]
-	accounts[3] = GenAccount("500000000000000000000", 500,600)
-	genesis.Alloc[committees[3]] = accounts[3]
-	accounts[4] = GenAccount("600000000000000000000", 600,300)
-	genesis.Alloc[committees[4]] = accounts[4]
+	//accounts := make([]core.GenesisAccount,len(*myAccounts))
+	for addr := range *myAccounts {
+		account := GenAccount((*myAccounts)[addr].Balance, (*myAccounts)[addr].Stake,(*myAccounts)[addr].Heft)
+		genesis.Alloc[addr] = account
+	}
 
 	extra := new(genaro.ExtraData)
 	var candidateInfos state.CandidateInfos
