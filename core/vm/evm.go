@@ -243,7 +243,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateTraffic(evm, s, caller)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		err = updateStakeNode(evm, s, caller)
-	case common.SynchronizeShareKey.Uint64(): //用户stake后同步节点Id
+	case common.SynchronizeShareKey.Uint64():
 		err = SynchronizeShareKey(evm, s, caller)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
 		err = updateFileShareSecretKey(evm, s, caller)
@@ -251,6 +251,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = UnlockSharedKey(evm, s, caller)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		err = userPunishment(evm, s, caller)
+	default:
+		err = errors.New("undefined type of special transaction")
 	}
 	return err
 }
@@ -306,14 +308,13 @@ func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Add
 }
 
 func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	userAdress := common.HexToAddress(s.NodeId)
 	var err error = nil
 	if s.Node != nil && len(s.Node) != 0 {
-		err = (*evm).StateDB.SyncStakeNode(userAdress, s.Node)
+		err = (*evm).StateDB.SyncStakeNode(caller, s.Node)
 
 		if err == nil { // 存储倒排索引
 			node2UserAccountIndexAddress := common.StakeNode2StakeAddress
-			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, s.NodeId)
+			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, caller.String())
 		}
 	}
 
@@ -390,7 +391,8 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 		if b.TimeStart >= b.TimeEnd {
 			return errors.New("endTime must larger then startTime")
 		}
-		// 根据nodeid更新heft值
+
+		// 根据nodeid更新storage属性
 		if !(*evm).StateDB.UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
 			return errors.New("update user's bucket fail")
 		}

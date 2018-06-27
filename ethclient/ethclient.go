@@ -488,6 +488,12 @@ func (ec *Client) GetBuckets(ctx context.Context, account common.Address, blockN
 	return result, err
 }
 
+func (ec *Client) GetStake(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_getStake", account, toBlockNumArg(blockNumber))
+	return (*big.Int)(&result), err
+}
+
 func toCallArg(msg ethereum.CallMsg) interface{} {
 	arg := map[string]interface{}{
 		"from": msg.From,
