@@ -28,6 +28,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -253,6 +254,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = userPunishment(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
+	}
+
+	if err != nil{
+		log.Info("special transaction error: ", err)
 	}
 	return err
 }
