@@ -22,7 +22,6 @@ import (
 	"time"
 	"encoding/json"
 	"errors"
-	"container/list"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"

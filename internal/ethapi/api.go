@@ -1864,39 +1864,3 @@ func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address 
 	}
 	return state.CheckUnlockSharedKey(address, shareKeyId)
 }
-
-// GetStake returns the stake of ether for the given address in the state of the
-// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
-// block numbers are also allowed.
-func (s *PublicBlockChainAPI) GetStake(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
-	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
-	if state == nil || err != nil {
-		return
-	}
-	i,err := state.GetStake(address)
-	if err != nil {
-		return
-	}
-	b = new(big.Int)
-	b.SetUint64(i)
-	err = state.Error()
-	return
-}
-
-// GetHeft returns the heft of ether for the given address in the state of the
-// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
-// block numbers are also allowed.
-func (s *PublicBlockChainAPI) GetHeft(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
-	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
-	if state == nil || err != nil {
-		return
-	}
-	i,err := state.GetHeft(address)
-	if err != nil {
-		return
-	}
-	b = new(big.Int)
-	b.SetUint64(i)
-	err = state.Error()
-	return
-}
