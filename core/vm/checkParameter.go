@@ -87,7 +87,10 @@ func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckStakeTx() error {
+func CheckStakeTx(s types.SpecialTxInput) error {
+	if s.Stake <= 0 {
+		return errors.New("value of stake must larger than zero")
+	}
 	return nil
 }
 
@@ -98,11 +101,19 @@ func CheckSyncHeftTx(caller common.Address) error {
 	return nil
 }
 
-func CheckApplyBucketTx() error {
+func CheckApplyBucketTx(s types.SpecialTxInput) error {
+	for _, v := range s.Buckets {
+		if len(v.BucketId) != 64 {
+			return errors.New("length of bucketId must be 64")
+		}
+	}
 	return nil
 }
 
-func CheckTrafficTx() error {
+func CheckTrafficTx(s types.SpecialTxInput) error {
+	if s.Traffic <= 0 {
+		errors.New("value of traffic must larger than zero")
+	}
 	return nil
 }
 
@@ -132,6 +143,9 @@ func CheckPunishmentTx(caller common.Address) error {
 	return nil
 }
 
-func CheckSyncFileSharePublicKeyTx() error {
+func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
+	if s.FileSharePublicKey == "" {
+		return errors.New("public key for file share can't be null")
+	}
 	return nil
 }
