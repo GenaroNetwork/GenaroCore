@@ -25,6 +25,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 var (
@@ -243,7 +244,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// The only possible consensus-error would be if there wasn't
 		// sufficient balance to make the transfer happen. The first
 		// balance transfer may never fail.
-		if vmerr == vm.ErrInsufficientBalance {
+		if vmerr == vm.ErrInsufficientBalance || vmerr == state.ErrSyncNode{
 			return nil, 0, false, vmerr
 		}
 	}

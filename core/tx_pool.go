@@ -606,12 +606,12 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrIntrinsicGas
 	}
 	if common.SpecialSyncAddress == *tx.To(){
-		return dispatchHandlerValidateTx(tx.Data())
+		return pool.dispatchHandlerValidateTx(tx.Data(), from)
 	}
 	return nil
 }
 
-func dispatchHandlerValidateTx(input []byte) error {
+func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address) error {
 	var err error
 	// 解析数据
 	var s types.SpecialTxInput
@@ -621,29 +621,29 @@ func dispatchHandlerValidateTx(input []byte) error {
 	}
 	switch s.Type.ToInt().Uint64(){
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
-
-
+		return vm.CheckStakeTx()
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-
-
+		return vm.CheckSyncHeftTx(caller)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
-
+		return vm.CheckApplyBucketTx()
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
 		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
-
+		return vm.CheckTrafficTx()
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
-
-	case common.SynchronizeShareKey.Uint64(): //用户stake后同步节点Id
+		callerStake, _ := pool.currentState.GetStake(caller)
+		existNodes := pool.currentState.GetStorageNodes(caller)
+		return vm.CheckSyncNodeTx(callerStake, existNodes, s.Node)
+	case common.SynchronizeShareKey.Uint64():
 		return vm.CheckSynchronizeShareKeyParameter(s)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
-
+		return vm.CheckSyncFileSharePublicKeyTx()
 	case common.UnlockSharedKey.Uint64():
 		return vm.CheckUnlockSharedKeyParameter(s)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
-
+		return vm.CheckPunishmentTx(caller)
 	}
 	return err
 }

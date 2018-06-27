@@ -86,3 +86,52 @@ func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
 	}
 	return nil
 }
+
+func CheckStakeTx() error {
+	return nil
+}
+
+func CheckSyncHeftTx(caller common.Address) error {
+	if caller !=  common.SyncHeftAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+	return nil
+}
+
+func CheckApplyBucketTx() error {
+	return nil
+}
+
+func CheckTrafficTx() error {
+	return nil
+}
+
+func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string) error {
+	var nodeNum int
+	if toAddNodes != nil{
+		nodeNum = len(toAddNodes)
+	}else{
+		return errors.New("none nodes to synchronize")
+	}
+
+	if existNodes != nil {
+		nodeNum += len(existNodes)
+	}
+
+	needStakeVale := int64(nodeNum) * common.StakeValuePerNode
+	if uint64(needStakeVale) > stake {
+		return errors.New("none enough stake to synchronize node")
+	}
+	return nil
+}
+
+func CheckPunishmentTx(caller common.Address) error {
+	if caller !=  common.SyncHeftAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+	return nil
+}
+
+func CheckSyncFileSharePublicKeyTx() error {
+	return nil
+}

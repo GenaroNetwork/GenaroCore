@@ -19,7 +19,7 @@ func (s SpecialTxInput) SpecialCost() *big.Int {
 	rt := new(big.Int)
 	switch s.Type.ToInt() {
 	case common.SpecialTxTypeStakeSync:
-		return rt.SetUint64(s.Stake)
+		return rt.SetUint64(s.Stake*1000000000000000000)
 	case common.SpecialTxTypeSpaceApply:
 		var totalCost int64
 		for _, v := range s.Buckets {

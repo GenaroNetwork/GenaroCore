@@ -228,9 +228,9 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
 		// if the address of caller is not offical address, fail this transaction
-		//if caller != common.SyncHeftAddress {
-		//	return errors.New("current caller addrss has no permission on this operation")
-		//}
+		if caller != common.SyncHeftAddress {
+			return errors.New("current caller addrss has no permission on this operation")
+		}
 		err = updateHeft(&evm.StateDB, s)
 		*sentinelHeft = *sentinelHeft + 1
 
