@@ -406,7 +406,7 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 	}
 	// Ensure that difficulty corresponds to the turn of the signer
 	diffcult := CalcDifficulty(snap,signer,blockNumber)
-	if header.Difficulty != diffcult {
+	if header.Difficulty.Cmp(diffcult) != 0 {
 		return errInvalidDifficulty
 	}
 	// Ensure that block time corresponds to the turn of the signer
