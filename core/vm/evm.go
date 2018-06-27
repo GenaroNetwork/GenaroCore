@@ -27,6 +27,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -172,7 +173,10 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 	//If transactions are special, they are treated separately according to their types.
 	if to.Address() == common.SpecialSyncAddress {
-		dispatchHandler(evm, caller.Address(), input, sentinelHeft)
+		err := dispatchHandler(evm, caller.Address(), input, sentinelHeft)
+		if err != nil {
+			return nil, gas, err
+		}
 	}
 
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
@@ -206,13 +210,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	return ret, contract.Gas, err
 }
 
-type sentinel struct {
-	NodeId  string `json:"nodeid"`
-	Heft    uint64 `json:"heft"`
-	Stake   uint64 `json:"stake"`
 
-	HeftLog list.List
-}
 
 func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
 	var err error
@@ -227,6 +225,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateStake(evm, s, caller)
 
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
+		// if the address of caller is not offical address, fail this transaction
+		if caller != common.SyncHeftAddress {
+			return errors.New("current caller addrss has no permission on this operation")
+		}
 		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64())
 		*sentinelHeft = *sentinelHeft + 1
 
@@ -234,20 +236,26 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 		err = updateStorageProperties(evm, s, caller)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		err = specialTxTypeMortgageInit(evm, s,caller)
-	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): // 交易代表用户押注初始化交易
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
 		err = SpecialTxTypeSyncSidechainStatus(evm, s)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		err = updateTraffic(evm, s, caller)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		err = updateStakeNode(evm, s, caller)
-	case common.SynchronizeShareKey.Uint64(): //用户stake后同步节点Id
+	case common.SynchronizeShareKey.Uint64():
 		err = SynchronizeShareKey(evm, s, caller)
-	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64():
+	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
 		err = updateFileShareSecretKey(evm, s, caller)
 	case common.UnlockSharedKey.Uint64():
 		err = UnlockSharedKey(evm, s, caller)
-	case common.SpecialTxTypePunishment.Uint64():
+	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		err = userPunishment(evm, s, caller)
+	default:
+		err = errors.New("undefined type of special transaction")
+	}
+
+	if err != nil{
+		log.Info("special transaction error: ", err)
 	}
 	return err
 }
@@ -268,6 +276,9 @@ func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) erro
 }
 
 func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if err := CheckUnlockSharedKeyParameter(s); nil != err {
+		return err
+	}
 	if !(*evm).StateDB.UnlockSharedKey(caller,s.SynchronizeShareKey.ShareKeyId) {
 		return errors.New("update  chain UnlockSharedKey fail")
 	}
@@ -275,6 +286,9 @@ func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if err := CheckSynchronizeShareKeyParameter(s); nil != err  {
+		return err
+	}
 	s.SynchronizeShareKey.Status = 0
 	s.SynchronizeShareKey.FromAccount = caller
 	if !(*evm).StateDB.SynchronizeShareKey(s.SynchronizeShareKey.RecipientAddress,s.SynchronizeShareKey) {
@@ -292,14 +306,13 @@ func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Add
 }
 
 func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	userAdress := common.HexToAddress(s.NodeId)
 	var err error = nil
 	if s.Node != nil && len(s.Node) != 0 {
-		err = (*evm).StateDB.SyncStakeNode(userAdress, s.Node)
+		err = (*evm).StateDB.SyncStakeNode(caller, s.Node)
 
 		if err == nil { // 存储倒排索引
 			node2UserAccountIndexAddress := common.StakeNode2StakeAddress
-			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, s.NodeId)
+			(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.Node, caller.String())
 		}
 	}
 
@@ -307,6 +320,9 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
+	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s); nil != err {
+		return err
+	}
 	restlt,flag := (*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit)
 	if  false == flag{
 		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
@@ -318,8 +334,14 @@ func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
 }
 
 func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Address) error{
+	if err := CheckspecialTxTypeMortgageInitParameter(s,caller); nil != err {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
 	sumMortgageTable :=	new(big.Int)
 	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+	if len(mortgageTable) > 8 {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
 	zero := big.NewInt(0)
 	for _, v := range mortgageTable{
 		if v.ToInt().Cmp(zero) < 0 {
@@ -357,10 +379,15 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 
 	for _, b := range s.Buckets {
 		bucketId := b.BucketId
+		if len(bucketId) != 64 {
+			return errors.New("the length of bucketId must be 64")
+		}
+
 		if b.TimeStart >= b.TimeEnd {
 			return errors.New("endTime must larger then startTime")
 		}
-		// 根据nodeid更新heft值
+
+		// 根据nodeid更新storage属性
 		if !(*evm).StateDB.UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
 			return errors.New("update user's bucket fail")
 		}
@@ -407,6 +434,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 
 func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	amount := new(big.Int)
+	// the unit of stake is GNX， one stake means one GNX
 	amount.SetUint64(s.Stake*1000000000000000000)
 
 	// judge if there is enough balance to stake（balance must larger than stake value)

@@ -33,6 +33,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/metrics"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
+	"encoding/json"
+	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 )
 
 const (
@@ -603,7 +605,47 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if tx.Gas() < intrGas {
 		return ErrIntrinsicGas
 	}
+	if common.SpecialSyncAddress == *tx.To(){
+		return pool.dispatchHandlerValidateTx(tx.Data(), from)
+	}
 	return nil
+}
+
+func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address) error {
+	var err error
+	// 解析数据
+	var s types.SpecialTxInput
+	err = json.Unmarshal(input, &s)
+	if err != nil{
+		return errors.New("special tx error： the extraData parameters of the wrong format")
+	}
+	switch s.Type.ToInt().Uint64(){
+	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
+		return vm.CheckStakeTx(s)
+	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
+		return vm.CheckSyncHeftTx(caller)
+	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
+		return vm.CheckApplyBucketTx(s)
+	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
+		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
+		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s)
+	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
+		return vm.CheckTrafficTx(s)
+	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
+		callerStake, _ := pool.currentState.GetStake(caller)
+		existNodes := pool.currentState.GetStorageNodes(caller)
+		return vm.CheckSyncNodeTx(callerStake, existNodes, s.Node)
+	case common.SynchronizeShareKey.Uint64():
+		return vm.CheckSynchronizeShareKeyParameter(s)
+	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
+		return vm.CheckSyncFileSharePublicKeyTx(s)
+	case common.UnlockSharedKey.Uint64():
+		return vm.CheckUnlockSharedKeyParameter(s)
+	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
+		return vm.CheckPunishmentTx(caller)
+	}
+	return err
 }
 
 // add validates a transaction and inserts it into the non-executable queue for

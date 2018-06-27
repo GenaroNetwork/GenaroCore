@@ -4,12 +4,14 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"math/big"
+	"math"
 )
 
 type SpecialTxInput struct {
 	GenaroData
 	NodeId string       `json:"address"`
 	Type   *hexutil.Big `json:"type"`
+	BlockNumber string  `json:"blockNr"`
 	Message string      `json:"msg"`
 }
 
@@ -17,15 +19,18 @@ func (s SpecialTxInput) SpecialCost() *big.Int {
 	rt := new(big.Int)
 	switch s.Type.ToInt() {
 	case common.SpecialTxTypeStakeSync:
-		return rt.SetUint64(s.Stake)
+		return rt.SetUint64(s.Stake*1000000000000000000)
 	case common.SpecialTxTypeSpaceApply:
-		var totalCost uint64
+		var totalCost int64
 		for _, v := range s.Buckets {
-			oneCost := v.Size / v.Duration
+			duration := math.Abs(float64(v.TimeStart) - float64(v.TimeEnd))
+
+			oneCost := int64(v.Size) * int64(math.Ceil(duration/10)) * common.BucketApplyGasPerGPerDay
+
 			totalCost += oneCost
 		}
 
-		totalGas := big.NewInt(int64(totalCost) * common.BucketApplyGasPerGPerDay)
+		totalGas := big.NewInt(totalCost)
 		return totalGas
 	case common.SpecialTxTypeTrafficApply:
 		totalGas := big.NewInt(int64(s.Traffic) * common.TrafficApplyGasPerG)
@@ -78,7 +83,6 @@ type BucketPropertie struct {
 	// 开始时间和结束时间共同表示存储空间的时长，对应STORAGEGAS指令
 	TimeStart uint64 `json:"timeStart"`
 	TimeEnd   uint64 `json:"timeEnd"`
-	Duration  uint64 `json:"duration"`
 
 	// 备份数，对应STORAGEGASPRICE指令
 	Backup uint64 `json:"backup"`

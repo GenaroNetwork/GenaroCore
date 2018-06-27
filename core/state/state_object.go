@@ -33,6 +33,7 @@ import (
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
+var ErrSyncNode = errors.New("no enough stake value to sync node")
 
 type Code []byte
 
@@ -902,7 +903,7 @@ func (self *stateObject)SyncStakeNode(s []string) error {
 	var err error
 	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{ // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
-		err = errors.New("can't sync node before stake")
+		err = ErrSyncNode
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		totalNodeNumber := len(s)
@@ -911,7 +912,7 @@ func (self *stateObject)SyncStakeNode(s []string) error {
 		}
 		needStakeVale := int64(totalNodeNumber) * common.StakeValuePerNode
 		if uint64(needStakeVale) > genaroData.Stake {
-			err = errors.New("no enough stake value to sync node")
+			err = ErrSyncNode
 		}else {
 			genaroData.Node = append(genaroData.Node, s...)
 			b, _ := json.Marshal(genaroData)
