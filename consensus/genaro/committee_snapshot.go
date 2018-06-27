@@ -7,6 +7,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"encoding/binary"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // Each turn has a Snapshot. EpochNumber means the "electoral materials" period.
@@ -155,6 +156,7 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	if pos == -1 {
 		return false
 	}
+	//TODO maybe have one bug, the startBlock maybe equals (s.EpochNumber + g.config.ValidPeriod + g.config.ElectionPeriod) * s.config.Epoch
 	startBlock := s.EpochNumber * s.config.Epoch
 	if number < startBlock {
 		return false
@@ -169,12 +171,19 @@ func (s *CommitteeSnapshot) inturn(number uint64, addr common.Address) bool {
 	}
 }
 
+func (s *CommitteeSnapshot) getInturnRank(number uint64) int {
+	var bias int
+	startBlock := s.EpochNumber * s.config.Epoch
+	bias = int((number - startBlock) / s.config.BlockInterval % s.CommitteeSize)
+	return bias
+}
+
 func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
 	return config.Epoch*epochNumber
 }
 
 func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
-	return (config.Epoch + 1)*epochNumber - 1
+	return config.Epoch*(epochNumber+1) - 1
 }
 
 func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBlockNumber uint64) bool {
@@ -183,3 +192,22 @@ func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBl
 	}
 	return false
 }
+
+// cal block delay time
+func (s *CommitteeSnapshot) getDelayTime(header *types.Header) uint64 {
+	return s.getDistance(header.Coinbase,header.Number.Uint64())
+}
+
+func (s *CommitteeSnapshot) getDistance(addr common.Address, blockNumber uint64) uint64 {
+	bias := s.getInturnRank(blockNumber)
+	index := s.getCurrentRankIndex(addr)
+	if index < 0 {
+		return minDistance
+	}
+	distance := bias - index
+	if distance < 0 {
+		distance = int(s.CommitteeSize)+distance
+	}
+	return uint64(distance)
+}
+

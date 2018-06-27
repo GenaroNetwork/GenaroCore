@@ -44,7 +44,7 @@ var (
 		ConstantinopleBlock: nil,
 		Genaro: &GenaroConfig{
 			Epoch:            2000, //the number of blocks in one committee term
-			BlockInterval:    10,   //a peer create BlockInterval blocks one time
+			BlockInterval:    1,    //a peer create BlockInterval blocks one time
 			ElectionPeriod:   1,    //a committee list write time
 			ValidPeriod:      1,    //a written committee list waiting time to come into force
 			CurrencyRates:    5,    //interest rates of coin
@@ -61,6 +61,7 @@ var (
 		ByzantiumBlock:      big.NewInt(4),
 		Genaro: &GenaroConfig{
 			Epoch:            2000, //the number of blocks in one committee term
+			Period:			  1,
 			BlockInterval:    10,   //a peer create BlockInterval blocks one time
 			ElectionPeriod:   1,    //a committee list write time
 			ValidPeriod:      1,    //a written committee list waiting time to come into force
@@ -170,12 +171,13 @@ func (c *CliqueConfig) String() string {
 
 // GenaroConfig is the consensus engine configs for SPOR/PoS.
 type GenaroConfig struct {
-	Epoch            uint64 //the number of blocks in one committee term
-	BlockInterval    uint64 //a peer create BlockInterval blocks one time
-	ElectionPeriod   uint64 //a committee list write time
-	ValidPeriod      uint64 //a written committee list waiting time to come into force
-	CurrencyRates    uint64 //interest rates of coin
-	CommitteeMaxSize uint64 //max number of committee member
+	Epoch            uint64 `json:"epoch"`	//the number of blocks in one committee term
+	Period 			 uint64 `json:"period"` // Number of seconds between blocks to enforce
+	BlockInterval    uint64 `json:"blockInterval"`	//a peer create BlockInterval blocks one time
+	ElectionPeriod   uint64 `json:"electionPeriod"`	//a committee list write time
+	ValidPeriod      uint64 `json:"validPeriod"`	//a written committee list waiting time to come into force
+	CurrencyRates    uint64 `json:"currencyRates"`	//interest rates of coin
+	CommitteeMaxSize uint64 `json:"committeeMaxSize"`	//max number of committee member
 }
 
 // String implements the stringer interface, returning the consensus engine details.

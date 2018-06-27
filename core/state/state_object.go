@@ -139,8 +139,8 @@ func (c CandidateInfos) Less(i, j int) bool {
 
 func (c CandidateInfos) Apply() {
 	//TODO define how to get point
-	for _, candidate := range c{
-		candidate.Point = candidate.Stake + candidate.Heft
+	for i, candidate := range c{
+		c[i].Point = candidate.Stake + candidate.Heft
 	}
 }
 

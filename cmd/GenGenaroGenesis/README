@@ -1,0 +1,2 @@
+use:
+./GenGenaroGenesis -f account.json
