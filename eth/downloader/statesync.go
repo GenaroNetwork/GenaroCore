@@ -424,6 +424,10 @@ func (s *stateSync) process(req *stateReq) error {
 	// Put unfulfilled tasks back into the retry queue
 	npeers := s.d.peers.Len()
 	for hash, task := range req.tasks {
+		for k := range task.attempts {
+			fmt.Println(k)
+		}
+
 		// If the node did deliver something, missing items may be due to a protocol
 		// limit or a previous timeout + delayed delivery. Both cases should permit
 		// the node to retry the missing items (to avoid single-peer stalls).
@@ -432,7 +436,7 @@ func (s *stateSync) process(req *stateReq) error {
 		}
 		// If we've requested the node too many times already, it may be a malicious
 		// sync where nobody has the right data. Abort.
-		if len(task.attempts) >= npeers {
+		if len(task.attempts) >= npeers+100 {
 			return fmt.Errorf("state node %s failed with all peers (%d tries, %d peers)", hash.TerminalString(), len(task.attempts), npeers)
 		}
 		// Missing item, place into the retry queue.

@@ -123,6 +123,10 @@ func ecrecover(header *types.Header) (common.Address, error) {
 	return header.Coinbase, nil
 }
 
+func Ecrecover(header *types.Header) (common.Address, error) {
+	return ecrecover(header)
+}
+
 type Genaro struct {
 	config     *params.GenaroConfig // genaro config
 	db         ethdb.Database       // Database to store and retrieve snapshot checkpoints
@@ -239,6 +243,7 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 		return nil, nil
 	case <-time.After(delay):
 	}
+	ResetHeaderSignature(header)
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())
 	if err != nil {
@@ -364,6 +369,10 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 // in the header satisfies the consensus protocol requirements.
 func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) error {
 	log.Info("VerifySeal:" + header.Number.String())
+	return g.verifySeal(chain, header, nil)
+}
+
+func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 	blockNumber := header.Number.Uint64()
 	if blockNumber == 0 {
 		return errUnknownBlock
@@ -395,10 +404,35 @@ func (g *Genaro) VerifySeal(chain consensus.ChainReader, header *types.Header) e
 	if _, ok := snap.Committee[signer]; !ok {
 		return errUnauthorized
 	}
+
+	// Ensure the timestamp has the correct delay
+	var parent *types.Header
+	if len(parents) > 0 {
+		parent = parents[len(parents)-1]
+	} else {
+		parent = chain.GetHeader(header.ParentHash, blockNumber-1)
+	}
+	if parent == nil || parent.Number.Uint64() != blockNumber-1 || parent.Hash() != header.ParentHash {
+		return consensus.ErrUnknownAncestor
+	}
+
+	if header.Time.Uint64() < parent.Time.Uint64() {
+		return errUnknownBlock
+	}
 	// Ensure that difficulty corresponds to the turn of the signer
 	diffcult := CalcDifficulty(snap,signer,blockNumber)
 	if header.Difficulty.Cmp(diffcult) != 0 {
 		return errInvalidDifficulty
+	}
+	// Ensure that block time corresponds to the turn of the signer
+	inturn := snap.inturn(blockNumber, signer)
+	if !inturn {
+		//bias := header.Difficulty.Uint64()
+		bias := snap.getDelayTime(header)
+		delay := uint64(time.Duration(bias * uint64(time.Second)))
+		if parent.Time.Uint64()+delay/uint64(time.Second) > header.Time.Uint64() {
+			return errInvalidBlockTime
+		}
 	}
 	return nil
 }
@@ -677,36 +711,6 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 // via the VerifySeal method.
 func (g *Genaro) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
 	log.Info("VerifyHeader:" + header.Number.String())
-	blockNumber := header.Number.Uint64()
-	// get current committee snapshot
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, blockNumber))
-	if err != nil {
-		return err
-	}
-	// Ensure the timestamp has the correct delay
-	parent := chain.GetHeader(header.ParentHash, blockNumber-1)
-	if parent == nil {
-		log.Info("407 get parent nil", "parent blockNumber", blockNumber-1)
-		return consensus.ErrUnknownAncestor
-	}
-	if header.Time.Uint64() < parent.Time.Uint64() {
-		return errUnknownBlock
-	}
-	// get signer from header
-	signer, err := ecrecover(header)
-	if err != nil {
-		return err
-	}
-	// Ensure that block time corresponds to the turn of the signer
-	inturn := snap.inturn(blockNumber, signer)
-	if !inturn {
-		//bias := header.Difficulty.Uint64()
-		bias := snap.getDelayTime(header)
-		delay := uint64(time.Duration(bias * uint64(time.Second)))
-		if parent.Time.Uint64()+delay/uint64(time.Second) > header.Time.Uint64() {
-			return errInvalidBlockTime
-		}
-	}
 	return g.VerifySeal(chain, header)
 }
 
@@ -720,8 +724,8 @@ func (g *Genaro) VerifyHeaders(chain consensus.ChainReader, headers []*types.Hea
 	results := make(chan error, len(headers))
 
 	go func() {
-		for _, header := range headers {
-			err := g.VerifySeal(chain, header)
+		for i, header := range headers {
+			err := g.verifySeal(chain, header, headers[:i])
 
 			select {
 			case <-abort:
