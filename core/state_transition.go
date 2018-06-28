@@ -25,7 +25,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 var (
