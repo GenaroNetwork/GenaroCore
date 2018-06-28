@@ -60,13 +60,15 @@ var (
 	//费用
 
 	var OneDayGes  int64 = int64(5000)
-	var BucketApplyGasPerGPerDay  int64 = int64(5000)
-	var TrafficApplyGasPerG	 int64 = int64(5000)
+	var BucketApplyGasPerGPerDay  int64 = int64(5000) //单位为wei
+    var TrafficApplyGasPerG	 int64 = int64(5000) //单位为wei
 	var OneDaySyncLogGsa  int64 = int64(5000)
 	var StakeValuePerNode   int64 = int64(1000)
 
-	//官方账号
-	var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
+//官方账号
+//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
+var SyncLogAddress Address  = HexToAddress("0xaf7a12de8dc1de25c0541966695498074f52a1cc")
+var SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83843f0b")
 
 	//特殊交易 Tx.init 格式
 	//其中 allow 中的权限如下
@@ -81,10 +83,3 @@ var (
 	// save candidate list in this address storage
 	var CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
 	var RefundListAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
-
-
-
-//官方账号
-//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
-var SyncLogAddress Address  = HexToAddress("0xaf7a12de8dc1de25c0541966695498074f52a1cc")
-

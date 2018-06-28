@@ -20,6 +20,7 @@ type GasTable struct {
 	ExtcodeSize uint64
 	ExtcodeCopy uint64
 	Balance     uint64
+	StorageAttribution uint64
 	SLoad       uint64
 	Calls       uint64
 	Suicide     uint64
@@ -41,6 +42,7 @@ var (
 		ExtcodeSize: 20,
 		ExtcodeCopy: 20,
 		Balance:     20,
+		StorageAttribution:  20,
 		SLoad:       50,
 		Calls:       40,
 		Suicide:     0,
@@ -53,6 +55,7 @@ var (
 		ExtcodeSize: 700,
 		ExtcodeCopy: 700,
 		Balance:     400,
+		StorageAttribution:     400,
 		SLoad:       200,
 		Calls:       700,
 		Suicide:     5000,
@@ -65,8 +68,10 @@ var (
 		ExtcodeSize: 700,
 		ExtcodeCopy: 700,
 		Balance:     400,
+		StorageAttribution: 400,
 		SLoad:       200,
 		Calls:       700,
+
 		Suicide:     5000,
 		ExpByte:     50,
 

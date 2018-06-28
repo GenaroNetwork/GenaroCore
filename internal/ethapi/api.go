@@ -1097,11 +1097,18 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberAndIndex(ctx conte
 }
 
 // GetTransactionByBlockNumberRange returns the transaction of special type from  startblocknumber to endblocknumber.
-func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType *big.Int) []*RPCTransaction {
+func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType *big.Int) ([]*RPCTransaction, error) {
 	var specialTx []*RPCTransaction
 	if startBlockNr >= endBlockNr {
-		return nil
+		return nil,errors.New("endBlockNumber large then startBlockNumber")
 	}
+	//最大遍历区间86400
+	var maxRange int64 = 86400
+	var currentRange = endBlockNr.Int64() - startBlockNr.Int64()
+	if currentRange > maxRange {
+		return nil, errors.New("the span between the start block number and the end block number is greater than 86400")
+	}
+
 	for i := startBlockNr; i<= endBlockNr; i++ {
 		if block, _ := s.b.BlockByNumber(ctx, i); block != nil {
 			txs := block.Transactions()
@@ -1109,7 +1116,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.
 			specialTx = append(specialTx, currentBlockTx...)
 		}
 	}
-	return specialTx
+	return specialTx, nil
 }
 
 func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txType *big.Int) []*RPCTransaction {
@@ -1140,12 +1147,15 @@ func txWithType(tx *types.Transaction, txType *big.Int) bool {
 type rpcTrafficInfo struct {
 	NodeId  string  `json:"address"`
 	Traffic uint64  `json:"traffic"`
-	//Hash    common.Hash  `json:"hash"`
+	Hash    common.Hash  `json:"hash"`
 }
 
 // GetTrafficTxInfo get informations of special transaction of traffic apply
-func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcTrafficInfo {
-	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeTrafficApply)
+func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]*rpcTrafficInfo, error) {
+	rpcTx, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeTrafficApply)
+	if err != nil{
+		return nil, err
+	}
 	var retArr[]*rpcTrafficInfo
 	for _, v := range rpcTx {
 		var s types.SpecialTxInput
@@ -1153,11 +1163,11 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 		r := new(rpcTrafficInfo)
 		r.NodeId = s.NodeId
 		r.Traffic = s.Traffic
-		//r.Hash = v.Hash
+		r.Hash = v.Hash
 		retArr = append(retArr, r)
 
 	}
-	return retArr
+	return retArr,nil
 }
 
 
@@ -1168,11 +1178,15 @@ type rpcBucketPropertie struct {
 	TimeEnd          uint64	`json:"timeEnd"`
 	Backup           uint64 `json:"backup"`
 	Size             uint64 `json:"size"`
+	Hash    		 common.Hash  `json:"hash"`
 }
 
 // GetBucketTxInfo get informations of special transaction of bucket apply
-func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []*rpcBucketPropertie {
-	rpcTx := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeSpaceApply)
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]*rpcBucketPropertie, error)  {
+	rpcTx, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeSpaceApply)
+	if err != nil{
+		return nil, err
+	}
 	var retArr []*rpcBucketPropertie
 	for _, tx := range rpcTx {
 		var s types.SpecialTxInput
@@ -1185,10 +1199,11 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 			r.Backup = v.Backup
 			r.Size = v.Size
 			r.NodeId = s.NodeId
+			r.Hash = tx.Hash
 			retArr = append(retArr, r)
 		}
 	}
-	return retArr
+	return retArr,nil
 }
 
 func (s *PublicTransactionPoolAPI) GetAddressByNode(ctx context.Context, str string) string {
@@ -1405,6 +1420,9 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		json.Unmarshal([]byte(args.ExtraData), &s)
 		switch s.Type.ToInt().Uint64() {
 		case common.SpecialTxTypeMortgageInit.Uint64():
+			if len(s.SpecialTxTypeMortgageInit.MortgageTable) > 8 {
+				return nil
+			}
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
 			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
@@ -1420,12 +1438,10 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			var b []*types.BucketPropertie
 			for _, v := range s.Buckets{
 				t := time.Now()
-				r := rand.New(rand.NewSource(t.UnixNano()))
-				bucketID := s.NodeId + strconv.FormatInt(t.UnixNano(),10) + strconv.Itoa(r.Int())
+				r := rand.New(rand.NewSource(t.Unix()))
+				bucketID := s.NodeId + strconv.FormatInt(t.Unix(),10) + strconv.Itoa(r.Int())
 				bucketIdSha256 := sha256.Sum256([]byte(bucketID))
 				v.BucketId = hex.EncodeToString(bucketIdSha256[:])
-				v.TimeStart = uint64(t.UnixNano())
-				v.TimeEnd = uint64(t.AddDate(0, 0, int(v.Duration)).UnixNano())
 				b = append(b, v)
 			}
 			s.Buckets = b
@@ -1806,8 +1822,11 @@ func (s *PublicBlockChainAPI) GetLogSwitchByAddressAndFileID(ctx context.Context
 	return result
 }
 
-func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []types.SpecialTxTypeMortgageInit {
-	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SpecialTxTypeMortgageInit)
+func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]types.SpecialTxTypeMortgageInit, error) {
+	result, err := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SpecialTxTypeMortgageInit)
+	if err != nil {
+		return nil, err
+	}
 	var specialTxTypeMortgageInit types.SpecialTxInput
 	var resultArr []types.SpecialTxTypeMortgageInit
 	for _, v := range result {
@@ -1817,7 +1836,7 @@ func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context
 			resultArr = append(resultArr, specialTxTypeMortgageInit.SpecialTxTypeMortgageInit)
 		}
 	}
-	return resultArr
+	return resultArr,nil
 }
 
 
@@ -1831,8 +1850,11 @@ func (s *PublicBlockChainAPI) DataVersionRead(ctx context.Context, address commo
 	return result, error
 }
 
-func (s *PublicTransactionPoolAPI) GetSynchronizeShareKey(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) []types.SynchronizeShareKey {
-	result := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SynchronizeShareKey)
+func (s *PublicTransactionPoolAPI) GetSynchronizeShareKey(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]types.SynchronizeShareKey, error) {
+	result, err := s.GetTransactionByBlockNumberRange(ctx,startBlockNr,endBlockNr,common.SynchronizeShareKey)
+	if err != nil {
+		return nil, err
+	}
 	var synchronizeShareKey types.SpecialTxInput
 	var resultArr []types.SynchronizeShareKey
 	for _, v := range result {
@@ -1842,7 +1864,7 @@ func (s *PublicTransactionPoolAPI) GetSynchronizeShareKey(ctx context.Context, s
 			resultArr = append(resultArr, synchronizeShareKey.SynchronizeShareKey)
 		}
 	}
-	return resultArr
+	return resultArr, nil
 }
 
 func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address common.Address, shareKeyId string) bool {
