@@ -10,7 +10,7 @@ import (
 // TODO re-design the struct to speed up
 type ExtraData struct {
 	CommitteeRank []common.Address `json:"committeeRank"` // rank of committee
-	SentinelHeft  uint64           `json:"sentinelHeft"`  //sentinelHeft
+	//SentinelHeft  uint64           `json:"sentinelHeft"`  //sentinelHeft
 	Signature     []byte           `json:"signature"`     // the signature of block broadcaster
 }
 
@@ -29,18 +29,18 @@ func ResetHeaderSignature(header *types.Header) {
 	copy(header.Extra, extraByte)
 }
 
-func SetHeaderSentinelHeft(header *types.Header, sentinelHeft uint64) {
-	extraData := UnmarshalToExtra(header)
-	extraData.SentinelHeft = sentinelHeft
-	extraByte, _ := json.Marshal(extraData)
-	header.Extra = make([]byte, len(extraByte))
-	copy(header.Extra, extraByte)
-}
-
-func GetHeaderSentinelHeft(header *types.Header) uint64{
-	extraData := UnmarshalToExtra(header)
-	return extraData.SentinelHeft
-}
+//func SetHeaderSentinelHeft(header *types.Header, sentinelHeft uint64) {
+//	extraData := UnmarshalToExtra(header)
+//	extraData.SentinelHeft = sentinelHeft
+//	extraByte, _ := json.Marshal(extraData)
+//	header.Extra = make([]byte, len(extraByte))
+//	copy(header.Extra, extraByte)
+//}
+//
+//func GetHeaderSentinelHeft(header *types.Header) uint64{
+//	extraData := UnmarshalToExtra(header)
+//	return extraData.SentinelHeft
+//}
 
 func SetHeaderSignature(header *types.Header, signature []byte) {
 	extraData := UnmarshalToExtra(header)

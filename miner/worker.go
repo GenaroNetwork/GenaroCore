@@ -36,7 +36,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"gopkg.in/fatih/set.v0"
-	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 const (
@@ -483,7 +482,7 @@ func (self *worker) commitNewWork() {
 	}
 
 	// reflush blcok's extra[]
-    genaro.SetHeaderSentinelHeft(header, work.currentSentinelHeft)
+	//genaro.SetHeaderSentinelHeft(header, work.currentSentinelHeft)
 	work.currentSentinelHeft = 0
 
 	// Create the new block to seal with the consensus engine
