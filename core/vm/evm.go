@@ -68,12 +68,10 @@ type Context struct {
 	Transfer TransferFunc
 	// GetHash returns the hash corresponding to n
 	GetHash GetHashFunc
-    GetSentinel GetSentinelFunc
 
 	// Message information
 	Origin   common.Address // Provides information for ORIGIN
 	GasPrice *big.Int       // Provides information for GASPRICE
-	SentinelHeft uint64     // Provides information for SentinelHeft
 
 	// Block information
 	Coinbase    common.Address // Provides information for COINBASE
@@ -144,7 +142,7 @@ func (evm *EVM) Cancel() {
 // parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
-func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int, sentinelHeft *uint64) (ret []byte, leftOverGas uint64, err error) {
+func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -175,7 +173,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 	//If transactions are special, they are treated separately according to their types.
 	if to.Address() == common.SpecialSyncAddress {
-		err := dispatchHandler(evm, caller.Address(), input, sentinelHeft)
+		err := dispatchHandler(evm, caller.Address(), input)
 		if err != nil {
 			return nil, gas, err
 		}
@@ -214,7 +212,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 
 
-func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft *uint64) error{
+func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 	var err error
 	// 解析数据
 	var s types.SpecialTxInput
@@ -232,7 +230,6 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte, sentinelHeft
 			return errors.New("current caller addrss has no permission on this operation")
 		}
 		err = updateHeft(&evm.StateDB, s)
-		*sentinelHeft = *sentinelHeft + 1
 
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		err = updateStorageProperties(evm, s, caller)

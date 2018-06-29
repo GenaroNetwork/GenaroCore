@@ -49,7 +49,6 @@ The state transitioning model does all all the necessary work to work out a vali
 6) Derive new state root
 */
 type StateTransition struct {
-	sentinelHeft *uint64
 	gp         *GasPool
 	msg        Message
 	gas        uint64
@@ -110,9 +109,8 @@ func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error)
 }
 
 // NewStateTransition initialises and returns a new state transition object.
-func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool,sentinelHeft *uint64) *StateTransition {
+func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition {
 	return &StateTransition{
-		sentinelHeft: sentinelHeft,
 		gp:       gp,
 		evm:      evm,
 		msg:      msg,
@@ -130,8 +128,8 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool,sentinelHeft *uint
 // the gas used (which includes gas refunds) and an error if it failed. An error always
 // indicates a core error meaning that the message would always fail for that particular
 // state and would never be accepted within a block.
-func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool, sentinelHeft *uint64) ([]byte, uint64, bool, error) {
-	return NewStateTransition(evm, msg, gp, sentinelHeft).TransitionDb()
+func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, uint64, bool, error) {
+	return NewStateTransition(evm, msg, gp).TransitionDb()
 }
 
 func (st *StateTransition) from() vm.AccountRef {
@@ -236,7 +234,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	} else {
 		// Increment the nonce for the next transaction
 		st.state.SetNonce(sender.Address(), st.state.GetNonce(sender.Address())+1)
-		ret, st.gas, vmerr = evm.Call(sender, st.to().Address(), st.data, st.gas, st.value, st.sentinelHeft)
+		ret, st.gas, vmerr = evm.Call(sender, st.to().Address(), st.data, st.gas, st.value)
 	}
 	if vmerr != nil {
 		log.Debug("VM returned with error", "err", vmerr)
