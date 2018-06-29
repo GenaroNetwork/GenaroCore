@@ -644,7 +644,7 @@ func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, 
 }
 
 func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	//num := stack.pop()
+	//:= stack.pop()
 	//n := evm.interpreter.intPool.get().Sub(evm.BlockNumber, common.Big257)
 	//if num.Cmp(n) > 0 && num.Cmp(evm.BlockNumber) < 0 {
 	//	stack.push(evm.interpreter.intPool.get().SetUint64(evm.GetSentinel(num.Uint64())))
@@ -652,7 +652,13 @@ func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, st
 	//	stack.push(evm.interpreter.intPool.getZero())
 	//}
 	//evm.interpreter.intPool.put(num, n)
-	evm.StateDB.GetHeft(common.Address{})
+	address := stack.pop()
+	heft,err := evm.StateDB.GetHeft(common.BigToAddress(address))
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(heft))
+	}else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
