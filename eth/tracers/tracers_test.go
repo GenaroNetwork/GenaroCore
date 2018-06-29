@@ -173,8 +173,7 @@ func TestCallTracer(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to prepare transaction for tracing: %v", err)
 			}
-			var sentinelHeft uint64
-			st := core.NewStateTransition(evm, msg, new(core.GasPool).AddGas(tx.Gas()),&sentinelHeft)
+			st := core.NewStateTransition(evm, msg, new(core.GasPool).AddGas(tx.Gas()))
 			if _, _, _, err = st.TransitionDb(); err != nil {
 				t.Fatalf("failed to execute transaction: %v", err)
 			}

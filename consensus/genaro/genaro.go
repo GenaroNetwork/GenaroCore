@@ -394,7 +394,7 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	epochPoint := (blockNumber % g.config.Epoch) == 0
 	if epochPoint {
 		extraData := UnmarshalToExtra(header)
-		committeeSize := uint64(len(extraData.CommitteeRank) / common.AddressLength)
+		committeeSize := uint64(len(extraData.CommitteeRank))
 		if committeeSize == 0 || committeeSize > g.config.CommitteeMaxSize {
 			return errInvalidEpochBlock
 		}
