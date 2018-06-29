@@ -170,7 +170,7 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	header.Nonce = types.BlockNonce{}
 	number := header.Number.Uint64()
 
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number))
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number),nil)
 	if err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func (g *Genaro) CalcDifficulty(chain consensus.ChainReader, time uint64, parent
 	blockNumber := parent.Number.Uint64() + 1
 	dependEpoch := GetTurnOfCommiteeByBlockNumber(g.config, blockNumber)
 
-	snap, err := g.snapshot(chain, dependEpoch)
+	snap, err := g.snapshot(chain, dependEpoch,nil)
 	if err != nil {
 		return nil
 	}
@@ -303,7 +303,7 @@ func (g *Genaro) Authorize(signer common.Address, signFn SignerFn) {
 // Snapshot retrieves the snapshot at "electoral materials" period.
 // Snapshot func retrieves ths snapshot in order of memory, local DB, block header.
 // If committeeSnapshot is empty and it is time to write, we will create a new one, otherwise return nil
-func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*CommitteeSnapshot, error) {
+func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64, parents []*types.Header) (*CommitteeSnapshot, error) {
 	// Search for a snapshot in memory or on disk for checkpoints
 	var (
 		snap *CommitteeSnapshot
@@ -346,7 +346,16 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64) (*Com
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
 		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
 		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
-		h := chain.GetHeaderByNumber(endBlock+1)
+		var h *types.Header
+		if parents != nil && len(parents) > 0 && parents[0].Number.Uint64()<endBlock+1{
+			num := endBlock+1 - parents[0].Number.Uint64()
+			if parents[num].Number.Uint64() == endBlock+1 {
+				h = parents[num]
+			}
+		}
+		if h == nil {
+			h = chain.GetHeaderByNumber(endBlock+1)
+		}
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
 		snap = newSnapshot(chain.Config().Genaro, h.Number.Uint64(), h.Hash(), epollNumber -
 			g.config.ValidPeriod - g.config.ElectionPeriod, committeeRank, proportion)
@@ -391,7 +400,7 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		}
 	}
 	// get current committee snapshot
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, blockNumber))
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, blockNumber),parents)
 	if err != nil {
 		return err
 	}
@@ -405,7 +414,6 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		return errUnauthorized
 	}
 
-	// Ensure the timestamp has the correct delay
 	var parent *types.Header
 	if len(parents) > 0 {
 		parent = parents[len(parents)-1]
@@ -548,7 +556,7 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	blockNumber := header.Number.Uint64()
 	updateSpecialBlock(g.config, header, state)
 
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()))
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()),nil)
 	if err != nil {
 		return nil, err
 	}
