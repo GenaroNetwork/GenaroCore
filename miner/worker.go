@@ -74,7 +74,6 @@ type Work struct {
 
 	Block *types.Block // the new block
 
-	currentSentinelHeft uint64
 
 	header   *types.Header
 	txs      []*types.Transaction
@@ -384,7 +383,6 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 
 	// Keep track of transactions which return errors so they can be removed
 	work.tcount = 0
-	work.currentSentinelHeft = 0
 	self.current = work
 	return nil
 }
@@ -480,10 +478,6 @@ func (self *worker) commitNewWork() {
 	for _, hash := range badUncles {
 		delete(self.possibleUncles, hash)
 	}
-
-	// reflush blcok's extra[]
-	//genaro.SetHeaderSentinelHeft(header, work.currentSentinelHeft)
-	work.currentSentinelHeft = 0
 
 	// Create the new block to seal with the consensus engine
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts); err != nil {
@@ -599,7 +593,7 @@ func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsB
 func (env *Work) commitTransaction(tx *types.Transaction, bc *core.BlockChain, coinbase common.Address, gp *core.GasPool) (error, []*types.Log) {
 	snap := env.state.Snapshot()
 
-	receipt, _, err := core.ApplyTransaction(env.config, bc, &coinbase, gp, env.state, env.header, tx, &env.header.GasUsed, vm.Config{},&(env.currentSentinelHeft))
+	receipt, _, err := core.ApplyTransaction(env.config, bc, &coinbase, gp, env.state, env.header, tx, &env.header.GasUsed, vm.Config{})
 	if err != nil {
 		env.state.RevertToSnapshot(snap)
 		return err, nil
