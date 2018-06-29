@@ -60,7 +60,7 @@ var (
 		EIP155Block:         big.NewInt(3),
 		ByzantiumBlock:      big.NewInt(4),
 		Genaro: &GenaroConfig{
-			Epoch:            2000, //the number of blocks in one committee term
+			Epoch:            86400, //the number of blocks in one committee term
 			Period:			  1,
 			BlockInterval:    10,   //a peer create BlockInterval blocks one time
 			ElectionPeriod:   1,    //a committee list write time
