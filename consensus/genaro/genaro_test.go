@@ -18,7 +18,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"bytes"
 	"math/big"
-	//"time"
+
 )
 
 func TestGetDependTurnByBlockNumber(t *testing.T){

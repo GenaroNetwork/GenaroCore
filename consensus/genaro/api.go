@@ -33,7 +33,7 @@ type API struct {
 func (api *API) GetSnapshot(epochNumber uint64) (*CommitteeSnapshot, error) {
 	// Retrieve the requested block number (or current if none requested)
 	//Todo add some check
-	return api.genaro.snapshot(api.chain, epochNumber)
+	return api.genaro.snapshot(api.chain, epochNumber,nil)
 }
 
 // GetCommittee return the member of committee

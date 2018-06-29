@@ -23,7 +23,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
-	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the
@@ -90,12 +89,13 @@ func GetHashFn(ref *types.Header, chain ChainContext) func(n uint64) common.Hash
 func GetSentinelFn(ref *types.Header, chain ChainContext) func(n uint64) uint64 {
 
 	return func(n uint64) uint64 {
-		GetHashFunc := GetHashFn(ref, chain)
-		hash := GetHashFunc(n)
-		header := chain.GetHeader(hash, n)
-		sentinelHeft := genaro.GetHeaderSentinelHeft(header)
-
-		return sentinelHeft
+		//GetHashFunc := GetHashFn(ref, chain)
+		//hash := GetHashFunc(n)
+		//header := chain.GetHeader(hash, n)
+		//sentinelHeft := genaro.GetHeaderSentinelHeft(header)
+		//
+		//return sentinelHeft
+		return 0
 	}
 
 }
