@@ -48,8 +48,4 @@ profile.cov
 **/yarn-error.log
 
 
-
-/automatedScript/chainNode/
-/automatedScript/genaro.json
-/automatedScript/nohupNodeLog/
-
+automatedScript/
