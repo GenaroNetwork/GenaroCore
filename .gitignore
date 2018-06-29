@@ -49,7 +49,7 @@ profile.cov
 
 
 
-automatedScript/chainNode/
-automatedScript/genaro.json
-automatedScript/nohupNodeLog/
+/automatedScript/chainNode/
+/automatedScript/genaro.json
+/automatedScript/nohupNodeLog/
 
