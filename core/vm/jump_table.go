@@ -431,7 +431,7 @@ func NewFrontierInstructionSet() [256]operation {
 		},
 		SENTINEL_HEFT: {
 			execute:       opSentinelHeft,
-			gasCost:       constGasFunc(GasExtStep),
+			gasCost:       gasStorageAttribution,
 			validateStack: makeStackFunc(1, 1),
 			valid:         true,
 		},
