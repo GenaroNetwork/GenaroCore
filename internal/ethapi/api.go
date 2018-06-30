@@ -210,12 +210,14 @@ func (s *PublicBlockChainAPI) GetCandidates(ctx context.Context,blockNr rpc.Bloc
 	return state.GetCandidates()
 }
 
-func (s *PublicBlockChainAPI) GetCommit(ctx context.Context,blockNr rpc.BlockNumber) []common.Address {
+// get commitees by rank
+func (s *PublicBlockChainAPI) GetCommitteeRank(ctx context.Context,blockNr rpc.BlockNumber) []common.Address {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil
 	}
-	return state.GetCandidates()
+	committees,_ := state.GetCommitteeRank(0,uint64(blockNr))
+	return committees
 }
 
 // PrivateAccountAPI provides an API to access accounts managed by this node.
