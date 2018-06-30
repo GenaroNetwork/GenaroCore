@@ -163,7 +163,7 @@ func main() {
 	extra := new(genaro.ExtraData)
 	var candidateInfos state.CandidateInfos
 	candidateInfos = GenesisAllocToCandidateInfos(genesis.Alloc)
-	extra.CommitteeRank,extra.Proportion = genaro.Rank(candidateInfos)
+	extra.CommitteeRank,extra.Proportion = state.Rank(candidateInfos)
 	extraByte, _ := json.Marshal(extra)
 	genesis.ExtraData = extraByte
 

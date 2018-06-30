@@ -19,7 +19,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
-	"sort"
 )
 
 const (
@@ -43,7 +42,6 @@ var (
 	coinRewardsRatio				 = 1250
 	storageRewardsRatio				 = 1250
 	ratioPerYear					 = 700
-	base							 = 10000
 )
 
 var (
@@ -454,26 +452,6 @@ func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 	return nil
 }
 
-func Rank(candidateInfos state.CandidateInfos) ([]common.Address, []uint64){
-	candidateInfos.Apply()
-	sort.Sort(sort.Reverse(candidateInfos))
-	committeeRank := make([]common.Address, len(candidateInfos))
-	proportion := make([]uint64, len(candidateInfos))
-	total := uint64(0)
-	for _, c := range candidateInfos{
-		total += c.Stake
-	}
-	if total == 0 {
-		return committeeRank, proportion
-	}
-	for i, c := range candidateInfos{
-		committeeRank[i] = c.Signer
-		proportion[i] = c.Stake*uint64(base)/total
-	}
-
-	return committeeRank, proportion
-}
-
 func updateEpochRewards(state *state.StateDB)  {
 	//reset CoinActualRewards and StorageActualRewards, add TotalActualRewards
 	coinrewards := state.GetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)))
@@ -498,26 +476,26 @@ func updateEpochYearRewards(state *state.StateDB) {
 	state.SetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), big.NewInt(0))
 }
 
-func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, state *state.StateDB)  {
+func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
 	blockNumber := header.Number.Uint64()
 	if blockNumber%config.Epoch == 0 {
 		//rank
 		//epochStartBlockNumber := blockNumber - config.Epoch
 		epochEndBlockNumber := blockNumber
-		state.GetCandidates()
-		candidateInfos := state.GetCandidatesInfoInRange(0, epochEndBlockNumber)
-		commiteeRank, proportion := Rank(candidateInfos)
+		thisstate.GetCandidates()
+		candidateInfos := thisstate.GetCandidatesInfoInRange(0, epochEndBlockNumber)
+		commiteeRank, proportion := state.Rank(candidateInfos)
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
 		}else{
 			SetHeaderCommitteeRankList(header, commiteeRank[:config.CommitteeMaxSize],proportion[:config.CommitteeMaxSize])
 		}
 		//CoinActualRewards and StorageActualRewards should update per epoch
-		updateEpochRewards(state)
+		updateEpochRewards(thisstate)
 	}
 	if blockNumber%(calEpochPerYear(config)*config.Epoch) == 0 {
 		//CoinActualRewards and StorageActualRewards should update per epoch, surplusCoin should update per year
-		updateEpochYearRewards(state)
+		updateEpochYearRewards(thisstate)
 	}
 }
 
@@ -587,38 +565,38 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 
 func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards *big.Int) uint64 {
 	if coinrewards.Cmp(big.NewInt(0)) == 0 {
-		return uint64(base)
+		return uint64(common.Base)
 	}
 	planrewards := big.NewInt(0)
 	//get total coinReward
 	planrewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
-	planrewards.Div(planrewards, big.NewInt(int64(base)))
+	planrewards.Div(planrewards, big.NewInt(int64(common.Base)))
 	//get coinReward perYear
 	planrewards.Mul(planrewards, big.NewInt(int64(ratioPerYear)))
-	planrewards.Div(planrewards, big.NewInt(int64(base)))
+	planrewards.Div(planrewards, big.NewInt(int64(common.Base)))
 	//get coinReward perEpoch
 	planrewards.Div(planrewards, big.NewInt(int64(calEpochPerYear(config))))
 	//get coefficient
-	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	planrewards.Mul(planrewards, big.NewInt(int64(common.Base)))
 	coinRatio := planrewards.Div(planrewards, coinrewards).Uint64()
 	return coinRatio
 }
 
 func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusRewards *big.Int) uint64 {
 	if storagerewards.Cmp(big.NewInt(0)) == 0 {
-		return uint64(base)
+		return uint64(common.Base)
 	}
 	planrewards := big.NewInt(0)
 	//get total storageReward
 	planrewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
-	planrewards.Div(planrewards, big.NewInt(int64(base)))
+	planrewards.Div(planrewards, big.NewInt(int64(common.Base)))
 	//get storageReward perYear
 	planrewards.Mul(planrewards, big.NewInt(int64(ratioPerYear)))
-	planrewards.Div(planrewards, big.NewInt(int64(base)))
+	planrewards.Div(planrewards, big.NewInt(int64(common.Base)))
 	//get storageReward perEpoch
 	planrewards.Div(planrewards, big.NewInt(int64(calEpochPerYear(config))))
 	//get coefficient
-	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	planrewards.Mul(planrewards, big.NewInt(int64(common.Base)))
 	storageRatio := planrewards.Div(planrewards, storagerewards).Uint64()
 	return storageRatio
 }
@@ -640,18 +618,18 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	//plan rewards per year
 	planRewards := big.NewInt(0)
 	planRewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
-	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//fmt.Printf("Plan rewards this year %v\n", planRewards.String())
 	//plan rewards per epoch
 	planRewards.Div(planRewards, big.NewInt(int64(calEpochPerYear(config))))
 	//fmt.Printf("Plan rewards this epoch %v\n", planRewards.String())
 	//Coefficient adjustment
 	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
-	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//fmt.Printf("Plan rewards this epoch %v(after adjustment), coefficient %v\n", planRewards.String(), coefficient)
 	//this addr should get
 	planRewards.Mul(planRewards, big.NewInt(int64(proportion)))
-	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//fmt.Printf("Plan rewards peer %v, proportion %v\n", planRewards.String(), proportion)
 
 	blockReward := big.NewInt(0)
@@ -681,12 +659,12 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	//plan rewards per year
 	planRewards := big.NewInt(0)
 	planRewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
-	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//plan rewards per epoch
 	planRewards.Div(planRewards, big.NewInt(int64(calEpochPerYear(config))))
 	//Coefficient adjustment
 	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
-	planRewards.Div(planRewards, big.NewInt(int64(base)))
+	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//plan rewards per block
 	blockReward := big.NewInt(0)
 	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch)))

@@ -5286,6 +5286,13 @@ var methods = function () {
         inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
+    var getCommitteeRank = new Method({
+        name: 'getCommitteeRank',
+        call: 'eth_getCommitteeRank',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getStake = new Method({
         name: 'getStake',
         call: 'eth_getStake',
@@ -5519,6 +5526,7 @@ var methods = function () {
         getHeft,
         getHeftRangeDiff,
         getCandidates,
+        getCommitteeRank,
         getGenaroCodeHash
     ];
 };

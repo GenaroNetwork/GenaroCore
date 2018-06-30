@@ -58,7 +58,7 @@ func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, e
 	for i, rank := range committeeRank {
 		if i < int(config.CommitteeMaxSize) {
 			snap.CommitteeRank[i] = rank
-			snap.Committee[rank] = proportion[i]*uint64(base)/total
+			snap.Committee[rank] = proportion[i]*uint64(common.Base)/total
 		}
 	}
 	if config.CommitteeMaxSize < uint64(len(snap.CommitteeRank)) {

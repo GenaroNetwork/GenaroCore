@@ -766,6 +766,15 @@ func (self *StateDB)GetCandidates() Candidates{
 	return nil
 }
 
+func (self *StateDB)GetCommitteeRank(blockNumStart uint64, blockNumEnd uint64) ([]common.Address, []uint64){
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		candidateInfos := self.GetCandidatesInfoInRange(blockNumStart, blockNumEnd)
+		return Rank(candidateInfos)
+	}
+	return nil,nil
+}
+
 // get CandidateInfo in given range
 func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
