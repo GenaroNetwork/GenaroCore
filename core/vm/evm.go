@@ -264,7 +264,7 @@ func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) erro
 	var actualPunishment uint64
 	var ok bool
 	// 根据nodeid扣除对应用户的stake
-	if ok, actualPunishment = (*evm).StateDB.DeleteStake(adress, s.Stake); !ok {
+	if ok, actualPunishment = (*evm).StateDB.DeleteStake(adress, s.Stake, evm.BlockNumber.Uint64()); !ok {
 		return errors.New("delete user's stake fail")
 	}
 	amount := new(big.Int)

@@ -71,7 +71,7 @@ type StateDB interface {
 	GetHeftRangeDiff(common.Address, uint64, uint64) uint64
 
 	UpdateStake(common.Address, uint64, uint64) bool
-	DeleteStake(common.Address, uint64) (bool, uint64)
+	DeleteStake(common.Address, uint64, uint64) (bool, uint64)
 	GetStake(common.Address) (uint64, error)
 	GetStakeLog(common.Address) types.NumLogs
 	GetStakeRangeDiff(common.Address, uint64, uint64) uint64
