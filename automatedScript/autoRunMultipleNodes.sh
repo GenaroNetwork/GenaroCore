@@ -3,6 +3,22 @@
 #获取keystore
 #ls keystore/* > fileName 
 
+
+read -t 30 -p "please enter the number of committees(1-120):" committees
+
+if [[ $committees -gt 121 ]];then
+	echo "22"
+	exit
+fi
+
+if [[ $committees -le 0 ]];then
+	echo "333"
+	exit
+fi
+
+
+ls keystore/* | head -n $committees > fileName
+
 #计数器
 i=1
 
