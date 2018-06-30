@@ -68,6 +68,7 @@ var (
 	var StakeValuePerNode   int64 = int64(1000)
 
 	var Base = uint64(10000)
+	var BackStackListMax = int(20)
 
 //官方账号
 //var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
