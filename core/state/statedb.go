@@ -710,11 +710,21 @@ func (self *StateDB)UpdateStake(id common.Address, stake uint64, blockNumber uin
 }
 
 
-func (self *StateDB)DeleteStake(id common.Address, stake uint64) (bool, uint64) {
+func (self *StateDB)DeleteStake(id common.Address, stake uint64, blockNumber uint64) (bool, uint64) {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		alreadyPunishment := stateObject.DeleteStake(stake)
+		alreadyPunishment := stateObject.DeleteStake(stake,blockNumber)
 		return true, alreadyPunishment
+	}
+	return false, 0
+}
+
+func (self *StateDB)ClearStake(id common.Address, blockNumber uint64) (bool, uint64) {
+	stateObject := self.GetOrNewStateObject(id)
+	if stateObject != nil {
+		stake := stateObject.GetStake()
+		stateObject.DeleteStake(stake,blockNumber)
+		return true, stake
 	}
 	return false, 0
 }

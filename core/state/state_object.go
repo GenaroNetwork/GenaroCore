@@ -553,7 +553,7 @@ func (self *stateObject)UpdateStake(stake uint64, blockNumber uint64){
 	}
 }
 
-func (self *stateObject)DeleteStake(stake uint64) uint64 {
+func (self *stateObject)DeleteStake(stake uint64, blockNumber uint64) uint64 {
 	var currentPunishment uint64
 	var genaroData types.GenaroData
 	if self.data.CodeHash != nil {
@@ -566,6 +566,11 @@ func (self *stateObject)DeleteStake(stake uint64) uint64 {
 			currentPunishment = stake
 			genaroData.Stake -= stake
 		}
+
+		var newLog types.NumLog
+		newLog.Num = genaroData.Stake
+		newLog.BlockNum = blockNumber
+		genaroData.StakeLog.Add(newLog)
 
 		b, _ := json.Marshal(genaroData)
 		self.code = nil
