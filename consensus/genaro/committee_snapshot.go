@@ -211,3 +211,6 @@ func (s *CommitteeSnapshot) getDistance(addr common.Address, blockNumber uint64)
 	return uint64(distance)
 }
 
+func calEpochPerYear(config *params.GenaroConfig)uint64{
+	return (365*3600*24)/(config.Epoch*config.Period)
+}
