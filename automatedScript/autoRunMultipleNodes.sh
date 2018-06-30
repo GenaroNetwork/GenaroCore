@@ -30,10 +30,16 @@ rpcport=8549
 rm genaro.json
 
 # rm chainNode
-rm -r chainNode/chainNode*
+
+if [ -d "./chainNode" ];then
+	rm -r chainNode/*
+fi
 
 # rm nohupNodeLog
-rm -r nohupNodeLog/nohupNode*
+
+if [ -d "./nohupNodeLog" ];then
+	rm -r nohupNodeLog/*
+fi
 
 ./generateGenesisJson.sh > ./../cmd/GenGenaroGenesis/genesis.json
 
@@ -60,6 +66,15 @@ tmp=`grep enode bootnode/bootnode.log|tail -n 1|awk -F '://' '{print $2}'|awk -F
 if [ "$tmp" == "" ];then
     echo "node id is empty, please use: bootnode.sh <node_id>";
    	exit
+fi
+
+
+if [ ! -d "./chainNode" ];then
+	mkdir ./chainNode
+fi
+
+if [ ! -d "./nohupNodeLog" ];then
+	mkdir ./nohupNodeLog
 fi
 
 #遍历keystore
