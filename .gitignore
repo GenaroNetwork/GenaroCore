@@ -53,3 +53,4 @@ automatedScript/fileName
 cmd/GenGenaroGenesis/genesis.json
 automatedScript/chainNode/
 automatedScript/nohupNodeLog/
+automatedScript/bootnode/
