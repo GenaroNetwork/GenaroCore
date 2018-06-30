@@ -1,0 +1,52 @@
+#!/bin/bash
+
+#获取keystore
+#ls keystore/* > fileName 
+
+#计数器
+i=1
+
+#port端口
+port=30315
+
+#rpcport端口
+rpcport=8555
+
+rm genaro.json
+
+# rm chainNode
+rm -r chainNode/chainNode*
+
+# rm nohupNodeLog
+rm -r nohupNodeLog/nohupNode*
+
+./generateGenesisJson.sh > ./../cmd/GenGenaroGenesis/genesis.json
+
+cd ../cmd/GenGenaroGenesis/
+
+go build
+
+cp `./GenGenaroGenesis -f genesis.json | xargs` ../../../Genaro-Core/automatedScript/genaro.json
+
+cd ../../../Genaro-Core/automatedScript
+
+
+#遍历keystore
+for line in `cat fileName`
+do 
+	echo $i
+	#kill 端口
+	lsof -i:$rpcport |awk '{print $2}'|grep -v PID | xargs kill
+	
+	#初始化
+	/root/gopath/src/github.com/GenaroNetwork/Genaro-Core/build/bin/geth  init  ./genaro.json --datadir "./chainNode/chainNode$i"
+	
+	#key复制到keystore下
+	cp $line  ./chainNode/chainNode$i/keystore/${line##*/}
+	
+	#启动
+	nohup /root/gopath/src/github.com/GenaroNetwork/Genaro-Core/build/bin/geth --rpc --rpccorsdomain "*" --rpcvhosts=* --rpcapi "eth,net,web3,admin,personal,miner" --datadir "./chainNode/chainNode$i" --port "$port" --rpcport "$rpcport" --rpcaddr 0.0.0.0  --bootnodes "enode://aa0f080cfcbf9a4daa3388967ae541c099d80525e3bca454ec345e3c92a5e466866857a0a61094cc4ea8f279a2a30701cd0802bc5de31596fbcc4591e55ab01f@127.0.0.1:30301" --unlock "0x${line##*--}" --password "./password"  --syncmode "full" --mine  > ./nohupNodeLog/nohupNode$i.out &
+	let "i=$i+1"
+	let "port=$port+1"
+	let "rpcport=$rpcport+1"
+done
