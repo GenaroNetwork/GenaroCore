@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#获取keystore
-#ls keystore/* > fileName 
-
-
 read -t 30 -p "please enter the number of committees(1-120):" committees
 
 if [[ $committees -gt 121 ]];then
@@ -16,6 +12,9 @@ if [[ $committees -le 0 ]];then
 	exit
 fi
 
+cd ../
+make geth
+cd automatedScript/
 
 ls keystore/* | head -n $committees > fileName
 
