@@ -23,7 +23,6 @@ rm -r nohupNodeLog/nohupNode*
 ./generateGenesisJson.sh > ./../cmd/GenGenaroGenesis/genesis.json
 
 cd ../cmd/GenGenaroGenesis/
-
 go build
 
 cp `./GenGenaroGenesis -f genesis.json | xargs` ../../../Genaro-Core/automatedScript/genaro.json
@@ -59,13 +58,13 @@ do
 
 
 	#初始化
-	/root/gopath/src/github.com/GenaroNetwork/Genaro-Core/build/bin/geth  init  ./genaro.json --datadir "./chainNode/chainNode$i"
+	./../build/bin/geth  init  ./genaro.json --datadir "./chainNode/chainNode$i"
 	
 	#key复制到keystore下
 	cp $line  ./chainNode/chainNode$i/keystore/${line##*/}
 	
 	#启动
-	nohup /root/gopath/src/github.com/GenaroNetwork/Genaro-Core/build/bin/geth --rpc --rpccorsdomain "*" --rpcvhosts=* --rpcapi "eth,net,web3,admin,personal,miner" --datadir "./chainNode/chainNode$i" --port "$port" --rpcport "$rpcport" --rpcaddr 0.0.0.0  --bootnodes "$bootnode_addr" --unlock "0x${line##*--}" --password "./password"  --syncmode "full" --mine  > ./nohupNodeLog/nohupNode$i.out &
+	nohup ./../build/bin/geth --rpc --rpccorsdomain "*" --rpcvhosts=* --rpcapi "eth,net,web3,admin,personal,miner" --datadir "./chainNode/chainNode$i" --port "$port" --rpcport "$rpcport" --rpcaddr 0.0.0.0  --bootnodes "$bootnode_addr" --unlock "0x${line##*--}" --password "./password"  --syncmode "full" --mine  > ./nohupNodeLog/nohupNode$i.out &
 	let "i=$i+1"
 	let "port=$port+1"
 	let "rpcport=$rpcport+1"
