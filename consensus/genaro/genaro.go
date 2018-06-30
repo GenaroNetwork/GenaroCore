@@ -570,9 +570,9 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 		state.SetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), tmp)
 	}
 	//  coin interest reward
-	accumulateInterestRewards(g.config, state, header, proportion, blockNumber)
+	accumulateInterestRewards(g.config, state, header, proportion, blockNumber, snap.CommitteeSize)
 	// storage reward
-	accumulateStorageRewards(g.config, state, blockNumber)
+	accumulateStorageRewards(g.config, state, blockNumber, snap.CommitteeSize)
 
 	//handle apply back stake list
 
@@ -625,7 +625,8 @@ func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusR
 }
 
 // AccumulateInterestRewards credits the reward to the block author by coin  interest
-func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, proportion uint64, blockNumber uint64) error {
+func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, proportion uint64,
+	blockNumber uint64, committeeSize uint64) error {
 	preCoinRewards := state.GetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)))
 	preSurplusRewards := big.NewInt(0)
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
@@ -656,7 +657,7 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	//fmt.Printf("Plan rewards peer %v, proportion %v\n", planRewards.String(), proportion)
 
 	blockReward := big.NewInt(0)
-	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch)))
+	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch/committeeSize)))
 
 	reward := blockReward
 	log.Info("accumulateInterestRewards 625", "reward", reward.String())
@@ -667,7 +668,7 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 }
 
 // AccumulateStorageRewards credits the reward to the sentinel owner
-func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, blockNumber uint64) error {
+func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, blockNumber uint64, committeeSize uint64) error {
 	preStorageRewards := state.GetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)))
 	preSurplusRewards := big.NewInt(0)
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
@@ -690,7 +691,7 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	planRewards.Div(planRewards, big.NewInt(int64(base)))
 	//plan rewards per block
 	blockReward := big.NewInt(0)
-	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch)))
+	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch/committeeSize)))
 
 	//allocate blockReward
 	cs := state.GetCandidates()
