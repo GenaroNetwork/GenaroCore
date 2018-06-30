@@ -49,3 +49,5 @@ profile.cov
 
 
 #automatedScript/
+automatedScript/fileName
+cmd/GenGenaroGenesis/genesis.json
