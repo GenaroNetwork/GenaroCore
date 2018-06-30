@@ -100,6 +100,11 @@ func sigHash(header *types.Header) (hash common.Hash) {
 	return hash
 }
 
+
+func calEpochPerYear(config *params.GenaroConfig)uint64{
+	return (365*3600*24)/(config.Epoch*config.Period)
+}
+
 // ecrecover extracts the Ethereum account address from a signed header.
 func ecrecover(header *types.Header) (common.Address, error) {
 	// If the signature's already cached, return that
