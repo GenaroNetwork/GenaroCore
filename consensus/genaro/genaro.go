@@ -20,6 +20,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"sort"
+	"fmt"
 )
 
 const (
@@ -489,7 +490,7 @@ func updateEpochRewards(state *state.StateDB)  {
 	state.AddBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), storagerewards)
 }
 
-func updateEpochYearRewards(state *state.StateDB)  {
+func updateEpochYearRewards(state *state.StateDB) {
 	surplusrewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
 	state.SetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)), surplusrewards)
 
@@ -594,10 +595,10 @@ func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards 
 	planrewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
 	planrewards.Div(planrewards, big.NewInt(int64(base)))
 	//get coinReward perYear
-	planrewards.Div(planrewards, big.NewInt(int64(ratioPerYear)))
-	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	planrewards.Mul(planrewards, big.NewInt(int64(ratioPerYear)))
+	planrewards.Div(planrewards, big.NewInt(int64(base)))
 	//get coinReward perEpoch
-	planrewards.Div(planrewards, big.NewInt(int64(config.Epoch)))
+	planrewards.Div(planrewards, big.NewInt(int64(calEpochPerYear(config))))
 	//get coefficient
 	planrewards.Mul(planrewards, big.NewInt(int64(base)))
 	coinRatio := planrewards.Div(planrewards, coinrewards).Uint64()
@@ -613,10 +614,10 @@ func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusR
 	planrewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
 	planrewards.Div(planrewards, big.NewInt(int64(base)))
 	//get storageReward perYear
-	planrewards.Div(planrewards, big.NewInt(int64(ratioPerYear)))
-	planrewards.Mul(planrewards, big.NewInt(int64(base)))
+	planrewards.Mul(planrewards, big.NewInt(int64(ratioPerYear)))
+	planrewards.Div(planrewards, big.NewInt(int64(base)))
 	//get storageReward perEpoch
-	planrewards.Div(planrewards, big.NewInt(int64(config.Epoch)))
+	planrewards.Div(planrewards, big.NewInt(int64(calEpochPerYear(config))))
 	//get coefficient
 	planrewards.Mul(planrewards, big.NewInt(int64(base)))
 	storageRatio := planrewards.Div(planrewards, storagerewards).Uint64()

@@ -336,7 +336,7 @@ func TestAccumulateInterestRewards(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		//每年
-		for j := 0; j < int(epochPerYear); j++ {
+		for j := 0; j < int(calEpochPerYear(genaroConfig)); j++ {
 			//每个epoch
 			for k := 0; k < int(genaroConfig.Epoch/genaroConfig.BlockInterval); k++ {
 				//每个出块节点
@@ -350,4 +350,17 @@ func TestAccumulateInterestRewards(t *testing.T) {
 		}
 	}
 
+}
+func TestGetCoinCofficient(t *testing.T) {
+	genaroConfig := &params.GenaroConfig{
+		Epoch:				5000,
+		Period:				1,
+		BlockInterval:		10,
+		ElectionPeriod:		1,
+		ValidPeriod:		1,
+		CurrencyRates:		10,
+		CommitteeMaxSize:	5,
+	}
+	cofficient := getCoinCofficient(genaroConfig, big.NewInt(50),big.NewInt(10000000))
+	fmt.Println(cofficient)
 }
