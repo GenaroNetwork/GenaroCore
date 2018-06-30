@@ -10,7 +10,7 @@ i=1
 port=30315
 
 #rpcport端口
-rpcport=8555
+rpcport=8549
 
 rm genaro.json
 
@@ -31,13 +31,33 @@ cp `./GenGenaroGenesis -f genesis.json | xargs` ../../../Genaro-Core/automatedSc
 cd ../../../Genaro-Core/automatedScript
 
 
+
+./bootnode.sh
+
+sleep 3
+
+if [ ! -f bootnode/bootnode.log ];then
+    echo "please run bootnode.sh first"
+    exit
+fi
+bootnode_addr=enode://"$(grep enode bootnode/bootnode.log|tail -n 1|awk -F '://' '{print $2}'|awk -F '@' '{print $1}')""@127.0.0.1:30301"
+
+tmp=`grep enode bootnode/bootnode.log|tail -n 1|awk -F '://' '{print $2}'|awk -F '@' '{print $1}'`
+if [ "$tmp" == "" ];then
+    echo "node id is empty, please use: bootnode.sh <node_id>";
+   	exit
+fi
+
 #遍历keystore
 for line in `cat fileName`
 do 
-	echo $i
 	#kill 端口
-	lsof -i:$rpcport |awk '{print $2}'|grep -v PID | xargs kill
-	
+	killPort=`lsof -i:$rpcport |awk '{print $2}'|grep -v PID | xargs`
+	if [ "$killPort" != "" ];then
+    	kill $killPort
+	fi	
+
+
 	#初始化
 	/root/gopath/src/github.com/GenaroNetwork/Genaro-Core/build/bin/geth  init  ./genaro.json --datadir "./chainNode/chainNode$i"
 	
@@ -45,7 +65,7 @@ do
 	cp $line  ./chainNode/chainNode$i/keystore/${line##*/}
 	
 	#启动
-	nohup /root/gopath/src/github.com/GenaroNetwork/Genaro-Core/build/bin/geth --rpc --rpccorsdomain "*" --rpcvhosts=* --rpcapi "eth,net,web3,admin,personal,miner" --datadir "./chainNode/chainNode$i" --port "$port" --rpcport "$rpcport" --rpcaddr 0.0.0.0  --bootnodes "enode://aa0f080cfcbf9a4daa3388967ae541c099d80525e3bca454ec345e3c92a5e466866857a0a61094cc4ea8f279a2a30701cd0802bc5de31596fbcc4591e55ab01f@127.0.0.1:30301" --unlock "0x${line##*--}" --password "./password"  --syncmode "full" --mine  > ./nohupNodeLog/nohupNode$i.out &
+	nohup /root/gopath/src/github.com/GenaroNetwork/Genaro-Core/build/bin/geth --rpc --rpccorsdomain "*" --rpcvhosts=* --rpcapi "eth,net,web3,admin,personal,miner" --datadir "./chainNode/chainNode$i" --port "$port" --rpcport "$rpcport" --rpcaddr 0.0.0.0  --bootnodes "$bootnode_addr" --unlock "0x${line##*--}" --password "./password"  --syncmode "full" --mine  > ./nohupNodeLog/nohupNode$i.out &
 	let "i=$i+1"
 	let "port=$port+1"
 	let "rpcport=$rpcport+1"

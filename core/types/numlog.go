@@ -1,7 +1,5 @@
 package types
 
-import "fmt"
-
 // deal for NumLogs
 
 type NumLog struct {
@@ -16,7 +14,6 @@ func (logs *NumLogs) Add(log NumLog) {
 	lenth := len(*logs)
 	if lenth == 0 {
 		*logs = append(*logs,log)
-		fmt.Println(len(*logs))
 	}else if (*logs)[lenth-1].BlockNum == log.BlockNum {
 		(*logs)[lenth-1].Num = log.Num
 	} else if (*logs)[lenth-1].BlockNum <= log.BlockNum{

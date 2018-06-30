@@ -20,7 +20,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"sort"
-	"fmt"
 )
 
 const (
