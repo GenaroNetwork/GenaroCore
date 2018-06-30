@@ -363,6 +363,6 @@ func TestGetCoinCofficient(t *testing.T) {
 		CurrencyRates:		10,
 		CommitteeMaxSize:	5,
 	}
-	cofficient := getCoinCofficient(genaroConfig, big.NewInt(500),big.NewInt(500000000))
+	cofficient := getCoinCofficient(genaroConfig, big.NewInt(500),big.NewInt(20857142))
 	fmt.Println(cofficient)
 }

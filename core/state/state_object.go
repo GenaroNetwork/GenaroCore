@@ -30,6 +30,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/pkg/errors"
+	"sort"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -142,6 +143,26 @@ func (c CandidateInfos) Apply() {
 	for i, candidate := range c{
 		c[i].Point = candidate.Stake + candidate.Heft
 	}
+}
+
+func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
+	candidateInfos.Apply()
+	sort.Sort(sort.Reverse(candidateInfos))
+	committeeRank := make([]common.Address, len(candidateInfos))
+	proportion := make([]uint64, len(candidateInfos))
+	total := uint64(0)
+	for _, c := range candidateInfos{
+		total += c.Stake
+	}
+	if total == 0 {
+		return committeeRank, proportion
+	}
+	for i, c := range candidateInfos{
+		committeeRank[i] = c.Signer
+		proportion[i] = c.Stake*uint64(common.Base)/total
+	}
+
+	return committeeRank, proportion
 }
 
 type FilePropertie struct {
