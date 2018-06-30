@@ -249,6 +249,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = UnlockSharedKey(evm, s, caller)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		err = userPunishment(evm, s, caller)
+	case common.SpecialTxTypeBackStake.Uint64():
+		err = userBackStake(evm, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -257,6 +259,18 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info("special transaction error: ", err)
 	}
 	return err
+}
+
+func userBackStake(evm *EVM, caller common.Address) error {
+	var backStake = common.AlreadyBackStake{
+		Addr: caller,
+		BackBlockNumber:evm.BlockNumber.Uint64(),
+	}
+	ok := (*evm).StateDB.AddAlreadyBackStack(backStake)
+	if ok {
+		return nil
+	}
+	return errors.New("userBackStake fail")
 }
 
 func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) error {

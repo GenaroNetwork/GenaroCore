@@ -245,3 +245,5 @@ type AlreadyBackStake struct {
 	Addr				Address
 	BackBlockNumber		uint64
 }
+
+type BackStakeList []AlreadyBackStake

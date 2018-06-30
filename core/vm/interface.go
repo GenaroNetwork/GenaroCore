@@ -103,9 +103,9 @@ type StateDB interface {
 	SyncNode2Address(common.Address, []string, string) error
 	GetAddressByNode(string) string
 
-	AddAlreadyBackStack(refund common.AlreadyBackStake) error
-	GetAlreadyBackStakeList() []common.AlreadyBackStake
-	SetAlreadyBackStakeList([]common.AlreadyBackStake) error
+	AddAlreadyBackStack(backStack common.AlreadyBackStake) bool
+	GetAlreadyBackStakeList() (bool,common.BackStakeList)
+	SetAlreadyBackStakeList(common.BackStakeList) bool
 
 	SynchronizeShareKey(common.Address,types.SynchronizeShareKey) bool
 

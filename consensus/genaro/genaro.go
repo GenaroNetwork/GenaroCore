@@ -39,8 +39,8 @@ const (
 
 var (
 	//totalRewards			*big.Int = big.NewInt(700000000e+18)
-	coinRewardsRatio				 = 1250
-	storageRewardsRatio				 = 1250
+	coinRewardsRatio				 = 5000
+	storageRewardsRatio				 = 5000
 	ratioPerYear					 = 700
 )
 
@@ -499,30 +499,18 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 	}
 }
 
-func handleAlreadyBackStakeList(config *params.GenaroConfig, header *types.Header, state *state.StateDB)  {
+func handleAlreadyBackStakeList(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
 	blockNumber := header.Number.Uint64()
-	backlist := state.GetAlreadyBackStakeList()
+	_,backlist := thisstate.GetAlreadyBackStakeList()
 	for i := 0; i < len(backlist); i++ {
 		back := backlist[i]
 		if IsBackStakeBlockNumber(config, back.BackBlockNumber, blockNumber) {
+			thisstate.BackStake(back.Addr,blockNumber)
 			backlist = append(backlist[:i], backlist[i+1:]...)
 			i--
 		}
 	}
-	state.SetAlreadyBackStakeList(backlist)
-}
-
-func handleApplyBackStakeList(config *params.GenaroConfig, header *types.Header, state *state.StateDB)  {
-	blockNumber := header.Number.Uint64()
-	backlist := state.GetAlreadyBackStakeList()
-	for i := 0; i < len(backlist); i++ {
-		back := backlist[i]
-		if IsBackStakeBlockNumber(config, back.BackBlockNumber, blockNumber) {
-			backlist = append(backlist[:i], backlist[i+1:]...)
-			i--
-		}
-	}
-	state.SetAlreadyBackStakeList(backlist)
+	thisstate.SetAlreadyBackStakeList(backlist)
 }
 
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block

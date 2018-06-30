@@ -719,11 +719,14 @@ func (self *StateDB)DeleteStake(id common.Address, stake uint64, blockNumber uin
 	return false, 0
 }
 
-func (self *StateDB)ClearStake(id common.Address, blockNumber uint64) (bool, uint64) {
+func (self *StateDB)BackStake(id common.Address, blockNumber uint64) (bool, uint64) {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
 		stake := stateObject.GetStake()
 		stateObject.DeleteStake(stake,blockNumber)
+		mount := big.NewInt(int64(stake))
+		mount.Mul(mount, big.NewInt(1000000000000000000))
+		stateObject.AddBalance(mount)
 		return true, stake
 	}
 	return false, 0
@@ -973,18 +976,33 @@ func (self *StateDB)GetAddressByNode(s string) string {
 }
 
 //add one back stake to list
-func (self *StateDB)AddAlreadyBackStack(refund common.AlreadyBackStake) error {
-	return nil
+func (self *StateDB)AddAlreadyBackStack(backStack common.AlreadyBackStake) bool {
+	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
+	if stateObject != nil {
+		stateObject.AddAlreadyBackStack(backStack)
+		return true
+	}
+	return false
 }
 
 //get all back stake
-func (self *StateDB)GetAlreadyBackStakeList() []common.AlreadyBackStake {
-	return nil
+func (self *StateDB)GetAlreadyBackStakeList() (bool,common.BackStakeList) {
+	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
+	if stateObject != nil {
+		backStacks := stateObject.GetAlreadyBackStakeList()
+		return true,backStacks
+	}
+	return false,nil
 }
 
 //set back stake list
-func (self *StateDB)SetAlreadyBackStakeList([]common.AlreadyBackStake) error {
-	return nil
+func (self *StateDB)SetAlreadyBackStakeList(backStacks common.BackStakeList) bool {
+	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
+	if stateObject != nil {
+		stateObject.SetAlreadyBackStakeList(backStacks)
+		return true
+	}
+	return false
 }
 
 

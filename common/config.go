@@ -56,6 +56,8 @@ var (
 
 	// SpecialTxTypePunishment 类型的交易代表对用户进行stake扣除惩罚交易
 	SpecialTxTypePunishment  = big.NewInt(10)
+
+	SpecialTxTypeBackStake  = big.NewInt(11)
 )
 	//费用
 
@@ -84,5 +86,4 @@ var SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83
 
 	// save candidate list in this address storage
 	var CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
-	var RefundListAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
-	var BackStakeAddress			Address	= HexToAddress("0x3000000000000000000000000000000000000000")
+	var BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")

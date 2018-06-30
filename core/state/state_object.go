@@ -643,6 +643,44 @@ func (self *stateObject)GetCandidates() (Candidates){
 	return nil
 }
 
+func (self *stateObject) AddAlreadyBackStack(backStake common.AlreadyBackStake) {
+	var backStakes common.BackStakeList
+	if self.data.CodeHash == nil{
+		backStakes = *new(common.BackStakeList)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &backStakes)
+		backStakes = append(backStakes,backStake)
+	}
+
+	b, _ := json.Marshal(backStakes)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)GetAlreadyBackStakeList() (common.BackStakeList){
+	if self.data.CodeHash != nil {
+		var backStakes common.BackStakeList
+		json.Unmarshal(self.data.CodeHash, &backStakes)
+		return backStakes
+	}
+	return nil
+}
+
+func (self *stateObject)SetAlreadyBackStakeList(backStakes common.BackStakeList){
+	b, _ := json.Marshal(backStakes)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
 
 func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
 	var bpArr []*types.BucketPropertie
