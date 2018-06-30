@@ -56,7 +56,7 @@ var (
 
 	// SpecialTxTypePunishment 类型的交易代表对用户进行stake扣除惩罚交易
 	SpecialTxTypePunishment  = big.NewInt(10)
-
+	// 退注特殊交易
 	SpecialTxTypeBackStake  = big.NewInt(11)
 )
 	//费用
@@ -67,8 +67,8 @@ var (
 	var OneDaySyncLogGsa  int64 = int64(5000)
 	var StakeValuePerNode   int64 = int64(1000)
 
-	var Base = uint64(10000)
-	var BackStackListMax = int(20)
+	var Base = uint64(10000)	// 收益计算中间值
+	var BackStackListMax = int(20)		// 最大退注长度
 
 //官方账号
 //var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
@@ -87,4 +87,5 @@ var SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83
 
 	// save candidate list in this address storage
 	var CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
+	// 退注记录地址
 	var BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
