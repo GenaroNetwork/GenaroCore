@@ -1071,15 +1071,18 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 		return nil, err
 	}
 	var retArr[]*rpcTrafficInfo
-	for _, v := range rpcTx {
-		var s types.SpecialTxInput
-		json.Unmarshal([]byte(v.Input), &s)
-		r := new(rpcTrafficInfo)
-		r.NodeId = s.NodeId
-		r.Traffic = s.Traffic
-		r.Hash = v.Hash
-		retArr = append(retArr, r)
-
+	for _, tx := range rpcTx {
+		if transactionReceipt, err:= s.GetTransactionReceipt(ctx,tx.Hash); err == nil && transactionReceipt != nil {
+			if status, ok := transactionReceipt["status"]; ok && status == types.ReceiptStatusSuccessful {
+				var s types.SpecialTxInput
+				json.Unmarshal([]byte(tx.Input), &s)
+				r := new(rpcTrafficInfo)
+				r.NodeId = s.NodeId
+				r.Traffic = s.Traffic
+				r.Hash = tx.Hash
+				retArr = append(retArr, r)
+			}
+		}
 	}
 	return retArr,nil
 }
@@ -1103,18 +1106,22 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	}
 	var retArr []*rpcBucketPropertie
 	for _, tx := range rpcTx {
-		var s types.SpecialTxInput
-		json.Unmarshal([]byte(tx.Input), &s)
-		for _, v := range s.Buckets {
-			r := new(rpcBucketPropertie)
-			r.BucketId = v.BucketId
-			r.TimeStart = v.TimeStart
-			r.TimeEnd = v.TimeEnd
-			r.Backup = v.Backup
-			r.Size = v.Size
-			r.NodeId = s.NodeId
-			r.Hash = tx.Hash
-			retArr = append(retArr, r)
+		if transactionReceipt, err:= s.GetTransactionReceipt(ctx,tx.Hash); err == nil && transactionReceipt != nil {
+			if status, ok := transactionReceipt["status"]; ok && status == types.ReceiptStatusSuccessful {
+				var s types.SpecialTxInput
+				json.Unmarshal([]byte(tx.Input), &s)
+				for _, v := range s.Buckets {
+					r := new(rpcBucketPropertie)
+					r.BucketId = v.BucketId
+					r.TimeStart = v.TimeStart
+					r.TimeEnd = v.TimeEnd
+					r.Backup = v.Backup
+					r.Size = v.Size
+					r.NodeId = s.NodeId
+					r.Hash = tx.Hash
+					retArr = append(retArr, r)
+				}
+			}
 		}
 	}
 	return retArr,nil
