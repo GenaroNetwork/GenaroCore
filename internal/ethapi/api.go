@@ -1168,7 +1168,7 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 	var retArr[]*rpcTrafficInfo
 	for _, tx := range rpcTx {
 		if transactionReceipt, err:= s.GetTransactionReceipt(ctx,tx.Hash); err == nil && transactionReceipt != nil {
-			if status, ok := transactionReceipt["status"]; ok && status.(uint) == types.ReceiptStatusSuccessful {
+			if status, ok := transactionReceipt["status"]; ok && uint(status.(hexutil.Uint)) == types.ReceiptStatusSuccessful {
 				var s types.SpecialTxInput
 				json.Unmarshal([]byte(tx.Input), &s)
 				r := new(rpcTrafficInfo)
@@ -1202,7 +1202,7 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	var retArr []*rpcBucketPropertie
 	for _, tx := range rpcTx {
 		if transactionReceipt, err:= s.GetTransactionReceipt(ctx,tx.Hash); err == nil && transactionReceipt != nil {
-			if status, ok := transactionReceipt["status"]; ok && status.(uint) == types.ReceiptStatusSuccessful {
+			if status, ok := transactionReceipt["status"]; ok && uint(status.(hexutil.Uint)) == types.ReceiptStatusSuccessful {
 				var s types.SpecialTxInput
 				json.Unmarshal([]byte(tx.Input), &s)
 				for _, v := range s.Buckets {
