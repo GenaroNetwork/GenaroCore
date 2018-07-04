@@ -1049,3 +1049,21 @@ func (self *StateDB) CheckUnlockSharedKey(address common.Address,shareKeyId stri
 	}
 	return false
 }
+
+func (self *StateDB)UpdateBucketApplyPrice(address common.Address,	price *hexutil.Big) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		stateObject.UpdateBucketApplyPrice(price)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)UpdateTrafficApplyPrice(address common.Address, price *hexutil.Big) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		stateObject.UpdateTrafficApplyPrice(price)
+		return true
+	}
+	return false
+}

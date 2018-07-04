@@ -270,13 +270,15 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 	}
 
 	if s.BucketApplyGasPerGPerDay != nil {
-		//error := (*evm).StateDB.UpdateBucketApplyPrice(caller, s.BucketApplyGasPerGPerDay)
-		return nil
+		if ok := (*evm).StateDB.UpdateBucketApplyPrice(caller, s.BucketApplyGasPerGPerDay); !ok {
+			return errors.New("update the price of bucketApply fail")
+		}
 	}
 
 	if s.TrafficApplyGasPerG != nil {
-		//error := (*evm).StateDB.UpdateTrafficApplyPrice(caller, s.TrafficApplyGasPerG)
-		return nil
+		if ok := (*evm).StateDB.UpdateTrafficApplyPrice(caller, s.TrafficApplyGasPerG); !ok {
+			return errors.New("update the price of trafficApply fail")
+		}
 	}
 
 	return nil

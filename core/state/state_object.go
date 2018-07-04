@@ -1144,3 +1144,46 @@ func (self *stateObject)CheckUnlockSharedKey(shareKeyId string) bool {
 	}
 	return false
 }
+
+
+func (self *stateObject)UpdateBucketApplyPrice(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil{
+		genaroPrice = types.GenaroPrice{
+			BucketApplyGasPerGPerDay :price,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.BucketApplyGasPerGPerDay = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil{
+		genaroPrice = types.GenaroPrice{
+			TrafficApplyGasPerG :price,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.TrafficApplyGasPerG = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
