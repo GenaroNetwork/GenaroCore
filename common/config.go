@@ -72,7 +72,7 @@ var (
 
 //官方账号
 //var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
-var SyncLogAddress Address  = HexToAddress("0xaf7a12de8dc1de25c0541966695498074f52a1cc")
+var SyncLogAddress Address  = HexToAddress("0xebb97ad3ca6b4f609da161c0b2b0eaa4ad58f3e8")
 var SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83843f0b")
 
 	//特殊交易 Tx.init 格式
