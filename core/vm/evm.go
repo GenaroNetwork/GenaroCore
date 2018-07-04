@@ -251,6 +251,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = userPunishment(evm, s, caller)
 	case common.SpecialTxTypeBackStake.Uint64():
 		err = userBackStake(evm, caller)
+	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
+		err = genaroPriceRegulation(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -259,6 +261,25 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info("special transaction error: ", err)
 	}
 	return err
+}
+
+func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Address) error{
+
+	if caller !=  common.GenaroPriceAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+
+	if s.BucketApplyGasPerGPerDay != nil {
+		//error := (*evm).StateDB.UpdateBucketApplyPrice(caller, s.BucketApplyGasPerGPerDay)
+		return nil
+	}
+
+	if s.TrafficApplyGasPerG != nil {
+		//error := (*evm).StateDB.UpdateTrafficApplyPrice(caller, s.TrafficApplyGasPerG)
+		return nil
+	}
+
+	return nil
 }
 
 func userBackStake(evm *EVM, caller common.Address) error {

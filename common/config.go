@@ -58,22 +58,27 @@ var (
 	SpecialTxTypePunishment  = big.NewInt(10)
 	// 退注特殊交易
 	SpecialTxTypeBackStake  = big.NewInt(11)
+
+	//价格调控
+	SpecialTxTypePriceRegulation = big.NewInt(12)
 )
 	//费用
 
 	var OneDayGes  int64 = int64(5000)
-	var BucketApplyGasPerGPerDay  int64 = int64(5000) //单位为wei
-    var TrafficApplyGasPerG	 int64 = int64(5000) //单位为wei
 	var OneDaySyncLogGsa  int64 = int64(5000)
 	var StakeValuePerNode   int64 = int64(1000)
 
 	var Base = uint64(10000)	// 收益计算中间值
 	var BackStackListMax = int(20)		// 最大退注长度
 
-//官方账号
-//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
-var SyncLogAddress Address  = HexToAddress("0xaf7a12de8dc1de25c0541966695498074f52a1cc")
-var SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83843f0b")
+	var BucketApplyGasPerGPerDay  int64 = int64(5000) //单位为wei
+	var TrafficApplyGasPerG	 int64 = int64(5000) //单位为wei
+
+	//官方账号
+	//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
+	var SyncLogAddress Address  = HexToAddress("0xaf7a12de8dc1de25c0541966695498074f52a1cc")
+	var SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83843f0b")
+	var GenaroPriceAddress Address = HexToAddress("0x6666666666666666666666666666666666666666")
 
 	//特殊交易 Tx.init 格式
 	//其中 allow 中的权限如下

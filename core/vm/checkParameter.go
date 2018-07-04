@@ -149,3 +149,10 @@ func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
 	}
 	return nil
 }
+
+func CheckPriceRegulation(caller common.Address) error {
+	if caller !=  common.GenaroPriceAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+	return nil
+}

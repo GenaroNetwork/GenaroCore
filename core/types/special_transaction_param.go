@@ -13,6 +13,12 @@ type SpecialTxInput struct {
 	Type   *hexutil.Big `json:"type"`
 	BlockNumber string  `json:"blockNr"`
 	Message string      `json:"msg"`
+	GenaroPrice
+}
+
+type GenaroPrice struct {
+	BucketApplyGasPerGPerDay *hexutil.Big `json:"bucketPricePerGperDay"`
+	TrafficApplyGasPerG *hexutil.Big `json:"trafficPricePerG"`
 }
 
 func (s SpecialTxInput) SpecialCost() *big.Int {
