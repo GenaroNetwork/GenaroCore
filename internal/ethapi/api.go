@@ -1471,6 +1471,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 				input,_ := json.Marshal(s)
 				return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 			}
+			return nil
 		case common.SynchronizeShareKey.Uint64():
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
@@ -1530,7 +1531,9 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Sen
 	}
 	// Assemble the transaction and sign with the wallet
 	tx := args.toTransaction()
-
+	if nil == tx {
+		return common.Hash{}, errors.New(`sync log Address error`)
+	}
 	var chainID *big.Int
 	if config := s.b.ChainConfig(); config.IsEIP155(s.b.CurrentBlock().Number()) {
 		chainID = config.ChainId
