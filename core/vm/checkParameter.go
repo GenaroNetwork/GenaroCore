@@ -117,7 +117,7 @@ func CheckTrafficTx(s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string) error {
+func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string, stakeVlauePerNode *big.Int) error {
 	var nodeNum int
 	if toAddNodes != nil{
 		nodeNum = len(toAddNodes)
@@ -129,8 +129,10 @@ func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string) error {
 		nodeNum += len(existNodes)
 	}
 
-	needStakeVale := int64(nodeNum) * common.StakeValuePerNode
-	if uint64(needStakeVale) > stake {
+	needStakeVale := big.NewInt(0)
+	needStakeVale.Mul(big.NewInt(int64(nodeNum)), stakeVlauePerNode)
+
+	if needStakeVale.Cmp(big.NewInt(int64(stake*1000000000000000000))) != 1 {
 		return errors.New("none enough stake to synchronize node")
 	}
 	return nil

@@ -592,8 +592,10 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInsufficientFunds
 	}
 
+	currentPrice := pool.currentState.GetGenaroPrice()
+
 	totalCost := new(big.Int)
-	totalCost.Add(tx.Cost(), tx.SpecialCost())
+	totalCost.Add(tx.Cost(), tx.SpecialCost(currentPrice))
 	if pool.currentState.GetBalance(from).Cmp(totalCost) < 0 {
 		return ErrInsufficientFundsForSpecialTx
 	}
@@ -635,7 +637,8 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		callerStake, _ := pool.currentState.GetStake(caller)
 		existNodes := pool.currentState.GetStorageNodes(caller)
-		return vm.CheckSyncNodeTx(callerStake, existNodes, s.Node)
+		currentStakePrice := pool.currentState.GetStakePerNodePrice()
+		return vm.CheckSyncNodeTx(callerStake, existNodes, s.Node, currentStakePrice)
 	case common.SynchronizeShareKey.Uint64():
 		return vm.CheckSynchronizeShareKeyParameter(s)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上

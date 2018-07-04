@@ -19,27 +19,40 @@ type SpecialTxInput struct {
 type GenaroPrice struct {
 	BucketApplyGasPerGPerDay *hexutil.Big `json:"bucketPricePerGperDay"`
 	TrafficApplyGasPerG *hexutil.Big `json:"trafficPricePerG"`
+	StakeValuePerNode *hexutil.Big `json:"stakeValuePerNode"`
 }
 
-func (s SpecialTxInput) SpecialCost() *big.Int {
+func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) *big.Int {
 	rt := new(big.Int)
 	switch s.Type.ToInt() {
 	case common.SpecialTxTypeStakeSync:
 		return rt.SetUint64(s.Stake*1000000000000000000)
 	case common.SpecialTxTypeSpaceApply:
-		var totalCost int64
+		var totalCost *big.Int
 		for _, v := range s.Buckets {
+			var bucketPrice *big.Int
+			if currentPrice == nil || currentPrice.BucketApplyGasPerGPerDay == nil {
+				bucketPrice = common.DefaultBucketApplyGasPerGPerDay
+			}else{
+				bucketPrice = currentPrice.BucketApplyGasPerGPerDay.ToInt()
+			}
 			duration := math.Abs(float64(v.TimeStart) - float64(v.TimeEnd))
 
-			oneCost := int64(v.Size) * int64(math.Ceil(duration/10)) * common.BucketApplyGasPerGPerDay
+			oneCost := bucketPrice.Mul(bucketPrice, big.NewInt(int64(v.Size) * int64(math.Ceil(duration/10))))
 
-			totalCost += oneCost
+			totalCost.Add(totalCost, oneCost)
 		}
 
-		totalGas := big.NewInt(totalCost)
-		return totalGas
+		return totalCost
+
 	case common.SpecialTxTypeTrafficApply:
-		totalGas := big.NewInt(int64(s.Traffic) * common.TrafficApplyGasPerG)
+		var trafficPrice *big.Int
+		if currentPrice == nil || currentPrice.TrafficApplyGasPerG == nil {
+			trafficPrice = common.DefaultTrafficApplyGasPerG
+		}else{
+			trafficPrice = currentPrice.TrafficApplyGasPerG.ToInt()
+		}
+		totalGas := trafficPrice.Mul(trafficPrice, big.NewInt(int64(s.Traffic)))
 		return totalGas
 	case common.SpecialTxTypeMortgageInit:
 		sumMortgageTable := new(big.Int)

@@ -261,14 +261,14 @@ func (tx *Transaction) Cost() *big.Int {
 
 // SpecialCost returns total cost for special transaction
 // if current transaction is normal transaction, return zero.
-func (tx *Transaction) SpecialCost() *big.Int {
+func (tx *Transaction) SpecialCost(currentPrice *GenaroPrice) *big.Int {
 	if tx.Data() == nil {
 		return big.NewInt(0)
 	}
 	var s SpecialTxInput
 	err := json.Unmarshal(tx.Data(), &s)
 	if err != nil {
-		return s.SpecialCost()
+		return s.SpecialCost(currentPrice)
 	}
 	return big.NewInt(0)
 }

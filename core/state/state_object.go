@@ -963,7 +963,7 @@ func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[
 	return nil,nil
 }
 
-func (self *stateObject)SyncStakeNode(s []string) error {
+func (self *stateObject)SyncStakeNode(s []string, StakeValuePerNode *big.Int) error {
 	var err error
 	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{ // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
@@ -974,8 +974,10 @@ func (self *stateObject)SyncStakeNode(s []string) error {
 		if genaroData.Node != nil {
 			totalNodeNumber += len(genaroData.Node)
 		}
-		needStakeVale := int64(totalNodeNumber) * common.StakeValuePerNode
-		if uint64(needStakeVale) > genaroData.Stake {
+		needStakeVale := new(big.Int)
+		needStakeVale.Add(big.NewInt(int64(totalNodeNumber)),StakeValuePerNode)
+		currentStake := big.NewInt(int64(genaroData.Stake * 1000000000000000000))
+		if needStakeVale.Cmp(currentStake) != 1 {
 			err = ErrSyncNode
 		}else {
 			genaroData.Node = append(genaroData.Node, s...)
@@ -1167,6 +1169,18 @@ func (self *stateObject)UpdateBucketApplyPrice(price *hexutil.Big) {
 	}
 }
 
+func (self *stateObject)GetBucketApplyPrice() *big.Int{
+	if self.data.CodeHash != nil {
+		var genaroPrice types.GenaroPrice
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		if genaroPrice.BucketApplyGasPerGPerDay != nil {
+			return genaroPrice.BucketApplyGasPerGPerDay.ToInt()
+		}
+	}
+
+	return common.DefaultBucketApplyGasPerGPerDay
+}
+
 func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
 	if self.data.CodeHash == nil{
@@ -1186,4 +1200,57 @@ func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
 		self.onDirty(self.Address())
 		self.onDirty = nil
 	}
+}
+
+func (self *stateObject)GetTrafficApplyPrice() *big.Int {
+
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.TrafficApplyGasPerG != nil {
+			return genaroPrice.TrafficApplyGasPerG.ToInt()
+		}
+	}
+	return common.DefaultTrafficApplyGasPerG
+}
+
+func (self *stateObject)UpdateStakePerNodePrice(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil{
+		genaroPrice = types.GenaroPrice{
+			StakeValuePerNode :price,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.StakeValuePerNode = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)GetStakePerNodePrice() *big.Int {
+
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.StakeValuePerNode != nil {
+			return genaroPrice.StakeValuePerNode.ToInt()
+		}
+	}
+
+	return common.DefaultTrafficApplyGasPerG
+}
+
+func (self *stateObject)GetGenaroPrice() *types.GenaroPrice {
+	if self.data.CodeHash != nil {
+		var genaroPrice types.GenaroPrice
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		return  &genaroPrice
+	}
+	return nil
 }

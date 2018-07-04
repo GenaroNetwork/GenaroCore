@@ -1,6 +1,15 @@
 package common
 
-import "math/big"
+import (
+	"math/big"
+)
+
+func init() {
+	BaseCompany = big.NewInt(0)
+	BaseCompany.UnmarshalText([]byte("1000000000000000000"))
+}
+
+var BaseCompany *big.Int
 
 /*
 Some special address prepared for special transactions.
@@ -66,13 +75,16 @@ var (
 
 	var OneDayGes  int64 = int64(5000)
 	var OneDaySyncLogGsa  int64 = int64(5000)
-	var StakeValuePerNode   int64 = int64(1000)
+
 
 	var Base = uint64(10000)	// 收益计算中间值
 	var BackStackListMax = int(20)		// 最大退注长度
 
-	var BucketApplyGasPerGPerDay  int64 = int64(5000) //单位为wei
-	var TrafficApplyGasPerG	 int64 = int64(5000) //单位为wei
+
+	var DefaultBucketApplyGasPerGPerDay *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1)) //购买空间每天每G需1个gnx
+	var DefaultTrafficApplyGasPerG *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1)) // 购买流量每G需1个gnx
+	var DefaultStakeValuePerNode *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1000)) //同步一个节点1000个gnx
+
 
 	//官方账号
 	//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")

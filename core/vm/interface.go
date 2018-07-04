@@ -113,7 +113,15 @@ type StateDB interface {
 	UnlockSharedKey(common.Address,string) bool
 
 	UpdateBucketApplyPrice(common.Address, *hexutil.Big) bool
+	GetBucketApplyPrice() *big.Int
+
 	UpdateTrafficApplyPrice(common.Address, *hexutil.Big) bool
+	GetTrafficApplyPrice() *big.Int
+
+	UpdateStakePerNodePrice(common.Address, *hexutil.Big) bool
+	GetStakePerNodePrice() *big.Int
+
+	GetGenaroPrice() *types.GenaroPrice
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

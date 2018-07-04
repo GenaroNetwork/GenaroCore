@@ -269,6 +269,12 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
+	if s.StakeValuePerNode != nil {
+		if ok := (*evm).StateDB.UpdateStakePerNodePrice(caller, s.StakeValuePerNode); !ok {
+			return errors.New("update the price of stakePerNode fail")
+		}
+	}
+
 	if s.BucketApplyGasPerGPerDay != nil {
 		if ok := (*evm).StateDB.UpdateBucketApplyPrice(caller, s.BucketApplyGasPerGPerDay); !ok {
 			return errors.New("update the price of bucketApply fail")
@@ -413,7 +419,8 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	adress := common.HexToAddress(s.NodeId)
 
-	totalGas := s.SpecialCost()
+	currentPrice := (*evm).StateDB.GetGenaroPrice()
+	totalGas := s.SpecialCost(currentPrice)
 
 	// Fail if we're trying to use more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
@@ -456,7 +463,8 @@ func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64) er
 func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	adress := common.HexToAddress(s.NodeId)
 
-	totalGas := s.SpecialCost()
+	currentPrice := (*evm).StateDB.GetGenaroPrice()
+	totalGas := s.SpecialCost(currentPrice)
 
 	// Fail if we're trying to use more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {

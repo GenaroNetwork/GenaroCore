@@ -948,10 +948,13 @@ func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, Spe
 }
 
 func (self *StateDB)SyncStakeNode(address common.Address,s []string) error {
+
+	currentStakePrice := self.GetStakePerNodePrice()
+
 	stateObject := self.GetOrNewStateObject(address)
 	var err error = nil
 	if stateObject != nil {
-		err = stateObject.SyncStakeNode(s)
+		err = stateObject.SyncStakeNode(s, currentStakePrice)
 	}
 	return err
 }
@@ -1059,6 +1062,14 @@ func (self *StateDB)UpdateBucketApplyPrice(address common.Address,	price *hexuti
 	return false
 }
 
+func (self *StateDB)GetBucketApplyPrice() *big.Int {
+	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
+	if stateObject != nil {
+		return stateObject.GetBucketApplyPrice()
+	}
+	return common.DefaultBucketApplyGasPerGPerDay
+}
+
 func (self *StateDB)UpdateTrafficApplyPrice(address common.Address, price *hexutil.Big) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
@@ -1066,4 +1077,37 @@ func (self *StateDB)UpdateTrafficApplyPrice(address common.Address, price *hexut
 		return true
 	}
 	return false
+}
+
+func (self *StateDB)GetTrafficApplyPrice() *big.Int {
+	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
+	if stateObject != nil {
+		return stateObject.GetTrafficApplyPrice()
+	}
+	return common.DefaultTrafficApplyGasPerG
+}
+
+func (self *StateDB)UpdateStakePerNodePrice(address common.Address, price *hexutil.Big) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		stateObject.UpdateStakePerNodePrice(price)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)GetStakePerNodePrice() *big.Int {
+	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
+	if stateObject != nil {
+		return stateObject.GetStakePerNodePrice()
+	}
+	return common.DefaultStakeValuePerNode
+}
+
+func (self *StateDB)GetGenaroPrice() *types.GenaroPrice {
+	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
+	if stateObject != nil {
+		return stateObject.GetGenaroPrice()
+	}
+	return nil
 }
