@@ -2,7 +2,6 @@ package common
 
 import (
 	"math/big"
-	"fmt"
 	"github.com/GenaroNetwork/Genaro-Core/common/math"
 )
 
@@ -17,10 +16,6 @@ func init() {
 
 	DefaultOneDaySyncLogGsaCost, _ = math.ParseBig256("1000000000000000000")
 	DefaultOneDayMortgageGes, _ = math.ParseBig256("1000000000000000000")
-
-	fmt.Println("DefaultBucketApplyGasPerGPerDay", DefaultBucketApplyGasPerGPerDay.String()," wei")
-	fmt.Println("DefaultTrafficApplyGasPerG", DefaultTrafficApplyGasPerG.String())
-	fmt.Println("DefaultStakeValuePerNode",DefaultStakeValuePerNode.String())
 }
 
 
