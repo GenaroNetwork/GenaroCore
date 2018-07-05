@@ -19,6 +19,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"encoding/json"
 )
 
 const (
@@ -383,6 +384,12 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if blockNumber == 0 {
 		return errUnknownBlock
 	}
+	// check syn state
+	extraData := UnmarshalToExtra(header)
+	if blockNumber - extraData.LastSynBlockNum > common.SynBlockLen {
+		return errors.New("need SynState")
+	}
+
 	// Don't waste time checking blocks from the future
 	if header.Time.Cmp(big.NewInt(time.Now().Unix())) > 0 {
 		return consensus.ErrFutureBlock
@@ -520,6 +527,18 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	//commit rank
 	blockNumber := header.Number.Uint64()
 	updateSpecialBlock(g.config, header, state)
+
+	// update LastSynBlockNum
+	extraData := UnmarshalToExtra(header)
+	lastSynState := state.GetLastSynState()
+	if lastSynState != nil {
+		if blockNumber - lastSynState.LastSynBlockNum > common.SynBlockLen {
+			return nil, errors.New("need SynState")
+		}
+		extraData.LastSynBlockNum = lastSynState.LastSynBlockNum
+		header.Extra, _ = json.Marshal(extraData)
+	}
+	state.AddLastRootState(header.ParentHash,header.Number.Uint64()-1)
 
 	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()),nil)
 	if err != nil {
