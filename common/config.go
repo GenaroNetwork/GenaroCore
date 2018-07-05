@@ -73,6 +73,9 @@ var (
 	SpecialSyncAddress Address = HexToAddress("0x6000000000000000000000000000000000000000")
 )
 
+var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress}
+
+
 
 var (
 

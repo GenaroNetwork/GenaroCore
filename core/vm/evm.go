@@ -216,6 +216,7 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 
 
+
 func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 	var err error
 	// 解析数据
@@ -227,14 +228,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 	switch s.Type.ToInt().Uint64(){
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
 		err = updateStake(evm, s, caller)
-
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-		// if the address of caller is not offical address, fail this transaction
-		if caller != common.OfficialAddress {
-			return errors.New("current caller addrss has no permission on this operation")
-		}
-		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64())
-
+		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64(), caller)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		err = updateStorageProperties(evm, s, caller)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
@@ -270,6 +265,9 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 }
 
 func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Address) error{
+	if err := CheckPriceRegulation(caller); err != nil {
+		return err
+	}
 
 	if caller !=  common.GenaroPriceAddress {
 		return errors.New("caller address of this transaction is not invalid")
@@ -340,6 +338,10 @@ func userBackStake(evm *EVM, caller common.Address) error {
 }
 
 func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+
+	if err := CheckPunishmentTx(caller,s); err != nil  {
+		return err
+	}
 	adress := common.HexToAddress(s.NodeId)
 	var actualPunishment uint64
 	var ok bool
@@ -365,7 +367,7 @@ func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckSynchronizeShareKeyParameter(s); nil != err  {
+	if err := CheckSynchronizeShareKeyParameter(s); err != nil  {
 		return err
 	}
 	s.SynchronizeShareKey.Status = 0
@@ -377,6 +379,9 @@ func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address)
 }
 
 func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if err := CheckSyncFileSharePublicKeyTx(s); nil != err  {
+		return err
+	}
 	adress := common.HexToAddress(s.NodeId)
 	if !(*evm).StateDB.UpdateFileSharePublicKey(adress, s.FileSharePublicKey) {
 		return errors.New("update user's public key fail")
@@ -481,7 +486,11 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 }
 
 
-func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64) error {
+func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64, caller common.Address) error {
+	if err := CheckSyncHeftTx(caller, s); err != nil {
+		return err
+	}
+
 	adress := common.HexToAddress(s.NodeId)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft, blockNumber) {
@@ -491,6 +500,11 @@ func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64) er
 }
 
 func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+
+	if err := CheckTrafficTx(s); err != nil {
+		return err
+	}
+
 	adress := common.HexToAddress(s.NodeId)
 
 	currentPrice := (*evm).StateDB.GetGenaroPrice()
@@ -514,6 +528,10 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 
 
 func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckStakeTx(s); err != nil {
+		return err
+	}
+
 	amount := new(big.Int)
 	// the unit of stake is GNX， one stake means one GNX
 	amount.SetUint64(s.Stake*1000000000000000000)

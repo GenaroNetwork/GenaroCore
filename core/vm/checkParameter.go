@@ -6,7 +6,19 @@ import (
 	"time"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"errors"
+	"bytes"
 )
+
+
+func isSpecialAddress(address common.Address) bool {
+	var equal bool = false
+	for _, v := range common.SpecialAddressList {
+		if bytes.Compare(address.Bytes(), v.Bytes()) == 0{
+			equal = true
+		}
+	}
+	return equal
+}
 
 func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address) error {
 	if caller !=  common.OfficialAddress {
@@ -92,16 +104,27 @@ func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
 }
 
 func CheckStakeTx(s types.SpecialTxInput) error {
+	adress := common.HexToAddress(s.NodeId)
+	if isSpecialAddress(adress){
+		return errors.New("param [address] can't be special address")
+	}
+
 	if s.Stake <= 0 {
 		return errors.New("value of stake must larger than zero")
 	}
 	return nil
 }
 
-func CheckSyncHeftTx(caller common.Address) error {
+func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput) error {
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
+
+	adress := common.HexToAddress(s.NodeId)
+	if isSpecialAddress(adress){
+		return errors.New("param [address] can't be special address")
+	}
+
 	return nil
 }
 
@@ -115,6 +138,11 @@ func CheckApplyBucketTx(s types.SpecialTxInput) error {
 }
 
 func CheckTrafficTx(s types.SpecialTxInput) error {
+	adress := common.HexToAddress(s.NodeId)
+	if isSpecialAddress(adress){
+		return errors.New("param [address] can't be special address")
+	}
+
 	if s.Traffic <= 0 {
 		errors.New("value of traffic must larger than zero")
 	}
@@ -142,7 +170,12 @@ func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string, stakeVlauePe
 	return nil
 }
 
-func CheckPunishmentTx(caller common.Address) error {
+func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput) error {
+	adress := common.HexToAddress(s.NodeId)
+	if isSpecialAddress(adress){
+		return errors.New("param [address] can't be special address")
+	}
+
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
@@ -157,6 +190,11 @@ func CheckSynStateTx(caller common.Address) error {
 }
 
 func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
+	adress := common.HexToAddress(s.NodeId)
+	if isSpecialAddress(adress){
+		return errors.New("param [address] can't be special address")
+	}
+
 	if s.FileSharePublicKey == "" {
 		return errors.New("public key for file share can't be null")
 	}
