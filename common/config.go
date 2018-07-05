@@ -3,25 +3,44 @@ package common
 import (
 	"math/big"
 	"fmt"
+	"github.com/GenaroNetwork/Genaro-Core/common/math"
 )
 
 func init() {
 	BaseCompany = big.NewInt(0)
-	BaseCompany.UnmarshalText([]byte("1000000000000000000"))
+	BaseCompany.UnmarshalText([]byte("1000000000000000000")) // 基本单位1GNX
 
-	DefaultBucketApplyGasPerGPerDay = big.NewInt(0).Mul(BaseCompany,big.NewInt(1)) //购买空间每天每G需1个gnx
-	DefaultTrafficApplyGasPerG = big.NewInt(0).Mul(BaseCompany,big.NewInt(1)) // 购买流量每G需1个gnx
-	DefaultStakeValuePerNode = big.NewInt(0).Mul(BaseCompany,big.NewInt(1000)) //同步一个节点1000个gnx
+	DefaultStakeValuePerNode, _        = math.ParseBig256("5000000000000000000000") // 同步一个节点5000个gnx
+	DefaultTrafficApplyGasPerG, _      = math.ParseBig256("50000000000000000") // 购买流量每G需0.05个gnx
+	DefaultBucketApplyGasPerGPerDay, _ = math.ParseBig256("500000000000000") // 购买空间每天每G需0.0005个gnx（0.015个GNX每GB每月）
 
-	DefaultOneDaySyncLogGsaCost = big.NewInt(0).Mul(BaseCompany,big.NewInt(1))
-	DefaultOneDayMortgageGes = big.NewInt(0).Mul(BaseCompany,big.NewInt(1))
 
-	fmt.Println("DefaultBucketApplyGasPerGPerDay", DefaultBucketApplyGasPerGPerDay.String())
+	DefaultOneDaySyncLogGsaCost, _ = math.ParseBig256("1000000000000000000")
+	DefaultOneDayMortgageGes, _ = math.ParseBig256("1000000000000000000")
+
+	fmt.Println("DefaultBucketApplyGasPerGPerDay", DefaultBucketApplyGasPerGPerDay.String()," wei")
 	fmt.Println("DefaultTrafficApplyGasPerG", DefaultTrafficApplyGasPerG.String())
 	fmt.Println("DefaultStakeValuePerNode",DefaultStakeValuePerNode.String())
 }
 
-var BaseCompany *big.Int
+
+//费用
+var (
+	BaseCompany *big.Int
+
+	//var OneDayGes  int64 = int64(5000)
+	DefaultOneDaySyncLogGsaCost  *big.Int
+
+
+	DefaultBucketApplyGasPerGPerDay *big.Int
+
+	DefaultTrafficApplyGasPerG *big.Int
+
+	DefaultStakeValuePerNode *big.Int
+
+	DefaultOneDayMortgageGes *big.Int
+)
+
 
 /*
 Some special address prepared for special transactions.
@@ -41,6 +60,20 @@ var (
 
 	//特殊账户，该账户存储矿工节点Id到账户的倒排索引
 	StakeNode2StakeAddress Address = HexToAddress("0x0000000000000000000000000000000000000001")
+
+	//官方账号
+	//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
+	SyncLogAddress Address  = HexToAddress("0xebb97ad3ca6b4f609da161c0b2b0eaa4ad58f3e8")
+
+	SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83843f0b")
+
+	GenaroPriceAddress Address = HexToAddress("0x6666666666666666666666666666666666666666")
+
+
+	// save candidate list in this address storage
+	CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
+	// 退注记录地址
+	BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
 )
 
 
@@ -83,28 +116,14 @@ var (
 	//价格调控
 	SpecialTxTypePriceRegulation = big.NewInt(12)
 )
-	//费用
 
-	//var OneDayGes  int64 = int64(5000)
-	var DefaultOneDaySyncLogGsaCost  *big.Int
 
-	var DefaultOneDayMortgageGes *big.Int
 
 
 	var Base = uint64(10000)	// 收益计算中间值
 	var BackStackListMax = int(20)		// 最大退注长度
 
 
-	var DefaultBucketApplyGasPerGPerDay *big.Int
-	var DefaultTrafficApplyGasPerG *big.Int
-	var DefaultStakeValuePerNode *big.Int
-
-
-	//官方账号
-	//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
-	var SyncLogAddress Address  = HexToAddress("0xebb97ad3ca6b4f609da161c0b2b0eaa4ad58f3e8")
-	var SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83843f0b")
-	var GenaroPriceAddress Address = HexToAddress("0x6666666666666666666666666666666666666666")
 
 	//特殊交易 Tx.init 格式
 	//其中 allow 中的权限如下
@@ -114,9 +133,3 @@ var (
 	var ReadWrite int = 0
 	var ReadOnly int = 1
 	var Write int = 2
-
-
-	// save candidate list in this address storage
-	var CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
-	// 退注记录地址
-	var BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
