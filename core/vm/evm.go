@@ -289,13 +289,13 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 
 	if s.OneDayGesCost != nil {
 		if ok := (*evm).StateDB.UpdateOneDayGesCost(caller, s.OneDayGesCost); !ok {
-			return errors.New("update the price of trafficApply fail")
+			return errors.New("update the price of OneDayGesCost fail")
 		}
 	}
 
 	if s.OneDaySyncLogGsaCost != nil {
 		if ok := (*evm).StateDB.UpdateOneDaySyncLogGsaCost(caller, s.OneDaySyncLogGsaCost); !ok {
-			return errors.New("update the price of trafficApply fail")
+			return errors.New("update the price of OneDaySyncLogGsaCost fail")
 		}
 	}
 
