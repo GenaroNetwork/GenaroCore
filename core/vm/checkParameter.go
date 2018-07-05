@@ -11,13 +11,12 @@ import (
 
 
 func isSpecialAddress(address common.Address) bool {
-	var equal bool = false
 	for _, v := range common.SpecialAddressList {
 		if bytes.Compare(address.Bytes(), v.Bytes()) == 0{
-			equal = true
+			return  true
 		}
 	}
-	return equal
+	return false
 }
 
 func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address) error {
