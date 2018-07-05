@@ -1137,7 +1137,7 @@ func (self *StateDB)GetOneDayGesCost() *big.Int {
 	if stateObject != nil {
 		return stateObject.GetOneDayGesCost()
 	}
-	return common.DefaultOneDayGes
+	return common.DefaultOneDayMortgageGes
 }
 
 func (self *StateDB)GetOneDaySyncLogGsaCost() *big.Int {

@@ -287,8 +287,8 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 		}
 	}
 
-	if s.OneDayGesCost != nil {
-		if ok := (*evm).StateDB.UpdateOneDayGesCost(caller, s.OneDayGesCost); !ok {
+	if s.OneDayMortgageGes != nil {
+		if ok := (*evm).StateDB.UpdateOneDayGesCost(caller, s.OneDayMortgageGes); !ok {
 			return errors.New("update the price of OneDayGesCost fail")
 		}
 	}

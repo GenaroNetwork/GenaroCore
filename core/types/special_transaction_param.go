@@ -20,7 +20,7 @@ type GenaroPrice struct {
 	BucketApplyGasPerGPerDay *hexutil.Big `json:"bucketPricePerGperDay"`
 	TrafficApplyGasPerG *hexutil.Big `json:"trafficPricePerG"`
 	StakeValuePerNode *hexutil.Big `json:"stakeValuePerNode"`
-	OneDayGesCost	*hexutil.Big `json:"oneDayGesCost"`
+	OneDayMortgageGes	*hexutil.Big `json:"oneDayMortgageGes"`
 	OneDaySyncLogGsaCost  *hexutil.Big `json:"oneDaySyncLogGsaCost"`
 }
 
@@ -63,7 +63,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) *big.Int {
 			sumMortgageTable = sumMortgageTable.Add(sumMortgageTable, v.ToInt())
 		}
 		temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(), big.NewInt(int64(len(mortgageTable))))
-		timeLimitGas := temp.Mul(temp, common.DefaultOneDayGes)
+		timeLimitGas := temp.Mul(temp, common.DefaultOneDayMortgageGes)
 		sumMortgageTable.Add(sumMortgageTable, timeLimitGas)
 		return sumMortgageTable
 	default:

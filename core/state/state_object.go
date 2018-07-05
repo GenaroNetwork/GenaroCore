@@ -1260,11 +1260,11 @@ func (self *stateObject)UpdateOneDayGesCost(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
 	if self.data.CodeHash == nil{
 		genaroPrice = types.GenaroPrice{
-			OneDayGesCost :price,
+			OneDayMortgageGes :price,
 		}
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
-		genaroPrice.OneDayGesCost = price
+		genaroPrice.OneDayMortgageGes = price
 	}
 
 	b, _ := json.Marshal(genaroPrice)
@@ -1303,12 +1303,12 @@ func (self *stateObject)GetOneDayGesCost() *big.Int {
 
 	genaroPrice := self.GetGenaroPrice()
 	if genaroPrice != nil {
-		if genaroPrice.OneDayGesCost != nil {
-			return genaroPrice.OneDayGesCost.ToInt()
+		if genaroPrice.OneDayMortgageGes != nil {
+			return genaroPrice.OneDayMortgageGes.ToInt()
 		}
 	}
 
-	return common.DefaultOneDayGes
+	return common.DefaultOneDayMortgageGes
 }
 
 func (self *stateObject)GetOneDaySyncLogGsaCost() *big.Int {

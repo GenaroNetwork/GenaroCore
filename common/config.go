@@ -14,7 +14,7 @@ func init() {
 	DefaultStakeValuePerNode = big.NewInt(0).Mul(BaseCompany,big.NewInt(1000)) //同步一个节点1000个gnx
 
 	DefaultOneDaySyncLogGsaCost = big.NewInt(0).Mul(BaseCompany,big.NewInt(1))
-	DefaultOneDayGes = big.NewInt(0).Mul(BaseCompany,big.NewInt(1))
+	DefaultOneDayMortgageGes = big.NewInt(0).Mul(BaseCompany,big.NewInt(1))
 
 	fmt.Println("DefaultBucketApplyGasPerGPerDay", DefaultBucketApplyGasPerGPerDay.String())
 	fmt.Println("DefaultTrafficApplyGasPerG", DefaultTrafficApplyGasPerG.String())
@@ -88,7 +88,7 @@ var (
 	//var OneDayGes  int64 = int64(5000)
 	var DefaultOneDaySyncLogGsaCost  *big.Int
 
-	var DefaultOneDayGes *big.Int
+	var DefaultOneDayMortgageGes *big.Int
 
 
 	var Base = uint64(10000)	// 收益计算中间值
