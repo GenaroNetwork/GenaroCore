@@ -352,7 +352,7 @@ func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) erro
 	amount := new(big.Int)
 	amount.SetUint64(actualPunishment*1000000000000000000)
 	//将实际扣除的钱转到官方账号中
-	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, amount)
+	(*evm).StateDB.AddBalance(common.OfficialAddress, amount)
 	return nil
 }
 
@@ -447,7 +447,7 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
 	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
 	//时间期限收取的费用转账到官方账号
-	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, timeLimitGas)
+	(*evm).StateDB.AddBalance(common.OfficialAddress, timeLimitGas)
 	return nil
 }
 
@@ -480,7 +480,7 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 
 	//扣除费用
 	(*evm).StateDB.SubBalance(caller, totalGas)
-	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, totalGas)
+	(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
 
 	return nil
 }
@@ -521,7 +521,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 	}
 
 	(*evm).StateDB.SubBalance(caller, totalGas)
-	(*evm).StateDB.AddBalance(common.SpecialSyncAddress, totalGas)
+	(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
 
 	return nil
 }
