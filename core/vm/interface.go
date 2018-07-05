@@ -127,6 +127,10 @@ type StateDB interface {
 
 	GetOneDayGesCost() *big.Int
 	GetOneDaySyncLogGsaCost() *big.Int
+	
+	AddLastRootState(statehash common.Hash, blockNumber uint64) bool
+	SetLastSynBlockNum(blockNumber uint64) bool
+	GetLastSynState() *types.LastSynState
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

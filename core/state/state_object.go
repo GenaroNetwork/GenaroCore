@@ -621,8 +621,8 @@ func (self *stateObject) AddCandidate(candidate common.Address) {
 		candidates = *new(Candidates)
 	}else {
 		json.Unmarshal(self.data.CodeHash, &candidates)
-		candidates = append(candidates,candidate)
 	}
+	candidates = append(candidates,candidate)
 
 	b, _ := json.Marshal(candidates)
 	self.code = nil
@@ -1147,7 +1147,6 @@ func (self *stateObject)CheckUnlockSharedKey(shareKeyId string) bool {
 	return false
 }
 
-
 func (self *stateObject)UpdateBucketApplyPrice(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
 	if self.data.CodeHash == nil{
@@ -1193,6 +1192,26 @@ func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
 	}
 
 	b, _ := json.Marshal(genaroPrice)
+        self.code = nil
+        self.data.CodeHash = b[:]
+        self.dirtyCode = true
+        if self.onDirty != nil {
+                self.onDirty(self.Address())
+                self.onDirty = nil
+        }
+}
+
+func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint64) {
+	var lastSynState *types.LastSynState
+	if self.data.CodeHash == nil{
+		lastSynState = new(types.LastSynState)
+	}else {
+		json.Unmarshal(self.data.CodeHash, lastSynState)
+	}
+
+	lastSynState.AddLastSynState(statehash,blockNumber)
+
+	b, _ := json.Marshal(lastSynState)
 	self.code = nil
 	self.data.CodeHash = b[:]
 	self.dirtyCode = true
@@ -1225,6 +1244,26 @@ func (self *stateObject)UpdateStakePerNodePrice(price *hexutil.Big) {
 	}
 
 	b, _ := json.Marshal(genaroPrice)
+        self.code = nil
+        self.data.CodeHash = b[:]
+        self.dirtyCode = true
+        if self.onDirty != nil {
+                self.onDirty(self.Address())
+                self.onDirty = nil
+        }
+}
+
+func (self *stateObject)SetLastSynBlockNum(blockNumber uint64) {
+	var lastsynState *types.LastSynState
+	if self.data.CodeHash == nil{
+		lastsynState = new(types.LastSynState)
+	}else {
+		json.Unmarshal(self.data.CodeHash, lastsynState)
+	}
+
+	lastsynState.LastSynBlockNum = blockNumber
+
+	b, _ := json.Marshal(lastsynState)
 	self.code = nil
 	self.data.CodeHash = b[:]
 	self.dirtyCode = true
@@ -1319,4 +1358,12 @@ func (self *stateObject)GetOneDaySyncLogGsaCost() *big.Int {
 		}
 	}
 	return common.DefaultOneDaySyncLogGsaCost
+}
+func (self *stateObject)GetLastSynState() *types.LastSynState{
+	if self.data.CodeHash != nil {
+		var lastSynState types.LastSynState
+		json.Unmarshal(self.data.CodeHash, &lastSynState)
+		return &lastSynState
+	}
+	return nil
 }

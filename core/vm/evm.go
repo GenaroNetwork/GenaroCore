@@ -257,6 +257,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = userBackStake(evm, caller)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
 		err = genaroPriceRegulation(evm, s, caller)
+	case common.SpecialTxSynState.Uint64():
+		err = SynState(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -304,6 +306,18 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 	}
 
 	return nil
+}
+
+func SynState(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	lastSynState := (*evm).StateDB.GetLastSynState()
+	stateHash := common.StringToHash(s.Message)
+	blockNum,ok := lastSynState.LastRootStates[stateHash]
+	if ok {
+		lastSynState.LastSynBlockNum = blockNum
+		return nil
+	} else {
+		return errors.New("SynState fail")
+	}
 }
 
 func userBackStake(evm *EVM, caller common.Address) error {

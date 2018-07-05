@@ -149,6 +149,13 @@ func CheckPunishmentTx(caller common.Address) error {
 	return nil
 }
 
+func CheckSynStateTx(caller common.Address) error {
+	if caller !=  common.SpecialSyncAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+	return nil
+}
+
 func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
 	if s.FileSharePublicKey == "" {
 		return errors.New("public key for file share can't be null")

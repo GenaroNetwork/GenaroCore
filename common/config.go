@@ -46,6 +46,21 @@ var (
 Some special address prepared for special transactions.
 */
 var (
+
+	// save candidate list in this address storage
+	CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
+
+	// 退注记录地址
+	BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
+
+	// save last heft state
+	LastSynStateSaveAddress		Address	= HexToAddress("0x3000000000000000000000000000000000000000")
+
+	//特殊账户，该账户存储矿工节点Id到账户的倒排索引
+	StakeNode2StakeAddress Address = HexToAddress("0x400000000000000000000000000000000000000")
+
+	GenaroPriceAddress Address = HexToAddress("0x500000000000000000000000000000000000000")
+
 	// 特殊账户处理处理特殊交易（通过交易参数中的字段区分交易的作用）
 	// 	   一、stake同步:         交易发起方为用户，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为1
 	//     二、heft同步:          交易发起方为存储，交易的"from"为存储节点的address，交易的"to"字段为该特殊地址，参数类型字段为2
@@ -55,19 +70,7 @@ var (
 	//     六、跨链交易terminate: 交易发起方为用户，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为6
 	//     七、跨链交易Sidechina: 交易发起方为存储，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为7
 	//     八、矿工节点同步:      交易发起方为矿工，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为8
-	SpecialSyncAddress Address = HexToAddress("0x5000000000000000000000000000000000000000")
-
-
-	// save candidate list in this address storage
-	CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
-
-	// 退注记录地址
-	BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
-
-	//特殊账户，该账户存储矿工节点Id到账户的倒排索引
-	StakeNode2StakeAddress Address = HexToAddress("0x300000000000000000000000000000000000000")
-
-	GenaroPriceAddress Address = HexToAddress("0x400000000000000000000000000000000000000")
+	SpecialSyncAddress Address = HexToAddress("0x6000000000000000000000000000000000000000")
 )
 
 
@@ -109,6 +112,8 @@ var (
 
 	//价格调控
 	SpecialTxTypePriceRegulation = big.NewInt(12)
+
+	SpecialTxSynState  = big.NewInt(12)
 )
 
 
@@ -127,3 +132,8 @@ var (
 	var ReadWrite int = 0
 	var ReadOnly int = 1
 	var Write int = 2
+
+
+	var SynBlockLen = uint64(6)
+
+

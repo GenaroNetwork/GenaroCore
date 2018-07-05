@@ -649,7 +649,8 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckPunishmentTx(caller)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
 		return vm.CheckPriceRegulation(caller)
-
+	case common.SpecialTxSynState.Uint64():
+		return vm.CheckSynStateTx(caller)
 	}
 	return errors.New("undefined type of special transaction")
 }
