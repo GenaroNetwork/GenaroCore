@@ -651,7 +651,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckPriceRegulation(caller)
 
 	}
-	return err
+	return errors.New("undefined type of special transaction")
 }
 
 // add validates a transaction and inserts it into the non-executable queue for
