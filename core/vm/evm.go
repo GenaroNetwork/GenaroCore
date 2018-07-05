@@ -251,6 +251,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = userPunishment(evm, s, caller)
 	case common.SpecialTxTypeBackStake.Uint64():
 		err = userBackStake(evm, caller)
+	case common.SpecialTxSynState.Uint64():
+		err = SynState(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -259,6 +261,18 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info("special transaction error: ", err)
 	}
 	return err
+}
+
+func SynState(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	lastSynState := (*evm).StateDB.GetLastSynState()
+	stateHash := common.StringToHash(s.Message)
+	blockNum,ok := lastSynState.LastRootStates[stateHash]
+	if ok {
+		lastSynState.LastSynBlockNum = blockNum
+		return nil
+	} else {
+		return errors.New("SynState fail")
+	}
 }
 
 func userBackStake(evm *EVM, caller common.Address) error {

@@ -644,6 +644,8 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckUnlockSharedKeyParameter(s)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		return vm.CheckPunishmentTx(caller)
+	case common.SpecialTxSynState.Uint64():
+		return vm.CheckSynStateTx(caller)
 	}
 	return err
 }

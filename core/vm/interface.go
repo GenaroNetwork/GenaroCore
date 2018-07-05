@@ -111,6 +111,10 @@ type StateDB interface {
 
 	UpdateFileSharePublicKey(common.Address, string) bool
 	UnlockSharedKey(common.Address,string) bool
+
+	AddLastRootState(statehash common.Hash, blockNumber uint64) bool
+	SetLastSynBlockNum(blockNumber uint64) bool
+	GetLastSynState() *types.LastSynState
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

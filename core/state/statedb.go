@@ -1049,3 +1049,30 @@ func (self *StateDB) CheckUnlockSharedKey(address common.Address,shareKeyId stri
 	}
 	return false
 }
+
+func (self *StateDB)AddLastRootState(statehash common.Hash, blockNumber uint64) bool {
+	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
+	if stateObject != nil {
+		stateObject.AddLastRootState(statehash,blockNumber)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)SetLastSynBlockNum(blockNumber uint64) bool {
+	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
+	if stateObject != nil {
+		stateObject.SetLastSynBlockNum(blockNumber)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)GetLastSynState() *types.LastSynState{
+	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
+	if stateObject != nil {
+		return stateObject.GetLastSynState()
+	}
+	return nil
+}
+

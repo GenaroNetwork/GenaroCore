@@ -111,3 +111,26 @@ type FileIDArr struct {
 
 //Cross-chain storage processing
 type SpecialTxTypeMortgageInit FileIDArr
+
+
+type LastSynState struct {
+	LastRootStates map[common.Hash]uint64	`json:"LastRootStates"`
+	LastSynBlockNum uint64				`json:"LastSynBlockNum"`
+}
+
+func (lastSynState *LastSynState)AddLastSynState(blockhash common.Hash, blockNumber uint64){
+	lastSynState.LastRootStates[blockhash] = blockNumber
+	lenth := len(lastSynState.LastRootStates)
+	if uint64(lenth) > common.SynBlockLen {
+		var delBlockHash common.Hash
+		var delBlockBum uint64 = ^uint64(0)
+		for blockHash, blockBum := range lastSynState.LastRootStates {
+			if blockBum < delBlockBum {
+				delBlockHash = blockHash
+				blockBum = delBlockBum
+			}
+		}
+		delete(lastSynState.LastRootStates, delBlockHash)
+	}
+}
+
