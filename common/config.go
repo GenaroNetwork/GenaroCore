@@ -69,6 +69,9 @@ var (
 	CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
 	// 退注记录地址
 	BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
+	// save last heft state
+	LastSynStateSaveAddress		Address	= HexToAddress("0x3000000000000000000000000000000000000000")
+
 )
 
 
@@ -133,12 +136,5 @@ var (
 
 
 	var SynBlockLen = uint64(6)
-
-	// save candidate list in this address storage
-	var CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
-	// 退注记录地址
-	var BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
-	// save last heft state
-	var LastSynStateSaveAddress		Address	= HexToAddress("0x3000000000000000000000000000000000000000")
 
 
