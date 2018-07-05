@@ -917,7 +917,8 @@ func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]b
 			return false
 		}
 		TimeLimit := (resultTmp.EndTime - time.Now().Unix())/86400
-		timeLimitGas := big.NewInt(TimeLimit * int64(len(resultTmp.MortgageTable)) * common.OneDaySyncLogGsa)
+		tmp := big.NewInt(TimeLimit * int64(len(resultTmp.MortgageTable)))
+		timeLimitGas := tmp.Mul(tmp,self.GetOneDaySyncLogGsaCost())
 		stateObject.setBalance(timeLimitGas)
 		newStateObject := self.getStateObject(common.SpecialSyncAddress)
 		newStateObject.AddBalance(timeLimitGas)
@@ -1110,4 +1111,39 @@ func (self *StateDB)GetGenaroPrice() *types.GenaroPrice {
 		return stateObject.GetGenaroPrice()
 	}
 	return nil
+}
+
+
+func (self *StateDB)UpdateOneDayGesCost(address common.Address, price *hexutil.Big) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		stateObject.UpdateOneDayGesCost(price)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)UpdateOneDaySyncLogGsaCost(address common.Address, price *hexutil.Big) bool {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		stateObject.UpdateOneDaySyncLogGsaCost(price)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)GetOneDayGesCost() *big.Int {
+	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
+	if stateObject != nil {
+		return stateObject.GetOneDayGesCost()
+	}
+	return common.DefaultOneDayGes
+}
+
+func (self *StateDB)GetOneDaySyncLogGsaCost() *big.Int {
+	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
+	if stateObject != nil {
+		return stateObject.GetOneDaySyncLogGsaCost()
+	}
+	return common.DefaultOneDaySyncLogGsaCost
 }

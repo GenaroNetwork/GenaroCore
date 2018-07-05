@@ -73,8 +73,10 @@ var (
 )
 	//费用
 
-	var OneDayGes  int64 = int64(5000)
-	var OneDaySyncLogGsa  int64 = int64(5000)
+	//var OneDayGes  int64 = int64(5000)
+	var DefaultOneDaySyncLogGsaCost  *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1))
+
+	var DefaultOneDayGes *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1))
 
 
 	var Base = uint64(10000)	// 收益计算中间值

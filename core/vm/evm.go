@@ -287,6 +287,18 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 		}
 	}
 
+	if s.OneDayGesCost != nil {
+		if ok := (*evm).StateDB.UpdateOneDayGesCost(caller, s.OneDayGesCost); !ok {
+			return errors.New("update the price of trafficApply fail")
+		}
+	}
+
+	if s.OneDaySyncLogGsaCost != nil {
+		if ok := (*evm).StateDB.UpdateOneDaySyncLogGsaCost(caller, s.OneDaySyncLogGsaCost); !ok {
+			return errors.New("update the price of trafficApply fail")
+		}
+	}
+
 	return nil
 }
 
@@ -406,7 +418,7 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
 	}
 	temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(),big.NewInt(int64(len(mortgageTable))))
-	timeLimitGas := temp.Mul(temp,big.NewInt(common.OneDayGes))
+	timeLimitGas := temp.Mul(temp,(*evm).StateDB.GetOneDayGesCost())
 	//timeLimitGas = (*big.Int)()s.SpecialTxTypeMortgageInit.TimeLimit *
 	//扣除抵押表全部费用+按照时间期限收费
 	sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
