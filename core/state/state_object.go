@@ -1254,3 +1254,69 @@ func (self *stateObject)GetGenaroPrice() *types.GenaroPrice {
 	}
 	return nil
 }
+
+
+func (self *stateObject)UpdateOneDayGesCost(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil{
+		genaroPrice = types.GenaroPrice{
+			OneDayGesCost :price,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.OneDayGesCost = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)UpdateOneDaySyncLogGsaCost(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil{
+		genaroPrice = types.GenaroPrice{
+			OneDaySyncLogGsaCost :price,
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.OneDaySyncLogGsaCost = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+
+func (self *stateObject)GetOneDayGesCost() *big.Int {
+
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.OneDayGesCost != nil {
+			return genaroPrice.OneDayGesCost.ToInt()
+		}
+	}
+
+	return common.DefaultOneDayGes
+}
+
+func (self *stateObject)GetOneDaySyncLogGsaCost() *big.Int {
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.OneDaySyncLogGsaCost != nil {
+			return genaroPrice.OneDaySyncLogGsaCost.ToInt()
+		}
+	}
+	return common.DefaultOneDaySyncLogGsaCost
+}

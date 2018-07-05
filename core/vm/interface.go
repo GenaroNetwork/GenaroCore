@@ -122,6 +122,11 @@ type StateDB interface {
 	GetStakePerNodePrice() *big.Int
 
 	GetGenaroPrice() *types.GenaroPrice
+	UpdateOneDayGesCost(common.Address, *hexutil.Big) bool
+	UpdateOneDaySyncLogGsaCost(common.Address, *hexutil.Big) bool
+
+	GetOneDayGesCost() *big.Int
+	GetOneDaySyncLogGsaCost() *big.Int
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
