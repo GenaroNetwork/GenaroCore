@@ -1228,6 +1228,9 @@ func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context) map[strin
 	genaroPriceMap["bucketPricePerGperDay"] = common.DefaultBucketApplyGasPerGPerDay.String()
 	genaroPriceMap["trafficPricePerG"] = common.DefaultTrafficApplyGasPerG.String()
 	genaroPriceMap["stakeValuePerNode"] = common.DefaultStakeValuePerNode.String()
+	genaroPriceMap["oneDayGesCost"] = common.DefaultOneDayGes.String()
+	genaroPriceMap["oneDaySyncLogGsaCost"] = common.DefaultOneDaySyncLogGsaCost.String()
+
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
 	if state == nil || err != nil {
 		return genaroPriceMap
@@ -1243,6 +1246,14 @@ func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context) map[strin
 
 		if genaroPrice.BucketApplyGasPerGPerDay != nil{
 			genaroPriceMap["stakeValuePerNode"] = genaroPrice.StakeValuePerNode.String()
+		}
+
+		if genaroPrice.OneDayGesCost != nil{
+			genaroPriceMap["oneDayGesCost"] = genaroPrice.OneDayGesCost.String()
+		}
+
+		if genaroPrice.OneDaySyncLogGsaCost != nil{
+			genaroPriceMap["oneDaySyncLogGsaCost"] = genaroPrice.OneDaySyncLogGsaCost.String()
 		}
 	}
 
