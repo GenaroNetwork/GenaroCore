@@ -97,10 +97,6 @@ var (
 
 	//SpecialTxTypeSyncNodeId类型的交易代表用户同步stake时的节点到链上
 	SpecialTxTypeSyncNode =big.NewInt(8)
-	//同步分享秘钥
-	SynchronizeShareKey = big.NewInt(15)
-	//解锁分享秘钥
-	UnlockSharedKey = big.NewInt(20)
 
 	// SpecialTxTypeSyncSecretKey类型的交易代表用户同步文件分享公钥
 	SpecialTxTypeSyncFielSharePublicKey  = big.NewInt(9)
@@ -113,7 +109,13 @@ var (
 	//价格调控
 	SpecialTxTypePriceRegulation = big.NewInt(12)
 
-	SpecialTxSynState  = big.NewInt(12)
+	SpecialTxSynState  = big.NewInt(13)
+
+	//同步分享秘钥
+	SynchronizeShareKey = big.NewInt(15)
+
+	//解锁分享秘钥
+	UnlockSharedKey = big.NewInt(20)
 )
 
 
