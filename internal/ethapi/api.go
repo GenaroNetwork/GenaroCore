@@ -1222,6 +1222,33 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	return retArr,nil
 }
 
+
+func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context) map[string]string {
+	genaroPriceMap := make(map[string]string)
+	genaroPriceMap["bucketPricePerGperDay"] = common.DefaultBucketApplyGasPerGPerDay.String()
+	genaroPriceMap["trafficPricePerG"] = common.DefaultTrafficApplyGasPerG.String()
+	genaroPriceMap["stakeValuePerNode"] = common.DefaultStakeValuePerNode.String()
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return genaroPriceMap
+	}
+
+	if genaroPrice := state.GetGenaroPrice(); genaroPrice != nil {
+		if genaroPrice.BucketApplyGasPerGPerDay != nil{
+			genaroPriceMap["bucketPricePerGperDay"] = genaroPrice.BucketApplyGasPerGPerDay.String()
+		}
+		if genaroPrice.TrafficApplyGasPerG != nil{
+			genaroPriceMap["trafficPricePerG"] = genaroPrice.TrafficApplyGasPerG.String()
+		}
+
+		if genaroPrice.BucketApplyGasPerGPerDay != nil{
+			genaroPriceMap["stakeValuePerNode"] = genaroPrice.StakeValuePerNode.String()
+		}
+	}
+
+	return genaroPriceMap
+}
+
 func (s *PublicTransactionPoolAPI) GetAddressByNode(ctx context.Context, str string) string {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
 	var retS string

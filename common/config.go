@@ -2,11 +2,20 @@ package common
 
 import (
 	"math/big"
+	"fmt"
 )
 
 func init() {
 	BaseCompany = big.NewInt(0)
 	BaseCompany.UnmarshalText([]byte("1000000000000000000"))
+
+	DefaultBucketApplyGasPerGPerDay = big.NewInt(0).Mul(BaseCompany,big.NewInt(1)) //购买空间每天每G需1个gnx
+	DefaultTrafficApplyGasPerG = big.NewInt(0).Mul(BaseCompany,big.NewInt(1)) // 购买流量每G需1个gnx
+	DefaultStakeValuePerNode = big.NewInt(0).Mul(BaseCompany,big.NewInt(1000)) //同步一个节点1000个gnx
+
+	fmt.Println("DefaultBucketApplyGasPerGPerDay", DefaultBucketApplyGasPerGPerDay.String())
+	fmt.Println("DefaultTrafficApplyGasPerG", DefaultTrafficApplyGasPerG.String())
+	fmt.Println("DefaultStakeValuePerNode",DefaultStakeValuePerNode.String())
 }
 
 var BaseCompany *big.Int
@@ -81,9 +90,9 @@ var (
 	var BackStackListMax = int(20)		// 最大退注长度
 
 
-	var DefaultBucketApplyGasPerGPerDay *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1)) //购买空间每天每G需1个gnx
-	var DefaultTrafficApplyGasPerG *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1)) // 购买流量每G需1个gnx
-	var DefaultStakeValuePerNode *big.Int = new(big.Int).Mul(BaseCompany,big.NewInt(1000)) //同步一个节点1000个gnx
+	var DefaultBucketApplyGasPerGPerDay *big.Int
+	var DefaultTrafficApplyGasPerG *big.Int
+	var DefaultStakeValuePerNode *big.Int
 
 
 	//官方账号
