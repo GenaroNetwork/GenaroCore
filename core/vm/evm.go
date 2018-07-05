@@ -269,6 +269,7 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 		return err
 	}
 
+	var flag = false
 	if caller !=  common.GenaroPriceAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
@@ -277,30 +278,39 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 		if ok := (*evm).StateDB.UpdateStakePerNodePrice(caller, s.StakeValuePerNode); !ok {
 			return errors.New("update the price of stakePerNode fail")
 		}
+		flag = true
 	}
 
 	if s.BucketApplyGasPerGPerDay != nil {
 		if ok := (*evm).StateDB.UpdateBucketApplyPrice(caller, s.BucketApplyGasPerGPerDay); !ok {
 			return errors.New("update the price of bucketApply fail")
 		}
+		flag = true
 	}
 
 	if s.TrafficApplyGasPerG != nil {
 		if ok := (*evm).StateDB.UpdateTrafficApplyPrice(caller, s.TrafficApplyGasPerG); !ok {
 			return errors.New("update the price of trafficApply fail")
 		}
+		flag = true
 	}
 
 	if s.OneDayMortgageGes != nil {
 		if ok := (*evm).StateDB.UpdateOneDayGesCost(caller, s.OneDayMortgageGes); !ok {
 			return errors.New("update the price of OneDayGesCost fail")
 		}
+		flag = true
 	}
 
 	if s.OneDaySyncLogGsaCost != nil {
 		if ok := (*evm).StateDB.UpdateOneDaySyncLogGsaCost(caller, s.OneDaySyncLogGsaCost); !ok {
 			return errors.New("update the price of OneDaySyncLogGsaCost fail")
 		}
+		flag = true
+	}
+
+	if !flag {
+		return errors.New("none parice to update")
 	}
 
 	return nil
