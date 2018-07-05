@@ -371,7 +371,7 @@ func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address)
 		return err
 	}
 	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress) {
-		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+		return errors.New("update  chain SynchronizeShareKey fail")
 	}
 	s.SynchronizeShareKey.Status = 0
 	s.SynchronizeShareKey.FromAccount = caller
