@@ -177,9 +177,13 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		if err != nil {
 			return nil, gas, err
 		}
+
+		//如果是特殊交易，往官方账号转账
+		evm.Transfer(evm.StateDB, caller.Address(), common.OfficialAddress, value)
+	}else {
+		evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
 	}
 
-	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
 
 	// Initialise a new contract and set the code that is to be used by the EVM.
 	// The contract is a scoped environment for this execution context only.
@@ -226,7 +230,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
 		// if the address of caller is not offical address, fail this transaction
-		if caller != common.SyncHeftAddress {
+		if caller != common.OfficialAddress {
 			return errors.New("current caller addrss has no permission on this operation")
 		}
 		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64())
@@ -236,7 +240,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		err = specialTxTypeMortgageInit(evm, s,caller)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
-		err = SpecialTxTypeSyncSidechainStatus(evm, s)
+		err = SpecialTxTypeSyncSidechainStatus(evm, s, caller)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		err = updateTraffic(evm, s, caller)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
@@ -380,8 +384,8 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 	return err
 }
 
-func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput) error  {
-	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s); nil != err {
+func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error  {
+	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller); nil != err {
 		return err
 	}
 	restlt,flag := (*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit)

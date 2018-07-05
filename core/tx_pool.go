@@ -631,7 +631,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
-		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s)
+		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		return vm.CheckTrafficTx(s)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id

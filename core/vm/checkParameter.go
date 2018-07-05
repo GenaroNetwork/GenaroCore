@@ -8,7 +8,11 @@ import (
 	"errors"
 )
 
-func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput) error {
+func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address) error {
+	if caller !=  common.OfficialAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+
 	if 64 != len(s.SpecialTxTypeMortgageInit.Dataversion) {
 		return errors.New("Parameter Dataversion  error")
 	}
@@ -95,7 +99,7 @@ func CheckStakeTx(s types.SpecialTxInput) error {
 }
 
 func CheckSyncHeftTx(caller common.Address) error {
-	if caller !=  common.SyncHeftAddress {
+	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil
@@ -139,7 +143,7 @@ func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string, stakeVlauePe
 }
 
 func CheckPunishmentTx(caller common.Address) error {
-	if caller !=  common.SyncHeftAddress {
+	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil

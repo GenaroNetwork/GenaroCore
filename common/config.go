@@ -37,6 +37,11 @@ var (
 )
 
 
+var (
+	//官方账号
+	OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
+)
+
 /*
 Some special address prepared for special transactions.
 */
@@ -50,25 +55,19 @@ var (
 	//     六、跨链交易terminate: 交易发起方为用户，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为6
 	//     七、跨链交易Sidechina: 交易发起方为存储，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为7
 	//     八、矿工节点同步:      交易发起方为矿工，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为8
-	SpecialSyncAddress Address = HexToAddress("0xc1b2e1fc9d2099f5930a669c9ad65509433550d6")
-
-
-	//特殊账户，该账户存储矿工节点Id到账户的倒排索引
-	StakeNode2StakeAddress Address = HexToAddress("0x0000000000000000000000000000000000000001")
-
-	//官方账号
-	//var OfficialAddress Address  = HexToAddress("0xa07b0fc50549c636ad4d7fbc6ea747574efb8e8a")
-	SyncLogAddress Address  = HexToAddress("0xebb97ad3ca6b4f609da161c0b2b0eaa4ad58f3e8")
-
-	SyncHeftAddress Address = HexToAddress("0x4c76584a5c7caf369e8571cf13162bcf83843f0b")
-
-	GenaroPriceAddress Address = HexToAddress("0x6666666666666666666666666666666666666666")
+	SpecialSyncAddress Address = HexToAddress("0x5000000000000000000000000000000000000000")
 
 
 	// save candidate list in this address storage
 	CandidateSaveAddress		Address	= HexToAddress("0x1000000000000000000000000000000000000000")
+
 	// 退注记录地址
 	BackStakeAddress			Address	= HexToAddress("0x2000000000000000000000000000000000000000")
+
+	//特殊账户，该账户存储矿工节点Id到账户的倒排索引
+	StakeNode2StakeAddress Address = HexToAddress("0x300000000000000000000000000000000000000")
+
+	GenaroPriceAddress Address = HexToAddress("0x400000000000000000000000000000000000000")
 )
 
 

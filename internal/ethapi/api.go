@@ -1468,10 +1468,17 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 	}
 
+	if args.ExtraData == "" {
+		return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+	}
+
 	//deal special transaction
 	if *args.To == common.SpecialSyncAddress {
 		var s types.SpecialTxInput
-		json.Unmarshal([]byte(args.ExtraData), &s)
+		if err := json.Unmarshal([]byte(args.ExtraData), &s); err != nil {
+			// 这里发现特殊交易的参数错误后，不反悔错误。错误的返回同意由tx_pool	.go 中的dispatchHandlerValidateTx方法处理返回
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
+		}
 		switch s.Type.ToInt().Uint64() {
 		case common.SpecialTxTypeMortgageInit.Uint64():
 			if len(s.SpecialTxTypeMortgageInit.MortgageTable) > 8 {
@@ -1502,14 +1509,11 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		case common.SpecialTxTypeSyncSidechainStatus.Uint64():
-			if common.SyncLogAddress== args.From {
-				timeUnix := strconv.FormatInt(time.Now().Unix(),10)
-				timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
-				s.SpecialTxTypeMortgageInit.Dataversion = hex.EncodeToString(timeUnixSha256[:])
-				input,_ := json.Marshal(s)
-				return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-			}
-			return nil
+			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
+			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
+			s.SpecialTxTypeMortgageInit.Dataversion = hex.EncodeToString(timeUnixSha256[:])
+			input,_ := json.Marshal(s)
+			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		case common.SynchronizeShareKey.Uint64():
 			timeUnix := strconv.FormatInt(time.Now().Unix(),10)
 			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
@@ -1569,9 +1573,6 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Sen
 	}
 	// Assemble the transaction and sign with the wallet
 	tx := args.toTransaction()
-	if nil == tx {
-		return common.Hash{}, errors.New(`sync log Address error`)
-	}
 	var chainID *big.Int
 	if config := s.b.ChainConfig(); config.IsEIP155(s.b.CurrentBlock().Number()) {
 		chainID = config.ChainId
