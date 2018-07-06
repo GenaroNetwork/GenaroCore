@@ -1172,7 +1172,7 @@ func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBl
 				var s types.SpecialTxInput
 				json.Unmarshal([]byte(tx.Input), &s)
 				r := new(rpcTrafficInfo)
-				r.NodeId = s.NodeId
+				r.NodeId = s.Address
 				r.Traffic = s.Traffic
 				r.Hash = tx.Hash
 				retArr = append(retArr, r)
@@ -1212,7 +1212,7 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 					r.TimeEnd = v.TimeEnd
 					r.Backup = v.Backup
 					r.Size = v.Size
-					r.NodeId = s.NodeId
+					r.NodeId = s.Address
 					r.Hash = tx.Hash
 					retArr = append(retArr, r)
 				}
@@ -1500,7 +1500,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			for _, v := range s.Buckets{
 				t := time.Now()
 				r := rand.New(rand.NewSource(t.Unix()))
-				bucketID := s.NodeId + strconv.FormatInt(t.Unix(),10) + strconv.Itoa(r.Int())
+				bucketID := s.Address + strconv.FormatInt(t.Unix(),10) + strconv.Itoa(r.Int())
 				bucketIdSha256 := sha256.Sum256([]byte(bucketID))
 				v.BucketId = hex.EncodeToString(bucketIdSha256[:])
 				b = append(b, v)

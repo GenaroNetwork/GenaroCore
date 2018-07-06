@@ -112,7 +112,7 @@ func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
 }
 
 func CheckStakeTx(s types.SpecialTxInput) error {
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress){
 		return errors.New("param [address] can't be special address")
 	}
@@ -128,7 +128,7 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput) error {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress){
 		return errors.New("param [address] can't be special address")
 	}
@@ -146,7 +146,7 @@ func CheckApplyBucketTx(s types.SpecialTxInput) error {
 }
 
 func CheckTrafficTx(s types.SpecialTxInput) error {
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress){
 		return errors.New("param [address] can't be special address")
 	}
@@ -165,6 +165,19 @@ func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string, stakeVlauePe
 		return errors.New("none nodes to synchronize")
 	}
 
+	//校验节点是否已经绑定过
+	for _, addNode := range toAddNodes {
+		node := addNode
+		if node == ""{
+			return errors.New("the length of node must larger than 0")
+		}
+		for _, existNode := range existNodes {
+			if node == existNode {
+				return errors.New("the node has been bound to the account")
+			}
+		}
+	}
+
 	if existNodes != nil {
 		nodeNum += len(existNodes)
 	}
@@ -179,7 +192,7 @@ func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string, stakeVlauePe
 }
 
 func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput) error {
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress){
 		return errors.New("param [address] can't be special address")
 	}
@@ -198,7 +211,7 @@ func CheckSynStateTx(caller common.Address) error {
 }
 
 func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress){
 		return errors.New("param [address] can't be special address")
 	}

@@ -352,7 +352,7 @@ func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) erro
 	if err := CheckPunishmentTx(caller,s); err != nil  {
 		return err
 	}
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	var actualPunishment uint64
 	var ok bool
 	// 根据nodeid扣除对应用户的stake
@@ -392,7 +392,7 @@ func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Add
 	if err := CheckSyncFileSharePublicKeyTx(s); nil != err  {
 		return err
 	}
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	if !(*evm).StateDB.UpdateFileSharePublicKey(adress, s.FileSharePublicKey) {
 		return errors.New("update user's public key fail")
 	}
@@ -463,7 +463,7 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 }
 
 func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 
 	currentPrice := (*evm).StateDB.GetGenaroPrice()
 	totalGas := s.SpecialCost(currentPrice)
@@ -502,7 +502,7 @@ func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64, ca
 		return err
 	}
 
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	// 根据nodeid更新heft值
 	if !(*statedb).UpdateHeft(adress, s.Heft, blockNumber) {
 		return errors.New("update user's heft fail")
@@ -516,7 +516,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 		return err
 	}
 
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 
 	currentPrice := (*evm).StateDB.GetGenaroPrice()
 	totalGas := s.SpecialCost(currentPrice)
@@ -552,7 +552,7 @@ func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 		return ErrInsufficientBalance
 	}
 
-	adress := common.HexToAddress(s.NodeId)
+	adress := common.HexToAddress(s.Address)
 	// 根据nodeid更新stake值
 	if !(*evm).StateDB.UpdateStake(adress, s.Stake, evm.BlockNumber.Uint64()) {
 		return errors.New("update sentinel's stake fail")
