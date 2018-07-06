@@ -20,6 +20,10 @@ func isSpecialAddress(address common.Address) bool {
 }
 
 func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address) error {
+	if true == isSpecialAddress(s.SpecialTxTypeMortgageInit.FromAccount) {
+		return errors.New("fromAccount error")
+	}
+
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
@@ -83,6 +87,11 @@ func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller comm
 }
 
 func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput) error {
+
+	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress) {
+		return errors.New("update  chain SynchronizeShareKey fail")
+	}
+
 	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
 		return errors.New("Parameter ShareKeyId  error")
 	}

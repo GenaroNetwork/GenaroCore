@@ -380,9 +380,6 @@ func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address)
 	if err := CheckSynchronizeShareKeyParameter(s); err != nil  {
 		return err
 	}
-	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress) {
-		return errors.New("update  chain SynchronizeShareKey fail")
-	}
 	s.SynchronizeShareKey.Status = 0
 	s.SynchronizeShareKey.FromAccount = caller
 	if !(*evm).StateDB.SynchronizeShareKey(s.SynchronizeShareKey.RecipientAddress,s.SynchronizeShareKey) {
@@ -419,9 +416,6 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error  {
 	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller); nil != err {
 		return err
-	}
-	if true == isSpecialAddress(s.SpecialTxTypeMortgageInit.FromAccount) {
-		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
 	}
 
 	restlt,flag := (*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount,s.SpecialTxTypeMortgageInit)
