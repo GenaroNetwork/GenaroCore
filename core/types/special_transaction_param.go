@@ -136,7 +136,8 @@ type SpecialTxTypeMortgageInit FileIDArr
 
 type LastSynState struct {
 	LastRootStates map[common.Hash]uint64	`json:"LastRootStates"`
-	LastSynBlockNum uint64				`json:"LastSynBlockNum"`
+	LastSynBlockNum uint64					`json:"LastSynBlockNum"`
+	LastSynBlockHash common.Hash			`json:"LastSynBlockHash"`
 }
 
 func (lastSynState *LastSynState)AddLastSynState(blockhash common.Hash, blockNumber uint64){
@@ -148,7 +149,7 @@ func (lastSynState *LastSynState)AddLastSynState(blockhash common.Hash, blockNum
 		for blockHash, blockBum := range lastSynState.LastRootStates {
 			if blockBum < delBlockBum {
 				delBlockHash = blockHash
-				blockBum = delBlockBum
+				delBlockBum = blockBum
 			}
 		}
 		delete(lastSynState.LastRootStates, delBlockHash)

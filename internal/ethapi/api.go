@@ -526,6 +526,33 @@ func (s *PublicBlockChainAPI) GetBalance(ctx context.Context, address common.Add
 	return b, state.Error()
 }
 
+func (s *PublicBlockChainAPI) GetLastRootStates(ctx context.Context, blockNr rpc.BlockNumber) (lastRootStates map[common.Hash]uint64, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	lastSynState := state.GetLastSynState()
+	if lastSynState != nil {
+		lastRootStates = lastSynState.LastRootStates
+		return
+	}
+	return
+}
+
+func (s *PublicBlockChainAPI) GetLastSynBlock(ctx context.Context, blockNr rpc.BlockNumber) (ret string, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	lastSynState := state.GetLastSynState()
+	if lastSynState != nil {
+		ret = "blocknum:"+strconv.Itoa(int(lastSynState.LastSynBlockNum))+","
+		ret += "blockhash:"+lastSynState.LastSynBlockHash.String()
+		return
+	}
+	return
+}
+
 // GetStake returns the stake of ether for the given address in the state of the
 // given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
 // block numbers are also allowed.

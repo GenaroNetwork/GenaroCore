@@ -150,7 +150,7 @@ func CheckPunishmentTx(caller common.Address) error {
 }
 
 func CheckSynStateTx(caller common.Address) error {
-	if caller !=  common.SpecialSyncAddress {
+	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil

@@ -38,6 +38,22 @@ func GenCandidateAccount(committees []common.Address) core.GenesisAccount{
 	return CandidateAccount
 }
 
+// generate first SynState Account
+func GenLastSynStateAccount() core.GenesisAccount{
+	var lastRootStates = make(map[common.Hash]uint64)
+	lastRootStates[common.Hash{}] = 0
+	var lastSynState = types.LastSynState{
+		LastRootStates:	lastRootStates,
+		LastSynBlockNum: 0,
+	}
+	b, _ := json.Marshal(lastSynState)
+	LastSynStateAccount := core.GenesisAccount{
+		Balance: big.NewInt(0),
+		CodeHash: b,
+	}
+	return LastSynStateAccount
+}
+
 // generate user account
 func GenAccount(balanceStr string, stake,heft uint64) core.GenesisAccount {
 	balance,ok := math.ParseBig256(balanceStr)
@@ -152,7 +168,9 @@ func main() {
 		}
 	}
 	candidateAccount := GenCandidateAccount(committees)
+	LastSynStateAccount := GenLastSynStateAccount()
 	genesis.Alloc[common.CandidateSaveAddress] = candidateAccount
+	genesis.Alloc[common.LastSynStateSaveAddress] = LastSynStateAccount
 
 	//accounts := make([]core.GenesisAccount,len(*myAccounts))
 	for addr := range *myAccounts {

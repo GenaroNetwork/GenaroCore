@@ -1202,11 +1202,14 @@ func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
 }
 
 func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint64) {
-	var lastSynState *types.LastSynState
+	var lastSynState types.LastSynState
 	if self.data.CodeHash == nil{
-		lastSynState = new(types.LastSynState)
+		lastSynState = types.LastSynState{
+			LastRootStates:	make(map[common.Hash]uint64),
+			LastSynBlockNum: 0,
+		}
 	}else {
-		json.Unmarshal(self.data.CodeHash, lastSynState)
+		json.Unmarshal(self.data.CodeHash, &lastSynState)
 	}
 
 	lastSynState.AddLastSynState(statehash,blockNumber)
@@ -1253,15 +1256,19 @@ func (self *stateObject)UpdateStakePerNodePrice(price *hexutil.Big) {
         }
 }
 
-func (self *stateObject)SetLastSynBlockNum(blockNumber uint64) {
-	var lastsynState *types.LastSynState
+func (self *stateObject)SetLastSynBlock(blockNumber uint64,blockHash common.Hash) {
+	var lastsynState types.LastSynState
 	if self.data.CodeHash == nil{
-		lastsynState = new(types.LastSynState)
+		lastsynState = types.LastSynState{
+			LastRootStates:	make(map[common.Hash]uint64),
+			LastSynBlockNum: 0,
+		}
 	}else {
-		json.Unmarshal(self.data.CodeHash, lastsynState)
+		json.Unmarshal(self.data.CodeHash, &lastsynState)
 	}
 
 	lastsynState.LastSynBlockNum = blockNumber
+	lastsynState.LastSynBlockHash = blockHash
 
 	b, _ := json.Marshal(lastsynState)
 	self.code = nil

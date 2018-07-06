@@ -9,8 +9,9 @@ import (
 // the field "extra" store the json of ExtraData
 // TODO re-design the struct to speed up
 type ExtraData struct {
-	CommitteeRank []common.Address `json:"committeeRank"` // rank of committee
-	LastSynBlockNum  uint64           `json:"lastBlockNum"`  //sentinelHeft
+	CommitteeRank []common.Address 	`json:"committeeRank"` // rank of committee
+	LastSynBlockNum  uint64           `json:"lastBlockNum"`
+	LastSynBlockHash  common.Hash     `json:"lastSynBlockHash"`
 	Signature     []byte           `json:"signature"`     // the signature of block broadcaster
 	Proportion	  []uint64		   `json:"ratio"`
 }

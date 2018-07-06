@@ -1089,10 +1089,10 @@ func (self *StateDB)UpdateTrafficApplyPrice(address common.Address, price *hexut
         return false
 }
 
-func (self *StateDB)SetLastSynBlockNum(blockNumber uint64) bool {
+func (self *StateDB)SetLastSynBlock(blockNumber uint64,blockHash common.Hash) bool {
 	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
 	if stateObject != nil {
-		stateObject.SetLastSynBlockNum(blockNumber)
+		stateObject.SetLastSynBlock(blockNumber,blockHash)
 		return true
 	}
 	return false
