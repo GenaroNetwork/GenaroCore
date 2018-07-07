@@ -130,7 +130,7 @@ type StateDB interface {
 	GetOneDaySyncLogGsaCost() *big.Int
 	
 	AddLastRootState(statehash common.Hash, blockNumber uint64) bool
-	SetLastSynBlockNum(blockNumber uint64) bool
+	SetLastSynBlock(blockNumber uint64,blockHash common.Hash) bool
 	GetLastSynState() *types.LastSynState
 }
 

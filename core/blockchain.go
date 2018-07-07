@@ -43,6 +43,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/trie"
 	"github.com/hashicorp/golang-lru"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
+	"strings"
 )
 
 var (
@@ -960,14 +962,21 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	// Second clause in the if statement reduces the vulnerability to selfish mining.
 	// Please refer to http://www.cs.cornell.edu/~ie53/publications/btcProcFC.pdf
 	reorg := externTd.Cmp(localTd) > 0
-	if bc.chainConfig.Genaro != nil {
-
-	}
 	currentBlock = bc.CurrentBlock()
 	if !reorg && externTd.Cmp(localTd) == 0 {
 		// Split same-difficulty blocks by number, then at random
 		reorg = block.NumberU64() < currentBlock.NumberU64() || (block.NumberU64() == currentBlock.NumberU64() && mrand.Float64() < 0.5)
 	}
+	if bc.chainConfig.Genaro != nil {
+		blockExtra := genaro.UnmarshalToExtra(block.Header())
+		currentBlockExtra := genaro.UnmarshalToExtra(currentBlock.Header())
+		if blockExtra.LastSynBlockNum < currentBlockExtra.LastSynBlockNum {
+			reorg = false
+		} else if blockExtra.LastSynBlockNum == currentBlockExtra.LastSynBlockNum && !strings.EqualFold(blockExtra.LastSynBlockHash.String(),currentBlockExtra.LastSynBlockHash.String()) {
+			reorg = false
+		}
+	}
+
 	if reorg {
 		// Reorganise the chain if the parent is not the head block
 		if block.ParentHash() != currentBlock.Hash() {

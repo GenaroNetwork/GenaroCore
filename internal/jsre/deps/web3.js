@@ -5293,6 +5293,28 @@ var methods = function () {
         inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
+    var getLastRootStates = new Method({
+        name: 'getLastRootStates',
+        call: 'eth_getLastRootStates',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getLastSynBlock = new Method({
+        name: 'getLastSynBlock',
+        call: 'eth_getLastSynBlock',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    GetExtra
+    var getExtra = new Method({
+        name: 'getExtra',
+        call: 'eth_getExtra',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getStake = new Method({
         name: 'getStake',
         call: 'eth_getStake',
@@ -5527,7 +5549,10 @@ var methods = function () {
         getHeftRangeDiff,
         getCandidates,
         getCommitteeRank,
-        getGenaroCodeHash
+        getGenaroCodeHash,
+        getLastRootStates,
+        getLastSynBlock,
+        getExtra
     ];
 };
 

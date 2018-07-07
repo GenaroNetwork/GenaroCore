@@ -25,6 +25,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/log"
+	"bytes"
 )
 
 // nonceHeap is a heap.Interface implementation over 64bit unsigned integers for
@@ -368,7 +369,12 @@ func (l *txList) Flatten() types.Transactions {
 type priceHeap []*types.Transaction
 
 func (h priceHeap) Len() int           { return len(h) }
-func (h priceHeap) Less(i, j int) bool { return h[i].GasPrice().Cmp(h[j].GasPrice()) < 0 }
+func (h priceHeap) Less(i, j int) bool {
+	if bytes.Compare(h[i].To().Bytes(),common.SpecialSyncAddress.Bytes()) == 0 && bytes.Compare(h[j].To().Bytes(),common.SpecialSyncAddress.Bytes()) != 0{
+		return false
+	}
+	return h[i].GasPrice().Cmp(h[j].GasPrice()) < 0
+}
 func (h priceHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
 func (h *priceHeap) Push(x interface{}) {

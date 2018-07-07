@@ -19,7 +19,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
-	"encoding/json"
+	"github.com/gin-gonic/gin/json"
 )
 
 const (
@@ -386,7 +386,7 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	}
 	// check syn state
 	extraData := UnmarshalToExtra(header)
-	if blockNumber - extraData.LastSynBlockNum > common.SynBlockLen {
+	if blockNumber - extraData.LastSynBlockNum > common.SynBlockLen+1 {
 		return errors.New("need SynState")
 	}
 
@@ -532,10 +532,8 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	extraData := UnmarshalToExtra(header)
 	lastSynState := state.GetLastSynState()
 	if lastSynState != nil {
-		if blockNumber - lastSynState.LastSynBlockNum > common.SynBlockLen {
-			return nil, errors.New("need SynState")
-		}
 		extraData.LastSynBlockNum = lastSynState.LastSynBlockNum
+		extraData.LastSynBlockHash = lastSynState.LastSynBlockHash
 		header.Extra, _ = json.Marshal(extraData)
 	}
 	state.AddLastRootState(header.ParentHash,header.Number.Uint64()-1)

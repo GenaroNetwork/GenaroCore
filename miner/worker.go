@@ -26,7 +26,6 @@ import (
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
-	"github.com/GenaroNetwork/Genaro-Core/consensus/misc"
 	"github.com/GenaroNetwork/Genaro-Core/core"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
@@ -36,6 +35,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"gopkg.in/fatih/set.v0"
+	"github.com/pkg/errors"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/misc"
 )
 
 const (
@@ -50,6 +51,8 @@ const (
 	// chainSideChanSize is the size of channel listening to ChainSideEvent.
 	chainSideChanSize = 10
 )
+
+var SynError = errors.New("need SynState")
 
 // Agent can register themself with the worker
 type Agent interface {
@@ -155,7 +158,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 	go worker.update()
 
 	go worker.wait()
-	worker.commitNewWork()
+	worker.commitNewWork(false)
 
 	return worker
 }
@@ -252,7 +255,7 @@ func (self *worker) update() {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			self.commitNewWork()
+			self.commitNewWork(false)
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -273,7 +276,7 @@ func (self *worker) update() {
 			} else {
 				// If we're mining, but nothing is being processed, wake on new transactions
 				if self.config.Clique != nil && self.config.Clique.Period == 0 {
-					self.commitNewWork()
+					self.commitNewWork(false)
 				}
 			}
 
@@ -336,7 +339,7 @@ func (self *worker) wait() {
 			self.unconfirmed.Insert(block.NumberU64(), block.Hash())
 
 			if mustCommitNewWork {
-				self.commitNewWork()
+				self.commitNewWork(true)
 			}
 		}
 	}
@@ -387,7 +390,7 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 	return nil
 }
 
-func (self *worker) commitNewWork() {
+func (self *worker) commitNewWork(checkSynState bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.uncleMu.Lock()
@@ -449,13 +452,47 @@ func (self *worker) commitNewWork() {
 	if self.config.DAOForkSupport && self.config.DAOForkBlock != nil && self.config.DAOForkBlock.Cmp(header.Number) == 0 {
 		misc.ApplyDAOHardFork(work.state)
 	}
-	pending, err := self.eth.TxPool().Pending()
-	if err != nil {
-		log.Error("Failed to fetch pending transactions", "err", err)
-		return
+
+	if self.config.Genaro != nil {
+		// deal TxPool util has SynState
+		for {
+			pending, err := self.eth.TxPool().Pending()
+			if err != nil {
+				log.Error("Failed to fetch pending transactions", "err", err)
+				return
+			}
+			txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
+			work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
+
+			// check if has Syn State
+			lastSynState := work.state.GetLastSynState()
+			if lastSynState != nil {
+				if header.Number.Uint64()-lastSynState.LastSynBlockNum > common.SynBlockLen+1 {
+					log.Error("need SynState")
+					if !checkSynState {
+						return
+					}
+					time.Sleep(time.Second)
+				} else {
+					break
+				}
+			}else {
+				log.Error("lastSynState nil")
+				return
+			}
+			*work = *self.current
+		}
+	} else {
+		pending, err := self.eth.TxPool().Pending()
+		if err != nil {
+			log.Error("Failed to fetch pending transactions", "err", err)
+			return
+		}
+		txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
+		work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
 	}
-	txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
-	work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
+
+
 	// compute uncles for the new block.
 	var (
 		uncles    []*types.Header
@@ -491,6 +528,7 @@ func (self *worker) commitNewWork() {
 		self.unconfirmed.Shift(work.Block.NumberU64() - 1)
 	}
 	self.push(work)
+	return
 }
 
 func (self *worker) commitUncle(work *Work, uncle *types.Header) error {
