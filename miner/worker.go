@@ -255,7 +255,7 @@ func (self *worker) update() {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			self.commitNewWork(true)
+			self.commitNewWork(false)
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -276,7 +276,7 @@ func (self *worker) update() {
 			} else {
 				// If we're mining, but nothing is being processed, wake on new transactions
 				if self.config.Clique != nil && self.config.Clique.Period == 0 {
-					self.commitNewWork(true)
+					self.commitNewWork(false)
 				}
 			}
 
@@ -452,8 +452,37 @@ func (self *worker) commitNewWork(checkSynState bool) {
 	if self.config.DAOForkSupport && self.config.DAOForkBlock != nil && self.config.DAOForkBlock.Cmp(header.Number) == 0 {
 		misc.ApplyDAOHardFork(work.state)
 	}
-	// deal TxPool util has SynState
-	for {
+
+	if self.config.Genaro != nil {
+		// deal TxPool util has SynState
+		for {
+			pending, err := self.eth.TxPool().Pending()
+			if err != nil {
+				log.Error("Failed to fetch pending transactions", "err", err)
+				return
+			}
+			txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
+			work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
+
+			// check if has Syn State
+			lastSynState := work.state.GetLastSynState()
+			if lastSynState != nil {
+				if header.Number.Uint64()-lastSynState.LastSynBlockNum > common.SynBlockLen+1 {
+					log.Error("need SynState")
+					if !checkSynState {
+						return
+					}
+					time.Sleep(time.Second)
+				} else {
+					break
+				}
+			}else {
+				log.Error("lastSynState nil")
+				return
+			}
+			*work = *self.current
+		}
+	} else {
 		pending, err := self.eth.TxPool().Pending()
 		if err != nil {
 			log.Error("Failed to fetch pending transactions", "err", err)
@@ -461,25 +490,8 @@ func (self *worker) commitNewWork(checkSynState bool) {
 		}
 		txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
 		work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
-
-		// check if has Syn State
-		lastSynState := work.state.GetLastSynState()
-		if lastSynState != nil {
-			if header.Number.Uint64()-lastSynState.LastSynBlockNum > common.SynBlockLen+1 {
-				log.Error("need SynState")
-				if !checkSynState {
-					return
-				}
-				time.Sleep(time.Second)
-			} else {
-				break
-			}
-		}else {
-			log.Error("lastSynState nil")
-			return
-		}
-		*work = *self.current
 	}
+
 
 	// compute uncles for the new block.
 	var (

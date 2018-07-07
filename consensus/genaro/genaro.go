@@ -386,7 +386,7 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	}
 	// check syn state
 	extraData := UnmarshalToExtra(header)
-	if blockNumber - extraData.LastSynBlockNum > common.SynBlockLen {
+	if blockNumber - extraData.LastSynBlockNum > common.SynBlockLen+1 {
 		return errors.New("need SynState")
 	}
 
