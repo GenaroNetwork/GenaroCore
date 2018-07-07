@@ -10,9 +10,11 @@ import (
 type SpecialTxInput struct {
 	GenaroData
 	Address     string       `json:"address"`
+	NodeID      string       `json:"nodeId"`
 	Type        *hexutil.Big `json:"type"`
 	BlockNumber string       `json:"blockNr"`
 	Message     string       `json:"msg"`
+	Sign        string       `json:"sign"`
 	GenaroPrice
 }
 

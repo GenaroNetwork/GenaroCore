@@ -7,6 +7,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"errors"
 	"bytes"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"fmt"
 )
 
 
@@ -157,27 +159,38 @@ func CheckTrafficTx(s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckSyncNodeTx(stake uint64, existNodes, toAddNodes []string, stakeVlauePerNode *big.Int) error {
-	var nodeNum int
-	if toAddNodes != nil{
-		nodeNum = len(toAddNodes)
-	}else{
-		return errors.New("none nodes to synchronize")
+func CheckSyncNodeTx(caller common.Address,stake uint64, existNodes []string, s types.SpecialTxInput, stakeVlauePerNode *big.Int) error {
+
+	if len(s.NodeID) == 0 {
+		return errors.New("length of nodeId must be ")
+	}
+
+	//caller和节点待绑定账户是否一致
+	if caller.String() != s.Address {
+		return errors.New("two address not equal")
 	}
 
 	//校验节点是否已经绑定过
-	for _, addNode := range toAddNodes {
-		node := addNode
-		if node == ""{
-			return errors.New("the length of node must larger than 0")
-		}
-		for _, existNode := range existNodes {
-			if node == existNode {
-				return errors.New("the node has been bound to the account")
-			}
+	for _, existNode := range existNodes {
+		if s.NodeID == existNode {
+			return errors.New("the node has been bound to the account")
 		}
 	}
 
+	// 验证节点绑定签名
+	// 拼接message
+	msg := s.NodeID + s.Sign
+	recoveredPub, err := crypto.Ecrecover([]byte(msg), []byte(s.Sign))
+	if err != nil {
+		errors.New("ECRecover error")
+	}
+	pubKey := crypto.ToECDSAPub(recoveredPub)
+
+	//get publickey
+	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
+	fmt.Println(recoveredAddr)
+
+	var nodeNum int = 1
 	if existNodes != nil {
 		nodeNum += len(existNodes)
 	}
