@@ -7,12 +7,18 @@ import (
 	"strings"
 	"github.com/tidwall/gjson"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"fmt"
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"fmt"
+	"time"
 	"log"
 )
 
 var rpcurl string
+var delaytime int64
+
+func logPrint(msg string){
+	log.Println(msg)
+}
 
 func HttpPost(url string, contentType string, body string) ([]byte, error) {
 	bodyio := strings.NewReader(body)
@@ -67,32 +73,64 @@ func SendSynState(url string,blockHash string) (string,error){
 	return gjson.ParseBytes(ret).String(),nil
 }
 
+func GetLastSynBlockInfo(url string) ([]byte,error){
+	ret,err := HttpPost(url,"application/json",`{"jsonrpc":"2.0","method":"eth_getLastSynBlock","params":["latest"],"id":1}`)
+	return ret,err
+}
+
+func GetLastSynBlockHash(url string) (string,error){
+	ret,err := GetLastSynBlockInfo(url)
+	if err != nil {
+		return "",err
+	}
+	hash := gjson.GetBytes(ret,"result.BlockHash").String()
+	return hash,nil
+}
+
 func initarg() {
+	flag.Int64Var(&delaytime,"t",1,"delay time")
 	flag.StringVar(&rpcurl, "u", "http://127.0.0.1:8545", "rpc url")
 	flag.Parse()
 }
 
-func main() {
-	initarg()
+func SynState(){
 	cuBlockNum,err := GetCuBlockNum(rpcurl)
 	if err != nil {
-		log.Fatal(err)
+		logPrint(err.Error())
 		return
 	}
 	fmt.Println(cuBlockNum)
 	synBlockNum := cuBlockNum/6
 	if synBlockNum != 0 {
+		synBlockHashPre,err := GetLastSynBlockHash(rpcurl)
+		if err != nil {
+			logPrint(err.Error())
+			return
+		}
 		synBlockHash,err := GetBlockHash(rpcurl,synBlockNum*6)
 		if err != nil {
-			log.Fatal(err)
+			logPrint(err.Error())
 			return
 		}
 		fmt.Println(synBlockHash)
-		ret,err := SendSynState(rpcurl,synBlockHash)
-		if err != nil {
-			log.Fatal(err)
+		if strings.EqualFold(synBlockHashPre,synBlockHash) {
+			logPrint("syn state is exist")
 			return
 		}
-		fmt.Println(ret)
+		ret,err := SendSynState(rpcurl,synBlockHash)
+		if err != nil {
+			logPrint(err.Error())
+			return
+		}
+		logPrint(ret)
 	}
+}
+
+func main() {
+	initarg()
+	for {
+		SynState()
+		time.Sleep(time.Duration(delaytime)*time.Second)
+	}
+
 }

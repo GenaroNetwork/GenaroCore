@@ -5305,7 +5305,14 @@ var methods = function () {
         call: 'eth_getLastSynBlock',
         params: 1,
         inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
-        outputFormatter: utils.toDecimal
+    });
+
+    GetExtra
+    var getExtra = new Method({
+        name: 'getExtra',
+        call: 'eth_getExtra',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
     var getStake = new Method({
@@ -5544,7 +5551,8 @@ var methods = function () {
         getCommitteeRank,
         getGenaroCodeHash,
         getLastRootStates,
-        getLastSynBlock
+        getLastSynBlock,
+        getExtra
     ];
 };
 

@@ -47,6 +47,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"math/rand"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 const (
@@ -539,18 +540,34 @@ func (s *PublicBlockChainAPI) GetLastRootStates(ctx context.Context, blockNr rpc
 	return
 }
 
-func (s *PublicBlockChainAPI) GetLastSynBlock(ctx context.Context, blockNr rpc.BlockNumber) (ret string, err error) {
+type BlockInfo struct {
+	BlockNum uint64
+	BlockHash common.Hash
+}
+
+func (s *PublicBlockChainAPI) GetLastSynBlock(ctx context.Context, blockNr rpc.BlockNumber) (blockInfo BlockInfo, err error) {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return
 	}
 	lastSynState := state.GetLastSynState()
 	if lastSynState != nil {
-		ret = "blocknum:"+strconv.Itoa(int(lastSynState.LastSynBlockNum))+","
-		ret += "blockhash:"+lastSynState.LastSynBlockHash.String()
+		blockInfo.BlockNum = lastSynState.LastSynBlockNum
+		blockInfo.BlockHash = lastSynState.LastSynBlockHash
 		return
 	}
 	return
+}
+
+// get head extra data
+func (s *PublicBlockChainAPI) GetExtra(ctx context.Context, blockNr rpc.BlockNumber) (extra *genaro.ExtraData, err error) {
+	block, err := s.b.BlockByNumber(ctx, blockNr)
+	if err != nil {
+		return
+	}
+	extra = genaro.UnmarshalToExtra(block.Header())
+	return
+
 }
 
 // GetStake returns the stake of ether for the given address in the state of the
