@@ -99,8 +99,9 @@ type StateDB interface {
 	//根据用户id和fileID开启定时同步日志接口
 	TxLogBydataVersionUpdate(common.Address,[32]byte) bool
 
-	SyncStakeNode(common.Address, []string) error
-	SyncNode2Address(common.Address, []string, string) error
+	SyncStakeNode(common.Address, string) error
+	GetStorageNodes(addr common.Address) []string
+	SyncNode2Address(common.Address, string, string) error
 	GetAddressByNode(string) string
 
 	AddAlreadyBackStack(backStack common.AlreadyBackStake) bool

@@ -638,7 +638,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		callerStake, _ := pool.currentState.GetStake(caller)
 		existNodes := pool.currentState.GetStorageNodes(caller)
 		currentStakePrice := pool.currentState.GetStakePerNodePrice()
-		return vm.CheckSyncNodeTx(callerStake, existNodes, s.Node, currentStakePrice)
+		return vm.CheckSyncNodeTx(caller, callerStake, existNodes, s, currentStakePrice)
 	case common.SynchronizeShareKey.Uint64():
 		return vm.CheckSynchronizeShareKeyParameter(s)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上

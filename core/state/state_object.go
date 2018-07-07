@@ -963,16 +963,16 @@ func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[
 	return nil,nil
 }
 
-func (self *stateObject)SyncStakeNode(s []string, StakeValuePerNode *big.Int) error {
+func (self *stateObject)SyncStakeNode(s string, StakeValuePerNode *big.Int) error {
 	var err error
 	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{ // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
 		err = ErrSyncNode
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		totalNodeNumber := len(s)
+		var totalNodeNumber int = 1
 		if genaroData.Node != nil {
-			totalNodeNumber += len(genaroData.Node)
+			totalNodeNumber = len(genaroData.Node) + 1
 		}
 		needStakeVale := new(big.Int)
 		needStakeVale.Add(big.NewInt(int64(totalNodeNumber)),StakeValuePerNode)
@@ -980,7 +980,7 @@ func (self *stateObject)SyncStakeNode(s []string, StakeValuePerNode *big.Int) er
 		if needStakeVale.Cmp(currentStake) != 1 {
 			err = ErrSyncNode
 		}else {
-			genaroData.Node = append(genaroData.Node, s...)
+			genaroData.Node = append(genaroData.Node, s)
 			b, _ := json.Marshal(genaroData)
 			self.code = nil
 			self.data.CodeHash = b[:]
@@ -994,17 +994,13 @@ func (self *stateObject)SyncStakeNode(s []string, StakeValuePerNode *big.Int) er
 	return err
 }
 
-func (self *stateObject)SyncNode2Address(s []string, address string) error {
+func (self *stateObject)SyncNode2Address(s string, address string) error {
 	d := make(map[string]string)
 	if self.data.CodeHash != nil {
-		for _, v := range s {
-			d[v] = address
-		}
+			d[s] = address
 	}else{
 		json.Unmarshal(self.data.CodeHash, &d)
-		for _, v := range s {
-			d[v] = address
-		}
+		d[s] = address
 	}
 	b, _ := json.Marshal(d)
 	self.code = nil

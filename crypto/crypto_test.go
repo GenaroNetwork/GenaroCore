@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"log"
 )
 
 var testAddrHex = "970e8128ab834e8eac17ab8e3812f010678cf791"
@@ -59,7 +60,6 @@ func BenchmarkSha3(b *testing.B) {
 func TestSign(t *testing.T) {
 	key, _ := HexToECDSA(testPrivHex)
 	addr := common.HexToAddress(testAddrHex)
-
 	msg := Keccak256([]byte("foo"))
 	sig, err := Sign(msg, key)
 	if err != nil {
@@ -71,6 +71,38 @@ func TestSign(t *testing.T) {
 	}
 	pubKey := ToECDSAPub(recoveredPub)
 	recoveredAddr := PubkeyToAddress(*pubKey)
+	if addr != recoveredAddr {
+		t.Errorf("Address mismatch: want: %x have: %x", addr, recoveredAddr)
+	}
+
+	// should be equal to SigToPub
+	recoveredPub2, err := SigToPub(msg, sig)
+	if err != nil {
+		t.Errorf("ECRecover error: %s", err)
+	}
+	recoveredAddr2 := PubkeyToAddress(*recoveredPub2)
+	if addr != recoveredAddr2 {
+		t.Errorf("Address mismatch: want: %x have: %x", addr, recoveredAddr2)
+	}
+}
+
+func TestSign2(t *testing.T) {
+	key, _ := HexToECDSA(testPrivHex)
+	addr := common.HexToAddress(testAddrHex)
+
+	msg := Keccak256([]byte("someid|0xf9ed16104c6cbe13494b48ea66306d19453e3b83"))
+	sig, err := Sign(msg, key)
+	if err != nil {
+		t.Errorf("Sign error: %s", err)
+	}
+	recoveredPub, err := Ecrecover(msg, sig)
+	if err != nil {
+		t.Errorf("ECRecover error: %s", err)
+	}
+	pubKey := ToECDSAPub(recoveredPub)
+	//wo
+	recoveredAddr := PubkeyToAddress(*pubKey)
+	log.Println(recoveredAddr.String())
 	if addr != recoveredAddr {
 		t.Errorf("Address mismatch: want: %x have: %x", addr, recoveredAddr)
 	}
