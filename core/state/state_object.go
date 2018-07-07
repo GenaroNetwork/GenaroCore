@@ -114,14 +114,22 @@ type Account struct {
 
 type Candidates []common.Address
 
-func (self Candidates)isExist(addr common.Address) bool{
-	for _,addrIn := range self {
+func (self *Candidates)isExist(addr common.Address) bool{
+	for _,addrIn := range *self {
 		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
 			return true
 		}
 	}
 	return false
 }
+
+//func (self *Candidates)DelCandidate(addr common.Address) {
+//	for i,addrIn := range *self {
+//		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
+//			(*self) = append(*self)[:i],(*self)[i:])
+//		}
+//	}
+//}
 
 type CandidateInfo struct {
 	Signer       common.Address // peer address
@@ -633,8 +641,26 @@ func (self *stateObject) AddCandidate(candidate common.Address) {
 	}
 	if !candidates.isExist(candidate) {
 		candidates = append(candidates,candidate)
+		b, _ := json.Marshal(candidates)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) DelCandidate(candidate common.Address) {
+	var candidates Candidates
+	if self.data.CodeHash == nil{
+		candidates = *new(Candidates)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &candidates)
 	}
 
+	candidates = append(candidates,candidate)
 	b, _ := json.Marshal(candidates)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -643,6 +669,7 @@ func (self *stateObject) AddCandidate(candidate common.Address) {
 		self.onDirty(self.Address())
 		self.onDirty = nil
 	}
+
 }
 
 func (self *stateObject)GetCandidates() (Candidates){
