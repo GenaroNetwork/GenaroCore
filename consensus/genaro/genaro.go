@@ -19,7 +19,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
-	"github.com/gin-gonic/gin/json"
+	"encoding/json"
 )
 
 const (
