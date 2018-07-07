@@ -114,6 +114,15 @@ type Account struct {
 
 type Candidates []common.Address
 
+func (self Candidates)isExist(addr common.Address) bool{
+	for _,addrIn := range self {
+		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
 type CandidateInfo struct {
 	Signer       common.Address // peer address
 	Heft uint64         // the sentinel of the peer
@@ -622,7 +631,9 @@ func (self *stateObject) AddCandidate(candidate common.Address) {
 	}else {
 		json.Unmarshal(self.data.CodeHash, &candidates)
 	}
-	candidates = append(candidates,candidate)
+	if !candidates.isExist(candidate) {
+		candidates = append(candidates,candidate)
+	}
 
 	b, _ := json.Marshal(candidates)
 	self.code = nil
