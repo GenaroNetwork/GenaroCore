@@ -920,7 +920,7 @@ func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]b
 		tmp := big.NewInt(TimeLimit * int64(len(resultTmp.MortgageTable)))
 		timeLimitGas := tmp.Mul(tmp,self.GetOneDaySyncLogGsaCost())
 		stateObject.setBalance(timeLimitGas)
-		newStateObject := self.getStateObject(common.SpecialSyncAddress)
+		newStateObject := self.getStateObject(common.OfficialAddress)
 		newStateObject.AddBalance(timeLimitGas)
 		return true
 	}
