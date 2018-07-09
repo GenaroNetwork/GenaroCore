@@ -1,14 +1,18 @@
 package vm
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"math/big"
-	"time"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"errors"
-	"bytes"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"fmt"
+	"time"
+	"bytes"
+	"errors"
+	"math/big"
+	"crypto/sha256"
+
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"golang.org/x/crypto/ripemd160"
+
 )
 
 
@@ -182,13 +186,16 @@ func CheckSyncNodeTx(caller common.Address,stake uint64, existNodes []string, s 
 	msg := s.NodeID + s.Sign
 	recoveredPub, err := crypto.Ecrecover([]byte(msg), []byte(s.Sign))
 	if err != nil {
-		errors.New("ECRecover error")
+		errors.New("ECRecover error when valid sign")
 	}
-	pubKey := crypto.ToECDSAPub(recoveredPub)
 
 	//get publickey
-	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
-	fmt.Println(recoveredAddr)
+	pubKey := crypto.CompressPubkey(crypto.ToECDSAPub(recoveredPub))
+
+	genNodeID := generateNodeId(pubKey)
+	if genNodeID != s.NodeID {
+		return errors.New("sign valid error")
+	}
 
 	var nodeNum int = 1
 	if existNodes != nil {
@@ -202,6 +209,16 @@ func CheckSyncNodeTx(caller common.Address,stake uint64, existNodes []string, s 
 		return errors.New("none enough stake to synchronize node")
 	}
 	return nil
+}
+
+
+func generateNodeId(b []byte) string {
+	sha256byte := sha256.Sum256(b)
+	ripemder := ripemd160.New()
+	ripemder.Write(sha256byte[:])
+	hashBytes := ripemder.Sum(nil)
+	nodeId := fmt.Sprintf("%x", hashBytes)
+	return nodeId
 }
 
 func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput) error {
