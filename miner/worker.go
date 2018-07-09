@@ -158,6 +158,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 	go worker.update()
 
 	go worker.wait()
+	log.Info("newWorker")
 	worker.commitNewWork(false)
 
 	return worker
@@ -255,7 +256,8 @@ func (self *worker) update() {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			self.commitNewWork(false)
+			log.Info("worker.update case <-self.chainHeadCh")
+			self.commitNewWork(true)
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -276,6 +278,7 @@ func (self *worker) update() {
 			} else {
 				// If we're mining, but nothing is being processed, wake on new transactions
 				if self.config.Clique != nil && self.config.Clique.Period == 0 {
+					log.Info("worker.update case ev := <-self.txCh")
 					self.commitNewWork(false)
 				}
 			}
@@ -339,6 +342,7 @@ func (self *worker) wait() {
 			self.unconfirmed.Insert(block.NumberU64(), block.Hash())
 
 			if mustCommitNewWork {
+				log.Info("worker.wait")
 				self.commitNewWork(true)
 			}
 		}
