@@ -39,7 +39,7 @@ var (
 
 var (
 	//官方账号
-	OfficialAddress Address  = HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73")
+	OfficialAddress Address  = HexToAddress("0x3f70180da635e0205525106632bf1689ea1f7a84")
 )
 
 /*
@@ -113,6 +113,9 @@ var (
 	SpecialTxTypePriceRegulation = big.NewInt(12)
 
 	SpecialTxSynState  = big.NewInt(13)
+
+	//解除节点绑定
+	SpecialTxUnbindNode = big.NewInt(14)
 
 	//同步分享秘钥
 	SynchronizeShareKey = big.NewInt(15)

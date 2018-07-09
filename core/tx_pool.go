@@ -651,6 +651,9 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckPriceRegulation(caller)
 	case common.SpecialTxSynState.Uint64():
 		return vm.CheckSynStateTx(caller)
+	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
+		existNodes := pool.currentState.GetStorageNodes(caller)
+		return vm.CheckUnbindNodeTx(caller, s, existNodes)
 	}
 	return errors.New("undefined type of special transaction")
 }

@@ -1174,3 +1174,23 @@ func (self *StateDB)GetOneDaySyncLogGsaCost() *big.Int {
 	return common.DefaultOneDaySyncLogGsaCost
 }
 
+func (self *StateDB)UnbindNode(address common.Address, nodeId string) error {
+	stateObject := self.GetOrNewStateObject(address)
+	var err error = nil
+	if stateObject != nil {
+		err = stateObject.UnbindNode(nodeId)
+	}
+	return err
+}
+
+
+func (self *StateDB)UbindNode2Address(address common.Address, nodeId string) error{
+	stateObject := self.GetOrNewStateObject(address)
+	var err error = nil
+	if stateObject != nil {
+		err = stateObject.UbindNode2Address(nodeId)
+	}
+	return err
+}
+
+
