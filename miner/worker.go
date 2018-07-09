@@ -257,7 +257,7 @@ func (self *worker) update() {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
 			log.Info("worker.update case <-self.chainHeadCh")
-			self.commitNewWork(true)
+			self.commitNewWork(false)
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -343,7 +343,7 @@ func (self *worker) wait() {
 
 			if mustCommitNewWork {
 				log.Info("worker.wait")
-				self.commitNewWork(true)
+				self.commitNewWork(false)
 			}
 		}
 	}

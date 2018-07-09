@@ -687,8 +687,8 @@ func (self *stateObject) AddAlreadyBackStack(backStake common.AlreadyBackStake) 
 		backStakes = *new(common.BackStakeList)
 	}else {
 		json.Unmarshal(self.data.CodeHash, &backStakes)
-		backStakes = append(backStakes,backStake)
 	}
+	backStakes = append(backStakes,backStake)
 
 	b, _ := json.Marshal(backStakes)
 	self.code = nil
