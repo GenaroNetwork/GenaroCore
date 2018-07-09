@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"time"
 	"log"
+	"errors"
 )
 
 var rpcurl string
@@ -18,6 +19,15 @@ var delaytime int64
 
 func logPrint(msg string){
 	log.Println(msg)
+}
+
+func checkError(ret []byte) error{
+	errStr := gjson.GetBytes(ret,"error").String()
+	if !strings.EqualFold("",errStr){
+		return errors.New(errStr)
+	} else {
+		return nil
+	}
 }
 
 func HttpPost(url string, contentType string, body string) ([]byte, error) {
@@ -39,6 +49,10 @@ func GetCuBlockNum(url string) (uint64,error){
 	if err != nil {
 		return 0,err
 	}
+	err = checkError(ret)
+	if err != nil {
+		return 0,err
+	}
 	blockNumStr := gjson.GetBytes(ret,"result").String()
 	blockNum,err := hexutil.DecodeUint64(blockNumStr)
 	if err != nil {
@@ -50,6 +64,10 @@ func GetCuBlockNum(url string) (uint64,error){
 func GetBlockByNumber(url string,blockNum uint64) ([]byte,error) {
 	blockNumHex := hexutil.EncodeUint64(blockNum)
 	ret,err := HttpPost(url,"application/json",`{"jsonrpc":"2.0","id":1,"method":"eth_getBlockByNumber","params":["`+blockNumHex+`",true]}`)
+	if err != nil {
+		return nil,err
+	}
+	err = checkError(ret)
 	if err != nil {
 		return nil,err
 	}
@@ -70,11 +88,19 @@ func SendSynState(url string,blockHash string) (string,error){
 	if err != nil {
 		return "",err
 	}
+	err = checkError(ret)
+	if err != nil {
+		return "",err
+	}
 	return gjson.ParseBytes(ret).String(),nil
 }
 
 func GetLastSynBlockInfo(url string) ([]byte,error){
 	ret,err := HttpPost(url,"application/json",`{"jsonrpc":"2.0","method":"eth_getLastSynBlock","params":["latest"],"id":1}`)
+	err = checkError(ret)
+	if err != nil {
+		return nil,err
+	}
 	return ret,err
 }
 
@@ -92,6 +118,8 @@ func initarg() {
 	flag.StringVar(&rpcurl, "u", "http://127.0.0.1:8545", "rpc url")
 	flag.Parse()
 }
+
+var lastSynBlockHash string = ""
 
 func SynState(){
 	cuBlockNum,err := GetCuBlockNum(rpcurl)
@@ -112,6 +140,10 @@ func SynState(){
 			logPrint(err.Error())
 			return
 		}
+		if strings.EqualFold(lastSynBlockHash,synBlockHash) {
+			logPrint("BlockHash is exist")
+			return
+		}
 		fmt.Println(synBlockHash)
 		if strings.EqualFold(synBlockHashPre,synBlockHash) {
 			logPrint("syn state is exist")
@@ -122,6 +154,7 @@ func SynState(){
 			logPrint(err.Error())
 			return
 		}
+		lastSynBlockHash = synBlockHash
 		logPrint(ret)
 	}
 }
