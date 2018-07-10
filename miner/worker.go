@@ -158,8 +158,8 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 	go worker.update()
 
 	go worker.wait()
-	log.Info("newWorker")
-	worker.commitNewWork(false)
+
+	worker.commitNewWork()
 
 	return worker
 }
@@ -256,8 +256,7 @@ func (self *worker) update() {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			log.Info("worker.update case <-self.chainHeadCh")
-			self.commitNewWork(true)
+			self.commitNewWork()
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -278,8 +277,7 @@ func (self *worker) update() {
 			} else {
 				// If we're mining, but nothing is being processed, wake on new transactions
 				if self.config.Clique != nil && self.config.Clique.Period == 0 {
-					log.Info("worker.update case ev := <-self.txCh")
-					self.commitNewWork(false)
+					self.commitNewWork()
 				}
 			}
 
@@ -342,8 +340,7 @@ func (self *worker) wait() {
 			self.unconfirmed.Insert(block.NumberU64(), block.Hash())
 
 			if mustCommitNewWork {
-				log.Info("worker.wait")
-				self.commitNewWork(true)
+				self.commitNewWork()
 			}
 		}
 	}
@@ -394,7 +391,7 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 	return nil
 }
 
-func (self *worker) commitNewWork(checkSynState bool) {
+func (self *worker) commitNewWork() {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.uncleMu.Lock()
@@ -473,7 +470,7 @@ func (self *worker) commitNewWork(checkSynState bool) {
 			if lastSynState != nil {
 				if header.Number.Uint64()-lastSynState.LastSynBlockNum > common.SynBlockLen+1 {
 					log.Error("need SynState")
-					if !checkSynState {
+					if atomic.LoadInt32(&self.mining) == 0 {
 						return
 					}
 					time.Sleep(time.Second)

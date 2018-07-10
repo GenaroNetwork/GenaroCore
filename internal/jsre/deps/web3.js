@@ -5293,6 +5293,13 @@ var methods = function () {
         inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
+    var getAlreadyBackStakeList = new Method({
+        name: 'getAlreadyBackStakeList',
+        call: 'eth_getAlreadyBackStakeList',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getLastRootStates = new Method({
         name: 'getLastRootStates',
         call: 'eth_getLastRootStates',
@@ -5552,7 +5559,8 @@ var methods = function () {
         getGenaroCodeHash,
         getLastRootStates,
         getLastSynBlock,
-        getExtra
+        getExtra,
+        getAlreadyBackStakeList
     ];
 };
 

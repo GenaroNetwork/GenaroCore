@@ -123,13 +123,13 @@ func (self *Candidates)isExist(addr common.Address) bool{
 	return false
 }
 
-//func (self *Candidates)DelCandidate(addr common.Address) {
-//	for i,addrIn := range *self {
-//		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
-//			(*self) = append(*self)[:i],(*self)[i:])
-//		}
-//	}
-//}
+func (self *Candidates)DelCandidate(addr common.Address) {
+	for i,addrIn := range *self {
+		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
+			(*self) = append((*self)[:i],(*self)[i+1:]...)
+		}
+	}
+}
 
 type CandidateInfo struct {
 	Signer       common.Address // peer address
@@ -660,7 +660,7 @@ func (self *stateObject) DelCandidate(candidate common.Address) {
 		json.Unmarshal(self.data.CodeHash, &candidates)
 	}
 
-	candidates = append(candidates,candidate)
+	candidates.DelCandidate(candidate)
 	b, _ := json.Marshal(candidates)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -687,16 +687,18 @@ func (self *stateObject) AddAlreadyBackStack(backStake common.AlreadyBackStake) 
 		backStakes = *new(common.BackStakeList)
 	}else {
 		json.Unmarshal(self.data.CodeHash, &backStakes)
-		backStakes = append(backStakes,backStake)
 	}
+	if !backStakes.IsExist(backStake){
+		backStakes = append(backStakes,backStake)
 
-	b, _ := json.Marshal(backStakes)
-	self.code = nil
-	self.data.CodeHash = b[:]
-	self.dirtyCode = true
-	if self.onDirty != nil {
-		self.onDirty(self.Address())
-		self.onDirty = nil
+		b, _ := json.Marshal(backStakes)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
 	}
 }
 

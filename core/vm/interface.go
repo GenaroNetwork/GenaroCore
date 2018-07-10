@@ -77,6 +77,7 @@ type StateDB interface {
 	GetStakeRangeDiff(common.Address, uint64, uint64) uint64
 
 	AddCandidate(common.Address) bool
+	DelCandidate(candidate common.Address) bool
 	GetCandidates() state.Candidates
 	GetCandidatesInfoInRange(uint64, uint64) []state.CandidateInfo
 

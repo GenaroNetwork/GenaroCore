@@ -570,6 +570,20 @@ func (s *PublicBlockChainAPI) GetExtra(ctx context.Context, blockNr rpc.BlockNum
 
 }
 
+func (s *PublicBlockChainAPI) GetAlreadyBackStakeList(ctx context.Context, blockNr rpc.BlockNumber) (backStackList common.BackStakeList, err error){
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	ok,backStackList := state.GetAlreadyBackStakeList()
+	if ok {
+		return
+	} else {
+		err = errors.New("GetAlreadyBackStakeList failed")
+	}
+	return
+}
+
 // GetStake returns the stake of ether for the given address in the state of the
 // given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
 // block numbers are also allowed.
