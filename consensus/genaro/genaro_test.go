@@ -271,17 +271,17 @@ func TestCandidateInfos(t *testing.T) {
 	candidateInfos[0] = state.CandidateInfo{
 		Signer:		common.StringToAddress("xx"),
 		Heft:		10,
-		Stake:		15,
+		Stake:		25,
 	}
 	candidateInfos[1] = state.CandidateInfo{
 		Signer:		common.StringToAddress("xx"),
 		Heft:		11,
-		Stake:		15,
+		Stake:		35,
 	}
 	candidateInfos[2] = state.CandidateInfo{
 		Signer:		common.StringToAddress("xx"),
 		Heft:		12,
-		Stake:		15,
+		Stake:		45,
 	}
 	candidateInfos[3] = state.CandidateInfo{
 		Signer:		common.StringToAddress("xx"),
@@ -290,8 +290,15 @@ func TestCandidateInfos(t *testing.T) {
 	}
 
 	candidateInfos.Apply()
-	state.Rank(candidateInfos)
+	commiteeRank, proportion := state.Rank(candidateInfos)
+	fmt.Println("Rank")
+	fmt.Println(commiteeRank)
+	fmt.Println(proportion)
 	fmt.Println(candidateInfos)
+	commiteeRank, proportion = state.RankWithLenth(candidateInfos,3)
+	fmt.Println("RankWithLenth")
+	fmt.Println(commiteeRank)
+	fmt.Println(proportion)
 }
 
 func TestAccumulateInterestRewards(t *testing.T) {
