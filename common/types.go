@@ -25,6 +25,7 @@ import (
 
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
+	"bytes"
 )
 
 const (
@@ -247,3 +248,13 @@ type AlreadyBackStake struct {
 }
 
 type BackStakeList []AlreadyBackStake
+
+func (self *BackStakeList)IsExist(BackStake AlreadyBackStake) bool{
+	for _,BackStakeIn := range *self {
+		if bytes.Compare(BackStakeIn.Addr.Bytes(),BackStake.Addr.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
+}
+

@@ -344,6 +344,10 @@ func userBackStake(evm *EVM, caller common.Address) error {
 	if !ok {
 		return errors.New("userBackStake fail")
 	}
+	ok = (*evm).StateDB.DelCandidate(caller)
+	if !ok {
+		return errors.New("DelCandidate fail")
+	}
 	return nil
 }
 

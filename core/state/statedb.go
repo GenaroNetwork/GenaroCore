@@ -770,6 +770,15 @@ func (self *StateDB)AddCandidate(candidate common.Address) bool {
 	return false
 }
 
+// delete a candidate
+func (self *StateDB)DelCandidate(candidate common.Address) bool {
+	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		stateObject.DelCandidate(candidate)
+		return true
+	}
+	return false
+}
 // get all Candidates
 func (self *StateDB)GetCandidates() Candidates{
 	stateObject := self.getStateObject(common.CandidateSaveAddress)

@@ -124,7 +124,7 @@ var (
 
 
 
-	var Base = uint64(10000)	// 收益计算中间值
+	var Base = uint64(1000000)	// 收益计算中间值
 	var BackStackListMax = int(20)		// 最大退注长度
 
 
