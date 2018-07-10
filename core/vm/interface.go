@@ -133,6 +133,9 @@ type StateDB interface {
 	AddLastRootState(statehash common.Hash, blockNumber uint64) bool
 	SetLastSynBlock(blockNumber uint64,blockHash common.Hash) bool
 	GetLastSynState() *types.LastSynState
+
+	UnbindNode(common.Address, string) error
+	UbindNode2Address(common.Address, string) error
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

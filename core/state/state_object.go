@@ -1036,7 +1036,7 @@ func (self *stateObject)SyncStakeNode(s string, StakeValuePerNode *big.Int) erro
 
 func (self *stateObject)SyncNode2Address(s string, address string) error {
 	d := make(map[string]string)
-	if self.data.CodeHash != nil {
+	if self.data.CodeHash == nil {
 			d[s] = address
 	}else{
 		json.Unmarshal(self.data.CodeHash, &d)
@@ -1407,6 +1407,53 @@ func (self *stateObject)GetLastSynState() *types.LastSynState{
 		var lastSynState types.LastSynState
 		json.Unmarshal(self.data.CodeHash, &lastSynState)
 		return &lastSynState
+	}
+	return nil
+}
+
+func (self *stateObject)UnbindNode(nodeId string) error{
+	var err error
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		err = errors.New("no node of this account")
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+
+		var a []string
+		for k, v := range genaroData.Node {
+			if v == nodeId {
+				a = append(genaroData.Node[:k], genaroData.Node[k+1:]...)
+			}
+		}
+		genaroData.Node = a
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+
+	}
+	return err
+}
+
+func (self *stateObject)UbindNode2Address(nodeId string) error{
+	d := make(map[string]string)
+	if self.data.CodeHash == nil {
+		return nil
+	}else{
+		json.Unmarshal(self.data.CodeHash, &d)
+		delete(d, nodeId)
+	}
+	b, _ := json.Marshal(d)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
 	}
 	return nil
 }

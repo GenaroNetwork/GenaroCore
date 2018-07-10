@@ -166,7 +166,7 @@ func CheckTrafficTx(s types.SpecialTxInput) error {
 func CheckSyncNodeTx(caller common.Address,stake uint64, existNodes []string, s types.SpecialTxInput, stakeVlauePerNode *big.Int) error {
 
 	if len(s.NodeID) == 0 {
-		return errors.New("length of nodeId must be ")
+		return errors.New("length of nodeId must larger then 0")
 	}
 
 	//caller和节点待绑定账户是否一致
@@ -257,4 +257,21 @@ func CheckPriceRegulation(caller common.Address) error {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil
+}
+
+func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes []string) error{
+	if existNodes == nil {
+		return errors.New("none node of this account need to unbind")
+	}
+
+	if s.NodeID == "" {
+		return errors.New("nodeId is null")
+	}
+
+	for _, v := range existNodes{
+		if v == s.NodeID {
+			return nil
+		}
+	}
+	return errors.New("this node does not belong to this account")
 }
