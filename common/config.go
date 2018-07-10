@@ -71,9 +71,13 @@ var (
 	//     七、跨链交易Sidechina: 交易发起方为存储，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为7
 	//     八、矿工节点同步:      交易发起方为矿工，交易的"from"字段为用户address，交易的"to"字段为该特殊地址，参数类型字段为8
 	SpecialSyncAddress Address = HexToAddress("0x6000000000000000000000000000000000000000")
+
+	//	用于存放收益计算数据的地址
+	RewardsAddress Address = HexToAddress("0x7000000000000000000000000000000000000000")
+
 )
 
-var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress}
+var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsAddress}
 
 
 
@@ -141,7 +145,7 @@ var (
 	var ReadOnly int = 1
 	var Write int = 2
 
-
+	// 同步交易的块间隔
 	var SynBlockLen = uint64(6)
 
 

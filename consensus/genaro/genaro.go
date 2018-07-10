@@ -23,7 +23,6 @@ import (
 )
 
 const (
-	wiggleTime					= 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 	inmemorySnapshots			= 128                    // Number of recent snapshots to keep in memory
 	epochLength					= uint64(5000)           // Default number of blocks a turn
 	minDistance					= uint64(500)
@@ -33,16 +32,13 @@ const (
 	Pre							= "pre"
 	TotalActualRewardsAddress	= "ggg"
 
-	backStakePeriod				= uint64(2)
-
-	IncrementDifficult			= 1
+	backStakePeriod				= uint64(5)
 )
 
 var (
-	//totalRewards			*big.Int = big.NewInt(700000000e+18)
-	coinRewardsRatio				 = 5000
-	storageRewardsRatio				 = 5000
-	ratioPerYear					 = 700
+	coinRewardsRatio				 = common.Base*50/100
+	storageRewardsRatio				 = common.Base*50/100
+	ratioPerYear					 = common.Base*7/100
 )
 
 var (
@@ -491,7 +487,7 @@ func AddStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
 	state.AddBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), storagerewards)
 }
 
-func SetPreStorageActualRewardsAddress(state *state.StateDB, storagerewards *big.Int) {
+func SetPreStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
 	state.SetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)), storagerewards)
 }
 
@@ -531,38 +527,43 @@ func GetPreSurplusCoin(state *state.StateDB) *big.Int {
 	return state.GetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)))
 }
 
-
+// 一届委员会结束后的数据重置
 func updateEpochRewards(state *state.StateDB)  {
 	//reset CoinActualRewards and StorageActualRewards, add TotalActualRewards
+	// 获取这一届实际发放的的收益
 	coinrewards := GetCoinActualRewards(state)
 	storagerewards := GetStorageActualRewards(state)
-
+	// 设置上一届实际发放的的收益
 	SetPreCoinActualRewards(state, coinrewards)
-	SetPreStorageActualRewardsAddress(state, storagerewards)
-
+	SetPreStorageActualRewards(state, storagerewards)
+	// 本届实际收益归零
 	SetCoinActualRewards(state, big.NewInt(0))
 	SetStorageActualRewards(state, big.NewInt(0))
-
+	// 将一届的实际收益加入总的实际收益
 	AddTotalActualRewards(state, coinrewards)
 	AddTotalActualRewards(state, storagerewards)
 }
 
+// 更新年收益参数
 func updateEpochYearRewards(state *state.StateDB) {
+	// 获取这一年的未发放收益
 	surplusrewards := GetSurplusCoin(state)
+	// 设置上一年的未发放收益
 	SetPreSurplusCoin(state, surplusrewards)
-
+	// 更新上一年的未发放收益和重置总收益
 	totalRewards := GetTotalActualRewards(state)
 	SubSurplusCoin(state, totalRewards)
 	SetTotalActualRewards(state, big.NewInt(0))
 }
 
+// 换届时的更新
 func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
 	blockNumber := header.Number.Uint64()
+	// 换届块
 	if blockNumber%config.Epoch == 0 {
 		//rank
 		//epochStartBlockNumber := blockNumber - config.Epoch
 		epochEndBlockNumber := blockNumber
-		thisstate.GetCandidates()
 		candidateInfos := thisstate.GetCandidatesInfoInRange(0, epochEndBlockNumber)
 		commiteeRank, proportion := state.Rank(candidateInfos)
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
@@ -573,6 +574,7 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 		//CoinActualRewards and StorageActualRewards should update per epoch
 		updateEpochRewards(thisstate)
 	}
+	// 一年时间到
 	if blockNumber%(calEpochPerYear(config)*config.Epoch) == 0 {
 		//CoinActualRewards and StorageActualRewards should update per epoch, surplusCoin should update per year
 		updateEpochYearRewards(thisstate)
@@ -615,13 +617,16 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	if err != nil {
 		return nil, err
 	}
-	proportion := snap.Committee[header.Coinbase]
+	// 按账户设定收益权重
+	//proportion := snap.Committee[header.Coinbase]
+	// 按照顺位设定收益权重
+	proportion := snap.Committee[snap.CommitteeRank[blockNumber % snap.CommitteeSize]]
+
 	//init SurplusCoinAddress
 	if blockNumber == 1 {
-		log.Info("test")
+		//log.Info("test")
 		tmp := big.NewInt(175000000)
-		tmp.Mul(tmp, big.NewInt(100000000))
-		tmp.Mul(tmp, big.NewInt(10000000000))
+		tmp.Mul(tmp,common.BaseCompany)
 
 		SetSurplusCoin(state, tmp)
 	}
@@ -726,6 +731,10 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 
 // AccumulateStorageRewards credits the reward to the sentinel owner
 func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, blockNumber uint64, committeeSize uint64) error {
+	// 存储收益每一届结算一次
+	if blockNumber % config.Epoch != 0 {
+		return nil
+	}
 	preStorageRewards := GetPreStorageActualRewards(state)
 	preSurplusRewards := big.NewInt(0)
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
@@ -747,15 +756,18 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//plan rewards per block
-	blockReward := big.NewInt(0)
-	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch/committeeSize)))
+	//blockReward := big.NewInt(0)
+	//blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch/committeeSize)))
+	// 一届的收益 为 planRewards
+
 
 	//allocate blockReward
 	cs := state.GetCandidates()
 	total := uint64(0)
 	contributes := make([]uint64, len(cs))
 	for i, c := range cs{
-		contributes[i] = state.GetHeftLastDiff(c, blockNumber)
+		//contributes[i] = state.GetHeftLastDiff(c, blockNumber)
+		contributes[i] = state.GetHeftRangeDiff(c, blockNumber-config.Epoch, blockNumber)
 		total += contributes[i]
 	}
 	if total == 0 {
@@ -764,8 +776,8 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 
 	for i, c := range cs{
 		reward := big.NewInt(0)
-		reward.Mul(blockReward, big.NewInt(int64(contributes[i])))
-		reward.Div(blockReward, big.NewInt(int64(total)))
+		reward.Mul(planRewards, big.NewInt(int64(contributes[i])))
+		reward.Div(planRewards, big.NewInt(int64(total)))
 		state.AddBalance(c, reward)
 		AddStorageActualRewards(state, reward)
 	}
