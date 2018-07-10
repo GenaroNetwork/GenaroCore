@@ -459,28 +459,101 @@ func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 	return nil
 }
 
+func GetCoinActualRewards(state *state.StateDB) *big.Int {
+	return state.GetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)))
+}
+
+func AddCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
+	state.AddBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), coinrewards)
+}
+
+func SetCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
+	state.SetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), coinrewards)
+}
+
+func SetPreCoinActualRewards(state *state.StateDB,coinrewards *big.Int) {
+	state.SetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)), coinrewards)
+}
+
+func GetPreCoinActualRewards(state *state.StateDB) *big.Int {
+	return state.GetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)))
+}
+
+func GetStorageActualRewards(state *state.StateDB) *big.Int {
+	return state.GetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)))
+}
+
+func SetStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
+	state.SetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), storagerewards)
+}
+
+func AddStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
+	state.AddBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), storagerewards)
+}
+
+func SetPreStorageActualRewardsAddress(state *state.StateDB, storagerewards *big.Int) {
+	state.SetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)), storagerewards)
+}
+
+func GetPreStorageActualRewards(state *state.StateDB) *big.Int {
+	return state.GetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)))
+}
+
+func AddTotalActualRewards(state *state.StateDB, rewards *big.Int) {
+	state.AddBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), rewards)
+}
+
+func GetTotalActualRewards(state *state.StateDB) *big.Int {
+	return state.GetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)))
+}
+
+func SetTotalActualRewards(state *state.StateDB, rewards *big.Int) {
+	state.SetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), rewards)
+}
+
+func GetSurplusCoin(state *state.StateDB) *big.Int {
+	return state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+}
+
+func SubSurplusCoin(state *state.StateDB, rewards *big.Int) {
+	state.SubBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), rewards)
+}
+
+func SetSurplusCoin(state *state.StateDB, surplusrewards *big.Int) {
+	state.SetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), surplusrewards)
+}
+
+func SetPreSurplusCoin(state *state.StateDB, surplusrewards *big.Int) {
+	state.SetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)), surplusrewards)
+}
+
+func GetPreSurplusCoin(state *state.StateDB) *big.Int {
+	return state.GetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)))
+}
+
+
 func updateEpochRewards(state *state.StateDB)  {
 	//reset CoinActualRewards and StorageActualRewards, add TotalActualRewards
-	coinrewards := state.GetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)))
-	storagerewards := state.GetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)))
+	coinrewards := GetCoinActualRewards(state)
+	storagerewards := GetStorageActualRewards(state)
 
-	state.SetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)), coinrewards)
-	state.SetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)), storagerewards)
+	SetPreCoinActualRewards(state, coinrewards)
+	SetPreStorageActualRewardsAddress(state, storagerewards)
 
-	state.SetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), big.NewInt(0))
-	state.SetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), big.NewInt(0))
+	SetCoinActualRewards(state, big.NewInt(0))
+	SetStorageActualRewards(state, big.NewInt(0))
 
-	state.AddBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), coinrewards)
-	state.AddBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), storagerewards)
+	AddTotalActualRewards(state, coinrewards)
+	AddTotalActualRewards(state, storagerewards)
 }
 
 func updateEpochYearRewards(state *state.StateDB) {
-	surplusrewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
-	state.SetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)), surplusrewards)
+	surplusrewards := GetSurplusCoin(state)
+	SetPreSurplusCoin(state, surplusrewards)
 
-	totalRewards := state.GetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)))
-	state.SubBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), totalRewards)
-	state.SetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), big.NewInt(0))
+	totalRewards := GetTotalActualRewards(state)
+	SubSurplusCoin(state, totalRewards)
+	SetTotalActualRewards(state, big.NewInt(0))
 }
 
 func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
@@ -549,7 +622,8 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 		tmp := big.NewInt(175000000)
 		tmp.Mul(tmp, big.NewInt(100000000))
 		tmp.Mul(tmp, big.NewInt(10000000000))
-		state.SetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), tmp)
+
+		SetSurplusCoin(state, tmp)
 	}
 	//  coin interest reward
 	accumulateInterestRewards(g.config, state, header, proportion, blockNumber, snap.CommitteeSize)
@@ -609,17 +683,17 @@ func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusR
 // AccumulateInterestRewards credits the reward to the block author by coin  interest
 func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, proportion uint64,
 	blockNumber uint64, committeeSize uint64) error {
-	preCoinRewards := state.GetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)))
+	preCoinRewards := GetPreCoinActualRewards(state)
 	preSurplusRewards := big.NewInt(0)
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
 	if blockNumber%(config.Epoch*calEpochPerYear(config)) == 0 {
-		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)))
+		preSurplusRewards = GetPreSurplusCoin(state)
 	}else{
-		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+		preSurplusRewards = GetSurplusCoin(state)
 	}
 	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards)
 
-	surplusRewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+	surplusRewards := GetSurplusCoin(state)
 	//fmt.Printf("surplusRewards is %v\n", surplusRewards.String())
 	//plan rewards per year
 	planRewards := big.NewInt(0)
@@ -645,23 +719,24 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	log.Info("accumulateInterestRewards 625", "reward", reward.String())
 	//fmt.Printf("final reward %v\n",  reward.String())
 	state.AddBalance(header.Coinbase, reward)
-	state.AddBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), reward)
+
+	AddCoinActualRewards(state,reward)
 	return nil
 }
 
 // AccumulateStorageRewards credits the reward to the sentinel owner
 func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, blockNumber uint64, committeeSize uint64) error {
-	preStorageRewards := state.GetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)))
+	preStorageRewards := GetPreStorageActualRewards(state)
 	preSurplusRewards := big.NewInt(0)
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
 	if blockNumber%(config.Epoch*calEpochPerYear(config)) == 0 {
-		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)))
+		preSurplusRewards = GetPreSurplusCoin(state)
 	}else{
-		preSurplusRewards = state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+		preSurplusRewards = GetSurplusCoin(state)
 	}
 	coefficient := getStorageCoefficient(config, preStorageRewards, preSurplusRewards)
 
-	surplusRewards := state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
+	surplusRewards := GetSurplusCoin(state)
 	//plan rewards per year
 	planRewards := big.NewInt(0)
 	planRewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
@@ -692,7 +767,7 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 		reward.Mul(blockReward, big.NewInt(int64(contributes[i])))
 		reward.Div(blockReward, big.NewInt(int64(total)))
 		state.AddBalance(c, reward)
-		state.AddBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), reward)
+		AddStorageActualRewards(state, reward)
 	}
 	return nil
 }

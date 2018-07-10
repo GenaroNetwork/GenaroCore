@@ -291,7 +291,7 @@ func TestCandidateInfos(t *testing.T) {
 	}
 
 	candidateInfos.Apply()
-	Rank(candidateInfos)
+	state.Rank(candidateInfos)
 	fmt.Println(candidateInfos)
 }
 
@@ -345,7 +345,7 @@ func TestAccumulateInterestRewards(t *testing.T) {
 				header.Coinbase = addr[k%10]
 				proportion := proportions[k%10]
 				for l := 0; l < int(genaroConfig.BlockInterval); l++ {
-					accumulateInterestRewards(genaroConfig, state, header, proportion, blockNumber)
+					accumulateInterestRewards(genaroConfig, state, header, proportion, blockNumber,3)
 					//fmt.Println(state.GetBalance(header.Coinbase).Uint64())
 				}
 			}
