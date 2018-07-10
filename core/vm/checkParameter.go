@@ -12,7 +12,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"golang.org/x/crypto/ripemd160"
-
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 
@@ -169,32 +169,44 @@ func CheckSyncNodeTx(caller common.Address,stake uint64, existNodes []string, s 
 		return errors.New("length of nodeId must larger then 0")
 	}
 
+	paramAddress := common.HexToAddress(s.Address)
 	//caller和节点待绑定账户是否一致
-	if caller.String() != s.Address {
+	if caller != paramAddress {
 		return errors.New("two address not equal")
 	}
 
-	//校验节点是否已经绑定过
-	for _, existNode := range existNodes {
-		if s.NodeID == existNode {
-			return errors.New("the node has been bound to the account")
+	if existNodes != nil {
+		//校验节点是否已经绑定过
+		for _, existNode := range existNodes {
+			if s.NodeID == existNode {
+				return errors.New("the node has been bound to the account")
+			}
 		}
 	}
 
 	// 验证节点绑定签名
 	// 拼接message
-	msg := s.NodeID + s.Sign
-	recoveredPub, err := crypto.Ecrecover([]byte(msg), []byte(s.Sign))
+	msg := s.NodeID + s.Address
+
+	sig, err := hexutil.Decode(s.Sign)
 	if err != nil {
-		errors.New("ECRecover error when valid sign")
+		return errors.New("sign without 0x prefix")
+	}
+
+	recoveredPub, err := crypto.SigToPub(crypto.Keccak256([]byte(msg)), sig)
+	if err != nil {
+		return errors.New("ECRecover error when valid sign")
 	}
 
 	//get publickey
-	pubKey := crypto.CompressPubkey(crypto.ToECDSAPub(recoveredPub))
+	pubKey := crypto.CompressPubkey(recoveredPub)
+
 
 	genNodeID := generateNodeId(pubKey)
+	//log.Info(fmt.Sprintf("genNodeId:%s", genNodeID))
+	//log.Info(fmt.Sprintf("s.nodeId:%s", s.NodeID))
 	if genNodeID != s.NodeID {
-		return errors.New("sign valid error")
+		return errors.New("sign valid error, nodeId mismatch")
 	}
 
 	var nodeNum int = 1
