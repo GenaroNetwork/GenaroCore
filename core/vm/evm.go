@@ -29,6 +29,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/log"
+	"fmt"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already
@@ -378,12 +379,11 @@ func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) erro
 	adress := common.HexToAddress(s.Address)
 	var actualPunishment uint64
 	var ok bool
-	// 根据nodeid扣除对应用户的stake
+	// 根据address扣除对应用户的stake
 	if ok, actualPunishment = (*evm).StateDB.DeleteStake(adress, s.Stake, evm.BlockNumber.Uint64()); !ok {
 		return errors.New("delete user's stake fail")
 	}
-	amount := new(big.Int)
-	amount.SetUint64(actualPunishment*1000000000000000000)
+	amount := new(big.Int).Mul(common.BaseCompany, new(big.Int).SetUint64(actualPunishment))
 	//将实际扣除的钱转到官方账号中
 	(*evm).StateDB.AddBalance(common.OfficialAddress, amount)
 	return nil
@@ -496,7 +496,9 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 	adress := common.HexToAddress(s.Address)
 
 	currentPrice := (*evm).StateDB.GetGenaroPrice()
-	totalGas := s.SpecialCost(currentPrice)
+	currentCost := s.SpecialCost(currentPrice)
+	totalGas := new(big.Int).Set(&currentCost)
+	log.Info(fmt.Sprintf("evm bucketApply cost:%s", totalGas.String()))
 
 	// Fail if we're trying to use more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
@@ -549,7 +551,9 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 	adress := common.HexToAddress(s.Address)
 
 	currentPrice := (*evm).StateDB.GetGenaroPrice()
-	totalGas := s.SpecialCost(currentPrice)
+	currentCost := s.SpecialCost(currentPrice)
+	totalGas := new(big.Int).Set(&currentCost)
+	log.Info(fmt.Sprintf("evm trafficApply cost:%s", totalGas.String()))
 
 	// Fail if we're trying to use more than the available balance
 	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {

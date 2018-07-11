@@ -5,6 +5,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"math/big"
 	"math"
+	"fmt"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 )
 
 type SpecialTxInput struct {
@@ -26,39 +28,42 @@ type GenaroPrice struct {
 	OneDaySyncLogGsaCost  *hexutil.Big `json:"oneDaySyncLogGsaCost"`
 }
 
-func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) *big.Int {
-	rt := new(big.Int)
-	switch s.Type.ToInt() {
-	case common.SpecialTxTypeStakeSync:
-		return rt.SetUint64(s.Stake*1000000000000000000)
-	case common.SpecialTxTypeSpaceApply:
-		var totalCost *big.Int
+func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) big.Int {
+
+	switch s.Type.ToInt().Uint64() {
+	case common.SpecialTxTypeStakeSync.Uint64():
+		ret := new(big.Int).Mul(new(big.Int).SetUint64(s.Stake),common.BaseCompany)
+		return *ret
+	case common.SpecialTxTypeSpaceApply.Uint64():
+		var totalCost *big.Int = big.NewInt(0)
+		var bucketPrice *big.Int
+		if currentPrice != nil && currentPrice.BucketApplyGasPerGPerDay != nil {
+			bucketPrice = new(big.Int).Set(currentPrice.BucketApplyGasPerGPerDay.ToInt())
+		}else {
+			bucketPrice = new(big.Int).Set(common.DefaultBucketApplyGasPerGPerDay)
+		}
 		for _, v := range s.Buckets {
-			var bucketPrice *big.Int
-			if currentPrice == nil || currentPrice.BucketApplyGasPerGPerDay == nil {
-				bucketPrice = common.DefaultBucketApplyGasPerGPerDay
-			}else{
-				bucketPrice = currentPrice.BucketApplyGasPerGPerDay.ToInt()
-			}
-			duration := math.Abs(float64(v.TimeStart) - float64(v.TimeEnd))
-
-			oneCost := bucketPrice.Mul(bucketPrice, big.NewInt(int64(v.Size) * int64(math.Ceil(duration/10))))
-
+			duration := math.Ceil(math.Abs(float64(v.TimeStart) - float64(v.TimeEnd))/86400)
+			//log.Info(fmt.Sprintf("duration: %f",duration))
+			oneCost := new(big.Int).Mul(bucketPrice, big.NewInt(int64(v.Size) * int64(duration)))
+			//log.Info(fmt.Sprintf("oneCost: %s",oneCost.String()))
 			totalCost.Add(totalCost, oneCost)
 		}
+		log.Info(fmt.Sprintf("bucket apply cost:%s", totalCost.String()))
+		return *totalCost
+	case common.SpecialTxTypeTrafficApply.Uint64():
 
-		return totalCost
-
-	case common.SpecialTxTypeTrafficApply:
 		var trafficPrice *big.Int
-		if currentPrice == nil || currentPrice.TrafficApplyGasPerG == nil {
-			trafficPrice = common.DefaultTrafficApplyGasPerG
-		}else{
-			trafficPrice = currentPrice.TrafficApplyGasPerG.ToInt()
+		if currentPrice != nil && currentPrice.BucketApplyGasPerGPerDay != nil {
+			trafficPrice = new(big.Int).Set(currentPrice.TrafficApplyGasPerG.ToInt())
+		}else {
+			trafficPrice = new(big.Int).Set(common.DefaultTrafficApplyGasPerG)
 		}
-		totalGas := trafficPrice.Mul(trafficPrice, big.NewInt(int64(s.Traffic)))
-		return totalGas
-	case common.SpecialTxTypeMortgageInit:
+
+		totalGas := new(big.Int).Mul(trafficPrice, big.NewInt(int64(s.Traffic)))
+		log.Info(fmt.Sprintf("traffic apply cost:%s", totalGas.String()))
+		return *totalGas
+	case common.SpecialTxTypeMortgageInit.Uint64():
 		sumMortgageTable := new(big.Int)
 		mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
 		for _, v := range mortgageTable {
@@ -67,9 +72,9 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) *big.Int {
 		temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(), big.NewInt(int64(len(mortgageTable))))
 		timeLimitGas := temp.Mul(temp, common.DefaultOneDayMortgageGes)
 		sumMortgageTable.Add(sumMortgageTable, timeLimitGas)
-		return sumMortgageTable
+		return *sumMortgageTable
 	default:
-		return big.NewInt(0)
+		return *big.NewInt(0)
 	}
 }
 

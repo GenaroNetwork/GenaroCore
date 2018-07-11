@@ -23,9 +23,7 @@ func init() {
 var (
 	BaseCompany *big.Int
 
-	//var OneDayGes  int64 = int64(5000)
 	DefaultOneDaySyncLogGsaCost  *big.Int
-
 
 	DefaultBucketApplyGasPerGPerDay *big.Int
 
