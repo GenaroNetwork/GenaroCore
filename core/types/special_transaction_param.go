@@ -26,6 +26,7 @@ type GenaroPrice struct {
 	StakeValuePerNode *hexutil.Big `json:"stakeValuePerNode"`
 	OneDayMortgageGes	*hexutil.Big `json:"oneDayMortgageGes"`
 	OneDaySyncLogGsaCost  *hexutil.Big `json:"oneDaySyncLogGsaCost"`
+	ExtraPrice     []byte   `json:"extraPrice"` //该版本用不上，考虑后期版本兼容性使用
 }
 
 func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) big.Int {
