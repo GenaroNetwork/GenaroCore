@@ -1166,7 +1166,8 @@ func (self *StateDB)GetGenaroPrice() *types.GenaroPrice {
 	if stateObject != nil {
 		return stateObject.GetGenaroPrice()
         }
-        return nil
+    return nil
+
 }
 
 func (self *StateDB)GetLastSynState() *types.LastSynState{

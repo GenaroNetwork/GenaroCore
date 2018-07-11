@@ -594,8 +594,8 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 
 	currentPrice := pool.currentState.GetGenaroPrice()
 
-	totalCost := new(big.Int)
-	totalCost.Add(tx.Cost(), tx.SpecialCost(currentPrice))
+	totalCost := new(big.Int).Add(tx.Cost(), tx.SpecialCost(currentPrice))
+	log.Info(fmt.Sprintf("total cost:%s", totalCost.String()))
 	if pool.currentState.GetBalance(from).Cmp(totalCost) < 0 {
 		return ErrInsufficientFundsForSpecialTx
 	}
@@ -635,10 +635,10 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		return vm.CheckTrafficTx(s)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
-		callerStake, _ := pool.currentState.GetStake(caller)
-		existNodes := pool.currentState.GetStorageNodes(caller)
-		currentStakePrice := pool.currentState.GetStakePerNodePrice()
-		return vm.CheckSyncNodeTx(caller, callerStake, existNodes, s, currentStakePrice)
+		//callerStake, _ := pool.currentState.GetStake(caller)
+		//existNodes := pool.currentState.GetStorageNodes(caller)
+		//currentStakePrice := pool.currentState.GetStakePerNodePrice()
+		return vm.CheckSyncNodeTx(caller, s, pool.currentState)
 	case common.SynchronizeShareKey.Uint64():
 		return vm.CheckSynchronizeShareKeyParameter(s)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上

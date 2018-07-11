@@ -8,10 +8,11 @@ import (
 	"math/big"
 	"crypto/sha256"
 
+	"golang.org/x/crypto/ripemd160"
+
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"golang.org/x/crypto/ripemd160"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
@@ -163,7 +164,11 @@ func CheckTrafficTx(s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckSyncNodeTx(caller common.Address,stake uint64, existNodes []string, s types.SpecialTxInput, stakeVlauePerNode *big.Int) error {
+
+func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) error {
+	stake, _ := db.GetStake(caller)
+	existNodes := db.GetStorageNodes(caller)
+	stakeVlauePerNode := db.GetStakePerNodePrice()
 
 	if len(s.NodeID) == 0 {
 		return errors.New("length of nodeId must larger then 0")
@@ -175,13 +180,10 @@ func CheckSyncNodeTx(caller common.Address,stake uint64, existNodes []string, s 
 		return errors.New("two address not equal")
 	}
 
-	if existNodes != nil {
-		//校验节点是否已经绑定过
-		for _, existNode := range existNodes {
-			if s.NodeID == existNode {
-				return errors.New("the node has been bound to the account")
-			}
-		}
+
+	//校验节点是否已经绑定过
+	if db.GetAddressByNode(s.NodeID) != "" {
+		return errors.New("the input node have been bound by themselves or others")
 	}
 
 	// 验证节点绑定签名
