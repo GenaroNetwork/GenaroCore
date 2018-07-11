@@ -5313,7 +5313,7 @@ var methods = function () {
         params: 1,
         inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
-    
+
     var getExtra = new Method({
         name: 'getExtra',
         call: 'eth_getExtra',

@@ -162,6 +162,7 @@ func (c CandidateInfos) Apply() {
 	}
 }
 
+// 全员排名，无限制长度
 func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
 	candidateInfos.Apply()
 	sort.Sort(sort.Reverse(candidateInfos))
@@ -178,7 +179,31 @@ func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
 		committeeRank[i] = c.Signer
 		proportion[i] = c.Stake*uint64(common.Base)/total
 	}
+	return committeeRank, proportion
+}
 
+// 限制排名的长度后，进行排名
+func RankWithLenth(candidateInfos CandidateInfos, lenth int) ([]common.Address, []uint64){
+	candidateInfos.Apply()
+	sort.Sort(sort.Reverse(candidateInfos))
+	rankLenth := lenth
+	if len(candidateInfos) < rankLenth {
+		rankLenth = len(candidateInfos)
+	}
+	committeeRank := make([]common.Address, rankLenth)
+	proportion := make([]uint64, rankLenth)
+	total := uint64(0)
+
+	for i:=0;i<rankLenth;i++ {
+		total += candidateInfos[i].Stake
+	}
+	if total == 0 {
+		return committeeRank, proportion
+	}
+	for i:=0;i<rankLenth;i++ {
+		committeeRank[i] =  candidateInfos[i].Signer
+		proportion[i] = candidateInfos[i].Stake*uint64(common.Base)/total
+	}
 	return committeeRank, proportion
 }
 
