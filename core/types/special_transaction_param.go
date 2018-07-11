@@ -5,6 +5,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"math/big"
 	"math"
+	"bytes"
 )
 
 type SpecialTxInput struct {
@@ -135,7 +136,7 @@ type FileIDArr struct {
 //Cross-chain storage processing
 type SpecialTxTypeMortgageInit FileIDArr
 
-
+// 区块同步信号的数据结构
 type LastSynState struct {
 	LastRootStates map[common.Hash]uint64	`json:"LastRootStates"`
 	LastSynBlockNum uint64					`json:"LastSynBlockNum"`
@@ -158,3 +159,83 @@ func (lastSynState *LastSynState)AddLastSynState(blockhash common.Hash, blockNum
 	}
 }
 
+// 父子账号绑定关系表
+type BindingTable struct {
+	MainAccounts	map[common.Address][]common.Address		`json:"MainAccounts"`
+	SubAccounts		map[common.Address]common.Address			`json:"SubAccounts"`
+}
+
+func (bindingTable *BindingTable) GetSubAccountSizeInMainAccount(mainAccount common.Address) int {
+	if bindingTable.IsMainAccountExist(mainAccount) {
+		return len(bindingTable.MainAccounts[mainAccount])
+	}
+	return 0
+}
+
+func (bindingTable *BindingTable) IsAccountInBinding(account common.Address) bool{
+	if bindingTable.IsSubAccountExist(account) || bindingTable.IsMainAccountExist(account) {
+		return true
+	}
+	return false
+}
+
+func (bindingTable *BindingTable) IsSubAccountExist(subAccount common.Address) bool{
+	_,ok := bindingTable.SubAccounts[subAccount]
+	return ok
+}
+
+func (bindingTable *BindingTable) IsMainAccountExist(mainAccount common.Address) bool{
+	_,ok := bindingTable.MainAccounts[mainAccount]
+	return ok
+}
+
+// 删除子账号的绑定
+func (bindingTable *BindingTable) DelSubAccount(subAccount common.Address){
+	mainAccount,ok := bindingTable.SubAccounts[subAccount]
+	if ok {
+		subAccounts := bindingTable.MainAccounts[mainAccount]
+		for i,account := range subAccounts {
+			if bytes.Compare(account.Bytes(),subAccount.Bytes()) == 0 {
+				subAccounts = append(subAccounts[:i],subAccounts[i+1:]...)
+				break
+			}
+		}
+		delete(bindingTable.SubAccounts,subAccount)
+		bindingTable.MainAccounts[mainAccount] = subAccounts
+		if len(subAccounts) == 0 {
+			delete(bindingTable.MainAccounts,mainAccount)
+		}
+	}
+}
+
+// 删除主账号账号的绑定
+// 返回被关联删除的子账号列表
+func (bindingTable *BindingTable) DelMainAccount(mainAccount common.Address) []common.Address{
+	subAccounts,ok := bindingTable.MainAccounts[mainAccount]
+	if ok {
+		for _,account := range subAccounts {
+			delete(bindingTable.SubAccounts,account)
+		}
+		delete(bindingTable.MainAccounts,mainAccount)
+	}
+	return subAccounts
+}
+
+// 更新绑定信息
+func (bindingTable *BindingTable) UpdateBinding(mainAccount,subAccount common.Address) {
+	// 账号已绑定
+	if bytes.Compare(bindingTable.SubAccounts[subAccount].Bytes(),mainAccount.Bytes()) == 0{
+		return
+	}
+	// 账号已存在
+	if bindingTable.IsSubAccountExist(subAccount) {
+		bindingTable.DelSubAccount(subAccount)
+	}
+
+	if bindingTable.IsMainAccountExist(mainAccount){
+		bindingTable.MainAccounts[mainAccount] = append(bindingTable.MainAccounts[mainAccount],subAccount)
+	}else {
+		bindingTable.MainAccounts[mainAccount] = []common.Address{subAccount}
+	}
+	bindingTable.SubAccounts[subAccount] = mainAccount
+}

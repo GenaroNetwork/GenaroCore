@@ -73,11 +73,14 @@ var (
 	SpecialSyncAddress Address = HexToAddress("0x6000000000000000000000000000000000000000")
 
 	//	用于存放收益计算数据的地址
-	RewardsAddress Address = HexToAddress("0x7000000000000000000000000000000000000000")
+	RewardsSaveAddress Address = HexToAddress("0x7000000000000000000000000000000000000000")
+
+	// 父子账号的绑定表
+	BindingSaveAddress Address = HexToAddress("0x8000000000000000000000000000000000000000")
 
 )
 
-var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsAddress}
+var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress}
 
 
 
@@ -148,4 +151,5 @@ var (
 	// 同步交易的块间隔
 	var SynBlockLen = uint64(6)
 
-
+	// 一个主节点最大的绑定数量
+	var MaxBinding = 10

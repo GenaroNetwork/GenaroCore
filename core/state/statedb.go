@@ -770,6 +770,15 @@ func (self *StateDB)AddCandidate(candidate common.Address) bool {
 	return false
 }
 
+// 判断是否为候选者
+func (self *StateDB)IsCandidateExist(candidate common.Address) bool {
+	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		return stateObject.IsCandidateExist(candidate)
+	}
+	return false
+}
+
 // delete a candidate
 func (self *StateDB)DelCandidate(candidate common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
@@ -1072,11 +1081,31 @@ func (self *StateDB)UpdateBucketApplyPrice(address common.Address,	price *hexuti
         return false
 }
 
+// 添加同步使用的最近块信息
 func (self *StateDB)AddLastRootState(statehash common.Hash, blockNumber uint64) bool {
 	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
 	if stateObject != nil {
 		stateObject.AddLastRootState(statehash,blockNumber)
 		return true
+	}
+	return false
+}
+
+// 账号绑定更新
+func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool {
+	stateObject := self.getStateObject(common.BindingSaveAddress)
+	if stateObject != nil {
+		stateObject.UpdateAccountBinding(mainAccount, subAccount)
+		return true
+	}
+	return false
+}
+
+// 检查账号是否是绑定账号
+func (self *StateDB)IsBindingAccount(account common.Address) bool {
+	stateObject := self.getStateObject(common.BindingSaveAddress)
+	if stateObject != nil {
+		return stateObject.IsBindingAccount(account)
 	}
 	return false
 }

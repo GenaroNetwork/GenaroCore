@@ -677,6 +677,18 @@ func (self *stateObject) AddCandidate(candidate common.Address) {
 	}
 }
 
+// 判断候选者是否存在
+func (self *stateObject) IsCandidateExist(candidate common.Address) bool{
+	var candidates Candidates
+	if self.data.CodeHash == nil{
+		candidates = *new(Candidates)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &candidates)
+	}
+
+	return candidates.isExist(candidate)
+}
+
 func (self *stateObject) DelCandidate(candidate common.Address) {
 	var candidates Candidates
 	if self.data.CodeHash == nil{
@@ -1262,6 +1274,7 @@ func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
         }
 }
 
+// 添加最近块的信息
 func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint64) {
 	var lastSynState types.LastSynState
 	if self.data.CodeHash == nil{
@@ -1283,6 +1296,186 @@ func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint
 		self.onDirty(self.Address())
 		self.onDirty = nil
 	}
+}
+
+// 更新账号绑定
+func (self *stateObject)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address){
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	bindingTable.UpdateBinding(mainAccount,subAccount)
+
+	b, _ := json.Marshal(bindingTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+// 删除子账号绑定
+// 成功删除一个绑定账号返回true，否则返回false
+func (self *stateObject)DelSubAccountBinding(subAccount common.Address) bool{
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	if bindingTable.IsSubAccountExist(subAccount) {
+		bindingTable.DelSubAccount(subAccount)
+
+		b, _ := json.Marshal(bindingTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+		return true
+	}
+	return false
+}
+
+// 主账号删除绑定
+// 返回删除主账号后的所属子账号
+func (self *stateObject)DelMainAccountBinding(mainAccount common.Address) []common.Address{
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	if bindingTable.IsMainAccountExist(mainAccount) {
+		subAccounts := bindingTable.DelMainAccount(mainAccount)
+
+		b, _ := json.Marshal(bindingTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+		return subAccounts
+	}
+	return nil
+}
+
+// 获取所属子账号
+func (self *stateObject)GetSubAccounts(mainAccount common.Address) []common.Address{
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+	if bindingTable.IsMainAccountExist(mainAccount) {
+		return bindingTable.MainAccounts[mainAccount]
+	}
+
+	return nil
+}
+
+// 获取子账号数量
+func (self *stateObject)GetSubAccountsCount(mainAccount common.Address) int{
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	return bindingTable.GetSubAccountSizeInMainAccount(mainAccount)
+}
+
+// 获取所属主账号
+// 如果子账号不存在，则返回空账号
+func (self *stateObject)GetMainAccountsCount(subAccount common.Address) common.Address{
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	if bindingTable.IsSubAccountExist(subAccount) {
+		return bindingTable.SubAccounts[subAccount]
+	}
+
+	return common.Address{}
+}
+
+// 检查是否是绑定账号
+func (self *stateObject)IsBindingAccount(account common.Address) bool {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	return bindingTable.IsAccountInBinding(account)
+}
+
+// 检查是否是主账号
+func (self *stateObject)IsMainAccount(account common.Address) bool {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	return bindingTable.IsMainAccountExist(account)
+}
+
+// 检查是否是子账号
+func (self *stateObject)IsSubAccount(account common.Address) bool {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash == nil{
+		bindingTable  = types.BindingTable {
+			MainAccounts:	make(map[common.Address][]common.Address),
+			SubAccounts:	make(map[common.Address]common.Address),
+		}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+
+	return bindingTable.IsSubAccountExist(account)
 }
 
 func (self *stateObject)GetTrafficApplyPrice() *big.Int {
