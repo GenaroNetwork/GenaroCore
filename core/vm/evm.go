@@ -577,9 +577,9 @@ func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 		return err
 	}
 
-	amount := new(big.Int)
 	// the unit of stake is GNX， one stake means one GNX
-	amount.SetUint64(s.Stake*1000000000000000000)
+	currentCost := s.SpecialCost(nil)
+	amount := new(big.Int).Set(&currentCost)
 
 	// judge if there is enough balance to stake（balance must larger than stake value)
 	if !evm.Context.CanTransfer(evm.StateDB, caller, amount) {
