@@ -424,11 +424,11 @@ func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Add
 
 func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
-	existNodes := (*evm).StateDB.GetStorageNodes(caller)
-	currentStake, _:= (*evm).StateDB.GetStake(caller)
-	priceTable := (*evm).StateDB.GetStakePerNodePrice()
+	//existNodes := (*evm).StateDB.GetStorageNodes(caller)
+	//currentStake, _:= (*evm).StateDB.GetStake(caller)
+	//priceTable := (*evm).StateDB.GetStakePerNodePrice()
 
-	if err := CheckSyncNodeTx(caller, currentStake, existNodes, s, priceTable); nil != err {
+	if err := CheckSyncNodeTx(caller, s, (*evm).StateDB); nil != err {
 		return err
 	}
 
