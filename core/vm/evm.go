@@ -349,18 +349,16 @@ func SynState(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 }
 
 func userBackStake(evm *EVM, caller common.Address) error {
-	ok,backStakeList := (*evm).StateDB.GetAlreadyBackStakeList()
-	if !ok {
-		return errors.New("userBackStake fail")
+	err := CheckBackStakeTx(caller, (*evm).StateDB)
+	if err != nil {
+		return err
 	}
-	if len(backStakeList) > common.BackStackListMax {
-		return errors.New("BackStackList too long")
-	}
+
 	var backStake = common.AlreadyBackStake{
 		Addr: caller,
 		BackBlockNumber:evm.BlockNumber.Uint64(),
 	}
-	ok = (*evm).StateDB.AddAlreadyBackStack(backStake)
+	ok := (*evm).StateDB.AddAlreadyBackStack(backStake)
 	if !ok {
 		return errors.New("userBackStake fail")
 	}

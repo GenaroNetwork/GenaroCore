@@ -648,7 +648,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		return vm.CheckPunishmentTx(caller,s)
 	case common.SpecialTxTypeBackStake.Uint64():
-		return nil
+		return vm.CheckBackStakeTx(caller, pool.currentState)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
 		return vm.CheckPriceRegulation(caller)
 	case common.SpecialTxSynState.Uint64():

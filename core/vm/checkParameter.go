@@ -247,6 +247,17 @@ func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput) error {
 	return nil
 }
 
+func CheckBackStakeTx(caller common.Address, state StateDB) error {
+	ok,backStakeList := state.GetAlreadyBackStakeList()
+	if !ok {
+		return errors.New("userBackStake fail")
+	}
+	if len(backStakeList) > common.BackStackListMax {
+		return errors.New("BackStackList too long")
+	}
+	return nil
+}
+
 func CheckSynStateTx(caller common.Address) error {
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
