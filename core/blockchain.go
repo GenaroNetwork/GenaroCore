@@ -1015,17 +1015,6 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 //
 // After insertion is done, all accumulated events will be fired.
 func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
-	// genaro 专用，为了同步前几个块的时间戳
-	if bc.Config().Genaro != nil {
-		for _,block := range chain {
-			if block.NumberU64() < common.SynBlockLen*2 {
-				bc.insertChain(types.Blocks{block})
-			}else {
-				break
-			}
-		}
-	}
-	chain[0].NumberU64()
 	n, events, logs, err := bc.insertChain(chain)
 	bc.PostChainEvents(events, logs)
 	return n, err

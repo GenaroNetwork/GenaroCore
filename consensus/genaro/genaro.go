@@ -611,7 +611,10 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 		extraData.LastSynBlockHash = lastSynState.LastSynBlockHash
 		header.Extra, _ = json.Marshal(extraData)
 	}
-	state.AddLastRootState(header.ParentHash,header.Number.Uint64()-1)
+	if header.Number.Uint64() > common.SynBlockLen {
+		state.AddLastRootState(header.ParentHash,header.Number.Uint64()-1)
+	}
+
 
 	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()),nil)
 	if err != nil {
