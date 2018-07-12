@@ -1102,14 +1102,14 @@ func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount 
 }
 
 // 账号绑定更新
-func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool {
-	stateObject := self.getStateObject(common.BindingSaveAddress)
-	if stateObject != nil {
-		stateObject.UpdateAccountBinding(mainAccount, subAccount)
-		return true
-	}
-	return false
-}
+//func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool {
+//	stateObject := self.getStateObject(common.BindingSaveAddress)
+//	if stateObject != nil {
+//		stateObject.UpdateAccountBinding(mainAccount, subAccount)
+//		return true
+//	}
+//	return false
+//}
 
 // 检查账号是否是绑定账号
 func (self *StateDB)IsBindingAccount(account common.Address) bool {
