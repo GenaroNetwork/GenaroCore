@@ -1167,7 +1167,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberAndIndex(ctx conte
 func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType *big.Int) ([]*RPCTransaction, error) {
 	var specialTx []*RPCTransaction
 	if startBlockNr > endBlockNr {
-		return nil,errors.New("startBlockNumber can't large then endBlockNumber")
+		return nil,errors.New("startBlockNumber can't larger than endBlockNumber")
 	}
 	//最大遍历区间86400
 	var maxRange int64 = 86400
