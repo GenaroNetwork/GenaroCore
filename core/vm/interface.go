@@ -80,6 +80,7 @@ type StateDB interface {
 	DelCandidate(candidate common.Address) bool
 	GetCandidates() state.Candidates
 	GetCandidatesInfoInRange(uint64, uint64) []state.CandidateInfo
+	IsCandidateExist(candidate common.Address) bool
 
 	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
 	GetStorageSize(common.Address, [32]byte)  (uint64, error)
@@ -108,6 +109,7 @@ type StateDB interface {
 	AddAlreadyBackStack(backStack common.AlreadyBackStake) bool
 	GetAlreadyBackStakeList() (bool,common.BackStakeList)
 	SetAlreadyBackStakeList(common.BackStakeList) bool
+	IsAlreadyBackStake(addr common.Address) bool
 
 	SynchronizeShareKey(common.Address,types.SynchronizeShareKey) bool
 
@@ -134,8 +136,14 @@ type StateDB interface {
 	SetLastSynBlock(blockNumber uint64,blockHash common.Hash) bool
 	GetLastSynState() *types.LastSynState
 
+	UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool
+	GetMainAccount(subAccount common.Address) *common.Address
+	IsBindingAccount(account common.Address) bool
+	GetSubAccountsCount(mainAccount common.Address) int
+
 	UnbindNode(common.Address, string) error
 	UbindNode2Address(common.Address, string) error
+
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

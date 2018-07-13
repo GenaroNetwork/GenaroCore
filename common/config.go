@@ -126,6 +126,9 @@ var (
 	//同步分享秘钥
 	SynchronizeShareKey = big.NewInt(15)
 
+	// 账号绑定
+	SpecialTxAccountBinding = big.NewInt(16)
+
 	//解锁分享秘钥
 	UnlockSharedKey = big.NewInt(20)
 )
@@ -152,3 +155,5 @@ var (
 
 	// 一个主节点最大的绑定数量
 	var MaxBinding = 10
+	// 一次最小的押注额度
+	var MinStake = uint64(500)

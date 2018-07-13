@@ -118,14 +118,19 @@ func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckStakeTx(s types.SpecialTxInput) error {
+func CheckStakeTx(s types.SpecialTxInput, state StateDB) error {
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress){
 		return errors.New("param [address] can't be special address")
 	}
 
-	if s.Stake <= 0 {
+	if s.Stake < common.MinStake {
 		return errors.New("value of stake must larger than zero")
+	}
+
+	// 判断是否已经申请了退注
+	if state.IsAlreadyBackStake(adress) {
+		return errors.New("account in back stake list")
 	}
 	return nil
 }
@@ -255,6 +260,14 @@ func CheckBackStakeTx(caller common.Address, state StateDB) error {
 	if len(backStakeList) > common.BackStackListMax {
 		return errors.New("BackStackList too long")
 	}
+	// 判断是否是绑定用户
+	if state.IsBindingAccount(caller) {
+		return errors.New("account is binding")
+	}
+	// 判断是否已经申请了退注
+	if state.IsAlreadyBackStake(caller) {
+		return errors.New("account in back stake list")
+	}
 	return nil
 }
 
@@ -299,4 +312,31 @@ func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes 
 		}
 	}
 	return errors.New("this node does not belong to this account")
+}
+
+// 账号绑定检查
+func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
+	// 主账号
+	mainAccount := common.HexToAddress(s.Address)
+	// 子账号
+	subAccount := common.HexToAddress(s.Message)
+	// 主账号是否是候选者
+	if !state.IsCandidateExist(mainAccount) {
+		return errors.New("mainAddr is not a candidate")
+	}
+	// 主账号绑定数量是否超出限制
+	if state.GetSubAccountsCount(mainAccount) > common.MaxBinding {
+		return errors.New("binding enough")
+	}
+	// 子账号是否是候选者或存在于子账号队列中
+	thisMainAccount := state.GetMainAccount(subAccount)
+	if !state.IsCandidateExist(subAccount) && thisMainAccount == nil{
+		return errors.New("subAddr is not a candidate")
+	}
+	// 账号是否已经处于绑定状态
+	if bytes.Compare(thisMainAccount.Bytes(),mainAccount.Bytes()) == 0 {
+		return errors.New("has binding")
+	}
+
+	return nil
 }

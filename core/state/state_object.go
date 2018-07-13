@@ -1351,7 +1351,7 @@ func (self *stateObject)DelSubAccountBinding(subAccount common.Address) bool{
 	return false
 }
 
-// 主账号删除绑定
+// 主账号删除所有绑定
 // 返回删除主账号后的所属子账号
 func (self *stateObject)DelMainAccountBinding(mainAccount common.Address) []common.Address{
 	var bindingTable types.BindingTable
@@ -1414,8 +1414,8 @@ func (self *stateObject)GetSubAccountsCount(mainAccount common.Address) int{
 }
 
 // 获取所属主账号
-// 如果子账号不存在，则返回空账号
-func (self *stateObject)GetMainAccountsCount(subAccount common.Address) common.Address{
+// 如果子账号不存在，则返回nil
+func (self *stateObject)GetMainAccount(subAccount common.Address) *common.Address{
 	var bindingTable types.BindingTable
 	if self.data.CodeHash == nil{
 		bindingTable  = types.BindingTable {
@@ -1427,10 +1427,11 @@ func (self *stateObject)GetMainAccountsCount(subAccount common.Address) common.A
 	}
 
 	if bindingTable.IsSubAccountExist(subAccount) {
-		return bindingTable.SubAccounts[subAccount]
+		mainAccount := bindingTable.SubAccounts[subAccount]
+		return &mainAccount
 	}
 
-	return common.Address{}
+	return nil
 }
 
 // 检查是否是绑定账号

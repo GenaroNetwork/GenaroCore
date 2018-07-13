@@ -258,3 +258,12 @@ func (self *BackStakeList)IsExist(BackStake AlreadyBackStake) bool{
 	return false
 }
 
+func (self *BackStakeList)IsAccountExist(addr Address) bool{
+	for _,BackStakeIn := range *self {
+		if bytes.Compare(BackStakeIn.Addr.Bytes(),addr.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
