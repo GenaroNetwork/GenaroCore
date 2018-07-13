@@ -1040,33 +1040,23 @@ func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[
 	return nil,nil
 }
 
-func (self *stateObject)SyncStakeNode(s string, StakeValuePerNode *big.Int) error {
+func (self *stateObject)SyncStakeNode(s string) error {
 	var err error
 	var genaroData types.GenaroData
 	if self.data.CodeHash == nil{ // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
 		err = ErrSyncNode
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		var totalNodeNumber int = 1
-		if genaroData.Node != nil {
-			totalNodeNumber = len(genaroData.Node) + 1
+		genaroData.Node = append(genaroData.Node, s)
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
 		}
-		needStakeVale := new(big.Int)
-		needStakeVale.Add(big.NewInt(int64(totalNodeNumber)),StakeValuePerNode)
-		currentStake := big.NewInt(int64(genaroData.Stake * 1000000000000000000))
-		if needStakeVale.Cmp(currentStake) != 1 {
-			err = ErrSyncNode
-		}else {
-			genaroData.Node = append(genaroData.Node, s)
-			b, _ := json.Marshal(genaroData)
-			self.code = nil
-			self.data.CodeHash = b[:]
-			self.dirtyCode = true
-			if self.onDirty != nil {
-				self.onDirty(self.Address())
-				self.onDirty = nil
-			}
-		}
+
 	}
 	return err
 }

@@ -967,13 +967,10 @@ func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, Spe
 }
 
 func (self *StateDB)SyncStakeNode(address common.Address,s string) error {
-
-	currentStakePrice := self.GetStakePerNodePrice()
-
 	stateObject := self.GetOrNewStateObject(address)
 	var err error = nil
 	if stateObject != nil {
-		err = stateObject.SyncStakeNode(s, currentStakePrice)
+		err = stateObject.SyncStakeNode(s)
 	}
 	return err
 }

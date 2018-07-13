@@ -219,7 +219,9 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	needStakeVale := big.NewInt(0)
 	needStakeVale.Mul(big.NewInt(int64(nodeNum)), stakeVlauePerNode)
 
-	if needStakeVale.Cmp(big.NewInt(int64(stake*1000000000000000000))) != 1 {
+	currentStake := new(big.Int).Mul(new(big.Int).SetUint64(stake), common.BaseCompany)
+
+	if needStakeVale.Cmp(currentStake) != 1 {
 		return errors.New("none enough stake to synchronize node")
 	}
 	return nil
@@ -277,10 +279,15 @@ func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckPriceRegulation(caller common.Address) error {
+func CheckPriceRegulation(caller common.Address ,s types.SpecialTxInput) error {
 	if caller !=  common.GenaroPriceAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
+
+	if s.StakeValuePerNode == nil && s.BucketApplyGasPerGPerDay == nil && s.TrafficApplyGasPerG == nil && s.OneDayMortgageGes == nil && s.OneDaySyncLogGsaCost == nil {
+		return errors.New("none price to update")
+	}
+
 	return nil
 }
 
