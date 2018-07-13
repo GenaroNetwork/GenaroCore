@@ -25,6 +25,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"encoding/json"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -113,6 +114,19 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	// Create a new receipt for the transaction, storing the intermediate root and gas used by the tx
 	// based on the eip phase, we're passing wether the root touch-delete accounts.
 	receipt := types.NewReceipt(root, failed, *usedGas)
+
+	//extraCost for special Tx
+	if *msg.To() == common.SpecialSyncAddress {
+		if !failed {
+			var s types.SpecialTxInput
+			err = json.Unmarshal(msg.Data(), &s)
+			if err == nil{
+				currentPrice := vmenv.StateDB.GetGenaroPrice()
+				costInfo := s.SpecialCost(currentPrice)
+				receipt.ExtraInfo = costInfo.String()
+			}
+		}
+	}
 	receipt.TxHash = tx.Hash()
 	receipt.GasUsed = gas
 	// if the transaction created a contract, store the creation address in the receipt.

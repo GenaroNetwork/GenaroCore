@@ -1424,6 +1424,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 		"contractAddress":   nil,
 		"logs":              receipt.Logs,
 		"logsBloom":         receipt.Bloom,
+		"extraInfo":         receipt.ExtraInfo,
 	}
 
 	// Assign receipt status or post state.
