@@ -337,6 +337,10 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 }
 
 func SynState(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	err := CheckSynStateTx(caller)
+	if err != nil {
+		return err
+	}
 	lastSynState := (*evm).StateDB.GetLastSynState()
 	blockHash := common.HexToHash(s.Message)
 	blockNum,ok := lastSynState.LastRootStates[blockHash]
