@@ -623,7 +623,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	}
 	switch s.Type.ToInt().Uint64(){
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
-		return vm.CheckStakeTx(s)
+		return vm.CheckStakeTx(s, pool.currentState)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
 		return vm.CheckSyncHeftTx(caller, s)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
