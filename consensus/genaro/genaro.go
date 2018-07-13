@@ -700,12 +700,14 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 		preSurplusRewards = GetSurplusCoin(state)
 	}
 	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards)
-
 	surplusRewards := GetSurplusCoin(state)
 	//fmt.Printf("surplusRewards is %v\n", surplusRewards.String())
 	//plan rewards per year
 	planRewards := big.NewInt(0)
 	planRewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
+	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
+	//get Reward perYear
+	planRewards.Mul(planRewards, big.NewInt(int64(ratioPerYear)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//fmt.Printf("Plan rewards this year %v\n", planRewards.String())
 	//plan rewards per epoch
@@ -724,7 +726,7 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch/committeeSize)))
 
 	reward := blockReward
-	log.Info("accumulateInterestRewards 625", "reward", reward.String())
+	log.Info("accumulateInterestRewards", "reward", reward.String())
 	//fmt.Printf("final reward %v\n",  reward.String())
 	state.AddBalance(header.Coinbase, reward)
 
@@ -752,6 +754,9 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	//plan rewards per year
 	planRewards := big.NewInt(0)
 	planRewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))
+	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
+	//get storageReward perYear
+	planRewards.Mul(planRewards, big.NewInt(int64(ratioPerYear)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
 	//plan rewards per epoch
 	planRewards.Div(planRewards, big.NewInt(int64(calEpochPerYear(config))))
