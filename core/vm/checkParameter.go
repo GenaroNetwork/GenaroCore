@@ -279,10 +279,15 @@ func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckPriceRegulation(caller common.Address) error {
+func CheckPriceRegulation(caller common.Address ,s types.SpecialTxInput) error {
 	if caller !=  common.GenaroPriceAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
+
+	if s.StakeValuePerNode == nil && s.BucketApplyGasPerGPerDay == nil && s.TrafficApplyGasPerG == nil && s.OneDayMortgageGes == nil && s.OneDaySyncLogGsaCost == nil {
+		return errors.New("none price to update")
+	}
+
 	return nil
 }
 

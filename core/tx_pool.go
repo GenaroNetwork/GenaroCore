@@ -635,9 +635,6 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
 		return vm.CheckTrafficTx(s)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
-		//callerStake, _ := pool.currentState.GetStake(caller)
-		//existNodes := pool.currentState.GetStorageNodes(caller)
-		//currentStakePrice := pool.currentState.GetStakePerNodePrice()
 		return vm.CheckSyncNodeTx(caller, s, pool.currentState)
 	case common.SynchronizeShareKey.Uint64():
 		return vm.CheckSynchronizeShareKeyParameter(s)
@@ -650,7 +647,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypeBackStake.Uint64():
 		return vm.CheckBackStakeTx(caller, pool.currentState)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
-		return vm.CheckPriceRegulation(caller)
+		return vm.CheckPriceRegulation(caller, s)
 	case common.SpecialTxSynState.Uint64():
 		return vm.CheckSynStateTx(caller)
 	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
