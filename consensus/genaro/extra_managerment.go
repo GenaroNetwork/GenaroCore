@@ -14,6 +14,7 @@ type ExtraData struct {
 	LastSynBlockHash  common.Hash     `json:"lastSynBlockHash"`
 	Signature     []byte           `json:"signature"`     // the signature of block broadcaster
 	Proportion	  []uint64		   `json:"ratio"`
+	CommitteeAccountBinding 	map[common.Address][]common.Address	`json:"CommitteeAccountBinding"`	// 委员会账号的绑定信息
 }
 
 func UnmarshalToExtra(header *types.Header) *ExtraData {
