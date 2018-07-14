@@ -140,6 +140,10 @@ type StateDB interface {
 	GetMainAccount(subAccount common.Address) *common.Address
 	IsBindingAccount(account common.Address) bool
 	GetSubAccountsCount(mainAccount common.Address) int
+	IsBindingSubAccount(account common.Address) bool
+	IsBindingMainAccount(account common.Address) bool
+	DelSubAccountBinding(subAccount common.Address) bool
+	DelMainAccountBinding(mainAccount common.Address) []common.Address
 
 	UnbindNode(common.Address, string) error
 	UbindNode2Address(common.Address, string) error

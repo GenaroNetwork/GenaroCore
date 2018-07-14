@@ -1109,10 +1109,19 @@ func (self *StateDB)AddLastRootState(statehash common.Hash, blockNumber uint64) 
 
 // 账号绑定更新
 func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool {
-	stateObject := self.getStateObject(common.BindingSaveAddress)
+	stateObject := self.GetOrNewStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		stateObject.UpdateAccountBinding(mainAccount, subAccount)
 		return true
+	}
+	return false
+}
+
+// 取消子账号的绑定
+func (self *StateDB)DelSubAccountBinding(subAccount common.Address) bool {
+	stateObject := self.GetOrNewStateObject(common.BindingSaveAddress)
+	if stateObject != nil {
+		return stateObject.DelSubAccountBinding(subAccount)
 	}
 	return false
 }
@@ -1124,6 +1133,27 @@ func (self *StateDB)GetSubAccountsCount(mainAccount common.Address) int {
 		return stateObject.GetSubAccountsCount(mainAccount)
 	}
 	return 0
+}
+
+// 获得相关主账号的子账号
+// 如果子账号不存在，则返回nil
+func (self *StateDB)GetSubAccounts(mianAccount common.Address) []common.Address {
+	stateObject := self.getStateObject(common.BindingSaveAddress)
+	if stateObject != nil {
+		mainAccount := stateObject.GetSubAccounts(mianAccount)
+		return mainAccount
+	}
+	return nil
+}
+
+// 解除主账号的绑定
+func (self *StateDB)DelMainAccountBinding(mianAccount common.Address) []common.Address {
+	stateObject := self.getStateObject(common.BindingSaveAddress)
+	if stateObject != nil {
+		subAccounts := stateObject.DelMainAccountBinding(mianAccount)
+		return subAccounts
+	}
+	return nil
 }
 
 // 获得相关子账号的主账号
@@ -1142,6 +1172,15 @@ func (self *StateDB)IsBindingSubAccount(account common.Address) bool {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		return stateObject.IsSubAccount(account)
+	}
+	return false
+}
+
+// 检查账号是否是主账号
+func (self *StateDB)IsBindingMainAccount(account common.Address) bool {
+	stateObject := self.getStateObject(common.BindingSaveAddress)
+	if stateObject != nil {
+		return stateObject.IsMainAccount(account)
 	}
 	return false
 }

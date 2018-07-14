@@ -658,6 +658,10 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckUnbindNodeTx(caller, s, existNodes)
 	case common.SpecialTxAccountBinding.Uint64():	//账号绑定
 		return vm.CheckAccountBindingTx(caller, s, pool.currentState)
+	case common.SpecialTxAccountCancelBinding.Uint64(): // 账号解除绑定
+		_,err := vm.CheckAccountCancelBindingTx(caller, s, pool.currentState)
+		return err
+
 	}
 	return errors.New("undefined type of special transaction")
 }

@@ -259,6 +259,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = unbindNode(evm, s, caller)
 	case common.SpecialTxAccountBinding.Uint64():	// 账号绑定
 		err = accountBinding(evm, s, caller)
+	case common.SpecialTxAccountCancelBinding.Uint64(): // 账号解除绑定
+		err = accountCancelBinding(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -301,7 +303,42 @@ func accountBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) err
 	if !(*evm).StateDB.UpdateAccountBinding(mainAddr,subAddr) {
 		return errors.New("binding failed")
 	}
+	// 将子账号从候选者列表中去除
+	if !(*evm).StateDB.DelCandidate(subAddr) {
+		return errors.New("DelCandidate failed")
+	}
 
+	return nil
+}
+
+// 解除账号绑定
+func accountCancelBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	t,err := CheckAccountCancelBindingTx(caller, s,(*evm).StateDB)
+	if err != nil {
+		return err
+	}
+
+	// 判断账号处理类型
+	switch t{
+	case 1:
+		subAccounts := (*evm).StateDB.DelMainAccountBinding(caller)
+		// 恢复候选者身份
+		for _,subAccount := range subAccounts {
+			(*evm).StateDB.AddCandidate(subAccount)
+		}
+	case 2:
+		ok := (*evm).StateDB.DelSubAccountBinding(caller)
+		if ok {
+			(*evm).StateDB.AddCandidate(caller)
+		}
+	case 3:
+		ok := (*evm).StateDB.DelSubAccountBinding(caller)
+		if ok {
+			(*evm).StateDB.AddCandidate(caller)
+		}
+	default:
+		return errors.New("Account Cancel Binding failed")
+	}
 	return nil
 }
 

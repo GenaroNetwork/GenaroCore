@@ -5279,6 +5279,13 @@ var methods = function () {
         outputFormatter: utils.toDecimal
     });
 
+    var getSubAccounts = new Method({
+        name: 'getSubAccounts',
+        call: 'eth_getSubAccounts',GetCommitteeRank
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getCandidates = new Method({
         name: 'getCandidates',
         call: 'eth_getCandidates',
@@ -5559,7 +5566,8 @@ var methods = function () {
         getLastRootStates,
         getLastSynBlock,
         getExtra,
-        getAlreadyBackStakeList
+        getAlreadyBackStakeList,
+        getSubAccounts
     ];
 };
 

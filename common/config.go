@@ -129,6 +129,9 @@ var (
 	// 账号绑定
 	SpecialTxAccountBinding = big.NewInt(16)
 
+	// 解除账号的绑定关系
+	SpecialTxAccountCancelBinding = big.NewInt(17)
+
 	//解锁分享秘钥
 	UnlockSharedKey = big.NewInt(20)
 )

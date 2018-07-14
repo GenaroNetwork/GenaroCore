@@ -9,11 +9,11 @@ import (
 	"crypto/sha256"
 
 	"golang.org/x/crypto/ripemd160"
-
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"strings"
 )
 
 
@@ -316,6 +316,10 @@ func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes 
 
 // 账号绑定检查
 func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
+	// 检查是否是官方账号
+	if caller !=  common.OfficialAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
 	// 主账号
 	mainAccount := common.HexToAddress(s.Address)
 	// 子账号
@@ -334,9 +338,41 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 		return errors.New("subAddr is not a candidate")
 	}
 	// 账号是否已经处于绑定状态
-	if bytes.Compare(thisMainAccount.Bytes(),mainAccount.Bytes()) == 0 {
+	if thisMainAccount != nil && bytes.Compare(thisMainAccount.Bytes(),mainAccount.Bytes()) == 0 {
 		return errors.New("has binding")
 	}
 
 	return nil
 }
+
+// 检查输入参数，并返回执行类型
+// 1 主账号解绑
+// 2 子账号解绑
+// 3 主账号解绑子账号
+func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) (t int,err error){
+	// 判断账号类型
+	if state.IsBindingMainAccount(caller) {
+		if strings.EqualFold(s.Address,"") {
+			t = 1
+		} else {
+			subAccount := common.HexToAddress(s.Address)
+			if state.IsBindingSubAccount(subAccount) {
+				thisMainAccount := state.GetMainAccount(subAccount)
+				if thisMainAccount !=nil && bytes.EqualFold(thisMainAccount.Bytes(),caller.Bytes()){
+					t = 3
+				} else {
+					err = errors.New("not binding account")
+				}
+			}else {
+				err = errors.New("not binding account")
+			}
+		}
+
+	} else if state.IsBindingSubAccount(caller) {
+		t = 2
+	} else {
+		err = errors.New("not binding account")
+	}
+	return
+}
+

@@ -584,6 +584,15 @@ func (s *PublicBlockChainAPI) GetAlreadyBackStakeList(ctx context.Context, block
 	return
 }
 
+// 获取账号下的子账号队列
+func (s *PublicBlockChainAPI) GetSubAccounts(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (accounts []common.Address, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	return state.GetSubAccounts(address),nil
+}
+
 // GetStake returns the stake of ether for the given address in the state of the
 // given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
 // block numbers are also allowed.

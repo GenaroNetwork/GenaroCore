@@ -407,6 +407,24 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'getSubAccounts',
+			call: 'eth_getSubAccounts',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+        	name: 'getCandidates',
+        	call: 'eth_getCandidates',
+        	params: 1,
+        	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+        	name: 'getCommitteeRank',
+        	call: 'eth_getCommitteeRank',
+        	params: 1,
+        	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getTraffic',
 			call: 'eth_getTraffic',
 			params: 1,
