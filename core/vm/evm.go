@@ -332,9 +332,10 @@ func accountCancelBinding(evm *EVM, s types.SpecialTxInput, caller common.Addres
 			(*evm).StateDB.AddCandidate(caller)
 		}
 	case 3:
-		ok := (*evm).StateDB.DelSubAccountBinding(caller)
+		subAddr := common.HexToAddress(s.Address)
+		ok := (*evm).StateDB.DelSubAccountBinding(subAddr)
 		if ok {
-			(*evm).StateDB.AddCandidate(caller)
+			(*evm).StateDB.AddCandidate(subAddr)
 		}
 	default:
 		return errors.New("Account Cancel Binding failed")
