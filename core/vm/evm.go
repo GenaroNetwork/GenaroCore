@@ -249,7 +249,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = UnlockSharedKey(evm, s, caller)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		err = userPunishment(evm, s, caller)
-	case common.SpecialTxTypeBackStake.Uint64():
+	case common.SpecialTxTypeBackStake.Uint64():	// 退注
 		err = userBackStake(evm, caller)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
 		err = genaroPriceRegulation(evm, s, caller)
@@ -257,6 +257,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = SynState(evm, s, caller)
 	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
 		err = unbindNode(evm, s, caller)
+	case common.SpecialTxAccountBinding.Uint64():	// 账号绑定
+		err = accountBinding(evm, s, caller)
+	case common.SpecialTxAccountCancelBinding.Uint64(): // 账号解除绑定
+		err = accountCancelBinding(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -281,6 +285,61 @@ func unbindNode(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 		(*evm).StateDB.UbindNode2Address(node2UserAccountIndexAddress, s.NodeID)
 	}
 
+	return nil
+}
+
+// 账号之间建立绑定，由官方账号完成绑定连接
+func accountBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	err := CheckAccountBindingTx(caller, s,(*evm).StateDB)
+	if err != nil {
+		return err
+	}
+
+	// 主账号
+	mainAddr := common.HexToAddress(s.Address)
+	// 子账号
+	subAddr := common.HexToAddress(s.Message)
+	// 账号绑定
+	if !(*evm).StateDB.UpdateAccountBinding(mainAddr,subAddr) {
+		return errors.New("binding failed")
+	}
+	// 将子账号从候选者列表中去除
+	if !(*evm).StateDB.DelCandidate(subAddr) {
+		return errors.New("DelCandidate failed")
+	}
+
+	return nil
+}
+
+// 解除账号绑定
+func accountCancelBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	t,err := CheckAccountCancelBindingTx(caller, s,(*evm).StateDB)
+	if err != nil {
+		return err
+	}
+
+	// 判断账号处理类型
+	switch t{
+	case 1:
+		subAccounts := (*evm).StateDB.DelMainAccountBinding(caller)
+		// 恢复候选者身份
+		for _,subAccount := range subAccounts {
+			(*evm).StateDB.AddCandidate(subAccount)
+		}
+	case 2:
+		ok := (*evm).StateDB.DelSubAccountBinding(caller)
+		if ok {
+			(*evm).StateDB.AddCandidate(caller)
+		}
+	case 3:
+		subAddr := common.HexToAddress(s.Address)
+		ok := (*evm).StateDB.DelSubAccountBinding(subAddr)
+		if ok {
+			(*evm).StateDB.AddCandidate(subAddr)
+		}
+	default:
+		return errors.New("Account Cancel Binding failed")
+	}
 	return nil
 }
 
@@ -376,7 +435,7 @@ func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) erro
 		return errors.New("delete user's stake fail")
 	}
 	amount := new(big.Int).Mul(common.BaseCompany, new(big.Int).SetUint64(actualPunishment))
-	//将实际扣除的钱转到官方账号中
+	// 将实际扣除的钱转到官方账号中
 	(*evm).StateDB.AddBalance(common.OfficialAddress, amount)
 	return nil
 }
@@ -559,9 +618,8 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 	return nil
 }
 
-
 func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckStakeTx(s); err != nil {
+	if err := CheckStakeTx(s,evm.StateDB); err != nil {
 		return err
 	}
 

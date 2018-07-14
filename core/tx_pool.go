@@ -623,7 +623,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	}
 	switch s.Type.ToInt().Uint64(){
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
-		return vm.CheckStakeTx(s)
+		return vm.CheckStakeTx(s, pool.currentState)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
 		return vm.CheckSyncHeftTx(caller, s)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
@@ -653,6 +653,12 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
 		existNodes := pool.currentState.GetStorageNodes(caller)
 		return vm.CheckUnbindNodeTx(caller, s, existNodes)
+	case common.SpecialTxAccountBinding.Uint64():	//账号绑定
+		return vm.CheckAccountBindingTx(caller, s, pool.currentState)
+	case common.SpecialTxAccountCancelBinding.Uint64(): // 账号解除绑定
+		_,err := vm.CheckAccountCancelBindingTx(caller, s, pool.currentState)
+		return err
+
 	}
 	return errors.New("undefined type of special transaction")
 }

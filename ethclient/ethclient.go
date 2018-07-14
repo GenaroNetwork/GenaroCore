@@ -495,6 +495,12 @@ func (ec *Client) GetStake(ctx context.Context, account common.Address, blockNum
 	return (*big.Int)(&result), err
 }
 
+func (ec *Client) GetSubAccounts(ctx context.Context, account common.Address, blockNumber *big.Int) ([]common.Address, error) {
+	var result []common.Address
+	err := ec.c.CallContext(ctx, &result, "eth_getSubAccounts", account, toBlockNumArg(blockNumber))
+	return result, err
+}
+
 func toCallArg(msg ethereum.CallMsg) interface{} {
 	arg := map[string]interface{}{
 		"from": msg.From,
