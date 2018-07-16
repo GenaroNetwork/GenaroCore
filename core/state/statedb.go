@@ -829,6 +829,35 @@ func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd u
 	return nil
 }
 
+// 获取委员会权重信息，包含了子账号的权重
+func (self *StateDB)GetCandidatesInfoWithAllSubAccounts() []CandidateInfo {
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		candidates := stateObject.GetCandidates()
+		CandidateInfoArray := make([]CandidateInfo,len(candidates))
+		for id,candidate := range candidates {
+			CandidateInfoArray[id] = self.GetCandidateInfoWithAllSubAccounts(candidate)
+		}
+		return CandidateInfoArray
+	}
+	return nil
+}
+
+// 获取委员权重信息，包含了子账号的权重
+func (self *StateDB)GetCandidateInfoWithAllSubAccounts(candidate common.Address) (candidateInfo CandidateInfo) {
+	candidateInfo.Signer = candidate
+	candidateInfo.Heft,_ = self.GetHeft(candidate)
+	candidateInfo.Stake,_ = self.GetStake(candidate)
+	subAccounts := self.GetSubAccounts(candidate)
+	for _,subAccount := range subAccounts {
+		heft,_ := self.GetHeft(subAccount)
+		stake,_ := self.GetStake(subAccount)
+		candidateInfo.Heft += heft
+		candidateInfo.Stake += stake
+	}
+	return
+}
+
 func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid string, size uint64, backup uint64, timestart uint64, timeend uint64) bool {
 	stateObject := self.GetOrNewStateObject(userid)
 	if stateObject != nil {
@@ -1139,6 +1168,16 @@ func (self *StateDB)GetSubAccounts(mianAccount common.Address) []common.Address 
 	if stateObject != nil {
 		mainAccount := stateObject.GetSubAccounts(mianAccount)
 		return mainAccount
+	}
+	return nil
+}
+
+// 获取账号映射表
+func (self *StateDB)GetMainAccounts() map[common.Address][]common.Address {
+	stateObject := self.getStateObject(common.BindingSaveAddress)
+	if stateObject != nil {
+		mainAccounts := stateObject.GetMainAccounts()
+		return mainAccounts
 	}
 	return nil
 }
