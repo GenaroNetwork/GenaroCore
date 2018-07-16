@@ -334,7 +334,8 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64, paren
 
 		h := chain.GetHeaderByNumber(0)
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
-		snap = newSnapshot(chain.Config().Genaro, 0, h.Hash(), 0, committeeRank, proportion)
+		committeeAccountBinding := GetCommitteeAccountBinding(h)
+		snap = newSnapshot(chain.Config().Genaro, 0, h.Hash(), 0, committeeRank, proportion,committeeAccountBinding)
 		isCreateNew = true
 	}else{
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
@@ -351,8 +352,9 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64, paren
 			h = chain.GetHeaderByNumber(endBlock+1)
 		}
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
+		committeeAccountBinding := GetCommitteeAccountBinding(h)
 		snap = newSnapshot(chain.Config().Genaro, h.Number.Uint64(), h.Hash(), epollNumber -
-			g.config.ValidPeriod - g.config.ElectionPeriod, committeeRank, proportion)
+			g.config.ValidPeriod - g.config.ElectionPeriod, committeeRank, proportion,committeeAccountBinding)
 
 		log.Trace("computing rank from", startBlock, "to", endBlock)
 		isCreateNew = true
@@ -634,7 +636,7 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 		SetSurplusCoin(state, tmp)
 	}
 	//  coin interest reward
-	accumulateInterestRewards(g.config, state, header, proportion, blockNumber, snap.CommitteeSize)
+	accumulateInterestRewards(g.config, state, header, proportion, blockNumber, snap.CommitteeSize, snap.CommitteeAccountBinding)
 	// storage reward
 	accumulateStorageRewards(g.config, state, blockNumber, snap.CommitteeSize)
 
@@ -688,9 +690,35 @@ func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusR
 	return storageRatio
 }
 
+// 对账号及其子账号进行一次收益分配
+func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward *big.Int, subAccounts []common.Address){
+	coinbaseStake,_ := state.GetStake(coinbase)
+	totleStake := uint64(0)
+	totleStake += coinbaseStake
+	for _,subAccount := range subAccounts {
+		stake,_ := state.GetStake(subAccount)
+		totleStake += stake
+	}
+	// 结算收益
+	surplusReward := big.NewInt(0)
+	surplusReward.Set(reward)
+	// 子账号的收益
+	for _,subAccount := range subAccounts {
+		stake,_ := state.GetStake(subAccount)
+		accountReward := big.NewInt(0)
+		accountReward.Set(reward)
+		accountReward.Mul(accountReward,big.NewInt(int64(stake)))
+		accountReward.Div(accountReward,big.NewInt(int64(totleStake)))
+		state.AddBalance(subAccount, accountReward)
+		surplusReward.Sub(surplusReward,accountReward)
+	}
+	// 主账号的收益
+	state.AddBalance(coinbase, surplusReward)
+}
+
 // AccumulateInterestRewards credits the reward to the block author by coin  interest
 func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, proportion uint64,
-	blockNumber uint64, committeeSize uint64) error {
+	blockNumber uint64, committeeSize uint64, committeeAccountBinding 	map[common.Address][]common.Address) error {
 	preCoinRewards := GetPreCoinActualRewards(state)
 	preSurplusRewards := big.NewInt(0)
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
@@ -728,8 +756,13 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	reward := blockReward
 	log.Info("accumulateInterestRewards", "reward", reward.String())
 	//fmt.Printf("final reward %v\n",  reward.String())
-	state.AddBalance(header.Coinbase, reward)
-
+	// 判断是否拥有子账号
+	subAccounts,ok := committeeAccountBinding[header.Coinbase]
+	if ok {
+		settleInterestRewards(state,header.Coinbase,reward,subAccounts)
+	} else {
+		state.AddBalance(header.Coinbase, reward)
+	}
 	AddCoinActualRewards(state,reward)
 	return nil
 }

@@ -21,6 +21,7 @@ type CommitteeSnapshot struct {
 	CommitteeSize			uint64                           // the size of Committee
 	CommitteeRank			[]common.Address                 // the rank of committee
 	Committee				map[common.Address]uint64		 // committee members
+	CommitteeAccountBinding 	map[common.Address][]common.Address	// account binding map
 }
 
 type Stake struct {
@@ -37,17 +38,19 @@ type Stake struct {
 
 // newSnapshot creates a new snapshot with the specified startup parameters.
 func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, epochNumber uint64,
-	committeeRank []common.Address, proportion []uint64) *CommitteeSnapshot {
+	committeeRank []common.Address, proportion []uint64, CommitteeAccountBinding 	map[common.Address][]common.Address) *CommitteeSnapshot {
 	if config.Epoch == 0 {
 		config.Epoch = epochLength
 	}
+	committeeLenth := len(committeeRank)
 	snap := &CommitteeSnapshot{
 		config:				config,
 		WriteBlockNumber:	number,
 		WriteBlockHash:		hash,
 		EpochNumber:		epochNumber,
-		CommitteeRank:		make([]common.Address, len(committeeRank)),
-		Committee:			make(map[common.Address]uint64, len(committeeRank)),
+		CommitteeRank:		make([]common.Address, committeeLenth),
+		Committee:			make(map[common.Address]uint64, committeeLenth),
+		CommitteeAccountBinding:	make(map[common.Address][]common.Address, committeeLenth),
 	}
 
 	total := uint64(0)
@@ -65,6 +68,10 @@ func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, e
 		snap.CommitteeRank = snap.CommitteeRank[0:config.CommitteeMaxSize]
 	}
 	snap.CommitteeSize = uint64(len(snap.CommitteeRank))
+
+	for accountBinding := range CommitteeAccountBinding {
+		snap.CommitteeAccountBinding[accountBinding] = CommitteeAccountBinding[accountBinding]
+	}
 	return snap
 }
 

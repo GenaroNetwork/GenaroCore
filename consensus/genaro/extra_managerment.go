@@ -83,3 +83,8 @@ func CreateCommitteeRankByte(address []common.Address) []byte {
 	return extraByte
 
 }
+
+func GetCommitteeAccountBinding(header *types.Header) (committeeAccountBinding map[common.Address][]common.Address) {
+	extraData := UnmarshalToExtra(header)
+	return extraData.CommitteeAccountBinding
+}
