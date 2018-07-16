@@ -144,6 +144,7 @@ type StateDB interface {
 	IsBindingMainAccount(account common.Address) bool
 	DelSubAccountBinding(subAccount common.Address) bool
 	DelMainAccountBinding(mainAccount common.Address) []common.Address
+	GetMainAccounts() map[common.Address][]common.Address
 
 	UnbindNode(common.Address, string) error
 	UbindNode2Address(common.Address, string) error

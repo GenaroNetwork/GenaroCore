@@ -558,6 +558,15 @@ func updateEpochYearRewards(state *state.StateDB) {
 	SetTotalActualRewards(state, big.NewInt(0))
 }
 
+// 获取委员会的绑定表
+func genCommitteeAccountBinding(thisstate *state.StateDB,commitee []common.Address) (committeeAccountBinding map[common.Address][]common.Address) {
+	mainAccounts := thisstate.GetMainAccounts()
+	for _,account := range commitee{
+		committeeAccountBinding[account] = mainAccounts[account]
+	}
+	return
+}
+
 // 换届时的更新
 func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
 	blockNumber := header.Number.Uint64()
@@ -565,14 +574,19 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 	if blockNumber%config.Epoch == 0 {
 		//rank
 		//epochStartBlockNumber := blockNumber - config.Epoch
-		epochEndBlockNumber := blockNumber
-		candidateInfos := thisstate.GetCandidatesInfoInRange(0, epochEndBlockNumber)
+		//epochEndBlockNumber := blockNumber
+		//candidateInfos := thisstate.GetCandidatesInfoInRange(0, epochEndBlockNumber)
+		candidateInfos := thisstate.GetCandidatesInfoWithAllSubAccounts()
 		commiteeRank, proportion := state.RankWithLenth(candidateInfos,int(config.CommitteeMaxSize))
+		var committeeAccountBinding map[common.Address][]common.Address
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
+			committeeAccountBinding = genCommitteeAccountBinding(thisstate,commiteeRank)
 		}else{
 			SetHeaderCommitteeRankList(header, commiteeRank[:config.CommitteeMaxSize],proportion[:config.CommitteeMaxSize])
+			committeeAccountBinding = genCommitteeAccountBinding(thisstate,commiteeRank[:config.CommitteeMaxSize])
 		}
+		SetCommitteeAccountBinding(header, committeeAccountBinding)
 		//CoinActualRewards and StorageActualRewards should update per epoch
 		updateEpochRewards(thisstate)
 	}

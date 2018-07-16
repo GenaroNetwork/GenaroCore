@@ -57,6 +57,19 @@ func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Add
 	return nil
 }
 
+// 设置委员会的绑定表
+func SetCommitteeAccountBinding(header *types.Header, committeeAccountBinding map[common.Address][]common.Address) error{
+	extraData := UnmarshalToExtra(header)
+	extraData.CommitteeAccountBinding = committeeAccountBinding
+	extraByte, err := json.Marshal(extraData)
+	if err != nil {
+		return err
+	}
+	header.Extra = make([]byte, len(extraByte))
+	copy(header.Extra, extraByte)
+	return nil
+}
+
 //func SetHeaderSentinelHeft(header *types.Header, sentinelHeft uint64) {
 //	extraData := UnmarshalToExtra(header)
 //	extraData.SentinelHeft = sentinelHeft

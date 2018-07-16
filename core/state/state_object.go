@@ -156,9 +156,15 @@ func (c CandidateInfos) Less(i, j int) bool {
 }
 
 func (c CandidateInfos) Apply() {
+	totleHeft := uint64(0)
+	totleStake := uint64(0)
+	for _, candidate := range c{
+		totleHeft += candidate.Heft
+		totleStake += candidate.Stake
+	}
 	//TODO define how to get point
 	for i, candidate := range c{
-		c[i].Point = candidate.Stake + candidate.Heft
+		c[i].Point = candidate.Stake*common.Base/totleStake + candidate.Heft*common.Base/totleHeft
 	}
 }
 
@@ -1390,6 +1396,18 @@ func (self *stateObject)GetSubAccountsCount(mainAccount common.Address) int{
 	}
 
 	return bindingTable.GetSubAccountSizeInMainAccount(mainAccount)
+}
+
+// 获取账号映射表
+func (self *stateObject)GetMainAccounts() map[common.Address][]common.Address{
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return nil
+	}
+
+	return bindingTable.MainAccounts
 }
 
 // 获取所属主账号
