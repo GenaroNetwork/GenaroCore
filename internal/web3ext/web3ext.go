@@ -407,6 +407,18 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'getHeft',
+			call: 'eth_getHeft',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getGenaroPrice',
+			call: 'eth_getGenaroPrice',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getSubAccounts',
 			call: 'eth_getSubAccounts',
 			params: 2,

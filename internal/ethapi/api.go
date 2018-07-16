@@ -1290,7 +1290,7 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 }
 
 
-func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context) map[string]string {
+func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context, blockNr rpc.BlockNumber) map[string]string {
 	genaroPriceMap := make(map[string]string)
 	genaroPriceMap["bucketPricePerGperDay"] = common.DefaultBucketApplyGasPerGPerDay.String()
 	genaroPriceMap["trafficPricePerG"] = common.DefaultTrafficApplyGasPerG.String()
@@ -1298,7 +1298,7 @@ func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context) map[strin
 	genaroPriceMap["oneDayMortgageGes"] = common.DefaultOneDayMortgageGes.String()
 	genaroPriceMap["oneDaySyncLogGsaCost"] = common.DefaultOneDaySyncLogGsaCost.String()
 
-	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return genaroPriceMap
 	}
