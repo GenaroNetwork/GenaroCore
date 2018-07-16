@@ -50,7 +50,7 @@ func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, e
 		EpochNumber:		epochNumber,
 		CommitteeRank:		make([]common.Address, committeeLenth),
 		Committee:			make(map[common.Address]uint64, committeeLenth),
-		CommitteeAccountBinding:	make(map[common.Address][]common.Address, committeeLenth),
+		CommitteeAccountBinding:	make(map[common.Address][]common.Address),
 	}
 
 	total := uint64(0)
@@ -114,6 +114,7 @@ func (s *CommitteeSnapshot) copy() *CommitteeSnapshot {
 		CommitteeSize:    s.CommitteeSize,
 		CommitteeRank:    make([]common.Address, s.CommitteeSize),
 		Committee:        make(map[common.Address]uint64),
+		CommitteeAccountBinding:	make(map[common.Address][]common.Address),
 	}
 	for i, rank := range s.CommitteeRank {
 		cpy.CommitteeRank[i] = rank
@@ -121,6 +122,10 @@ func (s *CommitteeSnapshot) copy() *CommitteeSnapshot {
 
 	for key, val := range s.Committee {
 		cpy.Committee[key] = val
+	}
+
+	for key, val := range s.CommitteeAccountBinding {
+		cpy.CommitteeAccountBinding[key] = val
 	}
 
 	return cpy

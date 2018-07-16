@@ -562,7 +562,10 @@ func updateEpochYearRewards(state *state.StateDB) {
 func genCommitteeAccountBinding(thisstate *state.StateDB,commitee []common.Address) (committeeAccountBinding map[common.Address][]common.Address) {
 	mainAccounts := thisstate.GetMainAccounts()
 	for _,account := range commitee{
-		committeeAccountBinding[account] = mainAccounts[account]
+		subAccounts,ok := mainAccounts[account]
+		if ok {
+			committeeAccountBinding[account] = subAccounts
+		}
 	}
 	return
 }
