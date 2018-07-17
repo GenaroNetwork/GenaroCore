@@ -348,6 +348,10 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 	if state.GetSubAccountsCount(mainAccount) > common.MaxBinding {
 		return errors.New("binding enough")
 	}
+	// 绑定的子账号是否已经是一个主账号
+	if state.IsBindingMainAccount(subAccount) {
+		return errors.New("sub account is a main account")
+	}
 	// 子账号是否是候选者或存在于子账号队列中
 	thisMainAccount := state.GetMainAccount(subAccount)
 	if !state.IsCandidateExist(subAccount) && thisMainAccount == nil{
@@ -372,9 +376,7 @@ func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, s
 			t = 1
 		} else {
 			subAccount := common.HexToAddress(s.Address)
-			if state.IsBindingMainAccount(subAccount) {
-				err = errors.New("sub account is a main account")
-			}else if state.IsBindingSubAccount(subAccount) {
+			if state.IsBindingSubAccount(subAccount) {
 				thisMainAccount := state.GetMainAccount(subAccount)
 				if thisMainAccount !=nil && bytes.EqualFold(thisMainAccount.Bytes(),caller.Bytes()){
 					t = 3
