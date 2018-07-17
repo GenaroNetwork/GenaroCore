@@ -160,3 +160,5 @@ var (
 	var MaxBinding = 10
 	// 一次最小的押注额度
 	var MinStake = uint64(500)
+	// 进入委员会需要的最小stake
+	var CommitteeMinStake = uint64(5000)
