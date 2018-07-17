@@ -159,6 +159,6 @@ var (
 	// 一个主节点最大的绑定数量
 	var MaxBinding = 10
 	// 一次最小的押注额度
-	var MinStake = uint64(500)
+	var MinStake = uint64(5000)
 	// 进入委员会需要的最小stake
 	var CommitteeMinStake = uint64(5000)

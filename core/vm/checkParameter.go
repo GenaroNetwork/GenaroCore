@@ -125,7 +125,7 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB) error {
 	}
 
 	if s.Stake < common.MinStake {
-		return errors.New("value of stake must larger than zero")
+		return errors.New("value of stake must larger than MinStake")
 	}
 
 	// 判断是否已经申请了退注
