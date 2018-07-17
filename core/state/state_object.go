@@ -1263,13 +1263,13 @@ func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
 	}
 
 	b, _ := json.Marshal(genaroPrice)
-        self.code = nil
-        self.data.CodeHash = b[:]
-        self.dirtyCode = true
-        if self.onDirty != nil {
-                self.onDirty(self.Address())
-                self.onDirty = nil
-        }
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+	}
 }
 
 // 添加最近块的信息
