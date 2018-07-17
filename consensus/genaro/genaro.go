@@ -560,6 +560,7 @@ func updateEpochYearRewards(state *state.StateDB) {
 
 // 获取委员会的绑定表
 func genCommitteeAccountBinding(thisstate *state.StateDB,commitee []common.Address) (committeeAccountBinding map[common.Address][]common.Address) {
+	committeeAccountBinding = make(map[common.Address][]common.Address)
 	mainAccounts := thisstate.GetMainAccounts()
 	for _,account := range commitee{
 		subAccounts,ok := mainAccounts[account]

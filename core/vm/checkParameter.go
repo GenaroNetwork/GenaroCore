@@ -363,7 +363,9 @@ func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, s
 			t = 1
 		} else {
 			subAccount := common.HexToAddress(s.Address)
-			if state.IsBindingSubAccount(subAccount) {
+			if state.IsBindingMainAccount(subAccount) {
+				err = errors.New("sub account is a main account")
+			}else if state.IsBindingSubAccount(subAccount) {
 				thisMainAccount := state.GetMainAccount(subAccount)
 				if thisMainAccount !=nil && bytes.EqualFold(thisMainAccount.Bytes(),caller.Bytes()){
 					t = 3

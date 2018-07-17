@@ -191,7 +191,13 @@ func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
 // 限制排名的长度后，进行排名
 func RankWithLenth(candidateInfos CandidateInfos, lenth int) ([]common.Address, []uint64){
 	candidateInfos.Apply()
-	//
+	// 除去低于stake最小限制的账号
+	for i:=0;i<len(candidateInfos);i++ {
+		if candidateInfos[i].Stake < common.CommitteeMinStake {
+			candidateInfos = append(candidateInfos[:i],candidateInfos[i+1:]...)
+			i--
+		}
+	}
 
 	sort.Sort(sort.Reverse(candidateInfos))
 	rankLenth := lenth
