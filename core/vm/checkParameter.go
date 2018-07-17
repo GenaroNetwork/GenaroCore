@@ -145,10 +145,19 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput) error {
 		return errors.New("param [address] can't be special address")
 	}
 
+	if s.Heft <= 0 {
+		return errors.New("value of heft must larger than zero")
+	}
+
 	return nil
 }
 
 func CheckApplyBucketTx(s types.SpecialTxInput) error {
+	adress := common.HexToAddress(s.Address)
+	if isSpecialAddress(adress){
+		return errors.New("param [address] can't be special address")
+	}
+
 	for _, v := range s.Buckets {
 		if len(v.BucketId) != 64 {
 			return errors.New("length of bucketId must be 64")
@@ -182,7 +191,7 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	paramAddress := common.HexToAddress(s.Address)
 	//caller和节点待绑定账户是否一致
 	if caller != paramAddress {
-		return errors.New("two address not equal")
+		return errors.New("address in param is not equal with callerAddress of this Tx")
 	}
 
 
