@@ -146,6 +146,11 @@ type StateDB interface {
 	DelMainAccountBinding(mainAccount common.Address) []common.Address
 	GetMainAccounts() map[common.Address][]common.Address
 
+	AddAccountInForbidBackStakeList(address common.Address) bool
+	DelAccountInForbidBackStakeList(address common.Address) bool
+	IsAccountExistInForbidBackStakeList(address common.Address) bool
+	GetForbidBackStakeList() types.ForbidBackStakeList
+
 	UnbindNode(common.Address, string) error
 	UbindNode2Address(common.Address, string) error
 

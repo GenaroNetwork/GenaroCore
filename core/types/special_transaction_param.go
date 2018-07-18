@@ -245,3 +245,27 @@ func (bindingTable *BindingTable) UpdateBinding(mainAccount,subAccount common.Ad
 	}
 	bindingTable.SubAccounts[subAccount] = mainAccount
 }
+
+// 禁止退注的列表
+type ForbidBackStakeList []common.Address
+
+func (forbidList *ForbidBackStakeList) Add(addr common.Address) {
+	*forbidList = append(*forbidList,addr)
+}
+
+func (forbidList *ForbidBackStakeList) Del(addr common.Address) {
+	for i,addrIn := range *forbidList {
+		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
+			(*forbidList) = append((*forbidList)[:i],(*forbidList)[i+1:]...)
+		}
+	}
+}
+
+func (forbidList *ForbidBackStakeList)IsExist(addr common.Address) bool{
+	for _,addrIn := range *forbidList {
+		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
+}

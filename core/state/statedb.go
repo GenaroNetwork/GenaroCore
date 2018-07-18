@@ -1352,4 +1352,36 @@ func (self *StateDB)UbindNode2Address(address common.Address, nodeId string) err
 	return err
 }
 
+func (self *StateDB)AddAccountInForbidBackStakeList(address common.Address) bool {
+	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
+	if stateObject != nil {
+		stateObject.AddAccountInForbidBackStakeList(address)
+		return true
+	}
+	return false
+}
 
+func (self *StateDB)DelAccountInForbidBackStakeList(address common.Address) bool {
+	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
+	if stateObject != nil {
+		stateObject.DelAccountInForbidBackStakeList(address)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)IsAccountExistInForbidBackStakeList(address common.Address) bool {
+	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
+	if stateObject != nil {
+		return stateObject.IsAccountExistInForbidBackStakeList(address)
+	}
+	return false
+}
+
+func (self *StateDB)GetForbidBackStakeList() types.ForbidBackStakeList {
+	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
+	if stateObject != nil {
+		return stateObject.GetForbidBackStakeList()
+	}
+	return nil
+}

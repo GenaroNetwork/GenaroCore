@@ -76,9 +76,12 @@ var (
 	// 父子账号的绑定表
 	BindingSaveAddress Address = HexToAddress("0x8000000000000000000000000000000000000000")
 
+	// 存放禁止退注的名单
+	ForbidBackStakeSaveAddress Address = HexToAddress("0x9000000000000000000000000000000000000000")
+
 )
 
-var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress}
+var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress}
 
 
 

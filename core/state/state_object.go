@@ -711,16 +711,17 @@ func (self *stateObject) DelCandidate(candidate common.Address) {
 		json.Unmarshal(self.data.CodeHash, &candidates)
 	}
 
-	candidates.DelCandidate(candidate)
-	b, _ := json.Marshal(candidates)
-	self.code = nil
-	self.data.CodeHash = b[:]
-	self.dirtyCode = true
-	if self.onDirty != nil {
-		self.onDirty(self.Address())
-		self.onDirty = nil
+	if candidates.isExist(candidate) {
+		candidates.DelCandidate(candidate)
+		b, _ := json.Marshal(candidates)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
 	}
-
 }
 
 func (self *stateObject)GetCandidates() (Candidates){
@@ -731,6 +732,72 @@ func (self *stateObject)GetCandidates() (Candidates){
 	}
 	return nil
 }
+
+// 将账号加入禁止退注列表
+func (self *stateObject) AddAccountInForbidBackStakeList(addr common.Address) {
+	var forbidList types.ForbidBackStakeList
+	if self.data.CodeHash == nil{
+		forbidList = *new(types.ForbidBackStakeList)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+	}
+	if !forbidList.IsExist(addr) {
+		forbidList.Add(addr)
+		b, _ := json.Marshal(forbidList)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+// 判断账号是否存在于禁止退注列表中
+func (self *stateObject) IsAccountExistInForbidBackStakeList(addr common.Address) bool{
+	var forbidList types.ForbidBackStakeList
+	if self.data.CodeHash == nil{
+		forbidList = *new(types.ForbidBackStakeList)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+	}
+
+	return forbidList.IsExist(addr)
+}
+
+// 将账号从禁止退注名单中删除
+func (self *stateObject) DelAccountInForbidBackStakeList(addr common.Address) {
+	var forbidList types.ForbidBackStakeList
+	if self.data.CodeHash == nil{
+		forbidList = *new(types.ForbidBackStakeList)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+	}
+
+	if forbidList.IsExist(addr) {
+		forbidList.Del(addr)
+		b, _ := json.Marshal(forbidList)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+// 获取禁止退注名单
+func (self *stateObject)GetForbidBackStakeList() (types.ForbidBackStakeList){
+	if self.data.CodeHash != nil {
+		var forbidList types.ForbidBackStakeList
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+		return forbidList
+	}
+	return nil
+}
+
 
 func (self *stateObject) AddAlreadyBackStack(backStake common.AlreadyBackStake) {
 	var backStakes common.BackStakeList
