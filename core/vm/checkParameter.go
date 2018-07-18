@@ -279,6 +279,10 @@ func CheckBackStakeTx(caller common.Address, state StateDB) error {
 	if state.IsAlreadyBackStake(caller) {
 		return errors.New("account in back stake list")
 	}
+	// 判断账号是否在禁止退注的名单中
+	if state.IsAccountExistInForbidBackStakeList(caller) {
+		return errors.New("account in forbid backstake list")
+	}
 	return nil
 }
 
@@ -394,5 +398,38 @@ func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, s
 		err = errors.New("not binding account")
 	}
 	return
+}
+
+// 添加禁止退注名单的交易检查
+func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
+	// 检查是否是官方账号
+	if caller !=  common.OfficialAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+	account := common.HexToAddress(s.Address)
+	// 检查账号是否有押注
+	stake,err := state.GetStake(account)
+	if err != nil {
+		return err
+	}
+	if stake == 0 {
+		return errors.New("account stake is zero")
+	}
+	return nil
+}
+
+// 移除退注账号禁止名单的检查
+func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
+	// 检查是否是官方账号
+	if caller !=  common.OfficialAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+	account := common.HexToAddress(s.Address)
+	// 检查账号是否在禁止名单中
+	ok := state.IsAccountExistInForbidBackStakeList(account)
+	if !ok {
+		return errors.New("account is not in forbid list")
+	}
+	return nil
 }
 

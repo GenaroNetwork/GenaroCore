@@ -261,6 +261,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = accountBinding(evm, s, caller)
 	case common.SpecialTxAccountCancelBinding.Uint64(): // 账号解除绑定
 		err = accountCancelBinding(evm, s, caller)
+	case common.SpecialTxAddAccountInForbidBackStakeList.Uint64(): // 加入禁止退注名单
+		err = addAccountInForbidBackStakeList(evm, s, caller)
+	case common.SpecialTxDelAccountInForbidBackStakeList.Uint64(): // 移除禁止退注名单
+		err = delAccountInForbidBackStakeList(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -269,6 +273,30 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info("special transaction error: ", err)
 	}
 	return err
+}
+
+func delAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckDelAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	account := common.HexToAddress(s.Address)
+	ok := (*evm).StateDB.DelAccountInForbidBackStakeList(account)
+	if !ok {
+		return errors.New("Delete Account In Forbid BackStake List failed")
+	}
+	return nil
+}
+
+func addAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckAddAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	account := common.HexToAddress(s.Address)
+	ok := (*evm).StateDB.AddAccountInForbidBackStakeList(account)
+	if !ok {
+		return errors.New("Add Account In Forbid BackStake List failed")
+	}
+	return nil
 }
 
 func unbindNode(evm *EVM, s types.SpecialTxInput, caller common.Address) error {

@@ -135,6 +135,10 @@ var (
 	// 解除账号的绑定关系
 	SpecialTxAccountCancelBinding = big.NewInt(17)
 
+	// 禁止退注用户的增减
+	SpecialTxAddAccountInForbidBackStakeList = big.NewInt(18)
+	SpecialTxDelAccountInForbidBackStakeList = big.NewInt(19)
+
 	//解锁分享秘钥
 	UnlockSharedKey = big.NewInt(20)
 )
