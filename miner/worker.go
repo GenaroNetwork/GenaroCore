@@ -256,7 +256,12 @@ func (self *worker) update() {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			self.commitNewWork()
+			if self.config.Genaro != nil {
+				GenaroCommitNewWork(self)
+			} else {
+				self.commitNewWork()
+			}
+
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -391,7 +396,7 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 	return nil
 }
 
-func (self *worker) commitNewWork() {
+func (self *worker) commitNewWork() error{
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.uncleMu.Lock()
@@ -427,7 +432,7 @@ func (self *worker) commitNewWork() {
 	}
 	if err := self.engine.Prepare(self.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
-		return
+		return err
 	}
 	// If we are care about TheDAO hard-fork check whether to override the extra-data or not
 	if daoBlock := self.config.DAOForkBlock; daoBlock != nil {
@@ -446,7 +451,7 @@ func (self *worker) commitNewWork() {
 	err := self.makeCurrent(parent, header)
 	if err != nil {
 		log.Error("Failed to create mining context", "err", err)
-		return
+		return err
 	}
 	// Create the current work task and check any fork transitions needed
 	work := self.current
@@ -454,43 +459,26 @@ func (self *worker) commitNewWork() {
 		misc.ApplyDAOHardFork(work.state)
 	}
 
-	if self.config.Genaro != nil {
-		// deal TxPool util has SynState
-		for {
-			pending, err := self.eth.TxPool().Pending()
-			if err != nil {
-				log.Error("Failed to fetch pending transactions", "err", err)
-				return
-			}
-			txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
-			work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
+	pending, err := self.eth.TxPool().Pending()
+	if err != nil {
+		log.Error("Failed to fetch pending transactions", "err", err)
+		return err
+	}
+	txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
+	work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
 
-			// check if has Syn State
-			lastSynState := work.state.GetLastSynState()
-			if lastSynState != nil {
-				if header.Number.Uint64()-lastSynState.LastSynBlockNum > common.SynBlockLen+1 {
-					log.Error("need SynState")
-					if atomic.LoadInt32(&self.mining) == 0 {
-						return
-					}
-					time.Sleep(time.Second)
-				} else {
-					break
-				}
-			}else {
-				log.Error("lastSynState nil")
-				return
+	if self.config.Genaro != nil {
+		// check if has Syn State
+		lastSynState := work.state.GetLastSynState()
+		if lastSynState != nil {
+			if header.Number.Uint64()-lastSynState.LastSynBlockNum > common.SynBlockLen+1 {
+				log.Error("need SynState")
+				return SynError
 			}
-			*work = *self.current
+		}else {
+			log.Error("lastSynState nil")
+			return errors.New("lastSynState nil")
 		}
-	} else {
-		pending, err := self.eth.TxPool().Pending()
-		if err != nil {
-			log.Error("Failed to fetch pending transactions", "err", err)
-			return
-		}
-		txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
-		work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
 	}
 
 
@@ -520,7 +508,7 @@ func (self *worker) commitNewWork() {
 	// Create the new block to seal with the consensus engine
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts); err != nil {
 		log.Error("Failed to finalize block for sealing", "err", err)
-		return
+		return err
 	}
 
 	// We only care about logging if we're actually mining.
@@ -529,7 +517,7 @@ func (self *worker) commitNewWork() {
 		self.unconfirmed.Shift(work.Block.NumberU64() - 1)
 	}
 	self.push(work)
-	return
+	return nil
 }
 
 func (self *worker) commitUncle(work *Work, uncle *types.Header) error {

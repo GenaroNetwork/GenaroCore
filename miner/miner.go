@@ -32,6 +32,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/event"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"strings"
+	"time"
 )
 
 // Backend wraps all methods required for mining.
@@ -116,7 +118,21 @@ func (self *Miner) Start(coinbase common.Address) {
 	log.Info("Starting mining operation")
 	self.worker.start()
 
-	self.worker.commitNewWork()
+	if self.worker.config.Genaro != nil {
+		GenaroCommitNewWork(self.worker)
+	} else {
+		self.worker.commitNewWork()
+	}
+
+}
+
+// genaro commit work
+func GenaroCommitNewWork(wk *worker){
+	err := wk.commitNewWork()
+	for err != nil && strings.EqualFold(err.Error(),SynError.Error()) && atomic.LoadInt32(&wk.mining) > 0{
+		time.Sleep(time.Second)
+		err = wk.commitNewWork()
+	}
 }
 
 func (self *Miner) Stop() {
