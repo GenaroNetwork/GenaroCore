@@ -415,6 +415,10 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 	if stake == 0 {
 		return errors.New("account stake is zero")
 	}
+	// 判断是否已经在禁止名单中
+	if state.IsAccountExistInForbidBackStakeList(account) {
+		return errors.New("account is in forbid list")
+	}
 	return nil
 }
 
