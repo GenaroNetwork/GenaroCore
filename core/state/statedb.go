@@ -1385,3 +1385,21 @@ func (self *StateDB)GetForbidBackStakeList() types.ForbidBackStakeList {
 	}
 	return nil
 }
+
+func (self *StateDB)GetRewardsValues() *types.RewardsValues {
+	stateObject := self.GetOrNewStateObject(common.RewardsSaveAddress)
+	if stateObject != nil {
+		return stateObject.GetRewardsValues()
+	}
+	return nil
+}
+
+func (self *StateDB)SetRewardsValues(rewardsValues types.RewardsValues) bool{
+	stateObject := self.GetOrNewStateObject(common.RewardsSaveAddress)
+	if stateObject != nil {
+		stateObject.SetRewardsValues(rewardsValues)
+		return true
+	}
+	return false
+}
+

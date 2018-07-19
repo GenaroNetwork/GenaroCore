@@ -1736,3 +1736,25 @@ func (self *stateObject)UbindNode2Address(nodeId string) error{
 	}
 	return nil
 }
+
+func (self *stateObject)GetRewardsValues() *types.RewardsValues {
+	var rewardsValues types.RewardsValues
+	if self.data.CodeHash == nil {
+		return nil
+	}else{
+		json.Unmarshal(self.data.CodeHash, &rewardsValues)
+	}
+	return &rewardsValues
+}
+
+func (self *stateObject)SetRewardsValues(rewardsValues types.RewardsValues) {
+	b, _ := json.Marshal(rewardsValues)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
