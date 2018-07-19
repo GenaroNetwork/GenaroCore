@@ -272,11 +272,11 @@ func (forbidList *ForbidBackStakeList)IsExist(addr common.Address) bool{
 
 // 收益计算中间值
 type RewardsValues struct {
-	CoinActualRewards big.Int	`json:"CoinActualRewards"`
-	PreCoinActualRewards big.Int	`json:"PreCoinActualRewards"`
-	StorageActualRewards big.Int	`json:"StorageActualRewards"`
-	PreStorageActualRewards big.Int	`json:"PreStorageActualRewards"`
-	TotalActualRewards big.Int	`json:"TotalActualRewards"`
-	SurplusCoin big.Int	`json:"SurplusCoin"`
-	PreSurplusCoin big.Int	`json:"PreSurplusCoin"`
+	CoinActualRewards *big.Int	`json:"CoinActualRewards"`
+	PreCoinActualRewards *big.Int	`json:"PreCoinActualRewards"`
+	StorageActualRewards *big.Int	`json:"StorageActualRewards"`
+	PreStorageActualRewards *big.Int	`json:"PreStorageActualRewards"`
+	TotalActualRewards *big.Int	`json:"TotalActualRewards"`
+	SurplusCoin *big.Int	`json:"SurplusCoin"`
+	PreSurplusCoin *big.Int	`json:"PreSurplusCoin"`
 }

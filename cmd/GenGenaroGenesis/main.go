@@ -28,6 +28,24 @@ func initarg() {
 	flag.Parse()
 }
 
+func GenRewardsValuesAccount() core.GenesisAccount {
+	var rewardsValues = types.RewardsValues{
+		CoinActualRewards:	big.NewInt(0),
+		PreCoinActualRewards:	big.NewInt(0),
+		StorageActualRewards:	big.NewInt(0),
+		PreStorageActualRewards:	big.NewInt(0),
+		TotalActualRewards:	big.NewInt(0),
+		SurplusCoin:	big.NewInt(0),
+		PreSurplusCoin:	big.NewInt(0),
+	}
+	committeesData, _ := json.Marshal(rewardsValues)
+	RewardsValuesAccount := core.GenesisAccount{
+		Balance: big.NewInt(0),
+		CodeHash: committeesData,
+	}
+	return RewardsValuesAccount
+}
+
 // generate first committees list special account
 func GenCandidateAccount(committees []common.Address) core.GenesisAccount{
 	committeesData, _ := json.Marshal(committees)
@@ -169,8 +187,10 @@ func main() {
 	}
 	candidateAccount := GenCandidateAccount(committees)
 	LastSynStateAccount := GenLastSynStateAccount()
+	rewardsValuesAccount := GenRewardsValuesAccount()
 	genesis.Alloc[common.CandidateSaveAddress] = candidateAccount
 	genesis.Alloc[common.LastSynStateSaveAddress] = LastSynStateAccount
+	genesis.Alloc[common.RewardsSaveAddress] = rewardsValuesAccount
 
 	//accounts := make([]core.GenesisAccount,len(*myAccounts))
 	for addr := range *myAccounts {
