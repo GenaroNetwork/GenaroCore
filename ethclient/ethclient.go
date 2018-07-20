@@ -495,9 +495,21 @@ func (ec *Client) GetStake(ctx context.Context, account common.Address, blockNum
 	return (*big.Int)(&result), err
 }
 
+func (ec *Client) GetHeft(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_getHeft", account, toBlockNumArg(blockNumber))
+	return (*big.Int)(&result), err
+}
+
 func (ec *Client) GetSubAccounts(ctx context.Context, account common.Address, blockNumber *big.Int) ([]common.Address, error) {
 	var result []common.Address
 	err := ec.c.CallContext(ctx, &result, "eth_getSubAccounts", account, toBlockNumArg(blockNumber))
+	return result, err
+}
+
+func (ec *Client) GetGlobalVar(ctx context.Context, blockNumber *big.Int) (*types.GenaroPrice, error) {
+	var result *types.GenaroPrice
+	err := ec.c.CallContext(ctx, &result, "eth_getGlobalVar", toBlockNumArg(blockNumber))
 	return result, err
 }
 

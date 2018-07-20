@@ -441,6 +441,11 @@ func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error
 	if s.MaxBinding != 0 {
 		genaroPrice.MaxBinding = s.MaxBinding
 	}
+
+	ok := (*evm).StateDB.SetGenaroPrice(*genaroPrice)
+	if !ok {
+		return errors.New("setGlobalVar fail")
+	}
 	return nil
 }
 

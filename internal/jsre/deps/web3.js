@@ -5282,8 +5282,8 @@ var methods = function () {
     var getGlobalVar = new Method({
         name: 'getGlobalVar',
         call: 'eth_getGlobalVar',
-        params: 2,
-        inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
     var getSubAccounts = new Method({

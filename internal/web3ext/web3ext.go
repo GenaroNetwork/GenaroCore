@@ -397,8 +397,8 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'getGlobalVar',
 			call: 'eth_getGlobalVar',
-			params: 2,
-			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'getBuckets',
