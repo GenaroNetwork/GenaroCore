@@ -28,14 +28,16 @@ func initarg() {
 	flag.Parse()
 }
 
-func GenRewardsValuesAccount() core.GenesisAccount {
+func GenRewardsValuesAccount(surplusCoinUint int64) core.GenesisAccount {
+	surplusCoin := big.NewInt(surplusCoinUint)
+	surplusCoin.Mul(surplusCoin,common.BaseCompany)
 	var rewardsValues = types.RewardsValues{
 		CoinActualRewards:	big.NewInt(0),
 		PreCoinActualRewards:	big.NewInt(0),
 		StorageActualRewards:	big.NewInt(0),
 		PreStorageActualRewards:	big.NewInt(0),
 		TotalActualRewards:	big.NewInt(0),
-		SurplusCoin:	big.NewInt(0),
+		SurplusCoin:	surplusCoin,
 		PreSurplusCoin:	big.NewInt(0),
 	}
 	committeesData, _ := json.Marshal(rewardsValues)
@@ -187,7 +189,7 @@ func main() {
 	}
 	candidateAccount := GenCandidateAccount(committees)
 	LastSynStateAccount := GenLastSynStateAccount()
-	rewardsValuesAccount := GenRewardsValuesAccount()
+	rewardsValuesAccount := GenRewardsValuesAccount(175000000)
 	genesis.Alloc[common.CandidateSaveAddress] = candidateAccount
 	genesis.Alloc[common.LastSynStateSaveAddress] = LastSynStateAccount
 	genesis.Alloc[common.RewardsSaveAddress] = rewardsValuesAccount

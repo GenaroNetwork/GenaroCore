@@ -453,120 +453,102 @@ func (g *Genaro) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 
 func GetCoinActualRewards(state *state.StateDB) *big.Int {
 	return state.GetRewardsValues().CoinActualRewards
-	//return state.GetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)))
 }
 
 func AddCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.CoinActualRewards.Add(rewardsValues.CoinActualRewards,coinrewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.AddBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), coinrewards)
 }
 
 func SetCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.CoinActualRewards.Set(coinrewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SetBalance(common.BytesToAddress([]byte(CoinActualRewardsAddress)), coinrewards)
 }
 
 func SetPreCoinActualRewards(state *state.StateDB,coinrewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.PreCoinActualRewards.Set(coinrewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)), coinrewards)
 }
 
 func GetPreCoinActualRewards(state *state.StateDB) *big.Int {
 	rewardsValues := state.GetRewardsValues()
 	return rewardsValues.PreStorageActualRewards
-	//return state.GetBalance(common.BytesToAddress([]byte(Pre + CoinActualRewardsAddress)))
 }
 
 func GetStorageActualRewards(state *state.StateDB) *big.Int {
 	rewardsValues := state.GetRewardsValues()
 	return rewardsValues.StorageActualRewards
-	//return state.GetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)))
 }
 
 func SetStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.StorageActualRewards.Set(storagerewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SetBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), storagerewards)
 }
 
 func AddStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.StorageActualRewards.Add(rewardsValues.StorageActualRewards,storagerewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.AddBalance(common.BytesToAddress([]byte(StorageActualRewardsAddress)), storagerewards)
 }
 
 func SetPreStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.PreStorageActualRewards.Set(storagerewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)), storagerewards)
 }
 
 func GetPreStorageActualRewards(state *state.StateDB) *big.Int {
 	rewardsValues := state.GetRewardsValues()
 	return rewardsValues.PreStorageActualRewards
-	//return state.GetBalance(common.BytesToAddress([]byte(Pre + StorageActualRewardsAddress)))
 }
 
 func AddTotalActualRewards(state *state.StateDB, rewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.TotalActualRewards.Add(rewardsValues.TotalActualRewards,rewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.AddBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), rewards)
 }
 
 func GetTotalActualRewards(state *state.StateDB) *big.Int {
 	rewardsValues := state.GetRewardsValues()
 	return rewardsValues.TotalActualRewards
-	//return state.GetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)))
 }
 
 func SetTotalActualRewards(state *state.StateDB, rewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.TotalActualRewards.Set(rewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SetBalance(common.BytesToAddress([]byte(TotalActualRewardsAddress)), rewards)
 }
 
 func GetSurplusCoin(state *state.StateDB) *big.Int {
 	rewardsValues := state.GetRewardsValues()
 	return rewardsValues.SurplusCoin
-	//return state.GetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)))
 }
 
 func SubSurplusCoin(state *state.StateDB, rewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.SurplusCoin.Sub(rewardsValues.SurplusCoin,rewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SubBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), rewards)
 }
 
 func SetSurplusCoin(state *state.StateDB, surplusrewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.SurplusCoin.Set(surplusrewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), surplusrewards)
 }
 
 func SetPreSurplusCoin(state *state.StateDB, surplusrewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.PreStorageActualRewards.Set(surplusrewards)
 	state.SetRewardsValues(*rewardsValues)
-	//state.SetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)), surplusrewards)
 }
 
 func GetPreSurplusCoin(state *state.StateDB) *big.Int {
 	rewardsValues := state.GetRewardsValues()
 	return rewardsValues.PreStorageActualRewards
-	//return state.GetBalance(common.BytesToAddress([]byte(Pre + SurplusCoinAddress)))
 }
 
 // 一届委员会结束后的数据重置
@@ -685,20 +667,10 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	// 按照顺位设定收益权重
 	proportion := snap.Committee[snap.CommitteeRank[blockNumber % snap.CommitteeSize]]
 
-	//init SurplusCoinAddress
-	if blockNumber == 1 {
-		//log.Info("test")
-		tmp := big.NewInt(175000000)
-		tmp.Mul(tmp,common.BaseCompany)
-
-		SetSurplusCoin(state, tmp)
-	}
 	//  coin interest reward
 	accumulateInterestRewards(g.config, state, header, proportion, blockNumber, snap.CommitteeSize, snap.CommitteeAccountBinding)
 	// storage reward
 	accumulateStorageRewards(g.config, state, blockNumber, snap.CommitteeSize)
-
-	//handle apply back stake list
 
 	//handle already back stake list
 	handleAlreadyBackStakeList(g.config, header, state)
