@@ -27,13 +27,13 @@ type GenaroPrice struct {
 	StakeValuePerNode *hexutil.Big `json:"stakeValuePerNode"`
 	OneDayMortgageGes	*hexutil.Big `json:"oneDayMortgageGes"`
 	OneDaySyncLogGsaCost  *hexutil.Big `json:"oneDaySyncLogGsaCost"`
-	MaxBinding	*hexutil.Big	`json:"MaxBinding"`	// 一个主节点最大的绑定数量
-	MinStake	*hexutil.Big	`json:"MinStake"`	// 一次最小的押注额度
-	CommitteeMinStake	*hexutil.Big	`json:"CommitteeMinStake"`	// 进入委员会需要的最小stake
-	BackStackListMax	*hexutil.Big	`json:"BackStackListMax"`	// 最大退注长度
-	CoinRewardsRatio	*hexutil.Big	`json:"CoinRewardsRatio"`	// 币息收益比率
-	StorageRewardsRatio	*hexutil.Big	`json:"StorageRewardsRatio"`	// 存储收益比率
-	RatioPerYear	*hexutil.Big	`json:"RatioPerYear"`	// 年收益比率
+	MaxBinding	uint64	`json:"MaxBinding"`	// 一个主节点最大的绑定数量
+	MinStake	uint64	`json:"MinStake"`	// 一次最小的押注额度
+	CommitteeMinStake	uint64	`json:"CommitteeMinStake"`	// 进入委员会需要的最小stake
+	BackStackListMax	uint64	`json:"BackStackListMax"`	// 最大退注长度
+	CoinRewardsRatio	uint64	`json:"CoinRewardsRatio"`	// 币息收益比率
+	StorageRewardsRatio	uint64	`json:"StorageRewardsRatio"`	// 存储收益比率
+	RatioPerYear	uint64	`json:"RatioPerYear"`	// 年收益比率
 	ExtraPrice     []byte   `json:"extraPrice"` //该版本用不上，考虑后期版本兼容性使用
 }
 

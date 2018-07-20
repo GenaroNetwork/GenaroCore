@@ -36,13 +36,13 @@ func GenGenaroPriceAccount() core.GenesisAccount {
 		StakeValuePerNode:	(*hexutil.Big)(common.DefaultStakeValuePerNode),
 		OneDayMortgageGes:	(*hexutil.Big)(common.DefaultOneDayMortgageGes),
 		OneDaySyncLogGsaCost:	(*hexutil.Big)(common.DefaultOneDaySyncLogGsaCost),
-		MaxBinding:	(*hexutil.Big)(big.NewInt(common.MaxBinding)),
-		MinStake:	(*hexutil.Big)(big.NewInt(common.MinStake)),
-		CommitteeMinStake:	(*hexutil.Big)(big.NewInt(common.CommitteeMinStake)),
-		BackStackListMax:	(*hexutil.Big)(big.NewInt(common.BackStackListMax)),
-		CoinRewardsRatio:	(*hexutil.Big)(big.NewInt(common.CoinRewardsRatio)),
-		StorageRewardsRatio:	(*hexutil.Big)(big.NewInt(common.StorageRewardsRatio)),
-		RatioPerYear:	(*hexutil.Big)(big.NewInt(common.RatioPerYear)),
+		MaxBinding:	common.MaxBinding,
+		MinStake:	common.MinStake,
+		CommitteeMinStake:	common.CommitteeMinStake,
+		BackStackListMax:	common.BackStackListMax,
+		CoinRewardsRatio:	common.CoinRewardsRatio,
+		StorageRewardsRatio:	common.StorageRewardsRatio,
+		RatioPerYear:	common.RatioPerYear,
 	}
 	data, _ := json.Marshal(genaroPrice)
 	GenaroPriceAccount := core.GenesisAccount{

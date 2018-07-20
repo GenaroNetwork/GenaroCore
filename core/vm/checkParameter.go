@@ -125,7 +125,7 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB) error {
 	}
 
 	genaroPrice := state.GetGenaroPrice()
-	if s.Stake < genaroPrice.MinStake.ToInt().Uint64() {
+	if s.Stake < genaroPrice.MinStake {
 		return errors.New("value of stake must larger than MinStake")
 	}
 
@@ -270,7 +270,7 @@ func CheckBackStakeTx(caller common.Address, state StateDB) error {
 		return errors.New("userBackStake fail")
 	}
 	genaroPrice := state.GetGenaroPrice()
-	if len(backStakeList) > int(genaroPrice.BackStackListMax.ToInt().Int64()) {
+	if len(backStakeList) > int(genaroPrice.BackStackListMax) {
 		return errors.New("BackStackList too long")
 	}
 	// 判断是否是绑定用户
@@ -352,7 +352,7 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 	}
 	// 主账号绑定数量是否超出限制
 	genaroPrice := state.GetGenaroPrice()
-	if state.GetSubAccountsCount(mainAccount) > int(genaroPrice.MaxBinding.ToInt().Int64()) {
+	if state.GetSubAccountsCount(mainAccount) > int(genaroPrice.MaxBinding) {
 		return errors.New("binding enough")
 	}
 	// 绑定的子账号是否已经是一个主账号
@@ -426,7 +426,7 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 }
 
 // 移除退注账号禁止名单的检查
-func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
+func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error {
 	// 检查是否是官方账号
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
@@ -440,3 +440,16 @@ func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 	return nil
 }
 
+// 设置全局变量交易参数检查
+func CheckSetGlobalVar(caller common.Address,s types.SpecialTxInput) error {
+	// 检查是否是官方账号
+	if caller !=  common.OfficialAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+
+	if s.RatioPerYear >= 100 || s.CoinRewardsRatio >= 100 || s.StorageRewardsRatio >= 100{
+		return errors.New("Ratio is not invalid")
+	}
+
+	return nil
+}

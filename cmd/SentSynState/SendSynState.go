@@ -16,6 +16,7 @@ import (
 
 var rpcurl string
 var delaytime int64
+var SynStateAccount string
 
 func logPrint(msg string){
 	log.Println(msg)
@@ -84,7 +85,7 @@ func GetBlockHash(url string,blockNum uint64) (string,error){
 }
 
 func SendSynState(url string,blockHash string) (string,error){
-	ret,err := HttpPost(url,"application/json",`{"jsonrpc": "2.0","method": "eth_sendTransaction","params": [{"from": "`+common.OfficialAddress.String()+`","to": "`+common.SpecialSyncAddress.String()+`","gasPrice": "0x430e23400","value": "0x1","extraData": "{\"msg\": \"`+blockHash+`\",\"type\": \"0xd\"}"}],"id": 1}`)
+	ret,err := HttpPost(url,"application/json",`{"jsonrpc": "2.0","method": "eth_sendTransaction","params": [{"from": "`+SynStateAccount+`","to": "`+common.SpecialSyncAddress.String()+`","gasPrice": "0x430e23400","value": "0x1","extraData": "{\"msg\": \"`+blockHash+`\",\"type\": \"0xd\"}"}],"id": 1}`)
 	if err != nil {
 		return "",err
 	}
@@ -116,6 +117,7 @@ func GetLastSynBlockHash(url string) (string,error){
 func initarg() {
 	flag.Int64Var(&delaytime,"t",1,"delay time")
 	flag.StringVar(&rpcurl, "u", "http://127.0.0.1:8545", "rpc url")
+	flag.StringVar(&SynStateAccount, "a", "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73", "state syn account")
 	flag.Parse()
 }
 

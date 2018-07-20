@@ -265,6 +265,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = addAccountInForbidBackStakeList(evm, s, caller)
 	case common.SpecialTxDelAccountInForbidBackStakeList.Uint64(): // 移除禁止退注名单
 		err = delAccountInForbidBackStakeList(evm, s, caller)
+	case common.SpecialTxSetGlobalVar.Uint64():	// 设置全局变量
+		err = setGlobalVar(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -410,6 +412,35 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 		}
 	}
 
+	return nil
+}
+
+func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error{
+	if err := CheckSetGlobalVar(caller, s); err != nil {
+		return err
+	}
+	genaroPrice := (*evm).StateDB.GetGenaroPrice()
+	if s.StorageRewardsRatio != 0 {
+		genaroPrice.StorageRewardsRatio = s.StorageRewardsRatio
+	}
+	if s.CoinRewardsRatio != 0 {
+		genaroPrice.CoinRewardsRatio = s.CoinRewardsRatio
+	}
+	if s.RatioPerYear != 0 {
+		genaroPrice.RatioPerYear = s.RatioPerYear
+	}
+	if s.BackStackListMax != 0 {
+		genaroPrice.BackStackListMax = s.BackStackListMax
+	}
+	if s.CommitteeMinStake != 0 {
+		genaroPrice.CommitteeMinStake = s.CommitteeMinStake
+	}
+	if s.MinStake != 0 {
+		genaroPrice.MinStake = s.MinStake
+	}
+	if s.MaxBinding != 0 {
+		genaroPrice.MaxBinding = s.MaxBinding
+	}
 	return nil
 }
 

@@ -141,6 +141,9 @@ var (
 
 	//解锁分享秘钥
 	UnlockSharedKey = big.NewInt(20)
+
+	// 设置全局变量
+	SpecialTxSetGlobalVar = big.NewInt(21)
 )
 
 	//特殊交易 Tx.init 格式
@@ -160,12 +163,12 @@ var (
 
 	// 可变更的全局变量
 	var (
-		MaxBinding = int64(10)	// 一个主节点最大的绑定数量
-		MinStake = int64(5000)	// 一次最小的押注额度
-		CommitteeMinStake = int64(5000)		// 进入委员会需要的最小stake
-		BackStackListMax = int64(20)	// 最大退注长度
-		CoinRewardsRatio = int64(50)	// 币息收益比率
-		StorageRewardsRatio = int64(50)	// 存储收益比率
-		RatioPerYear = int64(7)	// 年收益比率
+		MaxBinding = uint64(10)	// 一个主节点最大的绑定数量
+		MinStake = uint64(5000)	// 一次最小的押注额度
+		CommitteeMinStake = uint64(5000)		// 进入委员会需要的最小stake
+		BackStackListMax = uint64(20)	// 最大退注长度
+		CoinRewardsRatio = uint64(50)	// 币息收益比率
+		StorageRewardsRatio = uint64(50)	// 存储收益比率
+		RatioPerYear = uint64(7)	// 年收益比率
 	)
 

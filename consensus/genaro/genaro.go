@@ -603,7 +603,7 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 		//candidateInfos := thisstate.GetCandidatesInfoInRange(0, epochEndBlockNumber)
 		candidateInfos := thisstate.GetCandidatesInfoWithAllSubAccounts()
 		genaroPrice := thisstate.GetGenaroPrice()
-		commiteeRank, proportion := state.RankWithLenth(candidateInfos,int(config.CommitteeMaxSize),genaroPrice.CommitteeMinStake.ToInt().Uint64())
+		commiteeRank, proportion := state.RankWithLenth(candidateInfos,int(config.CommitteeMaxSize),genaroPrice.CommitteeMinStake)
 		var committeeAccountBinding map[common.Address][]common.Address
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
@@ -759,8 +759,8 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	}
 
 	genaroPrice := state.GetGenaroPrice()
-	coinRewardsRatio := common.Base*genaroPrice.CoinRewardsRatio.ToInt().Uint64()/100
-	ratioPerYear := common.Base*genaroPrice.RatioPerYear.ToInt().Uint64()/100
+	coinRewardsRatio := common.Base*genaroPrice.CoinRewardsRatio/100
+	ratioPerYear := common.Base*genaroPrice.RatioPerYear/100
 	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards,coinRewardsRatio,ratioPerYear)
 	surplusRewards := GetSurplusCoin(state)
 	//fmt.Printf("surplusRewards is %v\n", surplusRewards.String())
@@ -817,8 +817,8 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	}
 
 	genaroPrice := state.GetGenaroPrice()
-	storageRewardsRatio := common.Base*genaroPrice.StorageRewardsRatio.ToInt().Uint64()/100
-	ratioPerYear := common.Base*genaroPrice.RatioPerYear.ToInt().Uint64()/100
+	storageRewardsRatio := common.Base*genaroPrice.StorageRewardsRatio/100
+	ratioPerYear := common.Base*genaroPrice.RatioPerYear/100
 
 	coefficient := getStorageCoefficient(config, preStorageRewards, preSurplusRewards,storageRewardsRatio,ratioPerYear)
 
