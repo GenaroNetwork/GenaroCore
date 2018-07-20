@@ -238,32 +238,32 @@ func TestUpdateSpecialBlock(t *testing.T) {
 	updateSpecialBlock(genaroConfig, header, newTestStateDB())
 }
 
-func TestCalcDifficulty2(t *testing.T) {
-	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
-	}
-	committeeRank := genAddrs(10)
-	proportion := make([]uint64, 10)
-	for i := range committeeRank{
-		proportion[i] = uint64(i)
-	}
-
-	snapshot := newSnapshot(genaroConfig,0, common.StringToHash("0"), 0, committeeRank, proportion)
-
-	var i uint64
-	for i = 0; i < 10000; i++ {
-		x := CalcDifficulty(snapshot, committeeRank[0], i)
-		println(x.Uint64())
-	}
-
-	xx := CalcDifficulty(snapshot, genAddrs(1)[0], 100)
-	println(xx.Uint64())
-}
+//func TestCalcDifficulty2(t *testing.T) {
+//	genaroConfig := &params.GenaroConfig{
+//		Epoch:				5000,
+//		BlockInterval:		10,
+//		ElectionPeriod:		1,
+//		ValidPeriod:		1,
+//		CurrencyRates:		10,
+//		CommitteeMaxSize:	5,
+//	}
+//	committeeRank := genAddrs(10)
+//	proportion := make([]uint64, 10)
+//	for i := range committeeRank{
+//		proportion[i] = uint64(i)
+//	}
+//
+//	snapshot := newSnapshot(genaroConfig,0, common.StringToHash("0"), 0, committeeRank, proportion)
+//
+//	var i uint64
+//	for i = 0; i < 10000; i++ {
+//		x := CalcDifficulty(snapshot, committeeRank[0], i)
+//		println(x.Uint64())
+//	}
+//
+//	xx := CalcDifficulty(snapshot, genAddrs(1)[0], 100)
+//	println(xx.Uint64())
+//}
 
 func TestCandidateInfos(t *testing.T) {
 	var candidateInfos state.CandidateInfos
@@ -301,64 +301,64 @@ func TestCandidateInfos(t *testing.T) {
 	fmt.Println(proportion)
 }
 
-func TestAccumulateInterestRewards(t *testing.T) {
-	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
-	}
-
-	db, remove := newTestLDB()
-	defer remove()
-	state, err := state.New(common.Hash{}, state.NewDatabase(db))
-	if err != nil {
-		t.Errorf("error 310")
-	}
-
-	header := &types.Header{
-		Number:   big.NewInt(0),
-		Time:     big.NewInt(0),
-		Coinbase: common.HexToAddress("0x50a7658e5155206dc78eafb80e6a94640b274648"),
-		Extra:    make([]byte, 0),
-	}
-
-	blockNumber := uint64(1)
-
-	tmp := big.NewInt(175000000)
-	tmp.Mul(tmp, big.NewInt(100000000))
-	tmp.Mul(tmp, big.NewInt(10000000000))
-	fmt.Println(tmp.String())
-	state.SetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), tmp)
-
-	addr := genAddrs(10)
-	proportions := make([]uint64, 10)
-	proportions[0] = 5000
-	proportions[1] = 3000
-	proportions[2] = 1300
-	for i := 3; i < 10; i++ {
-		proportions[i] = 100
-	}
-
-	for i := 0; i < 5; i++ {
-		//每年
-		for j := 0; j < int(calEpochPerYear(genaroConfig)); j++ {
-			//每个epoch
-			for k := 0; k < int(genaroConfig.Epoch/genaroConfig.BlockInterval); k++ {
-				//每个出块节点
-				header.Coinbase = addr[k%10]
-				proportion := proportions[k%10]
-				for l := 0; l < int(genaroConfig.BlockInterval); l++ {
-					accumulateInterestRewards(genaroConfig, state, header, proportion, blockNumber,3)
-					//fmt.Println(state.GetBalance(header.Coinbase).Uint64())
-				}
-			}
-		}
-	}
-
-}
+//func TestAccumulateInterestRewards(t *testing.T) {
+//	genaroConfig := &params.GenaroConfig{
+//		Epoch:				5000,
+//		BlockInterval:		10,
+//		ElectionPeriod:		1,
+//		ValidPeriod:		1,
+//		CurrencyRates:		10,
+//		CommitteeMaxSize:	5,
+//	}
+//
+//	db, remove := newTestLDB()
+//	defer remove()
+//	state, err := state.New(common.Hash{}, state.NewDatabase(db))
+//	if err != nil {
+//		t.Errorf("error 310")
+//	}
+//
+//	header := &types.Header{
+//		Number:   big.NewInt(0),
+//		Time:     big.NewInt(0),
+//		Coinbase: common.HexToAddress("0x50a7658e5155206dc78eafb80e6a94640b274648"),
+//		Extra:    make([]byte, 0),
+//	}
+//
+//	blockNumber := uint64(1)
+//
+//	tmp := big.NewInt(175000000)
+//	tmp.Mul(tmp, big.NewInt(100000000))
+//	tmp.Mul(tmp, big.NewInt(10000000000))
+//	fmt.Println(tmp.String())
+//	state.SetBalance(common.BytesToAddress([]byte(SurplusCoinAddress)), tmp)
+//
+//	addr := genAddrs(10)
+//	proportions := make([]uint64, 10)
+//	proportions[0] = 5000
+//	proportions[1] = 3000
+//	proportions[2] = 1300
+//	for i := 3; i < 10; i++ {
+//		proportions[i] = 100
+//	}
+//
+//	for i := 0; i < 5; i++ {
+//		//每年
+//		for j := 0; j < int(calEpochPerYear(genaroConfig)); j++ {
+//			//每个epoch
+//			for k := 0; k < int(genaroConfig.Epoch/genaroConfig.BlockInterval); k++ {
+//				//每个出块节点
+//				header.Coinbase = addr[k%10]
+//				proportion := proportions[k%10]
+//				for l := 0; l < int(genaroConfig.BlockInterval); l++ {
+//					accumulateInterestRewards(genaroConfig, state, header, proportion, blockNumber,3)
+//					//fmt.Println(state.GetBalance(header.Coinbase).Uint64())
+//				}
+//			}
+//		}
+//	}
+//
+//}
 func TestGetCoinCofficient(t *testing.T) {
 	genaroConfig := &params.GenaroConfig{
 		Epoch:				86400,
