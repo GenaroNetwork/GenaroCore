@@ -23,10 +23,9 @@ import (
 )
 
 const (
-	inmemorySnapshots			= 128                    // Number of recent snapshots to keep in memory
+	inmemorySnapshots				= 128                    // Number of recent snapshots to keep in memory
 	epochLength					= uint64(5000)           // Default number of blocks a turn
 	minDistance					= uint64(500)
-	backStakePeriod				= uint64(5)
 )
 
 var (

@@ -143,14 +143,6 @@ var (
 	UnlockSharedKey = big.NewInt(20)
 )
 
-
-
-
-	var Base = uint64(100000)	// 收益计算中间值
-	var BackStackListMax = int(20)		// 最大退注长度
-
-
-
 	//特殊交易 Tx.init 格式
 	//其中 allow 中的权限如下
 	//0: readwrite
@@ -169,3 +161,7 @@ var (
 	var MinStake = uint64(5000)
 	// 进入委员会需要的最小stake
 	var CommitteeMinStake = uint64(5000)
+	var Base = uint64(100000)	// 收益计算中间值
+	var BackStackListMax = int(20)		// 最大退注长度
+	// 退注周期
+	var BackStakePeriod				= uint64(5)

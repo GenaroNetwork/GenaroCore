@@ -199,7 +199,7 @@ func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) 
 }
 
 func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBlockNumber uint64) bool {
-	if nowBlockNumber - applyBlockNumber > (config.ElectionPeriod + config.ValidPeriod + backStakePeriod) * config.Epoch {
+	if nowBlockNumber - applyBlockNumber > (config.ElectionPeriod + config.ValidPeriod + common.BackStakePeriod) * config.Epoch {
 		return true
 	}
 	return false
