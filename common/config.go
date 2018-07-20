@@ -154,14 +154,18 @@ var (
 
 	// 同步交易的块间隔
 	var SynBlockLen = uint64(6)
-
-	// 一个主节点最大的绑定数量
-	var MaxBinding = 10
-	// 一次最小的押注额度
-	var MinStake = uint64(5000)
-	// 进入委员会需要的最小stake
-	var CommitteeMinStake = uint64(5000)
-	var Base = uint64(100000)	// 收益计算中间值
-	var BackStackListMax = int(20)		// 最大退注长度
 	// 退注周期
-	var BackStakePeriod				= uint64(5)
+	var BackStakePeriod = uint64(5)
+	var Base = uint64(100000)	// 收益计算中间值
+
+	// 可变更的全局变量
+	var (
+		MaxBinding = int64(10)	// 一个主节点最大的绑定数量
+		MinStake = int64(5000)	// 一次最小的押注额度
+		CommitteeMinStake = int64(5000)		// 进入委员会需要的最小stake
+		BackStackListMax = int64(20)	// 最大退注长度
+		CoinRewardsRatio = int64(50)	// 币息收益比率
+		StorageRewardsRatio = int64(50)	// 存储收益比率
+		RatioPerYear = int64(7)	// 年收益比率
+	)
+

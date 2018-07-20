@@ -1290,6 +1290,15 @@ func (self *StateDB)GetGenaroPrice() *types.GenaroPrice {
 
 }
 
+func (self *StateDB)SetGenaroPrice(genaroPrice types.GenaroPrice) bool {
+	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
+	if stateObject != nil {
+		stateObject.SetGenaroPrice(genaroPrice)
+		return true
+	}
+	return false
+}
+
 func (self *StateDB)GetLastSynState() *types.LastSynState{
 	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
 	if stateObject != nil {

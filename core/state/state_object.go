@@ -189,11 +189,11 @@ func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
 }
 
 // 限制排名的长度后，进行排名
-func RankWithLenth(candidateInfos CandidateInfos, lenth int) ([]common.Address, []uint64){
+func RankWithLenth(candidateInfos CandidateInfos, lenth int, committeeMinStake uint64) ([]common.Address, []uint64){
 	candidateInfos.Apply()
 	// 除去低于stake最小限制的账号
 	for i:=0;i<len(candidateInfos);i++ {
-		if candidateInfos[i].Stake < common.CommitteeMinStake {
+		if candidateInfos[i].Stake < committeeMinStake {
 			candidateInfos = append(candidateInfos[:i],candidateInfos[i+1:]...)
 			i--
 		}
@@ -1614,6 +1614,17 @@ func (self *stateObject)GetGenaroPrice() *types.GenaroPrice {
 		return  &genaroPrice
 	}
 	return nil
+}
+
+func (self *stateObject)SetGenaroPrice(genaroPrice types.GenaroPrice) {
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
 }
 
 

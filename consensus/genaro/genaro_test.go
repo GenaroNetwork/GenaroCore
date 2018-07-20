@@ -295,7 +295,7 @@ func TestCandidateInfos(t *testing.T) {
 	fmt.Println(commiteeRank)
 	fmt.Println(proportion)
 	fmt.Println(candidateInfos)
-	commiteeRank, proportion = state.RankWithLenth(candidateInfos,3)
+	commiteeRank, proportion = state.RankWithLenth(candidateInfos,3,5000)
 	fmt.Println("RankWithLenth")
 	fmt.Println(commiteeRank)
 	fmt.Println(proportion)
@@ -369,6 +369,6 @@ func TestGetCoinCofficient(t *testing.T) {
 		CurrencyRates:		10,
 		CommitteeMaxSize:	5,
 	}
-	cofficient := getCoinCofficient(genaroConfig, big.NewInt(500),big.NewInt(20857142))
+	cofficient := getCoinCofficient(genaroConfig, big.NewInt(500),big.NewInt(20857142),common.Base*50/100,common.Base*7/100)
 	fmt.Println(cofficient)
 }

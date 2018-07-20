@@ -29,9 +29,9 @@ const (
 )
 
 var (
-	coinRewardsRatio				 = common.Base*50/100
-	storageRewardsRatio				 = common.Base*50/100
-	ratioPerYear					 = common.Base*7/100
+	//coinRewardsRatio				 = common.Base*50/100
+	//storageRewardsRatio				 = common.Base*50/100
+	//ratioPerYear					 = common.Base*7/100
 )
 
 var (
@@ -602,7 +602,8 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 		//epochEndBlockNumber := blockNumber
 		//candidateInfos := thisstate.GetCandidatesInfoInRange(0, epochEndBlockNumber)
 		candidateInfos := thisstate.GetCandidatesInfoWithAllSubAccounts()
-		commiteeRank, proportion := state.RankWithLenth(candidateInfos,int(config.CommitteeMaxSize))
+		genaroPrice := thisstate.GetGenaroPrice()
+		commiteeRank, proportion := state.RankWithLenth(candidateInfos,int(config.CommitteeMaxSize),genaroPrice.CommitteeMinStake.ToInt().Uint64())
 		var committeeAccountBinding map[common.Address][]common.Address
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
@@ -681,7 +682,7 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	return types.NewBlock(header, txs, nil, receipts), nil
 }
 
-func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards *big.Int) uint64 {
+func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards *big.Int,coinRewardsRatio uint64,ratioPerYear uint64) uint64 {
 	if coinrewards.Cmp(big.NewInt(0)) == 0 {
 		return uint64(common.Base)
 	}
@@ -700,7 +701,7 @@ func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards 
 	return coinRatio
 }
 
-func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusRewards *big.Int) uint64 {
+func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusRewards *big.Int,storageRewardsRatio uint64,ratioPerYear uint64) uint64 {
 	if storagerewards.Cmp(big.NewInt(0)) == 0 {
 		return uint64(common.Base)
 	}
@@ -756,7 +757,11 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	}else{
 		preSurplusRewards = GetSurplusCoin(state)
 	}
-	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards)
+
+	genaroPrice := state.GetGenaroPrice()
+	coinRewardsRatio := common.Base*genaroPrice.CoinRewardsRatio.ToInt().Uint64()/100
+	ratioPerYear := common.Base*genaroPrice.RatioPerYear.ToInt().Uint64()/100
+	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards,coinRewardsRatio,ratioPerYear)
 	surplusRewards := GetSurplusCoin(state)
 	//fmt.Printf("surplusRewards is %v\n", surplusRewards.String())
 	//plan rewards per year
@@ -810,9 +815,15 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	}else{
 		preSurplusRewards = GetSurplusCoin(state)
 	}
-	coefficient := getStorageCoefficient(config, preStorageRewards, preSurplusRewards)
+
+	genaroPrice := state.GetGenaroPrice()
+	storageRewardsRatio := common.Base*genaroPrice.StorageRewardsRatio.ToInt().Uint64()/100
+	ratioPerYear := common.Base*genaroPrice.RatioPerYear.ToInt().Uint64()/100
+
+	coefficient := getStorageCoefficient(config, preStorageRewards, preSurplusRewards,storageRewardsRatio,ratioPerYear)
 
 	surplusRewards := GetSurplusCoin(state)
+
 	//plan rewards per year
 	planRewards := big.NewInt(0)
 	planRewards.Mul(surplusRewards, big.NewInt(int64(storageRewardsRatio)))

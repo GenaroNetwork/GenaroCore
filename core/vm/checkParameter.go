@@ -124,7 +124,8 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB) error {
 		return errors.New("param [address] can't be special address")
 	}
 
-	if s.Stake < common.MinStake {
+	genaroPrice := state.GetGenaroPrice()
+	if s.Stake < genaroPrice.MinStake.ToInt().Uint64() {
 		return errors.New("value of stake must larger than MinStake")
 	}
 
@@ -268,7 +269,8 @@ func CheckBackStakeTx(caller common.Address, state StateDB) error {
 	if !ok {
 		return errors.New("userBackStake fail")
 	}
-	if len(backStakeList) > common.BackStackListMax {
+	genaroPrice := state.GetGenaroPrice()
+	if len(backStakeList) > int(genaroPrice.BackStackListMax.ToInt().Int64()) {
 		return errors.New("BackStackList too long")
 	}
 	// 判断是否是绑定用户
@@ -349,7 +351,8 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 		return errors.New("mainAddr is not a candidate")
 	}
 	// 主账号绑定数量是否超出限制
-	if state.GetSubAccountsCount(mainAccount) > common.MaxBinding {
+	genaroPrice := state.GetGenaroPrice()
+	if state.GetSubAccountsCount(mainAccount) > int(genaroPrice.MaxBinding.ToInt().Int64()) {
 		return errors.New("binding enough")
 	}
 	// 绑定的子账号是否已经是一个主账号

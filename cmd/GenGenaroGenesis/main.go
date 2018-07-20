@@ -18,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"flag"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 )
 
 var accountfile string
@@ -26,6 +27,29 @@ var accountfile string
 func initarg() {
 	flag.StringVar(&accountfile, "f", "account.json", "account file")
 	flag.Parse()
+}
+
+func GenGenaroPriceAccount() core.GenesisAccount {
+	var genaroPrice = types.GenaroPrice {
+		BucketApplyGasPerGPerDay:	(*hexutil.Big)(common.DefaultBucketApplyGasPerGPerDay),
+		TrafficApplyGasPerG:	(*hexutil.Big)(common.DefaultTrafficApplyGasPerG),
+		StakeValuePerNode:	(*hexutil.Big)(common.DefaultStakeValuePerNode),
+		OneDayMortgageGes:	(*hexutil.Big)(common.DefaultOneDayMortgageGes),
+		OneDaySyncLogGsaCost:	(*hexutil.Big)(common.DefaultOneDaySyncLogGsaCost),
+		MaxBinding:	(*hexutil.Big)(big.NewInt(common.MaxBinding)),
+		MinStake:	(*hexutil.Big)(big.NewInt(common.MinStake)),
+		CommitteeMinStake:	(*hexutil.Big)(big.NewInt(common.CommitteeMinStake)),
+		BackStackListMax:	(*hexutil.Big)(big.NewInt(common.BackStackListMax)),
+		CoinRewardsRatio:	(*hexutil.Big)(big.NewInt(common.CoinRewardsRatio)),
+		StorageRewardsRatio:	(*hexutil.Big)(big.NewInt(common.StorageRewardsRatio)),
+		RatioPerYear:	(*hexutil.Big)(big.NewInt(common.RatioPerYear)),
+	}
+	data, _ := json.Marshal(genaroPrice)
+	GenaroPriceAccount := core.GenesisAccount{
+		Balance: big.NewInt(0),
+		CodeHash: data,
+	}
+	return GenaroPriceAccount
 }
 
 func GenRewardsValuesAccount(surplusCoinUint int64) core.GenesisAccount {
@@ -40,10 +64,10 @@ func GenRewardsValuesAccount(surplusCoinUint int64) core.GenesisAccount {
 		SurplusCoin:	surplusCoin,
 		PreSurplusCoin:	big.NewInt(0),
 	}
-	committeesData, _ := json.Marshal(rewardsValues)
+	data, _ := json.Marshal(rewardsValues)
 	RewardsValuesAccount := core.GenesisAccount{
 		Balance: big.NewInt(0),
-		CodeHash: committeesData,
+		CodeHash: data,
 	}
 	return RewardsValuesAccount
 }
@@ -190,10 +214,11 @@ func main() {
 	candidateAccount := GenCandidateAccount(committees)
 	LastSynStateAccount := GenLastSynStateAccount()
 	rewardsValuesAccount := GenRewardsValuesAccount(175000000)
+	genaroPriceAccount := GenGenaroPriceAccount()
 	genesis.Alloc[common.CandidateSaveAddress] = candidateAccount
 	genesis.Alloc[common.LastSynStateSaveAddress] = LastSynStateAccount
 	genesis.Alloc[common.RewardsSaveAddress] = rewardsValuesAccount
-
+	genesis.Alloc[common.GenaroPriceAddress] = genaroPriceAccount
 	//accounts := make([]core.GenesisAccount,len(*myAccounts))
 	for addr := range *myAccounts {
 		account := GenAccount((*myAccounts)[addr].Balance, (*myAccounts)[addr].Stake,(*myAccounts)[addr].Heft)
@@ -203,7 +228,7 @@ func main() {
 	extra := new(genaro.ExtraData)
 	var candidateInfos state.CandidateInfos
 	candidateInfos = GenesisAllocToCandidateInfos(genesis.Alloc)
-	extra.CommitteeRank,extra.Proportion = state.RankWithLenth(candidateInfos,int(genaroConfig.Genaro.CommitteeMaxSize))
+	extra.CommitteeRank,extra.Proportion = state.RankWithLenth(candidateInfos,int(genaroConfig.Genaro.CommitteeMaxSize),uint64(common.CommitteeMinStake))
 	extraByte, _ := json.Marshal(extra)
 	genesis.ExtraData = extraByte
 
