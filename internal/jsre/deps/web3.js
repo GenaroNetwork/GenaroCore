@@ -5279,9 +5279,16 @@ var methods = function () {
         outputFormatter: utils.toDecimal
     });
 
+    var getGlobalVar = new Method({
+        name: 'getGlobalVar',
+        call: 'eth_getGlobalVar',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getSubAccounts = new Method({
         name: 'getSubAccounts',
-        call: 'eth_getSubAccounts',GetCommitteeRank
+        call: 'eth_getSubAccounts',
         params: 2,
         inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
     });
@@ -5567,7 +5574,8 @@ var methods = function () {
         getLastSynBlock,
         getExtra,
         getAlreadyBackStakeList,
-        getSubAccounts
+        getSubAccounts,
+        getGlobalVar
     ];
 };
 

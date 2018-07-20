@@ -593,6 +593,15 @@ func (s *PublicBlockChainAPI) GetSubAccounts(ctx context.Context, address common
 	return state.GetSubAccounts(address),nil
 }
 
+// 获取所有全局变量
+func (s *PublicBlockChainAPI) GetGlobalVar(ctx context.Context, blockNr rpc.BlockNumber) *types.GenaroPrice{
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetGenaroPrice()
+}
+
 // GetStake returns the stake of ether for the given address in the state of the
 // given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
 // block numbers are also allowed.
