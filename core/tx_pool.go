@@ -664,6 +664,8 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckDelAccountInForbidBackStakeListTx(caller, s, pool.currentState)
 	case common.SpecialTxSetGlobalVar.Uint64():
 		return vm.CheckSetGlobalVar(caller, s)
+	case common.SpecialTxAddCoinpool.Uint64():
+
 	}
 	return errors.New("undefined type of special transaction")
 }

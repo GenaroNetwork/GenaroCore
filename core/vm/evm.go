@@ -267,6 +267,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = delAccountInForbidBackStakeList(evm, s, caller)
 	case common.SpecialTxSetGlobalVar.Uint64():	// 设置全局变量
 		err = setGlobalVar(evm, s, caller)
+	case common.SpecialTxAddCoinpool.Uint64():	// 增加币池
+		err = addCoinpool(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -413,6 +415,20 @@ func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Addre
 	}
 
 	return nil
+}
+
+func addCoinpool(evm *EVM, s types.SpecialTxInput, caller common.Address) error{
+	if err := CheckAddCoinpool(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	rewardsValues := (*evm).StateDB.GetRewardsValues()
+	rewardsValues.SurplusCoin.Add(rewardsValues.SurplusCoin,s.AddCoin.ToInt())
+	ok := (*evm).StateDB.SetRewardsValues(*rewardsValues)
+	if ok {
+		(*evm).StateDB.SubBalance(caller, s.AddCoin.ToInt())
+		return nil
+	}
+	return errors.New("addCoinpool fail")
 }
 
 func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error{

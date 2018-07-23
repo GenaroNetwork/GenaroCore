@@ -144,6 +144,8 @@ var (
 
 	// 设置全局变量
 	SpecialTxSetGlobalVar = big.NewInt(21)
+	// 增加币池的交易
+	SpecialTxAddCoinpool = big.NewInt(22)
 )
 
 	//特殊交易 Tx.init 格式
