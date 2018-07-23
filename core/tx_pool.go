@@ -649,7 +649,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
 		return vm.CheckPriceRegulation(caller, s)
 	case common.SpecialTxSynState.Uint64():
-		return vm.CheckSynStateTx(caller)
+		return vm.CheckSynStateTx(caller, pool.currentState)
 	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
 		existNodes := pool.currentState.GetStorageNodes(caller)
 		return vm.CheckUnbindNodeTx(caller, s, existNodes)

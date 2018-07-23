@@ -253,7 +253,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = userBackStake(evm, caller)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
 		err = genaroPriceRegulation(evm, s, caller)
-	case common.SpecialTxSynState.Uint64():
+	case common.SpecialTxSynState.Uint64():	// 同步信号
 		err = SynState(evm, s, caller)
 	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
 		err = unbindNode(evm, s, caller)
@@ -441,6 +441,9 @@ func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error
 	if s.MaxBinding != 0 {
 		genaroPrice.MaxBinding = s.MaxBinding
 	}
+	if len(s.SynStateAccount) > 0 {
+		genaroPrice.SynStateAccount = s.SynStateAccount
+	}
 
 	ok := (*evm).StateDB.SetGenaroPrice(*genaroPrice)
 	if !ok {
@@ -450,7 +453,7 @@ func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error
 }
 
 func SynState(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	err := CheckSynStateTx(caller)
+	err := CheckSynStateTx(caller, (*evm).StateDB)
 	if err != nil {
 		return err
 	}

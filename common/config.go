@@ -170,5 +170,6 @@ var (
 		CoinRewardsRatio = uint64(50)	// 币息收益比率
 		StorageRewardsRatio = uint64(50)	// 存储收益比率
 		RatioPerYear = uint64(7)	// 年收益比率
+		SynStateAccount = OfficialAddress	// 区块同步信号的发送地址
 	)
 

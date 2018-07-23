@@ -288,8 +288,10 @@ func CheckBackStakeTx(caller common.Address, state StateDB) error {
 	return nil
 }
 
-func CheckSynStateTx(caller common.Address) error {
-	if caller !=  common.OfficialAddress {
+func CheckSynStateTx(caller common.Address, state StateDB) error {
+	genaroPrice := state.GetGenaroPrice()
+	synStateAccount := common.HexToAddress(genaroPrice.SynStateAccount)
+	if caller != synStateAccount {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil
