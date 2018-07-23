@@ -218,7 +218,7 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	//get publickey
 	pubKey := crypto.CompressPubkey(recoveredPub)
 
-
+	//log.Info(fmt.Sprintf("publicKey:%x", pubKey))
 	genNodeID := generateNodeId(pubKey)
 	//log.Info(fmt.Sprintf("genNodeId:%s", genNodeID))
 	//log.Info(fmt.Sprintf("s.nodeId:%s", s.NodeID))
@@ -236,7 +236,10 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 
 	currentStake := new(big.Int).Mul(new(big.Int).SetUint64(stake), common.BaseCompany)
 
-	if needStakeVale.Cmp(currentStake) != 1 {
+	//log.Info(fmt.Sprintf("currentStake:%s", currentStake.String()))
+	//log.Info(fmt.Sprintf("needStakeVale:%s", needStakeVale.String()))
+
+	if needStakeVale.Cmp(currentStake) == 1 {
 		return errors.New("none enough stake to synchronize node")
 	}
 	return nil
