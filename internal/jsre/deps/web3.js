@@ -5300,6 +5300,13 @@ var methods = function () {
         inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
     });
 
+    var getMainAccount = new Method({
+        name: 'getMainAccount',
+        call: 'eth_getMainAccount',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getCandidates = new Method({
         name: 'getCandidates',
         call: 'eth_getCandidates',
@@ -5582,6 +5589,7 @@ var methods = function () {
         getExtra,
         getAlreadyBackStakeList,
         getSubAccounts,
+        getMainAccount,
         getGlobalVar,
         getRewardsValues
     ];

@@ -593,6 +593,14 @@ func (s *PublicBlockChainAPI) GetSubAccounts(ctx context.Context, address common
 	return state.GetSubAccounts(address),nil
 }
 
+func (s *PublicBlockChainAPI) GetMainAccount(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (account *common.Address, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	return state.GetMainAccount(address),nil
+}
+
 // 获取所有全局变量
 func (s *PublicBlockChainAPI) GetGlobalVar(ctx context.Context, blockNr rpc.BlockNumber) *types.GenaroPrice{
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)

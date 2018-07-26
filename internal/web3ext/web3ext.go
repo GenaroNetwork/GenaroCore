@@ -443,6 +443,12 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'getMainAccount',
+			call: 'eth_getMainAccount',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
         	name: 'getCandidates',
         	call: 'eth_getCandidates',
         	params: 1,
