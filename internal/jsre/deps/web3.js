@@ -4065,7 +4065,7 @@ module.exports = {
     outputBlockFormatter: outputBlockFormatter,
     outputLogFormatter: outputLogFormatter,
     outputPostFormatter: outputPostFormatter,
-    outputSyncingFormatter: outputSyncingFormatter
+    outputSyncingFormatter: outputSyncingFormatter,
     inputString: inputString
 };
 
