@@ -351,6 +351,9 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 	mainAccount := common.HexToAddress(s.Address)
 	// 子账号
 	subAccount := common.HexToAddress(s.Message)
+	if bytes.EqualFold(mainAccount.Bytes(),subAccount.Bytes()) {
+		return errors.New("same account")
+	}
 	// 主账号是否是候选者
 	if !state.IsCandidateExist(mainAccount) {
 		return errors.New("mainAddr is not a candidate")
