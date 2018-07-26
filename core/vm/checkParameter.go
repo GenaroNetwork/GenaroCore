@@ -291,8 +291,10 @@ func CheckBackStakeTx(caller common.Address, state StateDB) error {
 	return nil
 }
 
-func CheckSynStateTx(caller common.Address) error {
-	if caller !=  common.OfficialAddress {
+func CheckSynStateTx(caller common.Address, state StateDB) error {
+	genaroPrice := state.GetGenaroPrice()
+	synStateAccount := common.HexToAddress(genaroPrice.SynStateAccount)
+	if caller != synStateAccount {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil
@@ -456,3 +458,16 @@ func CheckSetGlobalVar(caller common.Address,s types.SpecialTxInput) error {
 
 	return nil
 }
+
+// 增加币池的检查
+func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateDB) error {
+	balance := state.GetBalance(caller)
+	if s.AddCoin.ToInt().Cmp(big.NewInt(0)) <= 0 {
+		return errors.New("Value is not invalid")
+	}
+	if balance.Cmp(s.AddCoin.ToInt()) < 0 {
+		return errors.New("Balance is not enough")
+	}
+	return nil
+}
+

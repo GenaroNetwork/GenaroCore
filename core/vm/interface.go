@@ -155,6 +155,9 @@ type StateDB interface {
 	UnbindNode(common.Address, string) error
 	UbindNode2Address(common.Address, string) error
 
+	GetRewardsValues() *types.RewardsValues
+	SetRewardsValues(rewardsValues types.RewardsValues) bool
+
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

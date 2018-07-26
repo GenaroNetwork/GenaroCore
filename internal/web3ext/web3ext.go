@@ -395,6 +395,18 @@ web3._extend({
 	property: 'eth',
 	methods: [
 		new web3._extend.Method({
+			name: 'getAlreadyBackStakeList',
+			call: 'eth_getAlreadyBackStakeList',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getRewardsValues',
+			call: 'eth_getRewardsValues',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getGlobalVar',
 			call: 'eth_getGlobalVar',
 			params: 1,
@@ -427,6 +439,12 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'getSubAccounts',
 			call: 'eth_getSubAccounts',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getMainAccount',
+			call: 'eth_getMainAccount',
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),

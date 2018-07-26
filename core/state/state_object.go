@@ -164,7 +164,11 @@ func (c CandidateInfos) Apply() {
 	}
 	//TODO define how to get point
 	for i, candidate := range c{
-		c[i].Point = candidate.Stake*common.Base/totleStake + candidate.Heft*common.Base/totleHeft
+		if candidate.Heft == 0 {
+			c[i].Point = 0
+		} else {
+			c[i].Point = candidate.Stake*common.Base/totleStake + candidate.Heft*common.Base/totleHeft
+		}
 	}
 }
 

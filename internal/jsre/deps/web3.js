@@ -5381,6 +5381,13 @@ var methods = function () {
         outputFormatter: utils.toDecimal
     });
 
+    var getRewardsValues = new Method({
+        name: 'getRewardsValues',
+        call: 'eth_getRewardsValues',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getGlobalVar = new Method({
         name: 'getGlobalVar',
         call: 'eth_getGlobalVar',
@@ -5391,6 +5398,13 @@ var methods = function () {
     var getSubAccounts = new Method({
         name: 'getSubAccounts',
         call: 'eth_getSubAccounts',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getMainAccount = new Method({
+        name: 'getMainAccount',
+        call: 'eth_getMainAccount',
         params: 2,
         inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
     });
@@ -5677,7 +5691,9 @@ var methods = function () {
         getExtra,
         getAlreadyBackStakeList,
         getSubAccounts,
-        getGlobalVar
+        getMainAccount,
+        getGlobalVar,
+        getRewardsValues
     ];
 };
 

@@ -37,7 +37,7 @@ var (
 
 var (
 	//官方账号
-	OfficialAddress Address  = HexToAddress("0x3f70180da635e0205525106632bf1689ea1f7a84")
+	OfficialAddress Address  = HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73")
 )
 
 /*
@@ -144,6 +144,8 @@ var (
 
 	// 设置全局变量
 	SpecialTxSetGlobalVar = big.NewInt(21)
+	// 增加币池的交易
+	SpecialTxAddCoinpool = big.NewInt(22)
 )
 
 	//特殊交易 Tx.init 格式
@@ -170,5 +172,6 @@ var (
 		CoinRewardsRatio = uint64(50)	// 币息收益比率
 		StorageRewardsRatio = uint64(50)	// 存储收益比率
 		RatioPerYear = uint64(7)	// 年收益比率
+		SynStateAccount = OfficialAddress	// 区块同步信号的发送地址
 	)
 
