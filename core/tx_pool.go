@@ -595,7 +595,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	currentPrice := pool.currentState.GetGenaroPrice()
 
 	totalCost := new(big.Int).Add(tx.Cost(), tx.SpecialCost(currentPrice))
-	log.Info(fmt.Sprintf("total cost:%s", totalCost.String()))
+	//log.Info(fmt.Sprintf("total cost:%s", totalCost.String()))
 	if pool.currentState.GetBalance(from).Cmp(totalCost) < 0 {
 		return ErrInsufficientFundsForSpecialTx
 	}
