@@ -116,14 +116,16 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	receipt := types.NewReceipt(root, failed, *usedGas)
 
 	//extraCost for special Tx
-	if *msg.To() == common.SpecialSyncAddress {
-		if !failed {
-			var s types.SpecialTxInput
-			err = json.Unmarshal(msg.Data(), &s)
-			if err == nil{
-				currentPrice := vmenv.StateDB.GetGenaroPrice()
-				costInfo := s.SpecialCost(currentPrice)
-				receipt.ExtraInfo = costInfo.String()
+	if nil != msg.To() {
+		if *msg.To() == common.SpecialSyncAddress {
+			if !failed {
+				var s types.SpecialTxInput
+				err = json.Unmarshal(msg.Data(), &s)
+				if err == nil{
+					currentPrice := vmenv.StateDB.GetGenaroPrice()
+					costInfo := s.SpecialCost(currentPrice)
+					receipt.ExtraInfo = costInfo.String()
+				}
 			}
 		}
 	}
