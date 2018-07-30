@@ -370,7 +370,7 @@ type priceHeap []*types.Transaction
 
 func (h priceHeap) Len() int           { return len(h) }
 func (h priceHeap) Less(i, j int) bool {
-	if bytes.Compare(h[i].To().Bytes(),common.SpecialSyncAddress.Bytes()) == 0 && bytes.Compare(h[j].To().Bytes(),common.SpecialSyncAddress.Bytes()) != 0{
+	if h[i].To() != nil && bytes.Compare(h[i].To().Bytes(),common.SpecialSyncAddress.Bytes()) == 0 && bytes.Compare(h[j].To().Bytes(),common.SpecialSyncAddress.Bytes()) != 0{
 		return false
 	}
 	return h[i].GasPrice().Cmp(h[j].GasPrice()) < 0
