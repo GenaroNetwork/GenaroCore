@@ -273,10 +273,9 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = errors.New("undefined type of special transaction")
 	}
 
-	if err != nil{
-		logger := log.New("evm_dispatchHandler", s.Type.ToInt().Uint64())
-		logger.Info("special transaction error: ", err)
-		logger.Info("special transaction param：", string(input))
+	if err != nil && common.SpecialTxSynState.Uint64() != s.Type.ToInt().Uint64(){
+		log.Info(fmt.Sprintf("special transaction error: %s", err))
+		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
 }
