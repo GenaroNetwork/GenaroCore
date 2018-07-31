@@ -274,7 +274,9 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 	}
 
 	if err != nil{
-		log.Info("special transaction error: ", err)
+		logger := log.New("evm_dispatchHandler", s.Type.ToInt().Uint64())
+		logger.Info("special transaction error: ", err)
+		logger.Info("special transaction param：", string(input))
 	}
 	return err
 }
