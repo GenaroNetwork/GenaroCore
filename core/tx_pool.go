@@ -607,8 +607,10 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if tx.Gas() < intrGas {
 		return ErrIntrinsicGas
 	}
-	if common.SpecialSyncAddress == *tx.To(){
-		return pool.dispatchHandlerValidateTx(tx.Data(), from)
+	if nil != tx.To() {
+		if common.SpecialSyncAddress == *tx.To(){
+			return pool.dispatchHandlerValidateTx(tx.Data(), from)
+		}
 	}
 	return nil
 }
