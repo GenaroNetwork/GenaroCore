@@ -105,6 +105,12 @@ func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error)
 		}
 		gas += z * params.TxDataZeroGas
 	}
+
+	// Only transfer transactions cost less gas
+	if !(contractCreation && homestead) && len(data) == 0{
+		gas = params.TxMinGas
+	}
+
 	return gas, nil
 }
 
