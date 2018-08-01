@@ -885,7 +885,9 @@ func (g *Genaro) VerifyHeaders(chain consensus.ChainReader, headers []*types.Hea
 	go func() {
 		for i, header := range headers {
 			err := g.verifySeal(chain, header, headers[:i])
-
+			if err != nil {
+				log.Error(err.Error())
+			}
 			select {
 			case <-abort:
 				return

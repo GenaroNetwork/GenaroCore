@@ -33,7 +33,11 @@ func NewStateSync(root common.Hash, database trie.DatabaseReader) *trie.TrieSync
 			return err
 		}
 		syncer.AddSubTrie(obj.Root, 64, parent, nil)
-		syncer.AddRawEntry(common.BytesToHash(obj.CodeHash), 64, parent)
+		thisCodeHash := emptyCodeHash
+		if !CheckCodeEmpty(obj.CodeHash) {
+			thisCodeHash = obj.CodeHash
+		}
+		syncer.AddRawEntry(common.BytesToHash(thisCodeHash), 64, parent)
 		return nil
 	}
 	syncer = trie.NewTrieSync(root, database, callback)

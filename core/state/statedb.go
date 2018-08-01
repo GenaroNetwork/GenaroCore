@@ -638,7 +638,7 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 			s.db.TrieDB().Reference(account.Root, parent)
 		}
 		code := common.BytesToHash(account.CodeHash)
-		if code != emptyCode {
+		if code != emptyCode && !CheckCodeEmpty(account.CodeHash){
 			s.db.TrieDB().Reference(code, parent)
 		}
 		return nil

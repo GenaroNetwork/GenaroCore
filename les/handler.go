@@ -588,8 +588,11 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 				if err != nil {
 					continue
 				}
-				code, _ := statedb.Database().TrieDB().Node(common.BytesToHash(account.CodeHash))
 
+				code, _ := statedb.Database().TrieDB().Node(common.BytesToHash(account.CodeHash))
+				if state.CheckCodeEmpty(account.CodeHash) {// check code if exist
+					code = nil
+				}
 				data = append(data, code)
 				if bytes += len(code); bytes >= softResponseLimit {
 					break

@@ -444,12 +444,21 @@ func (c *stateObject) Address() common.Address {
 	return c.address
 }
 
+// if empty return true
+func CheckCodeEmpty(codeHash []byte) bool {
+	if bytes.Equal(codeHash, emptyCodeHash) || len(codeHash)!=32 {
+		return true
+	} else {
+		return false
+	}
+}
+
 // Code returns the contract code associated with this object, if any.
 func (self *stateObject) Code(db Database) []byte {
 	if self.code != nil {
 		return self.code
 	}
-	if bytes.Equal(self.CodeHash(), emptyCodeHash) || len(self.CodeHash())!=32 {
+	if CheckCodeEmpty(self.CodeHash()) {
 		return nil
 	}
 	code, err := db.ContractCode(self.addrHash, common.BytesToHash(self.CodeHash()))
