@@ -114,6 +114,22 @@ func GetLastSynBlockHash(url string) (string,error){
 	return hash,nil
 }
 
+func CheckTransaction(url string, txHash string) (bool,error){
+	if strings.EqualFold("",txHash) {
+		return true,nil
+	}
+	ret,err := HttpPost(url,"application/json",`{"jsonrpc":"2.0","id":10,"method":"eth_getTransactionByHash","params":["`+txHash+`"]}`)
+	err = checkError(ret)
+	if err != nil {
+		return false,err
+	}
+	result := gjson.GetBytes(ret,"result").String()
+	if strings.EqualFold(result,"") {
+		return false,nil
+	}
+	return true,nil
+}
+
 func initarg() {
 	flag.Int64Var(&delaytime,"t",1,"delay time")
 	flag.StringVar(&rpcurl, "u", "http://127.0.0.1:8545", "rpc url")
@@ -122,6 +138,7 @@ func initarg() {
 }
 
 var lastSynBlockHash string = ""
+var preTxHash string = ""
 
 func SynState(){
 	cuBlockNum,err := GetCuBlockNum(rpcurl)
@@ -142,6 +159,14 @@ func SynState(){
 			logPrint(err.Error())
 			return
 		}
+		ok,err := CheckTransaction(rpcurl, preTxHash)
+		if err != nil {
+			logPrint(err.Error())
+			return
+		}
+		if !ok {
+			lastSynBlockHash = ""
+		}
 		if strings.EqualFold(lastSynBlockHash,synBlockHash) {
 			logPrint("BlockHash is exist")
 			return
@@ -156,6 +181,8 @@ func SynState(){
 			logPrint(err.Error())
 			return
 		}
+
+		preTxHash = gjson.Get(ret,"result").String()
 		lastSynBlockHash = synBlockHash
 		logPrint(ret)
 	}
@@ -163,6 +190,7 @@ func SynState(){
 
 func main() {
 	initarg()
+
 	for {
 		SynState()
 		time.Sleep(time.Duration(delaytime)*time.Second)
