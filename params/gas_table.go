@@ -52,10 +52,10 @@ var (
 	// GasTableHomestead contain the gas re-prices for
 	// the homestead phase.
 	GasTableEIP150 = GasTable{
-		ExtcodeSize: 700,
+		ExtcodeSize: 800,
 		ExtcodeCopy: 700,
 		Balance:     400,
-		StorageAttribution:     400,
+		StorageAttribution:     800,
 		SLoad:       200,
 		Calls:       700,
 		Suicide:     5000,
@@ -65,10 +65,10 @@ var (
 	}
 
 	GasTableEIP158 = GasTable{
-		ExtcodeSize: 700,
+		ExtcodeSize: 800,
 		ExtcodeCopy: 700,
 		Balance:     400,
-		StorageAttribution: 400,
+		StorageAttribution: 800,
 		SLoad:       200,
 		Calls:       700,
 
