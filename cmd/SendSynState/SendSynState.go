@@ -130,6 +130,27 @@ func CheckTransaction(url string, txHash string) (bool,error){
 	return true,nil
 }
 
+func checkRecipt(url string, txHash string) (bool,error){
+	if strings.EqualFold("",txHash) {
+		return true,nil
+	}
+	ret,err := HttpPost(url,"application/json",`{"jsonrpc":"2.0","id":10,"method":"eth_getTransactionReceipt","params":["`+txHash+`"]}`)
+	err = checkError(ret)
+	if err != nil {
+		return false,err
+	}
+	result := gjson.GetBytes(ret,"result").String()
+	if strings.EqualFold(result,"") {
+		return true,nil
+	}
+	//fmt.Println(result)
+	status := hexutil.MustDecodeUint64(gjson.GetBytes(ret,"result.status").String())
+	if status == 0 {
+		return false,nil
+	}
+	return true,nil
+}
+
 func initarg() {
 	flag.Int64Var(&delaytime,"t",1,"delay time")
 	flag.StringVar(&rpcurl, "u", "http://127.0.0.1:8545", "rpc url")
@@ -160,6 +181,14 @@ func SynState(){
 			return
 		}
 		ok,err := CheckTransaction(rpcurl, preTxHash)
+		if err != nil {
+			logPrint(err.Error())
+			return
+		}
+		if !ok {
+			lastSynBlockHash = ""
+		}
+		ok,err = checkRecipt(rpcurl, preTxHash)
 		if err != nil {
 			logPrint(err.Error())
 			return
