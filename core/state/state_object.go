@@ -149,6 +149,7 @@ func (c CandidateInfos) Swap(i, j int) {
 	c[i].Signer, c[j].Signer = c[j].Signer, c[i].Signer
 	c[i].Heft, c[j].Heft = c[j].Heft, c[i].Heft
 	c[i].Stake, c[j].Stake = c[j].Stake, c[i].Stake
+	c[i].Point, c[j].Point = c[j].Point, c[i].Point
 }
 
 func (c CandidateInfos) Less(i, j int) bool {
