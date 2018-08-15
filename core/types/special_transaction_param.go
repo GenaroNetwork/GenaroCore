@@ -36,6 +36,8 @@ type GenaroPrice struct {
 	StorageRewardsRatio	uint64	`json:"StorageRewardsRatio"`	// 存储收益比率
 	RatioPerYear	uint64	`json:"RatioPerYear"`	// 年收益比率
 	SynStateAccount	string	`json:"SynStateAccount"`	// 区块同步信号的发送地址
+	HeftAccount		string	`json:"HeftAccount"`	// 用于同步链上Heft值的账号
+	BindingAccount	string	`json:"BindingAccount"`	// 用于账号绑定的账号
 	ExtraPrice     []byte   `json:"extraPrice"` //该版本用不上，考虑后期版本兼容性使用
 }
 

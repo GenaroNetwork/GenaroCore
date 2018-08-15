@@ -191,6 +191,7 @@ func main() {
 			ValidPeriod:      1,    //a written committee list waiting time to come into force
 			CurrencyRates:    5,    //interest rates of coin
 			CommitteeMaxSize: 101,  //max number of committee member
+			OptionTxMemorySize: 20, //the number of save option tx
 		},
 	}
 	genesis := new(core.Genesis)

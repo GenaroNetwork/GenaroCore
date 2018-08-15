@@ -178,6 +178,7 @@ type GenaroConfig struct {
 	ValidPeriod      uint64 `json:"validPeriod"`	//a written committee list waiting time to come into force
 	CurrencyRates    uint64 `json:"currencyRates"`	//interest rates of coin
 	CommitteeMaxSize uint64 `json:"committeeMaxSize"`	//max number of committee member
+	OptionTxMemorySize uint64 `json:"optionTxMemorySize"`	//the number of save option tx
 }
 
 // String implements the stringer interface, returning the consensus engine details.
