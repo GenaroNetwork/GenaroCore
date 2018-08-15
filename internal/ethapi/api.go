@@ -221,6 +221,16 @@ func (s *PublicBlockChainAPI) GetCommitteeRank(ctx context.Context,blockNr rpc.B
 	return committees
 }
 
+// get MainAccount by rank
+func (s *PublicBlockChainAPI) GetMainAccountRank(ctx context.Context,blockNr rpc.BlockNumber) []common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	committees,_ := state.GetMainAccountRank()
+	return committees
+}
+
 // PrivateAccountAPI provides an API to access accounts managed by this node.
 // It offers methods to create, (un)lock en list accounts. Some methods accept
 // passwords and are therefore considered private by default.

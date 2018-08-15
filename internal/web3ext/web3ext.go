@@ -461,6 +461,12 @@ web3._extend({
         	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
+        	name: 'getMainAccountRank',
+        	call: 'eth_getMainAccountRank',
+        	params: 1,
+        	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getTraffic',
 			call: 'eth_getTraffic',
 			params: 1,

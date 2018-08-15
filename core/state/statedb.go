@@ -813,6 +813,15 @@ func (self *StateDB)GetCommitteeRank(blockNumStart uint64, blockNumEnd uint64) (
 	return nil,nil
 }
 
+func (self *StateDB)GetMainAccountRank() ([]common.Address, []uint64){
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		candidateInfos := self.GetCandidatesInfoWithAllSubAccounts()
+		return Rank(candidateInfos)
+	}
+	return nil,nil
+}
+
 // get CandidateInfo in given range
 func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)

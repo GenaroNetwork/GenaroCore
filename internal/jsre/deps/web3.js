@@ -5423,6 +5423,13 @@ var methods = function () {
         inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
+    var getMainAccountRank = new Method({
+        name: 'getMainAccountRank',
+        call: 'eth_getMainAccountRank',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getAlreadyBackStakeList = new Method({
         name: 'getAlreadyBackStakeList',
         call: 'eth_getAlreadyBackStakeList',
@@ -5693,7 +5700,8 @@ var methods = function () {
         getSubAccounts,
         getMainAccount,
         getGlobalVar,
-        getRewardsValues
+        getRewardsValues,
+        getMainAccountRank
     ];
 };
 
