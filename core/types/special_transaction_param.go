@@ -94,7 +94,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) big.Int {
 // 用户账户下的期票
 type PromissoryNote struct {
 	RestoreBlock uint64	`json:"restoreBlock"`	// 返还的块号
-	Num	uint64			`json:"restoreBlock"`	// 期票数量
+	Num	uint64			`json:"Num"`	// 期票数量
 }
 
 type PromissoryNotes	[]PromissoryNote
