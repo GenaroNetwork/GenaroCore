@@ -112,6 +112,36 @@ func GenLastSynStateAccount() core.GenesisAccount{
 	return LastSynStateAccount
 }
 
+// generate Promissory Notes
+// balance will edit
+func GenPromissoryNotes(balance *big.Int,PromissoryNotePercentage uint64,PromissoryNotePrice uint64,LastPromissoryNoteBlockNumber uint64,PromissoryNotePeriod uint64) types.PromissoryNotes{
+	var balanceGNX = big.NewInt(0)
+	balanceGNXUint := balanceGNX.Div(balance,common.BaseCompany).Uint64()
+	PromissoryNoteGNX := balanceGNXUint * PromissoryNotePercentage / 100
+	if PromissoryNoteGNX > PromissoryNotePrice {
+		PromissoryNoteNum := PromissoryNoteGNX / PromissoryNotePrice
+		timeNum := LastPromissoryNoteBlockNumber/PromissoryNotePeriod
+		notes := new(types.PromissoryNotes)
+		for i:=uint64(1);i<=PromissoryNoteNum;i++ {
+			var note types.PromissoryNote
+			note.Num = 1
+			n := i%timeNum
+			if n == 0 {
+				note.RestoreBlock = timeNum*PromissoryNotePeriod
+			} else {
+				note.RestoreBlock = n*PromissoryNotePeriod
+			}
+			notes.Add(note)
+		}
+
+		allPromissoryNotePrice := big.NewInt(int64(notes.GetAllNum()*PromissoryNotePrice))
+		allPromissoryNotePrice.Mul(allPromissoryNotePrice,common.BaseCompany)
+		balance.Sub(balance,allPromissoryNotePrice)
+		return *notes
+	}
+	return nil
+}
+
 // generate user account
 func GenAccount(balanceStr string, stake,heft uint64) core.GenesisAccount {
 	balance,ok := math.ParseBig256(balanceStr)
@@ -131,11 +161,17 @@ func GenAccount(balanceStr string, stake,heft uint64) core.GenesisAccount {
 	}
 	heftLogs := types.NumLogs{heftLog}
 
+	var notes types.PromissoryNotes
+	if PromissoryNoteEnable {
+		notes = GenPromissoryNotes(balance,PromissoryNotePercentage,PromissoryNotePrice,LastPromissoryNoteBlockNumber,PromissoryNotePeriod)
+	}
+
 	genaroData := types.GenaroData{
 		Stake: stake,
 		Heft: heft,
 		StakeLog:stakeLogs,
 		HeftLog:heftLogs,
+		PromissoryNotes: notes,
 	}
 	genaroDataByte, _ := json.Marshal(genaroData)
 	account := core.GenesisAccount{
