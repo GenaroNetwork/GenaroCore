@@ -56,3 +56,61 @@ func TestBindingTable(t *testing.T){
 	}
 	t.Log(subAccounts)
 }
+
+func (notes *PromissoryNotes) Print(t *testing.T){
+	for _,note := range *notes {
+		t.Log("RestoreBlock:",note.RestoreBlock)
+		t.Log("Num:",note.Num)
+	}
+}
+
+func TestPromissoryNote(t *testing.T){
+	note1 := PromissoryNote{
+		RestoreBlock:10,
+		Num:20,
+	}
+	note2 := PromissoryNote{
+		RestoreBlock:20,
+		Num:30,
+	}
+	note3 := PromissoryNote{
+		RestoreBlock:30,
+		Num:40,
+	}
+	note4 := PromissoryNote{
+		RestoreBlock:10,
+		Num:50,
+	}
+	note5 := PromissoryNote{
+		RestoreBlock:20,
+		Num:60,
+	}
+
+	notes  := new(PromissoryNotes)
+	notes.Add(note1)
+	notes.Add(note2)
+	notes.Add(note3)
+	notes.Add(note4)
+	notes.Add(note5)
+
+	notes.Print(t)
+	t.Log(notes.GetNum(20))
+	notes.Del(note2)
+	t.Log(notes.GetNum(20))
+	notes.Del(note5)
+	t.Log(notes.GetNum(20))
+	t.Log(notes.GetNum(30))
+	notes.Print(t)
+
+	t.Log(notes.DelBefor(10))
+	notes.Print(t)
+
+	notes.Add(note1)
+	notes.Add(note2)
+	notes.Print(t)
+	t.Log(notes.GetAllNum())
+	t.Log(notes.getBefor(20))
+	t.Log(notes.DelBefor(20))
+	notes.Print(t)
+
+}

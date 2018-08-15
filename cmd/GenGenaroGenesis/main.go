@@ -19,10 +19,21 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"flag"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/tidwall/gjson"
 )
 
 var accountfile string
 
+// 初始化相关参数
+var PromissoryNoteEnable bool // 是否分发期票
+var PromissoryNotePercentage uint64	// 初始期票占比
+var PromissoryNotePrice uint64	// 期票面值
+var LastPromissoryNoteBlockNumber uint64	// 最后的期票返还块号
+var PromissoryNotePeriod uint64	// 期票返还周期间隔
+var SurplusCoin int64	// 初始币池中的金额，单位GNX
+var SynStateAccount string	// 用于同步
+var HeftAccount string	// 用于heft设置
+var BindingAccount string	// 用于账号绑定
 
 func initarg() {
 	flag.StringVar(&accountfile, "f", "account.json", "account file")
@@ -43,7 +54,9 @@ func GenGenaroPriceAccount() core.GenesisAccount {
 		CoinRewardsRatio:	common.CoinRewardsRatio,
 		StorageRewardsRatio:	common.StorageRewardsRatio,
 		RatioPerYear:	common.RatioPerYear,
-		SynStateAccount:	common.SynStateAccount.String(),
+		SynStateAccount:	SynStateAccount,
+		HeftAccount:	HeftAccount,
+		BindingAccount:	BindingAccount,
 	}
 	data, _ := json.Marshal(genaroPrice)
 	GenaroPriceAccount := core.GenesisAccount{
@@ -167,13 +180,40 @@ type header struct {
 }
 
 
+func parseConfig(fileData []byte){
+	PromissoryNoteEnable = gjson.GetBytes(fileData,"config.PromissoryNoteEnable").Bool()
+	fmt.Println("PromissoryNoteEnable:",PromissoryNoteEnable)
+	PromissoryNotePercentage = gjson.GetBytes(fileData,"config.PromissoryNotePercentage").Uint()
+	PromissoryNotePrice = gjson.GetBytes(fileData,"config.PromissoryNotePrice").Uint()
+	LastPromissoryNoteBlockNumber = gjson.GetBytes(fileData,"config.LastPromissoryNoteBlockNumber").Uint()
+	PromissoryNotePeriod = gjson.GetBytes(fileData,"config.PromissoryNotePeriod").Uint()
+	SurplusCoin =  gjson.GetBytes(fileData,"config.SurplusCoin").Int()
+	fmt.Println("PromissoryNotePercentage:",PromissoryNotePercentage)
+	fmt.Println("PromissoryNotePrice:",PromissoryNotePrice)
+	fmt.Println("LastPromissoryNoteBlockNumber:",LastPromissoryNoteBlockNumber)
+	fmt.Println("PromissoryNotePeriod:",PromissoryNotePeriod)
+	fmt.Println("SurplusCoin:",SurplusCoin)
+
+	SynStateAccount = gjson.GetBytes(fileData,"config.SynStateAccount").String()
+	HeftAccount = gjson.GetBytes(fileData,"config.HeftAccount").String()
+	BindingAccount = gjson.GetBytes(fileData,"config.BindingAccount").String()
+	fmt.Println("SynStateAccount:",SynStateAccount)
+	fmt.Println("HeftAccount:",HeftAccount)
+	fmt.Println("BindingAccount:",BindingAccount)
+}
+
 func main() {
 	initarg()
-	accountfile, err := os.Open(accountfile)
-	myAccounts := new(MyAlloc)
-	if err := json.NewDecoder(accountfile).Decode(myAccounts); err != nil {
-		log.Fatalf("invalid account file: %v", err)
+	fileData,err := ioutil.ReadFile(accountfile)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	parseConfig(fileData)
+
+	myAccounts := new(MyAlloc)
+	accountStr := gjson.GetBytes(fileData,"accounts").String()
+	json.Unmarshal([]byte(accountStr),myAccounts)
 
 	genaroConfig := &params.ChainConfig{
 		ChainId:        big.NewInt(300),
@@ -192,6 +232,7 @@ func main() {
 			CurrencyRates:    5,    //interest rates of coin
 			CommitteeMaxSize: 101,  //max number of committee member
 			OptionTxMemorySize: 20, //the number of save option tx
+			PromissoryNotePrice:	PromissoryNotePrice,	// Promissory Note Price
 		},
 	}
 	genesis := new(core.Genesis)
@@ -215,7 +256,7 @@ func main() {
 	}
 	candidateAccount := GenCandidateAccount(committees)
 	LastSynStateAccount := GenLastSynStateAccount()
-	rewardsValuesAccount := GenRewardsValuesAccount(175000000)
+	rewardsValuesAccount := GenRewardsValuesAccount(SurplusCoin)
 	genaroPriceAccount := GenGenaroPriceAccount()
 	genesis.Alloc[common.CandidateSaveAddress] = candidateAccount
 	genesis.Alloc[common.LastSynStateSaveAddress] = LastSynStateAccount

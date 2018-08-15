@@ -91,21 +91,107 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) big.Int {
 	}
 }
 
+// 用户账户下的期票
+type PromissoryNote struct {
+	RestoreBlock uint64	`json:"restoreBlock"`	// 返还的块号
+	Num	uint64			`json:"restoreBlock"`	// 期票数量
+}
+
+type PromissoryNotes	[]PromissoryNote
+
+// 增加期票
+func (notes *PromissoryNotes) Add(newNote PromissoryNote){
+	isExist := false
+	for i,note := range *notes {
+		if note.RestoreBlock == newNote.RestoreBlock {
+			(*notes)[i].Num += newNote.Num
+			isExist = true
+			break
+		}
+	}
+
+	if !isExist {
+		*notes = append(*notes,newNote)
+	}
+}
+
+// 减少期票,返回是否成功减少
+func (notes *PromissoryNotes) Del(newNote PromissoryNote) bool{
+	isSuccess := false
+	for i,note := range *notes {
+		if note.RestoreBlock == newNote.RestoreBlock {
+			if (*notes)[i].Num >= newNote.Num {
+				(*notes)[i].Num -= newNote.Num
+				isSuccess = true
+				if (*notes)[i].Num == 0 {
+					(*notes) = append((*notes)[:i],(*notes)[i+1:]...)
+				}
+			}
+			break
+		}
+	}
+	return isSuccess
+}
+
+// 删除到期的期票，返回删除的数量
+func (notes *PromissoryNotes) DelBefor(blockNum uint64) uint64 {
+	delNum := uint64(0)
+	for i:=0;i<len(*notes);i++ {
+		if (*notes)[i].RestoreBlock <= blockNum {
+			delNum += (*notes)[i].Num
+			(*notes) = append((*notes)[:i],(*notes)[i+1:]...)
+			i--
+		}
+	}
+	return delNum
+}
+
+// 到期的期票数量
+func (notes *PromissoryNotes) getBefor(blockNum uint64) uint64 {
+	num := uint64(0)
+	for i:=0;i<len(*notes);i++ {
+		if (*notes)[i].RestoreBlock <= blockNum {
+			num += (*notes)[i].Num
+		}
+	}
+	return num
+}
+
+// 返回某一类期票的数量
+func (notes *PromissoryNotes) GetNum(restoreBlock uint64) uint64 {
+	for _,note := range *notes {
+		if note.RestoreBlock == restoreBlock {
+			return note.Num
+		}
+	}
+	return 0
+}
+
+// 获取期票总数
+func (notes *PromissoryNotes) GetAllNum() uint64 {
+	allNum := uint64(0)
+	for _,note := range *notes {
+		allNum += note.Num
+	}
+	return allNum
+}
+
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
 type GenaroData struct {
 	Heft                         uint64                               `json:"heft"`
 	Stake                        uint64                               `json:"stake"`
-	HeftLog						 NumLogs						`json:"heftlog"`
-	StakeLog					 NumLogs						`json:"stakelog"`
-	FileSharePublicKey           string                               `json:"publicKey"`
-	Node                         []string                             `json:"syncNode"`
-	SpecialTxTypeMortgageInit    SpecialTxTypeMortgageInit            `json:"specialTxTypeMortgageInit"`
+	HeftLog						 NumLogs								`json:"heftlog"`
+	StakeLog					 NumLogs								`json:"stakelog"`
+	FileSharePublicKey           string                               	`json:"publicKey"`
+	Node                         []string                             	`json:"syncNode"`
+	SpecialTxTypeMortgageInit    SpecialTxTypeMortgageInit            	`json:"specialTxTypeMortgageInit"`
 	SpecialTxTypeMortgageInitArr map[string]SpecialTxTypeMortgageInit `json:"specialTxTypeMortgageInitArr"`
-	Traffic                      uint64                               `json:"traffic"`
-	Buckets                      []*BucketPropertie                   `json:"buckets"`
-	SynchronizeShareKeyArr 		 map[string] SynchronizeShareKey	  `json:"synchronizeShareKeyArr"`
-	SynchronizeShareKey			 SynchronizeShareKey				   `json:"synchronizeShareKey"`
+	Traffic                      uint64                               	`json:"traffic"`
+	Buckets                      []*BucketPropertie                   	`json:"buckets"`
+	SynchronizeShareKeyArr 		 map[string] SynchronizeShareKey	  	`json:"synchronizeShareKeyArr"`
+	SynchronizeShareKey			 SynchronizeShareKey				   	`json:"synchronizeShareKey"`
+	PromissoryNotes				PromissoryNotes							`PromissoryNotes`
 }
 
 type SynchronizeShareKey struct {
