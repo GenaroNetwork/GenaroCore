@@ -159,7 +159,7 @@ var (
 	SpecialTxWithdrawCash = big.NewInt(30)
 
 	//撤回
-	SpecialTxRecall  = big.NewInt(31)
+	SpecialTxRevoke  = big.NewInt(31)
 
 	/************************************/
 )
