@@ -269,6 +269,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = setGlobalVar(evm, s, caller)
 	case common.SpecialTxAddCoinpool.Uint64():	// 增加币池
 		err = addCoinpool(evm, s, caller)
+	case common.SpecialTxRevoke.Uint64(): // 撤销期权交易
+		err = revokePromissoryNotesTx(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -278,6 +280,26 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckDelAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	//从交易中心移除本次交易并将期权还原到用户账户中
+	hashId := common.StringToHash(s.OrderId)
+	optionTxTable := (*evm).StateDB.GetOptionTxTable(hashId)
+	promissoryNotesOptionTx := (*optionTxTable)[hashId]
+
+	if (*evm).StateDB.DelTxInOptionTxTable(hashId) {
+		var promissoryNote types.PromissoryNote
+		promissoryNote.Num = promissoryNotesOptionTx.TxNum
+		promissoryNote.RestoreBlock = promissoryNotesOptionTx.RestoreBlock
+		(*evm).StateDB.AddPromissoryNote(caller, promissoryNote)
+	}
+
+	return nil
 }
 
 func delAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {

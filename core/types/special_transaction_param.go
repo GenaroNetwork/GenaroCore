@@ -18,7 +18,8 @@ type SpecialTxInput struct {
 	BlockNumber string       `json:"blockNr"`
 	Message     string       `json:"msg"`
 	Sign        string       `json:"sign"`
-	AddCoin	*hexutil.Big `json:"addCoin"`
+	AddCoin	*hexutil.Big     `json:"addCoin"`
+	OrderId     string       `json:"orderId"`
 	GenaroPrice
 }
 
