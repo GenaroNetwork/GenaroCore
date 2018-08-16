@@ -162,6 +162,5 @@ func TestAddressAdd(t *testing.T){
 func TestAddressMod(t *testing.T){
 	testAddr := HexToAddress("0xa000000000000000000000000000000000000000")
 	t.Log(testAddr.Mod(60))
-
 }
 

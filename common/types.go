@@ -281,3 +281,11 @@ func (addr Address) Mod(n int64) int64 {
 	addrBig.DivMod(addrBig,big.NewInt(n),m)
 	return  m.Int64()
 }
+
+// HASH对于一个整数的余数
+func (hash Hash) Mod(n int64) int64 {
+	addrBig := hash.Big()
+	var m = new(big.Int)
+	addrBig.DivMod(addrBig,big.NewInt(n),m)
+	return  m.Int64()
+}
