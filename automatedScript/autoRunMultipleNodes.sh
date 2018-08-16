@@ -27,8 +27,8 @@ port=30315
 #rpcport端口
 rpcport=8549
 
-rm genaro.json
-
+#rm genaro.json
+touch genaro.json
 # rm chainNode
 
 if [ -d "./chainNode" ];then
@@ -46,7 +46,7 @@ fi
 cd ../cmd/GenGenaroGenesis/
 go build
 
-cp `./GenGenaroGenesis -f genesis.json | xargs` ../../../Genaro-Core/automatedScript/genaro.json
+cp `./GenGenaroGenesis -f genesis.json | grep json | xargs` ../../../Genaro-Core/automatedScript/genaro.json
 
 cd ../../../Genaro-Core/automatedScript
 

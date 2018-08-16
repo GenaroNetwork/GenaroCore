@@ -1788,7 +1788,7 @@ func (self *stateObject)PromissoryNotesWithdrawCash(blockNumber uint64) uint64{
 	var genaroData types.GenaroData
 	var promissoryNotesNum uint64
 	if self.data.CodeHash == nil{
-		errors.New("no node of this account")
+		return 0
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		promissoryNotesNum = genaroData.PromissoryNotes.DelBefor(blockNumber)

@@ -742,8 +742,8 @@ func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 		return errors.New("WithdrawCash error")
 	}
 	promissoryPrice := big.NewInt(int64(evm.chainConfig.Genaro.PromissoryNotePrice*withdrawCashNum))
-	promissoryPriceGNX :=  common.BaseCompany.Mul(common.BaseCompany,promissoryPrice)
-	(*evm).StateDB.AddBalance(caller, promissoryPriceGNX)
+	promissoryPrice.Mul(promissoryPrice,common.BaseCompany)
+	(*evm).StateDB.AddBalance(caller, promissoryPrice)
 	return nil
 }
 // CallCode executes the contract associated with the addr with the given input
