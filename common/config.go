@@ -79,12 +79,15 @@ var (
 	// 存放禁止退注的名单
 	ForbidBackStakeSaveAddress Address = HexToAddress("0x9000000000000000000000000000000000000000")
 
+	// 期权交易列表
+	PromissoryNoteTxSaveAddress Address = HexToAddress("0x0000000000000000000000000000000000000001")
+
 	// 存放期权交易的起始地址
 	OptionTxBeginSaveAddress Address = HexToAddress("0xa000000000000000000000000000000000000000")
 
 )
 
-var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress}
+var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress, PromissoryNoteTxSaveAddress}
 
 
 
@@ -156,7 +159,7 @@ var (
 	SpecialTxWithdrawCash = big.NewInt(30)
 
 	//撤回
-	SpecialTxRecall  = big.NewInt(31)
+	SpecialTxRevoke  = big.NewInt(31)
 
 	/************************************/
 )
