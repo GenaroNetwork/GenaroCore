@@ -146,6 +146,16 @@ var (
 	SpecialTxSetGlobalVar = big.NewInt(21)
 	// 增加币池的交易
 	SpecialTxAddCoinpool = big.NewInt(22)
+
+
+	/************期权交易类型**************/
+	//提现
+	SpecialTxWithdrawCash = big.NewInt(30)
+
+	//撤回
+	SpecialTxRecall  = big.NewInt(31)
+
+	/************************************/
 )
 
 	//特殊交易 Tx.init 格式
