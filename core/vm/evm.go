@@ -269,6 +269,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = setGlobalVar(evm, s, caller)
 	case common.SpecialTxAddCoinpool.Uint64():	// 增加币池
 		err = addCoinpool(evm, s, caller)
+	case common.SpecialTxWithdrawCash.Uint64():	//提现
+		err = PromissoryNotesWithdrawCash(evm, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -730,6 +732,20 @@ func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 	return nil
 }
 
+
+
+//提现
+func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
+	blockNumber := evm.BlockNumber.Uint64()
+	withdrawCashNum := (*evm).StateDB.PromissoryNotesWithdrawCash(caller,blockNumber)
+	if withdrawCashNum <= 0 {
+		return errors.New("WithdrawCash error")
+	}
+	promissoryPrice := big.NewInt(int64(evm.chainConfig.Genaro.PromissoryNotePrice*withdrawCashNum))
+	promissoryPriceGNX :=  common.BaseCompany.Mul(common.BaseCompany,promissoryPrice)
+	(*evm).StateDB.AddBalance(caller, promissoryPriceGNX)
+	return nil
+}
 // CallCode executes the contract associated with the addr with the given input
 // as parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
