@@ -180,6 +180,7 @@ func (notes *PromissoryNotes) GetAllNum() uint64 {
 
 // 期票期权交易
 type PromissoryNotesOptionTx struct {
+	IsSell			bool		`json:"IsSell"`	// 期权是否在售
 	OptionPrice		*big.Int	`json:"OptionPrice"`	// 期权的价格
 	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
 	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量

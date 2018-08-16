@@ -22,7 +22,6 @@ import (
 	"io"
 	"math/big"
 	"encoding/json"
-
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
@@ -40,6 +39,12 @@ type Code []byte
 
 func (self Code) String() string {
 	return string(self) //strings.Join(Disassemble(self), " ")
+}
+
+// 获取用于存储期权交易的地址
+func GetOptionSaveAddr(optionTxHash common.Hash,optionTxMemorySize uint64) common.Address{
+	pos := optionTxHash.Mod(int64(optionTxMemorySize))
+	return common.OptionTxBeginSaveAddress.Add(pos)
 }
 
 type Storage map[common.Hash]common.Hash
