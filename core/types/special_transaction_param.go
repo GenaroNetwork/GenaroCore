@@ -176,6 +176,19 @@ func (notes *PromissoryNotes) GetAllNum() uint64 {
 	return allNum
 }
 
+// 期票期权交易
+type PromissoryNotesOptionTx struct {
+	OptionPrice		*big.Int	`json:"OptionPrice"`	// 期权的价格
+	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
+	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
+	PromissoryNoteTxPrice	*big.Int	`json:"PromissoryNoteTxPrice"`	// 期票的交易单价
+	PromissoryNotesOwner	common.Address	`json:"PromissoryNotesOwner"`	// 期票的拥有者
+	OptionOwner		common.Address	`json:"OptionOwner"`	// 期权的拥有者
+}
+
+// 期权交易表
+type OptionTxTable map[common.Hash]PromissoryNotesOptionTx
+
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
 type GenaroData struct {
@@ -191,7 +204,7 @@ type GenaroData struct {
 	Buckets                      []*BucketPropertie                   	`json:"buckets"`
 	SynchronizeShareKeyArr 		 map[string] SynchronizeShareKey	  	`json:"synchronizeShareKeyArr"`
 	SynchronizeShareKey			 SynchronizeShareKey				   	`json:"synchronizeShareKey"`
-	PromissoryNotes				PromissoryNotes							`PromissoryNotes`
+	PromissoryNotes				PromissoryNotes							`json:"PromissoryNotes"`
 }
 
 type SynchronizeShareKey struct {
