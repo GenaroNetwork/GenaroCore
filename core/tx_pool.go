@@ -630,27 +630,27 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 
 	switch s.Type.ToInt().Uint64(){
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
-		return vm.CheckStakeTx(s, pool.currentState)
+		return vm.CheckStakeTx(s, pool.currentState,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-		return vm.CheckSyncHeftTx(caller, s)
+		return vm.CheckSyncHeftTx(caller, s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
-		return vm.CheckApplyBucketTx(s)
+		return vm.CheckApplyBucketTx(s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
-		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller)
+		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
-		return vm.CheckTrafficTx(s)
+		return vm.CheckTrafficTx(s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		return vm.CheckSyncNodeTx(caller, s, pool.currentState)
 	case common.SynchronizeShareKey.Uint64():
-		return vm.CheckSynchronizeShareKeyParameter(s)
+		return vm.CheckSynchronizeShareKeyParameter(s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
-		return vm.CheckSyncFileSharePublicKeyTx(s)
+		return vm.CheckSyncFileSharePublicKeyTx(s,pool.chainconfig.Genaro)
 	case common.UnlockSharedKey.Uint64():
 		return vm.CheckUnlockSharedKeyParameter(s)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
-		return vm.CheckPunishmentTx(caller,s)
+		return vm.CheckPunishmentTx(caller,s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeBackStake.Uint64():
 		return vm.CheckBackStakeTx(caller, pool.currentState)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
