@@ -22,7 +22,6 @@ import (
 	"io"
 	"math/big"
 	"encoding/json"
-
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"

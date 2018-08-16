@@ -267,3 +267,17 @@ func (self *BackStakeList)IsAccountExist(addr Address) bool{
 	return false
 }
 
+// 地址增加偏移
+func (addr Address) Add(n int64) Address {
+	addrBig := addr.Big()
+	addrBig.Add(addrBig,big.NewInt(n))
+	return BigToAddress(addrBig)
+}
+
+// 地址对于一个整数的余数
+func (addr Address) Mod(n int64) int64 {
+	addrBig := addr.Big()
+	var m = new(big.Int)
+	addrBig.DivMod(addrBig,big.NewInt(n),m)
+	return  m.Int64()
+}
