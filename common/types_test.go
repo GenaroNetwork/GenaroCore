@@ -149,3 +149,18 @@ func BenchmarkAddressHex(b *testing.B) {
 		testAddr.Hex()
 	}
 }
+
+func TestAddressAdd(t *testing.T){
+	testAddr := HexToAddress("0xa000000000000000000000000000000000000000")
+	for i:=int64(1);i<30;i++ {
+		addr := testAddr.Add(i)
+		t.Log(addr.String())
+		t.Log(addr.Mod(30))
+	}
+}
+
+func TestAddressMod(t *testing.T){
+	testAddr := HexToAddress("0xa000000000000000000000000000000000000000")
+	t.Log(testAddr.Mod(60))
+}
+

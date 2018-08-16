@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
 )
 
 type SpecialTxInput struct {
@@ -179,6 +181,7 @@ func (notes *PromissoryNotes) GetAllNum() uint64 {
 
 // 期票期权交易
 type PromissoryNotesOptionTx struct {
+	IsSell			bool		`json:"IsSell"`	// 期权是否在售
 	OptionPrice		*big.Int	`json:"OptionPrice"`	// 期权的价格
 	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
 	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
@@ -189,6 +192,15 @@ type PromissoryNotesOptionTx struct {
 
 // 期权交易表
 type OptionTxTable map[common.Hash]PromissoryNotesOptionTx
+
+// 生成期权交易hash
+func GenOptionTxHash(addr common.Address, nonce uint64) common.Hash {
+	data, _ := rlp.EncodeToBytes([]interface{}{addr, nonce})
+	crypto.Keccak256()
+	var hash common.Hash
+	hash.SetBytes(crypto.Keccak256(data))
+	return hash
+}
 
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.

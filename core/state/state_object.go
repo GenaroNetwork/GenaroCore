@@ -42,6 +42,12 @@ func (self Code) String() string {
 	return string(self) //strings.Join(Disassemble(self), " ")
 }
 
+// 获取用于存储期权交易的地址
+func GetOptionSaveAddr(optionTxHash common.Hash,optionTxMemorySize uint64) common.Address{
+	pos := optionTxHash.Mod(int64(optionTxMemorySize))
+	return common.OptionTxBeginSaveAddress.Add(pos)
+}
+
 type Storage map[common.Hash]common.Hash
 
 func (self Storage) String() (str string) {
@@ -1782,6 +1788,32 @@ func (self *stateObject)SetRewardsValues(rewardsValues types.RewardsValues) {
 		self.onDirty = nil
 	}
 }
+
+
+func (self *stateObject)PromissoryNotesWithdrawCash(blockNumber uint64) uint64{
+	var genaroData types.GenaroData
+	var promissoryNotesNum uint64
+	if self.data.CodeHash == nil{
+		return 0
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		promissoryNotesNum = genaroData.PromissoryNotes.DelBefor(blockNumber)
+		if 0 == promissoryNotesNum {
+			return promissoryNotesNum
+		}
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+
+	}
+	return promissoryNotesNum
+}
+
 
 func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
 	var genaroData types.GenaroData
