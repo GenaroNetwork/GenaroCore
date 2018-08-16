@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
 )
 
 type SpecialTxInput struct {
@@ -188,6 +190,15 @@ type PromissoryNotesOptionTx struct {
 
 // 期权交易表
 type OptionTxTable map[common.Hash]PromissoryNotesOptionTx
+
+// 生成期权交易hash
+func GenOptionTxHash(addr common.Address, nonce uint64) common.Hash {
+	data, _ := rlp.EncodeToBytes([]interface{}{addr, nonce})
+	crypto.Keccak256()
+	var hash common.Hash
+	hash.SetBytes(crypto.Keccak256(data))
+	return hash
+}
 
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
