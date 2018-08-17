@@ -552,6 +552,12 @@ web3._extend({
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
+		new web3._extend.Method({
+			name: 'getPromissoryNotes',
+			call: 'eth_getPromissoryNotes',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
 	],
 	properties: [
 		new web3._extend.Property({
