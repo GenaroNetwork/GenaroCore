@@ -1430,6 +1430,14 @@ func (self *StateDB)AddPromissoryNote(address common.Address, promissoryNote typ
 	return false
 }
 
+func (self *StateDB)DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool{
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.DelPromissoryNote(promissoryNote)
+	}
+	return false
+}
+
 
 func (self *StateDB)GetOptionTxTable(hash common.Hash) *types.OptionTxTable {
 	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)

@@ -160,6 +160,7 @@ type StateDB interface {
 
 	PromissoryNotesWithdrawCash(common.Address,uint64) uint64
 	AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
+	DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
 
 	GetOptionTxTable(hash common.Hash) *types.OptionTxTable
 	DelTxInOptionTxTable(hash common.Hash) bool

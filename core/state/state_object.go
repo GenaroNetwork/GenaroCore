@@ -1836,6 +1836,30 @@ func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
 	}
 }
 
+func (self *stateObject)DelPromissoryNote(promissoryNote types.PromissoryNote) bool{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+	}
+	promissoryNotes := genaroData.PromissoryNotes
+	if !(&promissoryNotes).Del(promissoryNote) {
+		return false
+	}
+	genaroData.PromissoryNotes = promissoryNotes
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+
+	return true
+}
+
 func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
 	var optionTxTable types.OptionTxTable
 	if self.data.CodeHash == nil {
