@@ -1474,9 +1474,25 @@ func (self *StateDB)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOption
 }
 
 func (self *StateDB)PromissoryNotesWithdrawCash(address common.Address,blockNumber uint64) uint64 {
-	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
+	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		return stateObject.PromissoryNotesWithdrawCash(blockNumber)
+	}
+	return uint64(0)
+}
+
+func (self *StateDB)GetAllPromissoryNotesNum(address common.Address) uint64 {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetAllPromissoryNotesNum()
+	}
+	return uint64(0)
+}
+
+func (self *StateDB)GetBeforPromissoryNotesNum(address common.Address,blockNumber uint64) uint64 {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetBeforPromissoryNotesNum(blockNumber)
 	}
 	return uint64(0)
 }

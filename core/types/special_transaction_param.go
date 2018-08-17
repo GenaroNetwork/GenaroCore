@@ -154,7 +154,7 @@ func (notes *PromissoryNotes) DelBefor(blockNum uint64) uint64 {
 }
 
 // 到期的期票数量
-func (notes *PromissoryNotes) getBefor(blockNum uint64) uint64 {
+func (notes *PromissoryNotes) GetBefor(blockNum uint64) uint64 {
 	num := uint64(0)
 	for i:=0;i<len(*notes);i++ {
 		if (*notes)[i].RestoreBlock <= blockNum {
