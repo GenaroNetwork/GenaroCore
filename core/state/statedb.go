@@ -1421,6 +1421,57 @@ func (self *StateDB)SetRewardsValues(rewardsValues types.RewardsValues) bool{
 	return false
 }
 
+func (self *StateDB)AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool{
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		stateObject.AddPromissoryNote(promissoryNote)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool{
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.DelPromissoryNote(promissoryNote)
+	}
+	return false
+}
+
+func (self *StateDB)GetPromissoryNotes(address common.Address) types.PromissoryNotes {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetPromissoryNotes()
+	}
+	return nil
+}
+
+
+func (self *StateDB)GetOptionTxTable(hash common.Hash) *types.OptionTxTable {
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	if stateObject != nil {
+		return stateObject.GetOptionTxTable()
+	}
+	return nil
+}
+
+func (self *StateDB)DelTxInOptionTxTable(hash common.Hash) bool{
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	if stateObject != nil {
+		stateObject.DelTxInOptionTxTable(hash)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx) bool{
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	if stateObject != nil {
+		stateObject.AddTxInOptionTxTable(hash, promissoryNotesOptionTx)
+		return true
+	}
+	return false
+}
 
 func (self *StateDB)PromissoryNotesWithdrawCash(address common.Address,blockNumber uint64) uint64 {
 	stateObject := self.GetOrNewStateObject(address)

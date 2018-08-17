@@ -230,7 +230,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
 		err = updateStake(evm, s, caller)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64(), caller)
+		err = updateHeft(evm, s, caller)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		err = updateStorageProperties(evm, s, caller)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
@@ -269,8 +269,12 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = setGlobalVar(evm, s, caller)
 	case common.SpecialTxAddCoinpool.Uint64():	// 增加币池
 		err = addCoinpool(evm, s, caller)
+	case common.SpecialTxRevoke.Uint64(): // 撤销期权交易
+		err = revokePromissoryNotesTx(evm, s, caller)
 	case common.SpecialTxWithdrawCash.Uint64():	//提现
 		err = PromissoryNotesWithdrawCash(evm, caller)
+	case common.SpecialTxPublishOption.Uint64():
+		err = publishOption(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -280,6 +284,47 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckPublishOption(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	var promissoryNote types.PromissoryNote
+	promissoryNote.RestoreBlock = s.RestoreBlock
+	promissoryNote.Num = s.TxNum
+
+	if (*evm).StateDB.DelPromissoryNote(caller, promissoryNote){
+		var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+		promissoryNotesOptionTx.TxNum = s.TxNum
+		promissoryNotesOptionTx.RestoreBlock = s.RestoreBlock
+		promissoryNotesOptionTx.OptionOwner = caller
+		promissoryNotesOptionTx.IsSell = true
+		promissoryNotesOptionTx.OptionPrice = s.PromissoryNoteTxPrice.ToInt()
+		(*evm).StateDB.AddTxInOptionTxTable(common.Hash{}, promissoryNotesOptionTx)
+	}
+
+	return nil
+}
+
+func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckDelAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	//从交易中心移除本次交易并将期权还原到用户账户中
+	hashId := common.StringToHash(s.OrderId)
+	optionTxTable := (*evm).StateDB.GetOptionTxTable(hashId)
+	promissoryNotesOptionTx := (*optionTxTable)[hashId]
+
+	if (*evm).StateDB.DelTxInOptionTxTable(hashId) {
+		var promissoryNote types.PromissoryNote
+		promissoryNote.Num = promissoryNotesOptionTx.TxNum
+		promissoryNote.RestoreBlock = promissoryNotesOptionTx.RestoreBlock
+		(*evm).StateDB.AddPromissoryNote(caller, promissoryNote)
+	}
+
+	return nil
 }
 
 func delAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
@@ -510,7 +555,7 @@ func userBackStake(evm *EVM, caller common.Address) error {
 
 func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
-	if err := CheckPunishmentTx(caller,s); err != nil  {
+	if err := CheckPunishmentTx(caller,s,evm.chainConfig.Genaro); err != nil  {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)
@@ -537,7 +582,7 @@ func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckSynchronizeShareKeyParameter(s); err != nil  {
+	if err := CheckSynchronizeShareKeyParameter(s,evm.chainConfig.Genaro); err != nil  {
 		return err
 	}
 	s.SynchronizeShareKey.Status = 0
@@ -549,7 +594,7 @@ func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address)
 }
 
 func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckSyncFileSharePublicKeyTx(s); nil != err  {
+	if err := CheckSyncFileSharePublicKeyTx(s,evm.chainConfig.Genaro); nil != err  {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)
@@ -577,7 +622,7 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error  {
-	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller); nil != err {
+	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, evm.chainConfig.Genaro); nil != err {
 		return err
 	}
 
@@ -662,14 +707,14 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 }
 
 
-func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64, caller common.Address) error {
-	if err := CheckSyncHeftTx(caller, s); err != nil {
+func updateHeft(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSyncHeftTx(caller, s,evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 
 	adress := common.HexToAddress(s.Address)
 	// 根据nodeid更新heft值
-	if !(*statedb).UpdateHeft(adress, s.Heft, blockNumber) {
+	if !(evm.StateDB).UpdateHeft(adress, s.Heft, evm.BlockNumber.Uint64()) {
 		return errors.New("update user's heft fail")
 	}
 	return nil
@@ -677,7 +722,7 @@ func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64, ca
 
 func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
-	if err := CheckTrafficTx(s); err != nil {
+	if err := CheckTrafficTx(s,evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 
@@ -705,7 +750,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 }
 
 func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckStakeTx(s,evm.StateDB); err != nil {
+	if err := CheckStakeTx(s,evm.StateDB,evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 

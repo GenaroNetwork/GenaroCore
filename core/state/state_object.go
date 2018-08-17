@@ -22,6 +22,7 @@ import (
 	"io"
 	"math/big"
 	"encoding/json"
+
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
@@ -1834,4 +1835,114 @@ func (self *stateObject)GetBeforPromissoryNotesNum(blockNumber uint64) uint64{
 		return genaroData.PromissoryNotes.GetBefor(blockNumber)
 	}
 	return uint64(0)
+}
+
+func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		promissoryNotes := new(types.PromissoryNotes)
+		promissoryNotes.Add(promissoryNote)
+		genaroData.PromissoryNotes = *promissoryNotes
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.PromissoryNotes = append(genaroData.PromissoryNotes, promissoryNote)
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)DelPromissoryNote(promissoryNote types.PromissoryNote) bool{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+	}
+	promissoryNotes := genaroData.PromissoryNotes
+	if !(&promissoryNotes).Del(promissoryNote) {
+		return false
+	}
+	genaroData.PromissoryNotes = promissoryNotes
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+
+	return true
+}
+
+func (self *stateObject)GetPromissoryNotes() types.PromissoryNotes {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return nil
+	}else {
+		err := json.Unmarshal(self.data.CodeHash, &genaroData)
+		if err != nil {
+			return nil
+		}
+		return genaroData.PromissoryNotes
+	}
+}
+
+func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil {
+		return nil
+	}else{
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	return &optionTxTable
+}
+
+
+func (self *stateObject)DelTxInOptionTxTable(hash common.Hash){
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil{
+		optionTxTable = *new(types.OptionTxTable)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+
+	if _, ok := optionTxTable[hash]; ok{
+		delete(optionTxTable,hash)
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx){
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil{
+		optionTxTable = *new(types.OptionTxTable)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	if _, ok := optionTxTable[hash]; !ok{
+		optionTxTable[hash] = promissoryNotesOptionTx
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
 }

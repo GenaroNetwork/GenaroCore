@@ -14,20 +14,25 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"strings"
+	"github.com/GenaroNetwork/Genaro-Core/params"
 )
 
 
-func isSpecialAddress(address common.Address) bool {
+func isSpecialAddress(address common.Address,optionTxMemorySize uint64) bool {
 	for _, v := range common.SpecialAddressList {
 		if bytes.Compare(address.Bytes(), v.Bytes()) == 0{
 			return  true
 		}
 	}
+	dist := address.Sub(common.OptionTxBeginSaveAddress)
+	if dist>=0 && dist<int64(optionTxMemorySize) {
+		return true
+	}
 	return false
 }
 
-func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address) error {
-	if true == isSpecialAddress(s.SpecialTxTypeMortgageInit.FromAccount) {
+func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address, genaroConfig *params.GenaroConfig) error {
+	if true == isSpecialAddress(s.SpecialTxTypeMortgageInit.FromAccount,genaroConfig.OptionTxMemorySize) {
 		return errors.New("fromAccount error")
 	}
 
@@ -93,9 +98,9 @@ func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller comm
 	return nil
 }
 
-func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput) error {
+func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
 
-	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress) {
+	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress,genaroConfig.OptionTxMemorySize) {
 		return errors.New("update  chain SynchronizeShareKey fail")
 	}
 
@@ -118,9 +123,9 @@ func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckStakeTx(s types.SpecialTxInput, state StateDB) error {
+func CheckStakeTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress){
+	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -136,13 +141,13 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB) error {
 	return nil
 }
 
-func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput) error {
+func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress){
+	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -153,9 +158,9 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckApplyBucketTx(s types.SpecialTxInput) error {
+func CheckApplyBucketTx(s types.SpecialTxInput,genaroConfig *params.GenaroConfig) error {
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress){
+	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -167,9 +172,9 @@ func CheckApplyBucketTx(s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckTrafficTx(s types.SpecialTxInput) error {
+func CheckTrafficTx(s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress){
+	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -255,9 +260,9 @@ func generateNodeId(b []byte) string {
 	return nodeId
 }
 
-func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput) error {
+func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress){
+	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -300,9 +305,9 @@ func CheckSynStateTx(caller common.Address, state StateDB) error {
 	return nil
 }
 
-func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput) error {
+func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress){
+	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -472,5 +477,44 @@ func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateD
 		return errors.New("Balance is not enough")
 	}
 	return nil
+}
+
+func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	hashId := common.StringToHash(s.OrderId)
+
+	//根据订单号从期权列表中取出交易列表
+	optionTxTable := state.GetOptionTxTable(hashId)
+	if optionTxTable == nil {
+		return errors.New("None promissory note tx with this hash ")
+	}
+
+	// 从交易列表中获取指定id的交易
+	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+	var ok bool
+	if promissoryNotesOptionTx, ok = (*optionTxTable)[hashId]; !ok {
+		return errors.New("None promissory note tx with this hash ")
+	}
+
+	// 检查订单id对应的交易的拥有者是否是本次交易的发起人
+	if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
+		return errors.New("You can't revoke someone else's options trading，check the order id ")
+	}
+
+	if (common.Address{} == promissoryNotesOptionTx.OptionOwner) {
+		return errors.New("You can't revoke this options trading, current options have been purchased ")
+	}
+
+	return nil
+}
+
+func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	//检查交易发起方是否有足够的期票可出售
+	promissoryNotes := state.GetPromissoryNotes(caller)
+	for _, v := range promissoryNotes {
+		if v.RestoreBlock == s.RestoreBlock && v.Num >= s.TxNum {
+			return nil
+		}
+	}
+	return errors.New("None enough promissory notes to sell ")
 }
 
