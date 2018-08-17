@@ -166,6 +166,7 @@ type StateDB interface {
 	GetOptionTxTable(hash common.Hash) *types.OptionTxTable
 	DelTxInOptionTxTable(hash common.Hash) bool
 	AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx) bool
+	SetTxStatusInOptionTxTable(common.Hash, bool) bool
 
 }
 

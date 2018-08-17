@@ -679,6 +679,10 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState)
 	case common.SpecialTxPublishOption.Uint64():
 		return vm.CheckPublishOption(caller, s, pool.currentState)
+	case common.SpecialTxSetOptionTxStatus.Uint64():
+		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState)
+
+
 	}
 	return errors.New("undefined type of special transaction")
 }
