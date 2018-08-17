@@ -508,6 +508,14 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 }
 
 func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if s.RestoreBlock == 0 {
+		return errors.New("param [restoreBlock] must be larger than zero")
+	}
+
+	if s.TxNum == 0 {
+		return errors.New("param [txNum] must be larger than zero")
+	}
+
 	//检查交易发起方是否有足够的期票可出售
 	promissoryNotes := state.GetPromissoryNotes(caller)
 	for _, v := range promissoryNotes {
@@ -516,5 +524,29 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 		}
 	}
 	return errors.New("None enough promissory notes to sell ")
+}
+
+
+func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+
+	hashId := common.StringToHash(s.OrderId)
+	//根据订单号从期权列表中取出交易列表
+	optionTxTable := state.GetOptionTxTable(hashId)
+	if optionTxTable == nil {
+		return errors.New("None promissory note tx with this hash ")
+	}
+
+	// 从交易列表中获取指定id的交易
+	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+	var ok bool
+	if promissoryNotesOptionTx, ok = (*optionTxTable)[hashId]; !ok {
+		return errors.New("None promissory note tx with this hash ")
+	}
+
+	// 检查订单id对应的交易的拥有者是否是本次交易的发起人
+	if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
+		return errors.New("You can't revoke someone else's options trading，check the order id ")
+	}
+	return nil
 }
 

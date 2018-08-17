@@ -275,6 +275,9 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = PromissoryNotesWithdrawCash(evm, caller)
 	case common.SpecialTxPublishOption.Uint64():
 		err = publishOption(evm, s, caller)
+	case common.SpecialTxSetOptionTxStatus.Uint64():
+		err = setOptionTxStatus(evm, s, caller)
+
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -284,6 +287,17 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetOptionTxStatus(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	hashId := common.StringToHash(s.OrderId)
+	(*evm).StateDB.SetTxStatusInOptionTxTable(hashId, s.IsSell)
+
+	return nil
 }
 
 func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) error {

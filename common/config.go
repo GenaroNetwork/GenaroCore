@@ -164,6 +164,8 @@ var (
 	//期票的期权交易发布（挂起交易）
 	SpecialTxPublishOption  = big.NewInt(32)
 
+	SpecialTxSetOptionTxStatus  = big.NewInt(33)
+
 	/************************************/
 )
 

@@ -1480,3 +1480,12 @@ func (self *StateDB)PromissoryNotesWithdrawCash(address common.Address,blockNumb
 	}
 	return uint64(0)
 }
+
+func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool) bool{
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	if stateObject != nil {
+		stateObject.SetTxStatusInOptionTxTable(hash, status)
+		return true
+	}
+	return false
+}

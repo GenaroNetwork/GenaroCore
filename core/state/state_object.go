@@ -1924,3 +1924,25 @@ func (self *stateObject)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOp
 		}
 	}
 }
+
+func (self *stateObject)SetTxStatusInOptionTxTable(hash common.Hash, status bool) {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil{
+		optionTxTable = *new(types.OptionTxTable)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+
+	if promissoryNotesOptionTx, ok := optionTxTable[hash]; ok{
+		promissoryNotesOptionTx.IsSell = status
+		optionTxTable[hash] = promissoryNotesOptionTx
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
