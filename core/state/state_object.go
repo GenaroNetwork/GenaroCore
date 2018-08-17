@@ -1812,3 +1812,26 @@ func (self *stateObject)PromissoryNotesWithdrawCash(blockNumber uint64) uint64{
 	}
 	return promissoryNotesNum
 }
+
+func (self *stateObject)GetAllPromissoryNotesNum() uint64{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return uint64(0)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetAllNum()
+	}
+	return uint64(0)
+}
+
+
+func (self *stateObject)GetBeforPromissoryNotesNum(blockNumber uint64) uint64{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return uint64(0)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetBefor(blockNumber)
+	}
+	return uint64(0)
+}

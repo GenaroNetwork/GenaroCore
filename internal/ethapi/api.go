@@ -2035,3 +2035,23 @@ func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address 
 	}
 	return state.CheckUnlockSharedKey(address, shareKeyId)
 }
+
+
+// get All Promissory NotesNum
+func (s *PublicBlockChainAPI) GetAllPromissoryNotesNum(ctx context.Context,address common.Address) uint64 {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return uint64(0)
+	}
+	return state.GetAllPromissoryNotesNum(address)
+}
+
+
+// get All Promissory NotesNum
+func (s *PublicBlockChainAPI) GetBeforPromissoryNotesNum(ctx context.Context,address common.Address) uint64 {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return uint64(0)
+	}
+	return state.GetBeforPromissoryNotesNum(address,s.BlockNumber().Uint64())
+}
