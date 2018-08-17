@@ -159,7 +159,9 @@ type StateDB interface {
 	SetRewardsValues(rewardsValues types.RewardsValues) bool
 
 	PromissoryNotesWithdrawCash(common.Address,uint64) uint64
+	GetPromissoryNotes(address common.Address) types.PromissoryNotes
 	AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
+	DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
 
 	GetOptionTxTable(hash common.Hash) *types.OptionTxTable
 	DelTxInOptionTxTable(hash common.Hash) bool

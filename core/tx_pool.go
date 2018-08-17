@@ -673,9 +673,12 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckSetGlobalVar(caller, s)
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
+	case common.SpecialTxWithdrawCash.Uint64():
+		return nil
 	case common.SpecialTxRevoke.Uint64():
 		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState)
-
+	case common.SpecialTxPublishOption.Uint64():
+		return vm.CheckPublishOption(caller, s, pool.currentState)
 	}
 	return errors.New("undefined type of special transaction")
 }

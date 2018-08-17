@@ -1814,6 +1814,28 @@ func (self *stateObject)PromissoryNotesWithdrawCash(blockNumber uint64) uint64{
 	return promissoryNotesNum
 }
 
+func (self *stateObject)GetAllPromissoryNotesNum() uint64{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return uint64(0)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetAllNum()
+	}
+	return uint64(0)
+}
+
+
+func (self *stateObject)GetBeforPromissoryNotesNum(blockNumber uint64) uint64{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return uint64(0)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetBefor(blockNumber)
+	}
+	return uint64(0)
+}
 
 func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
 	var genaroData types.GenaroData
@@ -1833,6 +1855,43 @@ func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
 	if self.onDirty != nil {
 		self.onDirty(self.Address())
 		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)DelPromissoryNote(promissoryNote types.PromissoryNote) bool{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+	}
+	promissoryNotes := genaroData.PromissoryNotes
+	if !(&promissoryNotes).Del(promissoryNote) {
+		return false
+	}
+	genaroData.PromissoryNotes = promissoryNotes
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+
+	return true
+}
+
+func (self *stateObject)GetPromissoryNotes() types.PromissoryNotes {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return nil
+	}else {
+		err := json.Unmarshal(self.data.CodeHash, &genaroData)
+		if err != nil {
+			return nil
+		}
+		return genaroData.PromissoryNotes
 	}
 }
 

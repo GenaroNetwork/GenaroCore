@@ -273,6 +273,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = revokePromissoryNotesTx(evm, s, caller)
 	case common.SpecialTxWithdrawCash.Uint64():	//提现
 		err = PromissoryNotesWithdrawCash(evm, caller)
+	case common.SpecialTxPublishOption.Uint64():
+		err = publishOption(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -282,6 +284,27 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckPublishOption(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	var promissoryNote types.PromissoryNote
+	promissoryNote.RestoreBlock = s.RestoreBlock
+	promissoryNote.Num = s.TxNum
+
+	if (*evm).StateDB.DelPromissoryNote(caller, promissoryNote){
+		var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+		promissoryNotesOptionTx.TxNum = s.TxNum
+		promissoryNotesOptionTx.RestoreBlock = s.RestoreBlock
+		promissoryNotesOptionTx.OptionOwner = caller
+		promissoryNotesOptionTx.IsSell = true
+		promissoryNotesOptionTx.OptionPrice = s.PromissoryNoteTxPrice.ToInt()
+		(*evm).StateDB.AddTxInOptionTxTable(common.Hash{}, promissoryNotesOptionTx)
+	}
+
+	return nil
 }
 
 func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {

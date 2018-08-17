@@ -158,8 +158,11 @@ var (
 	//提现
 	SpecialTxWithdrawCash = big.NewInt(30)
 
-	//撤回
+	//撤回期票的期权发布（回收交易）
 	SpecialTxRevoke  = big.NewInt(31)
+
+	//期票的期权交易发布（挂起交易）
+	SpecialTxPublishOption  = big.NewInt(32)
 
 	/************************************/
 )

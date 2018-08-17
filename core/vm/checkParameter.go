@@ -507,3 +507,14 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 	return nil
 }
 
+func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	//检查交易发起方是否有足够的期票可出售
+	promissoryNotes := state.GetPromissoryNotes(caller)
+	for _, v := range promissoryNotes {
+		if v.RestoreBlock == s.RestoreBlock && v.Num >= s.TxNum {
+			return nil
+		}
+	}
+	return errors.New("None enough promissory notes to sell ")
+}
+
