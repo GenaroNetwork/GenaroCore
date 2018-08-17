@@ -540,6 +540,18 @@ web3._extend({
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputString]
 		}),
+		new web3._extend.Method({
+			name: 'getAllPromissoryNotesNum',
+			call: 'eth_getAllPromissoryNotesNum',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getBeforPromissoryNotesNum',
+			call: 'eth_getBeforPromissoryNotesNum',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
 	],
 	properties: [
 		new web3._extend.Property({
