@@ -1968,3 +1968,4 @@ func (self *stateObject)SetTxStatusInOptionTxTable(hash common.Hash, status bool
 		}
 	}
 }
+

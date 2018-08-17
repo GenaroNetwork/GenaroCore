@@ -395,6 +395,12 @@ web3._extend({
 	property: 'eth',
 	methods: [
 		new web3._extend.Method({
+			name: 'getAccountData',
+			call: 'eth_getAccountData',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getAlreadyBackStakeList',
 			call: 'eth_getAlreadyBackStakeList',
 			params: 1,

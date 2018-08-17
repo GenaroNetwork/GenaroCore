@@ -5373,12 +5373,26 @@ Object.defineProperty(Eth.prototype, 'defaultAccount', {
 });
 
 var methods = function () {
+    var getAccountData = new Method({
+        name: 'getAccountData',
+        call: 'eth_getAccountData',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getBalance = new Method({
         name: 'getBalance',
         call: 'eth_getBalance',
         params: 2,
         inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
         outputFormatter: utils.toDecimal
+    });
+
+    var getCandidates = new Method({
+            name: 'getCandidates',
+            call: 'eth_getCandidates',
+            params: 1,
+            inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
     var getRewardsValues = new Method({
@@ -5407,13 +5421,6 @@ var methods = function () {
         call: 'eth_getMainAccount',
         params: 2,
         inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
-    });
-
-    var getCandidates = new Method({
-        name: 'getCandidates',
-        call: 'eth_getCandidates',
-        params: 1,
-        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
     var getCommitteeRank = new Method({
@@ -5701,7 +5708,8 @@ var methods = function () {
         getMainAccount,
         getGlobalVar,
         getRewardsValues,
-        getMainAccountRank
+        getMainAccountRank,
+        getAccountData
     ];
 };
 

@@ -48,6 +48,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 const (
@@ -801,6 +802,14 @@ func (s *PublicBlockChainAPI) GetStorageAt(ctx context.Context, address common.A
 	}
 	res := state.GetState(address, common.HexToHash(key))
 	return res[:], state.Error()
+}
+
+func (s *PublicBlockChainAPI)GetAccountData(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*state.Account,error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return state.GetAccountData(address),nil
 }
 
 // CallArgs represents the arguments for a call.

@@ -1505,3 +1505,8 @@ func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool) bo
 	}
 	return false
 }
+
+func (self *StateDB)GetAccountData(address common.Address) *Account {
+	stateObject := self.GetOrNewStateObject(address)
+	return &stateObject.data
+}
