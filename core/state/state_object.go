@@ -1860,6 +1860,19 @@ func (self *stateObject)DelPromissoryNote(promissoryNote types.PromissoryNote) b
 	return true
 }
 
+func (self *stateObject)GetPromissoryNotes() types.PromissoryNotes {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return nil
+	}else {
+		err := json.Unmarshal(self.data.CodeHash, &genaroData)
+		if err != nil {
+			return nil
+		}
+		return genaroData.PromissoryNotes
+	}
+}
+
 func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
 	var optionTxTable types.OptionTxTable
 	if self.data.CodeHash == nil {
