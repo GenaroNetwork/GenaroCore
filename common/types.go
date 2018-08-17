@@ -282,6 +282,12 @@ func (addr Address) Mod(n int64) int64 {
 	return  m.Int64()
 }
 
+// A账号相对于B账号的偏移
+func (A Address) Sub(B Address) int64 {
+	v := A.Big()
+	return v.Sub(v,B.Big()).Int64()
+}
+
 // HASH对于一个整数的余数
 func (hash Hash) Mod(n int64) int64 {
 	addrBig := hash.Big()
