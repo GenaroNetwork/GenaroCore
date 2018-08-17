@@ -2056,11 +2056,20 @@ func (s *PublicBlockChainAPI) GetAllPromissoryNotesNum(ctx context.Context,addre
 }
 
 
-// get All Promissory NotesNum
+// get Befor Promissory Notes
 func (s *PublicBlockChainAPI) GetBeforPromissoryNotesNum(ctx context.Context,address common.Address) uint64 {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
 	if state == nil || err != nil {
 		return uint64(0)
 	}
 	return state.GetBeforPromissoryNotesNum(address,s.BlockNumber().Uint64())
+}
+
+// get All Promissory Notes
+func (s *PublicBlockChainAPI) GetPromissoryNotes(ctx context.Context,address common.Address) types.PromissoryNotes {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetPromissoryNotes(address)
 }
