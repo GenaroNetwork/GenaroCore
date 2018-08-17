@@ -1496,3 +1496,12 @@ func (self *StateDB)GetBeforPromissoryNotesNum(address common.Address,blockNumbe
 	}
 	return uint64(0)
 }
+
+func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool) bool{
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	if stateObject != nil {
+		stateObject.SetTxStatusInOptionTxTable(hash, status)
+		return true
+	}
+	return false
+}
