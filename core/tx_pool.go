@@ -681,7 +681,12 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckPublishOption(caller, s, pool.currentState)
 	case common.SpecialTxSetOptionTxStatus.Uint64():
 		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState)
-
+	//购买期权
+	case common.SpecialTxBuyPromissoryNotes.Uint64():
+		return nil
+	//执行期权
+	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
+		return nil
 
 	}
 	return errors.New("undefined type of special transaction")

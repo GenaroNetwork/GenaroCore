@@ -1510,3 +1510,28 @@ func (self *StateDB)GetAccountData(address common.Address) *Account {
 	stateObject := self.GetOrNewStateObject(address)
 	return &stateObject.data
 }
+
+func (self *StateDB)BuyPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	if stateObject != nil {
+		return stateObject.BuyPromissoryNotes(orderId, address)
+	}
+	return types.PromissoryNotesOptionTx{}
+}
+
+func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	stateObjectAddress := self.GetOrNewStateObject(address)
+	if stateObject != nil && nil != stateObjectAddress{
+		result :=  stateObject.DeletePromissoryNotes(orderId, address)
+		if 0 < result.TxNum{
+			promissoryNote := types.PromissoryNote{
+				RestoreBlock:result.RestoreBlock,
+				Num:result.TxNum,
+			}
+			stateObjectAddress.AddPromissoryNote(promissoryNote)
+			return result
+		}
+	}
+	return types.PromissoryNotesOptionTx{}
+}

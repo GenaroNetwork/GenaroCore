@@ -165,7 +165,10 @@ var (
 	SpecialTxPublishOption  = big.NewInt(32)
 
 	SpecialTxSetOptionTxStatus  = big.NewInt(33)
-
+	//购买期权
+	SpecialTxBuyPromissoryNotes = big.NewInt(35)
+	//执行期权
+	SpecialTxCarriedOutPromissoryNotes  = big.NewInt(35)
 	/************************************/
 )
 
