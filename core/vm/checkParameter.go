@@ -480,8 +480,6 @@ func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateD
 }
 
 func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB) error {
-	hashId := common.StringToHash(s.OrderId)
-
 	//根据订单号从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable()
 	if optionTxTable == nil {
@@ -491,7 +489,7 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 	// 从交易列表中获取指定id的交易
 	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
 	var ok bool
-	if promissoryNotesOptionTx, ok = (*optionTxTable)[hashId]; !ok {
+	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
 		return errors.New("None promissory note tx with this hash ")
 	}
 
@@ -528,8 +526,9 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 
 
 func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	// 1、当前交易从未被人认购，此时只能由该笔交易中期票的拥有者改变状态
+	// 2、交易已被认购，此时只能由该笔交易中的认购人更改售卖状态
 
-	hashId := common.StringToHash(s.OrderId)
 	//从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable()
 	if optionTxTable == nil {
@@ -539,13 +538,20 @@ func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state
 	// 从交易列表中获取指定id的交易
 	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
 	var ok bool
-	if promissoryNotesOptionTx, ok = (*optionTxTable)[hashId]; !ok {
+	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
 		return errors.New("None promissory note tx with this hash ")
 	}
 
-	// 检查订单id对应的交易的拥有者是否是本次交易的发起人
-	if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
-		return errors.New("You can't revoke someone else's options trading，check the order id ")
+	// 当前交易是否被认购, 期票拥有者不为零值，则认为已被人认购
+	if (common.Address{} == promissoryNotesOptionTx.OptionOwner) {
+		// 检查订单id对应的交易的拥有者是否是本次交易的发起人
+		if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
+			return errors.New("You can't revoke someone else's options trading，check the order id ")
+		}
+	}else {
+		if promissoryNotesOptionTx.OptionOwner != caller {
+			return errors.New("You can't revoke someone else's options trading，check the order id ")
+		}
 	}
 	return nil
 }

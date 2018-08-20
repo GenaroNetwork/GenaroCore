@@ -21,10 +21,11 @@ type SpecialTxInput struct {
 	Message     string       `json:"msg"`
 	Sign        string       `json:"sign"`
 	AddCoin	*hexutil.Big     `json:"addCoin"`
-	OrderId     string       `json:"orderId"`
+	OrderId     common.Hash     `json:"orderId"`
 	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
 	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
 	PromissoryNoteTxPrice	*hexutil.Big	`json:"PromissoryNoteTxPrice"`	// 期票的交易单价
+	OptionPrice		*hexutil.Big	`json:"OptionPrice"`	// 期权的价格
 	IsSell			bool		`json:"IsSell"`	// 期权是否在售
 	GenaroPrice
 }

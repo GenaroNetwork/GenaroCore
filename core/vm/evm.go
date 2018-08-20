@@ -294,8 +294,7 @@ func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) 
 		return err
 	}
 
-	hashId := common.StringToHash(s.OrderId)
-	(*evm).StateDB.SetTxStatusInOptionTxTable(hashId, s.IsSell)
+	(*evm).StateDB.SetTxStatusInOptionTxTable(s.OrderId, s.IsSell)
 
 	return nil
 }
@@ -316,7 +315,8 @@ func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) erro
 		promissoryNotesOptionTx.RestoreBlock = s.RestoreBlock
 		promissoryNotesOptionTx.PromissoryNotesOwner = caller
 		promissoryNotesOptionTx.IsSell = true
-		promissoryNotesOptionTx.OptionPrice = s.PromissoryNoteTxPrice.ToInt()
+		promissoryNotesOptionTx.PromissoryNoteTxPrice = s.PromissoryNoteTxPrice.ToInt()
+		promissoryNotesOptionTx.OptionPrice = s.OptionPrice.ToInt()
 		(*evm).StateDB.AddTxInOptionTxTable(optionHash, promissoryNotesOptionTx)
 	}
 
@@ -329,11 +329,10 @@ func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Add
 	}
 
 	//从交易中心移除本次交易并将期权还原到用户账户中
-	hashId := common.StringToHash(s.OrderId)
 	optionTxTable := (*evm).StateDB.GetOptionTxTable()
-	promissoryNotesOptionTx := (*optionTxTable)[hashId]
+	promissoryNotesOptionTx := (*optionTxTable)[s.OrderId]
 
-	if (*evm).StateDB.DelTxInOptionTxTable(hashId) {
+	if (*evm).StateDB.DelTxInOptionTxTable(s.OrderId) {
 		var promissoryNote types.PromissoryNote
 		promissoryNote.Num = promissoryNotesOptionTx.TxNum
 		promissoryNote.RestoreBlock = promissoryNotesOptionTx.RestoreBlock

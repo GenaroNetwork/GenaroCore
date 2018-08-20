@@ -1947,13 +1947,10 @@ func (self *stateObject)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOp
 }
 
 func (self *stateObject)SetTxStatusInOptionTxTable(hash common.Hash, status bool) {
-	var optionTxTable types.OptionTxTable
-	if self.data.CodeHash == nil{
-		optionTxTable = *new(types.OptionTxTable)
-	}else {
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash != nil{
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
-
 	if promissoryNotesOptionTx, ok := optionTxTable[hash]; ok{
 		promissoryNotesOptionTx.IsSell = status
 		optionTxTable[hash] = promissoryNotesOptionTx
