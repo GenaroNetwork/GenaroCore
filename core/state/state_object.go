@@ -1907,7 +1907,7 @@ func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
 
 
 func (self *stateObject)DelTxInOptionTxTable(hash common.Hash){
-	var optionTxTable types.OptionTxTable
+	optionTxTable := make(types.OptionTxTable)
 	if self.data.CodeHash == nil{
 		optionTxTable = *new(types.OptionTxTable)
 	}else {

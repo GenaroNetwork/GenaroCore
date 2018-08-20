@@ -327,7 +327,7 @@ func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) erro
 }
 
 func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckDelAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckPromissoryNoteRevoke(caller, s, (*evm).StateDB); err != nil {
 		return err
 	}
 
