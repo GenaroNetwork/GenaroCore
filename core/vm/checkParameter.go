@@ -483,7 +483,7 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 	hashId := common.StringToHash(s.OrderId)
 
 	//根据订单号从期权列表中取出交易列表
-	optionTxTable := state.GetOptionTxTable(hashId)
+	optionTxTable := state.GetOptionTxTable()
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
@@ -530,8 +530,8 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
 
 	hashId := common.StringToHash(s.OrderId)
-	//根据订单号从期权列表中取出交易列表
-	optionTxTable := state.GetOptionTxTable(hashId)
+	//从期权列表中取出交易列表
+	optionTxTable := state.GetOptionTxTable()
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}

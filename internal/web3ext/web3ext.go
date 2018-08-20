@@ -564,6 +564,12 @@ web3._extend({
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
+		new web3._extend.Method({
+			name: 'getOptionTx',
+			call: 'eth_getOptionTx',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		})
 	],
 	properties: [
 		new web3._extend.Property({

@@ -163,7 +163,7 @@ type StateDB interface {
 	AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
 	DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
 
-	GetOptionTxTable(hash common.Hash) *types.OptionTxTable
+	GetOptionTxTable() *types.OptionTxTable
 	DelTxInOptionTxTable(hash common.Hash) bool
 	AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx) bool
 	SetTxStatusInOptionTxTable(common.Hash, bool) bool

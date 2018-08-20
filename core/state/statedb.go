@@ -1447,7 +1447,7 @@ func (self *StateDB)GetPromissoryNotes(address common.Address) types.PromissoryN
 }
 
 
-func (self *StateDB)GetOptionTxTable(hash common.Hash) *types.OptionTxTable {
+func (self *StateDB)GetOptionTxTable() *types.OptionTxTable {
 	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
 	if stateObject != nil {
 		return stateObject.GetOptionTxTable()

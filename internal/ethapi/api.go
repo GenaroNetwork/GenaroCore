@@ -2073,3 +2073,22 @@ func (s *PublicBlockChainAPI) GetPromissoryNotes(ctx context.Context,address com
 	}
 	return state.GetPromissoryNotes(address)
 }
+
+
+func (s *PublicBlockChainAPI) GetOptionTx(ctx context.Context,address common.Address) types.OptionTxTable {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil
+	}
+	optionTxTableRet := make(types.OptionTxTable)
+	optionTxTable := *state.GetOptionTxTable()
+	for k, v := range optionTxTable {
+		if v.PromissoryNotesOwner == address {
+			optionTxTableRet[k] = v
+		}
+	}
+
+	return optionTxTableRet
+	//optionTxTable := *state.GetOptionTxTable()
+	//return optionTxTable
+}

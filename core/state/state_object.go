@@ -1928,12 +1928,11 @@ func (self *stateObject)DelTxInOptionTxTable(hash common.Hash){
 }
 
 func (self *stateObject)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx){
-	var optionTxTable types.OptionTxTable
-	if self.data.CodeHash == nil{
-		optionTxTable = *new(types.OptionTxTable)
-	}else {
-		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash != nil{
+		json.Unmarshal(self.data.CodeHash, optionTxTable)
 	}
+
 	if _, ok := optionTxTable[hash]; !ok{
 		optionTxTable[hash] = promissoryNotesOptionTx
 		b, _ := json.Marshal(optionTxTable)
