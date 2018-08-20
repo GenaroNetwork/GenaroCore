@@ -168,7 +168,10 @@ var (
 	// 1、当前交易从未被人认购，此时只能由该笔交易中期票的拥有者改变状态
 	// 2、交易已被认购，此时只能由该笔交易中的认购人更改售卖状态
 	SpecialTxSetOptionTxStatus  = big.NewInt(33)
-
+	//购买期权
+	SpecialTxBuyPromissoryNotes = big.NewInt(35)
+	//执行期权
+	SpecialTxCarriedOutPromissoryNotes  = big.NewInt(35)
 	/************************************/
 )
 

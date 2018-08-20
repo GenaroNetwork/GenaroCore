@@ -277,7 +277,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = publishOption(evm, s, caller)
 	case common.SpecialTxSetOptionTxStatus.Uint64():
 		err = setOptionTxStatus(evm, s, caller)
-
+	case common.SpecialTxBuyPromissoryNotes.Uint64(): //购买期权
+		err = buyPromissoryNotes(evm, s, caller)
+	case common.SpecialTxCarriedOutPromissoryNotes.Uint64(): //购买期权
+		err = CarriedOutPromissoryNotes(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -806,6 +809,28 @@ func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 	(*evm).StateDB.AddBalance(caller, promissoryPrice)
 	return nil
 }
+
+//购买期权
+func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId,caller)
+	if result.TxNum >= 0{
+		result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
+		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
+		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
+func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	result := (*evm).StateDB.CarriedOutPromissoryNotes(s.OrderId,caller)
+	if result.TxNum >= 0{
+		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum)))
+		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
+		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
 // CallCode executes the contract associated with the addr with the given input
 // as parameters. It also handles any necessary value transfer required and takes
 // the necessary steps to create accounts and reverses the state in case of an
