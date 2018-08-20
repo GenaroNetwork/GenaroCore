@@ -814,7 +814,7 @@ func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId,caller)
 	if result.TxNum >= 0{
-		result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
+		result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum))).Mul(result.OptionPrice,common.BaseCompany)
 		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
 	}
@@ -824,7 +824,7 @@ func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) 
 func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	result := (*evm).StateDB.CarriedOutPromissoryNotes(s.OrderId,caller)
 	if result.TxNum >= 0{
-		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum)))
+		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum))).Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
 		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
 	}
