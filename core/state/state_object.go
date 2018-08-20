@@ -1845,7 +1845,7 @@ func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
 		genaroData.PromissoryNotes = *promissoryNotes
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		genaroData.PromissoryNotes = append(genaroData.PromissoryNotes, promissoryNote)
+		genaroData.PromissoryNotes.Add(promissoryNote)
 	}
 
 	b, _ := json.Marshal(genaroData)
