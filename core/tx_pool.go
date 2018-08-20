@@ -675,11 +675,14 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
 	case common.SpecialTxWithdrawCash.Uint64():
 		return nil
-	case common.SpecialTxRevoke.Uint64():
-		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState)
 	case common.SpecialTxPublishOption.Uint64():
+	//发布期权售卖交易
 		return vm.CheckPublishOption(caller, s, pool.currentState)
+	case common.SpecialTxRevoke.Uint64():
+	//撤回期权售卖交易
+		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState)
 	case common.SpecialTxSetOptionTxStatus.Uint64():
+	// 更改期权售卖交易状态
 		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState)
 	//购买期权
 	case common.SpecialTxBuyPromissoryNotes.Uint64():

@@ -498,7 +498,7 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 		return errors.New("You can't revoke someone else's options trading，check the order id ")
 	}
 
-	if (common.Address{} == promissoryNotesOptionTx.OptionOwner) {
+	if (common.Address{} != promissoryNotesOptionTx.OptionOwner) {
 		return errors.New("You can't revoke this options trading, current options have been purchased ")
 	}
 
