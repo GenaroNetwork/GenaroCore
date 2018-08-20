@@ -192,7 +192,7 @@ type PromissoryNotesOptionTx struct {
 	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
 	PromissoryNoteTxPrice	*big.Int	`json:"PromissoryNoteTxPrice"`	// 期票的交易单价
 	PromissoryNotesOwner	common.Address	`json:"PromissoryNotesOwner"`	// 期票的拥有者
-	OptionOwner		common.Address	`json:"OptionOwner"`	// 期权的拥有者
+	OptionOwner		common.Address	`json:"OptionOwner"`
 }
 
 // 期权交易表
