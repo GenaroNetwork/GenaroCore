@@ -171,7 +171,7 @@ var (
 	//购买期权
 	SpecialTxBuyPromissoryNotes = big.NewInt(35)
 	//执行期权
-	SpecialTxCarriedOutPromissoryNotes  = big.NewInt(35)
+	SpecialTxCarriedOutPromissoryNotes  = big.NewInt(36)
 	/************************************/
 )
 
