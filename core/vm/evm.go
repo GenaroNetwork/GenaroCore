@@ -281,6 +281,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = buyPromissoryNotes(evm, s, caller)
 	case common.SpecialTxCarriedOutPromissoryNotes.Uint64(): //购买期权
 		err = CarriedOutPromissoryNotes(evm, s, caller)
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64(): //购买期权
+		err = turnBuyPromissoryNotes(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -813,8 +815,9 @@ func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 //购买期权
 func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId,caller)
-	if result.TxNum >= 0{
-		result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum))).Mul(result.OptionPrice,common.BaseCompany)
+	if result.TxNum > 0{
+		result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
+		result.OptionPrice.Mul(result.OptionPrice,common.BaseCompany)
 		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
 	}
@@ -823,10 +826,19 @@ func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) 
 
 func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	result := (*evm).StateDB.CarriedOutPromissoryNotes(s.OrderId,caller)
-	if result.TxNum >= 0{
-		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum))).Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
+	if result.TxNum > 0{
+		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum)))
+		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
 		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
+func turnBuyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	result := (*evm).StateDB.TurnBuyPromissoryNotes(s.OrderId,s.OptionPrice,caller)
+	if false == result{
+		errors.New("update error")
 	}
 	return nil
 }

@@ -169,7 +169,7 @@ type StateDB interface {
 	SetTxStatusInOptionTxTable(common.Hash, bool) bool
 	BuyPromissoryNotes(common.Hash,common.Address) types.PromissoryNotesOptionTx
 	CarriedOutPromissoryNotes(common.Hash,common.Address) types.PromissoryNotesOptionTx
-
+	TurnBuyPromissoryNotes(common.Hash,*hexutil.Big,common.Address) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
