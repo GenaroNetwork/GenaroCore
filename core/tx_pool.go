@@ -690,6 +690,9 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	//执行期权
 	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
 		return nil
+	//转卖期权
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
+		return nil
 
 	}
 	return errors.New("undefined type of special transaction")
