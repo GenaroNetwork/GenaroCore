@@ -818,7 +818,7 @@ func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) 
 	if result.TxNum > 0{
 		result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
 		result.OptionPrice.Mul(result.OptionPrice,common.BaseCompany)
-		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
+		(*evm).StateDB.AddBalance(result.PromissoryNotesOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
 	}
 	return nil
@@ -829,7 +829,7 @@ func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	if result.TxNum > 0{
 		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum)))
 		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
-		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
+		(*evm).StateDB.AddBalance(result.PromissoryNotesOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
 	}
 	return nil

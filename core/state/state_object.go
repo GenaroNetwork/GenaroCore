@@ -1980,6 +1980,12 @@ func (self *stateObject)BuyPromissoryNotes(orderId common.Hash, address common.A
 	if 0 >= buyPromissoryNotes.TxNum {
 		return types.PromissoryNotesOptionTx{}
 	}
+	var tmpAddr common.Address
+	var turnBuy = 0
+	if true == buyPromissoryNotes.IsSell &&  tmpAddr != buyPromissoryNotes.OptionOwner {
+		tmpAddr = buyPromissoryNotes.OptionOwner
+		turnBuy = 1
+	}
 	buyPromissoryNotes.IsSell = false
 	buyPromissoryNotes.OptionOwner = address
 	optionTxTable[orderId] = buyPromissoryNotes
@@ -1990,6 +1996,9 @@ func (self *stateObject)BuyPromissoryNotes(orderId common.Hash, address common.A
 	if self.onDirty != nil {
 		self.onDirty(self.Address())
 		self.onDirty = nil
+	}
+	if 1 == turnBuy {
+		buyPromissoryNotes.PromissoryNotesOwner = tmpAddr
 	}
 	return buyPromissoryNotes
 }
