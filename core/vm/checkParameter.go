@@ -479,7 +479,7 @@ func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateD
 	return nil
 }
 
-func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB, blockNum *big.Int) error {
 	//根据订单号从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable()
 	if optionTxTable == nil {
@@ -498,16 +498,23 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 		return errors.New("You can't revoke someone else's options trading，check the order id ")
 	}
 
+	//如果交易被认购，且时间超出认购期后没有被执行，则仍然可以撤回。
 	if (common.Address{} != promissoryNotesOptionTx.OptionOwner) {
-		return errors.New("You can't revoke this options trading, current options have been purchased ")
+		if promissoryNotesOptionTx.RestoreBlock <= blockNum.Uint64() {
+			return errors.New("You can't revoke this options trading, current options have been purchased ")
+		}
 	}
 
 	return nil
 }
 
-func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state StateDB, blockNum *big.Int) error {
 	if s.RestoreBlock == 0 {
 		return errors.New("param [restoreBlock] must be larger than zero")
+	}
+
+	if s.RestoreBlock <= blockNum.Uint64() {
+		return errors.New("param [restoreBlock] must be larger than current block number ")
 	}
 
 	if s.TxNum == 0 {

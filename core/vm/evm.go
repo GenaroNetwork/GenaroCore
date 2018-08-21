@@ -305,7 +305,7 @@ func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) 
 }
 
 func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckPublishOption(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckPublishOption(caller, s, (*evm).StateDB, (*evm).BlockNumber); err != nil {
 		return err
 	}
 	var promissoryNote types.PromissoryNote
@@ -329,7 +329,7 @@ func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) erro
 }
 
 func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckPromissoryNoteRevoke(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckPromissoryNoteRevoke(caller, s, (*evm).StateDB, (*evm).BlockNumber); err != nil {
 		return err
 	}
 
