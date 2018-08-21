@@ -281,6 +281,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = buyPromissoryNotes(evm, s, caller)
 	case common.SpecialTxCarriedOutPromissoryNotes.Uint64(): //购买期权
 		err = CarriedOutPromissoryNotes(evm, s, caller)
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64(): //购买期权
+		err = turnBuyPromissoryNotes(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -829,6 +831,14 @@ func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Ad
 		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
 		(*evm).StateDB.AddBalance(result.OptionOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
+func turnBuyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	result := (*evm).StateDB.TurnBuyPromissoryNotes(s.OrderId,s.OptionPrice,caller)
+	if false == result{
+		errors.New("update error")
 	}
 	return nil
 }

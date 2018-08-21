@@ -1535,3 +1535,11 @@ func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address commo
 	}
 	return types.PromissoryNotesOptionTx{}
 }
+
+func (self *StateDB)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big,address common.Address) bool{
+	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+	if stateObject != nil {
+		return stateObject.TurnBuyPromissoryNotes(orderId,optionPrice, address)
+	}
+	return false
+}

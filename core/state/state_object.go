@@ -1972,8 +1972,6 @@ func (self *stateObject)BuyPromissoryNotes(orderId common.Hash, address common.A
 	}else {
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
-	fmt.Println(optionTxTable)
-	fmt.Println(optionTxTable[orderId])
 	buyPromissoryNotes := optionTxTable[orderId]
 
 	if true != buyPromissoryNotes.IsSell {
@@ -2025,4 +2023,33 @@ func (self *stateObject)DeletePromissoryNotes(orderId common.Hash, address commo
 	}
 	return buyPromissoryNotes
 
+}
+
+
+func (self *stateObject)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big, address common.Address) bool {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil{
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	buyPromissoryNotes := optionTxTable[orderId]
+	if buyPromissoryNotes.OptionOwner != address {
+		return false
+	}
+	if 0 >= buyPromissoryNotes.TxNum {
+		return false
+	}
+	buyPromissoryNotes.IsSell = true
+	buyPromissoryNotes.OptionPrice = optionPrice.ToInt()
+	optionTxTable[orderId] = buyPromissoryNotes
+	b, _ := json.Marshal(optionTxTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
 }
