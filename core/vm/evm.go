@@ -815,8 +815,8 @@ func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 //购买期权
 func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId,caller)
-	if result.TxNum > 0{
-		result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
+	if result.TxNum > 0 {
+		//result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
 		//result.OptionPrice.Mul(result.OptionPrice,common.BaseCompany)
 		(*evm).StateDB.AddBalance(result.PromissoryNotesOwner, result.OptionPrice)
 		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
