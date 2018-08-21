@@ -3,7 +3,7 @@
 array=($(cat fileName))
 
 balanceKey="balance"
-balanceVal=40000000000000000000000000
+balanceVal=400000000000000000000000000
 
 heftKey="heft"
 heftVal=200
