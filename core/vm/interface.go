@@ -170,6 +170,7 @@ type StateDB interface {
 	BuyPromissoryNotes(common.Hash,common.Address) types.PromissoryNotesOptionTx
 	CarriedOutPromissoryNotes(common.Hash,common.Address) types.PromissoryNotesOptionTx
 	TurnBuyPromissoryNotes(common.Hash,*hexutil.Big,common.Address) bool
+	GetBeforPromissoryNotesNum(common.Address,uint64) uint64
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

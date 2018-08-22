@@ -673,8 +673,6 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckSetGlobalVar(caller, s)
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
-	case common.SpecialTxWithdrawCash.Uint64():
-		return nil
 	case common.SpecialTxPublishOption.Uint64():
 	//发布期权售卖交易
 		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())
@@ -686,13 +684,15 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState)
 	//购买期权
 	case common.SpecialTxBuyPromissoryNotes.Uint64():
-		return nil
+		return vm.CheckBuyPromissoryNotes(caller, s, pool.currentState)
 	//执行期权
 	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
-		return nil
+		return vm.CheckCarriedOutPromissoryNotes(caller, s, pool.currentState)
 	//转卖期权
 	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
-		return nil
+		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState)
+	case common.SpecialTxWithdrawCash.Uint64():
+		return vm.WithdrawCash(caller, pool.currentState, pool.chain.CurrentBlock().Number())
 
 	}
 	return errors.New("undefined type of special transaction")

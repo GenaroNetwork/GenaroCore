@@ -563,3 +563,73 @@ func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state
 	return nil
 }
 
+
+func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	//根据订单号从期权列表中取出交易列表
+	optionTxTable := state.GetOptionTxTable()
+	if optionTxTable == nil {
+		return errors.New("None promissory note tx with this hash ")
+	}
+	// 从交易列表中获取指定id的交易
+	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+	var ok bool
+	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
+		return errors.New("None promissory note tx with this hash ")
+	}
+	balance := state.GetBalance(caller)
+	if balance.Cmp(promissoryNotesOptionTx.OptionPrice) <= 0 {
+		return errors.New("Insufficient balance")
+	}
+	return nil
+}
+
+
+
+func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	//根据订单号从期权列表中取出交易列表
+	optionTxTable := state.GetOptionTxTable()
+	if optionTxTable == nil {
+		return errors.New("None promissory note tx with this hash ")
+	}
+	// 从交易列表中获取指定id的交易
+	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+	var ok bool
+	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
+		return errors.New("None promissory note tx with this hash ")
+	}
+	balance := state.GetBalance(caller)
+	promissoryNotesOptionTx.PromissoryNoteTxPrice.Mul(promissoryNotesOptionTx.PromissoryNoteTxPrice,big.NewInt(int64(promissoryNotesOptionTx.TxNum)))
+	if balance.Cmp(promissoryNotesOptionTx.PromissoryNoteTxPrice) <= 0 {
+		return errors.New("Insufficient balance")
+	}
+	return nil
+}
+
+
+
+func CheckTurnBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	//从期权列表中取出交易列表
+	optionTxTable := state.GetOptionTxTable()
+	if optionTxTable == nil {
+		return errors.New("None promissory note tx with this hash ")
+	}
+	// 从交易列表中获取指定id的交易
+	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+	var ok bool
+	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
+		return errors.New("None promissory note tx with this hash ")
+	}
+	if caller == promissoryNotesOptionTx.OptionOwner {
+		return errors.New("No right turn buy promissoryNotes ")
+	}
+	return nil
+}
+
+
+func WithdrawCash(caller common.Address, state StateDB, blockNum *big.Int) error {
+	beforPromissoryNotesNum := state.GetBeforPromissoryNotesNum(caller,blockNum.Uint64())
+	if beforPromissoryNotesNum <= 0 {
+		return errors.New("The number of cashable notes available is 0")
+	}
+	return nil
+}
