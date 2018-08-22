@@ -124,6 +124,10 @@ func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
 }
 
 func CheckStakeTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
@@ -146,6 +150,10 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, genaroConfig
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
@@ -159,6 +167,10 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, genaroConfig
 }
 
 func CheckApplyBucketTx(s types.SpecialTxInput,genaroConfig *params.GenaroConfig) error {
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
@@ -168,24 +180,55 @@ func CheckApplyBucketTx(s types.SpecialTxInput,genaroConfig *params.GenaroConfig
 		if len(v.BucketId) != 64 {
 			return errors.New("length of bucketId must be 64")
 		}
+
+		if v.TimeStart == 0 || v.TimeEnd == 0 {
+			return errors.New("param [timeEnd/timeStart] missing or can't be zero ")
+		}
+
+		if v.TimeEnd <= v.TimeStart {
+			return errors.New("param timeEnd must be larger than param TimeStart")
+		}
+
+		if v.Backup == 0 {
+			return errors.New("param [backup] missing or can't be zero ")
+		}
+
+		if v.Size == 0 {
+			return errors.New("param [size] missing or can't be zero ")
+		}
 	}
 	return nil
 }
 
 func CheckTrafficTx(s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
 	if s.Traffic <= 0 {
-		errors.New("value of traffic must larger than zero")
+		return errors.New("param [traffic] missing or must larger than zero")
 	}
 	return nil
 }
 
 
 func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) error {
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+	if s.NodeID == "" {
+		return errors.New("param [nodeId] missing ")
+	}
+	if s.Sign == "" {
+		return errors.New("param [sign] missing ")
+	}
+
 	stake, _ := db.GetStake(caller)
 	existNodes := db.GetStorageNodes(caller)
 	stakeVlauePerNode := db.GetStakePerNodePrice()
@@ -261,6 +304,14 @@ func generateNodeId(b []byte) string {
 }
 
 func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
+	if s.Stake == 0 {
+		return errors.New("param [stake] missing or must be larger than zero")
+	}
+
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
@@ -306,6 +357,10 @@ func CheckSynStateTx(caller common.Address, state StateDB) error {
 }
 
 func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
@@ -335,7 +390,7 @@ func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes 
 	}
 
 	if s.NodeID == "" {
-		return errors.New("nodeId is null")
+		return errors.New("param [nodeId] is null or missing")
 	}
 
 	for _, v := range existNodes{
