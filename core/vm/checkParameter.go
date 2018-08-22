@@ -576,6 +576,9 @@ func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, stat
 	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
 		return errors.New("None promissory note tx with this hash ")
 	}
+	if true != promissoryNotesOptionTx.IsSell {
+		return errors.New("Go to permission to buy promissory None")
+	}
 	balance := state.GetBalance(caller)
 	if balance.Cmp(promissoryNotesOptionTx.OptionPrice) <= 0 {
 		return errors.New("Insufficient balance")
@@ -597,8 +600,8 @@ func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInpu
 	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
 		return errors.New("None promissory note tx with this hash ")
 	}
-	if true != promissoryNotesOptionTx.IsSell {
-		return errors.New("Go to permission to buy promissory None")
+	if caller != promissoryNotesOptionTx.OptionOwner {
+		return errors.New("No right turn buy promissoryNotes ")
 	}
 	balance := state.GetBalance(caller)
 	promissoryNotesOptionTx.PromissoryNoteTxPrice.Mul(promissoryNotesOptionTx.PromissoryNoteTxPrice,big.NewInt(int64(promissoryNotesOptionTx.TxNum)))
