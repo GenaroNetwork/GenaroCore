@@ -480,6 +480,10 @@ func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateD
 }
 
 func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB, blockNum *big.Int) error {
+	if (s.OrderId == common.Hash{}) {
+		return errors.New("param [OrderId] Missing")
+	}
+
 	//根据订单号从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable()
 	if optionTxTable == nil {
@@ -521,6 +525,14 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 		return errors.New("param [txNum] must be larger than zero")
 	}
 
+	if s.PromissoryNoteTxPrice == nil{
+		return errors.New("param [PromissoryNoteTxPrice] Missing")
+	}
+
+	if s.OptionPrice == nil {
+		return errors.New("param [OptionPrice] Missing")
+	}
+
 	//检查交易发起方是否有足够的期票可出售
 	promissoryNotes := state.GetPromissoryNotes(caller)
 	for _, v := range promissoryNotes {
@@ -535,6 +547,10 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
 	// 1、当前交易从未被人认购，此时只能由该笔交易中期票的拥有者改变状态
 	// 2、交易已被认购，此时只能由该笔交易中的认购人更改售卖状态
+
+	if (s.OrderId == common.Hash{}) {
+		return errors.New("param [OrderId] Missing")
+	}
 
 	//从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable()
