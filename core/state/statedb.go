@@ -1447,16 +1447,30 @@ func (self *StateDB)GetPromissoryNotes(address common.Address) types.PromissoryN
 }
 
 
-func (self *StateDB)GetOptionTxTable() *types.OptionTxTable {
-	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+func (self *StateDB)GetOptionTxTable(hash common.Hash, optionTxMemorySize uint64) *types.OptionTxTable {
+
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	if stateObject != nil {
 		return stateObject.GetOptionTxTable()
 	}
 	return nil
 }
 
-func (self *StateDB)DelTxInOptionTxTable(hash common.Hash) bool{
-	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+func (self *StateDB)GetOptionTxTableByAddress(address common.Address) *types.OptionTxTable {
+
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetOptionTxTable()
+	}
+	return nil
+}
+
+func (self *StateDB)DelTxInOptionTxTable(hash common.Hash, optionTxMemorySize uint64) bool{
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	if stateObject != nil {
 		stateObject.DelTxInOptionTxTable(hash)
 		return true
@@ -1464,8 +1478,10 @@ func (self *StateDB)DelTxInOptionTxTable(hash common.Hash) bool{
 	return false
 }
 
-func (self *StateDB)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx) bool{
-	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+func (self *StateDB)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx, optionTxMemorySize uint64) bool{
+
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	if stateObject != nil {
 		stateObject.AddTxInOptionTxTable(hash, promissoryNotesOptionTx)
 		return true
@@ -1497,8 +1513,10 @@ func (self *StateDB)GetBeforPromissoryNotesNum(address common.Address,blockNumbe
 	return uint64(0)
 }
 
-func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool) bool{
-	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool, optionTxMemorySize uint64) bool{
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	if stateObject != nil {
 		stateObject.SetTxStatusInOptionTxTable(hash, status)
 		return true
@@ -1511,16 +1529,21 @@ func (self *StateDB)GetAccountData(address common.Address) *Account {
 	return &stateObject.data
 }
 
-func (self *StateDB)BuyPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
-	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+func (self *StateDB)BuyPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
+
+	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	if stateObject != nil {
 		return stateObject.BuyPromissoryNotes(orderId, address)
 	}
 	return types.PromissoryNotesOptionTx{}
 }
 
-func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
-	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
+	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	stateObjectAddress := self.GetOrNewStateObject(address)
 	if stateObject != nil && nil != stateObjectAddress{
 		result :=  stateObject.DeletePromissoryNotes(orderId, address)
@@ -1536,8 +1559,10 @@ func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address commo
 	return types.PromissoryNotesOptionTx{}
 }
 
-func (self *StateDB)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big,address common.Address) bool{
-	stateObject := self.GetOrNewStateObject(common.PromissoryNoteTxSaveAddress)
+func (self *StateDB)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big,address common.Address, optionTxMemorySize uint64) bool{
+	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	if stateObject != nil {
 		return stateObject.TurnBuyPromissoryNotes(orderId,optionPrice, address)
 	}

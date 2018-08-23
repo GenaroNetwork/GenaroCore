@@ -678,19 +678,19 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())
 	case common.SpecialTxRevoke.Uint64():
 	//撤回期权售卖交易
-		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())
+		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState, pool.chain.CurrentBlock().Number(),pool.chainconfig.Genaro.OptionTxMemorySize)
 	case common.SpecialTxSetOptionTxStatus.Uint64():
 	// 更改期权售卖交易状态
-		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState)
+		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
 	//购买期权
 	case common.SpecialTxBuyPromissoryNotes.Uint64():
-		return vm.CheckBuyPromissoryNotes(caller, s, pool.currentState)
+		return vm.CheckBuyPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
 	//执行期权
 	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
-		return vm.CheckCarriedOutPromissoryNotes(caller, s, pool.currentState)
+		return vm.CheckCarriedOutPromissoryNotes(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
 	//转卖期权
 	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
-		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState)
+		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
 	case common.SpecialTxWithdrawCash.Uint64():
 		return vm.WithdrawCash(caller, pool.currentState, pool.chain.CurrentBlock().Number())
 

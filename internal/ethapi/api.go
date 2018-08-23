@@ -2080,15 +2080,28 @@ func (s *PublicBlockChainAPI) GetOptionTx(ctx context.Context,address common.Add
 	if state == nil || err != nil {
 		return nil
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	optionTxMemorySize := s.b.ChainConfig().Genaro.OptionTxMemorySize
 	optionTxTableRet := make(types.OptionTxTable)
-	optionTxTable := *state.GetOptionTxTable()
-	for k, v := range optionTxTable {
-		if v.PromissoryNotesOwner == address {
-			optionTxTableRet[k] = v
+
+	for i := int64(0) ; i < int64(optionTxMemorySize) ; i++ {
+		optionSaveAddr := common.GetOptionSaveAddrByPos(i)
+		optionTxTable := state.GetOptionTxTableByAddress(optionSaveAddr)
+		if optionTxTable != nil {
+			txTableMap := *optionTxTable
+			for k, v := range txTableMap {
+				if v.PromissoryNotesOwner == address {
+					optionTxTableRet[k] = v
+				}
+			}
 		}
 	}
 
 	return optionTxTableRet
-	//optionTxTable := *state.GetOptionTxTable()
-	//return optionTxTable
 }

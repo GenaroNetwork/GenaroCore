@@ -295,3 +295,15 @@ func (hash Hash) Mod(n int64) int64 {
 	addrBig.DivMod(addrBig,big.NewInt(n),m)
 	return  m.Int64()
 }
+
+
+// 获取用于存储期权交易的地址
+func GetOptionSaveAddr(optionTxHash Hash,optionTxMemorySize uint64) Address{
+	pos := optionTxHash.Mod(int64(optionTxMemorySize))
+	retAddress := OptionTxBeginSaveAddress.Add(pos)
+	return retAddress
+}
+
+func GetOptionSaveAddrByPos(pos int64) Address{
+	return OptionTxBeginSaveAddress.Add(pos)
+}

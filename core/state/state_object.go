@@ -42,11 +42,7 @@ func (self Code) String() string {
 	return string(self) //strings.Join(Disassemble(self), " ")
 }
 
-// 获取用于存储期权交易的地址
-func GetOptionSaveAddr(optionTxHash common.Hash,optionTxMemorySize uint64) common.Address{
-	pos := optionTxHash.Mod(int64(optionTxMemorySize))
-	return common.OptionTxBeginSaveAddress.Add(pos)
-}
+
 
 type Storage map[common.Hash]common.Hash
 
@@ -1900,7 +1896,10 @@ func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
 	if self.data.CodeHash == nil {
 		return nil
 	}else{
-		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+		err := json.Unmarshal(self.data.CodeHash, &optionTxTable)
+		if err != nil {
+			return nil
+		}
 	}
 	return &optionTxTable
 }

@@ -295,11 +295,13 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 }
 
 func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckSetOptionTxStatus(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckSetOptionTxStatus(caller, s, (*evm).StateDB, (*evm).chainConfig.Genaro.OptionTxMemorySize); err != nil {
 		return err
 	}
 
-	(*evm).StateDB.SetTxStatusInOptionTxTable(s.OrderId, s.IsSell)
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	(*evm).StateDB.SetTxStatusInOptionTxTable(s.OrderId, s.IsSell, optionTxMemorySize)
 
 	return nil
 }
@@ -313,6 +315,7 @@ func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) erro
 	promissoryNote.Num = s.TxNum
 
 	optionHash := types.GenOptionTxHash(caller, (*evm).StateDB.GetNonce(caller))
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
 
 	if (*evm).StateDB.DelPromissoryNote(caller, promissoryNote){
 		var promissoryNotesOptionTx types.PromissoryNotesOptionTx
@@ -322,22 +325,24 @@ func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) erro
 		promissoryNotesOptionTx.IsSell = true
 		promissoryNotesOptionTx.PromissoryNoteTxPrice = s.PromissoryNoteTxPrice.ToInt()
 		promissoryNotesOptionTx.OptionPrice = s.OptionPrice.ToInt()
-		(*evm).StateDB.AddTxInOptionTxTable(optionHash, promissoryNotesOptionTx)
+		(*evm).StateDB.AddTxInOptionTxTable(optionHash, promissoryNotesOptionTx, optionTxMemorySize)
 	}
 
 	return nil
 }
 
 func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckPromissoryNoteRevoke(caller, s, (*evm).StateDB, (*evm).BlockNumber); err != nil {
+	if err := CheckPromissoryNoteRevoke(caller, s, (*evm).StateDB, (*evm).BlockNumber, (*evm).chainConfig.Genaro.OptionTxMemorySize); err != nil {
 		return err
 	}
 
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
 	//从交易中心移除本次交易并将期权还原到用户账户中
-	optionTxTable := (*evm).StateDB.GetOptionTxTable()
+	optionTxTable := (*evm).StateDB.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	promissoryNotesOptionTx := (*optionTxTable)[s.OrderId]
 
-	if (*evm).StateDB.DelTxInOptionTxTable(s.OrderId) {
+	if (*evm).StateDB.DelTxInOptionTxTable(s.OrderId, optionTxMemorySize) {
 		var promissoryNote types.PromissoryNote
 		promissoryNote.Num = promissoryNotesOptionTx.TxNum
 		promissoryNote.RestoreBlock = promissoryNotesOptionTx.RestoreBlock
@@ -814,7 +819,10 @@ func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 
 //购买期权
 func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId,caller)
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId, caller, optionTxMemorySize)
 	if result.TxNum > 0 {
 		//result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
 		//result.OptionPrice.Mul(result.OptionPrice,common.BaseCompany)
@@ -825,7 +833,10 @@ func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) 
 }
 
 func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	result := (*evm).StateDB.CarriedOutPromissoryNotes(s.OrderId,caller)
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.CarriedOutPromissoryNotes(s.OrderId,caller, optionTxMemorySize)
 	if result.TxNum > 0{
 		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum)))
 		//result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
@@ -836,7 +847,10 @@ func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Ad
 }
 
 func turnBuyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	result := (*evm).StateDB.TurnBuyPromissoryNotes(s.OrderId,s.OptionPrice,caller)
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.TurnBuyPromissoryNotes(s.OrderId, s.OptionPrice, caller, optionTxMemorySize)
 	if false == result{
 		errors.New("update error")
 	}

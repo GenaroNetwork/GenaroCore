@@ -534,13 +534,13 @@ func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateD
 	return nil
 }
 
-func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB, blockNum *big.Int) error {
+func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB, blockNum *big.Int,  optionTxMemorySize uint64) error {
 	if (s.OrderId == common.Hash{}) {
 		return errors.New("param [OrderId] Missing")
 	}
 
 	//根据订单号从期权列表中取出交易列表
-	optionTxTable := state.GetOptionTxTable()
+	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
@@ -599,7 +599,7 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 }
 
 
-func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
 	// 1、当前交易从未被人认购，此时只能由该笔交易中期票的拥有者改变状态
 	// 2、交易已被认购，此时只能由该笔交易中的认购人更改售卖状态
 
@@ -608,7 +608,7 @@ func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state
 	}
 
 	//从期权列表中取出交易列表
-	optionTxTable := state.GetOptionTxTable()
+	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
@@ -635,9 +635,9 @@ func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state
 }
 
 
-func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
 	//根据订单号从期权列表中取出交易列表
-	optionTxTable := state.GetOptionTxTable()
+	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
@@ -659,9 +659,9 @@ func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, stat
 
 
 
-func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB,  optionTxMemorySize uint64) error {
 	//根据订单号从期权列表中取出交易列表
-	optionTxTable := state.GetOptionTxTable()
+	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
@@ -684,9 +684,9 @@ func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInpu
 
 
 
-func CheckTurnBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckTurnBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB,  optionTxMemorySize uint64) error {
 	//从期权列表中取出交易列表
-	optionTxTable := state.GetOptionTxTable()
+	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
