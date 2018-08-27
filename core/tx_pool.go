@@ -632,7 +632,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
 		return vm.CheckStakeTx(s, pool.currentState,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-		return vm.CheckSyncHeftTx(caller, s,pool.chainconfig.Genaro)
+		return vm.CheckSyncHeftTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		return vm.CheckApplyBucketTx(s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易

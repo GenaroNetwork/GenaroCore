@@ -145,8 +145,10 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.Ge
 	return nil
 }
 
-func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
-	if caller !=  common.OfficialAddress {
+func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
+	genaroPrice := state.GetGenaroPrice()
+	heftAccount := common.HexToAddress(genaroPrice.HeftAccount)
+	if caller != heftAccount {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
@@ -403,10 +405,13 @@ func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes 
 
 // 账号绑定检查
 func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
-	// 检查是否是官方账号
-	if caller !=  common.OfficialAddress {
+	// 检查是否是官方绑定账号
+	genaroPrice := state.GetGenaroPrice()
+	bindingAccount := common.HexToAddress(genaroPrice.BindingAccount)
+	if caller != bindingAccount {
 		return errors.New("caller address of this transaction is not invalid")
 	}
+
 	// 主账号
 	mainAccount := common.HexToAddress(s.Address)
 	// 子账号

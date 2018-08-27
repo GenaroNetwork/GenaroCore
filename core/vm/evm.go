@@ -273,7 +273,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = revokePromissoryNotesTx(evm, s, caller)
 	case common.SpecialTxWithdrawCash.Uint64():	//提现
 		err = PromissoryNotesWithdrawCash(evm, caller)
-	case common.SpecialTxPublishOption.Uint64():
+	case common.SpecialTxPublishOption.Uint64():	//发布期权交易
 		err = publishOption(evm, s, caller)
 	case common.SpecialTxSetOptionTxStatus.Uint64():
 		err = setOptionTxStatus(evm, s, caller)
@@ -534,6 +534,14 @@ func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error
 		genaroPrice.SynStateAccount = s.SynStateAccount
 	}
 
+	if len(s.HeftAccount) > 0 {
+		genaroPrice.HeftAccount = s.HeftAccount
+	}
+
+	if len(s.BindingAccount) > 0 {
+		genaroPrice.BindingAccount = s.BindingAccount
+	}
+
 	ok := (*evm).StateDB.SetGenaroPrice(*genaroPrice)
 	if !ok {
 		return errors.New("setGlobalVar fail")
@@ -733,7 +741,7 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 
 
 func updateHeft(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckSyncHeftTx(caller, s,evm.chainConfig.Genaro); err != nil {
+	if err := CheckSyncHeftTx(caller, s, evm.StateDB, evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 
