@@ -261,7 +261,7 @@ func (tx *Transaction) Cost() *big.Int {
 
 // SpecialCost returns total cost for special transaction
 // if current transaction is normal transaction, return zero.
-func (tx *Transaction) SpecialCost(currentPrice *GenaroPrice) *big.Int {
+func (tx *Transaction) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[string]interface{}) *big.Int {
 	var ret = big.NewInt(0)
 	if tx.Data() == nil {
 		return ret
@@ -269,7 +269,7 @@ func (tx *Transaction) SpecialCost(currentPrice *GenaroPrice) *big.Int {
 	var s SpecialTxInput
 	err := json.Unmarshal(tx.Data(), &s)
 	if err == nil {
-		cost := s.SpecialCost(currentPrice)
+		cost := s.SpecialCost(currentPrice, bucketsMap)
 		ret.Set(&cost)
 		return ret
 	}

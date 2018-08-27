@@ -1314,6 +1314,42 @@ func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlo
 	return retArr,nil
 }
 
+type bucketSupplement struct {
+	BucketID    string       `json:"bucketId"`
+	Size        uint64       `json:"size"`
+	Duration    uint64       `json:"duration"`
+	Address     string       `json:"address"`
+	Hash        common.Hash  `json:"hash"`
+	BlockNum    uint64       `json:"blockNum"`
+}
+
+func (s *PublicTransactionPoolAPI)GetBucketSupplementTx(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]bucketSupplement, error)  {
+	var retArr []bucketSupplement
+
+	rpcTx, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxBucketSupplement)
+	if err != nil{
+		return nil, err
+	}
+	for _, tx := range rpcTx {
+		if transactionReceipt, err:= s.GetTransactionReceipt(ctx,tx.Hash); err == nil && transactionReceipt != nil {
+			if status, ok := transactionReceipt["status"]; ok && uint(status.(hexutil.Uint)) == types.ReceiptStatusSuccessful {
+				var s types.SpecialTxInput
+				json.Unmarshal([]byte(tx.Input), &s)
+				var bucketSup bucketSupplement
+				bucketSup.Size = s.Size
+				bucketSup.Duration = s.Duration
+				bucketSup.BucketID = s.BucketID
+				bucketSup.Address = s.Address
+				bucketSup.Hash = tx.Hash
+				bucketSup.BlockNum = tx.BlockNumber.ToInt().Uint64()
+				retArr = append(retArr, bucketSup)
+			}
+		}
+	}
+
+	return retArr, nil
+}
+
 
 func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context, blockNr rpc.BlockNumber) map[string]string {
 	genaroPriceMap := make(map[string]string)

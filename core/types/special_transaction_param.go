@@ -8,12 +8,16 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GenaroNetwork/Genaro-Core/log"
+	"time"
 )
 
 type SpecialTxInput struct {
 	GenaroData
 	Address     string       `json:"address"`
 	NodeID      string       `json:"nodeId"`
+	BucketID    string       `json:"bucketId"`
+	Size        uint64       `json:"size"`
+	Duration    uint64       `json:"duration"`
 	Type        *hexutil.Big `json:"type"`
 	BlockNumber string       `json:"blockNr"`
 	Message     string       `json:"msg"`
@@ -39,7 +43,7 @@ type GenaroPrice struct {
 	ExtraPrice     []byte   `json:"extraPrice"` //该版本用不上，考虑后期版本兼容性使用
 }
 
-func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) big.Int {
+func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[string]interface{}) big.Int {
 
 	switch s.Type.ToInt().Uint64() {
 	case common.SpecialTxTypeStakeSync.Uint64():
@@ -61,6 +65,56 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice) big.Int {
 			totalCost.Add(totalCost, oneCost)
 		}
 		log.Info(fmt.Sprintf("bucket apply cost:%s", totalCost.String()))
+		return *totalCost
+	case common.SpecialTxBucketSupplement.Uint64():
+		var totalCost *big.Int = big.NewInt(0)
+		var bucketPrice *big.Int
+		if currentPrice != nil && currentPrice.BucketApplyGasPerGPerDay != nil {
+			bucketPrice = new(big.Int).Set(currentPrice.BucketApplyGasPerGPerDay.ToInt())
+		}else {
+			bucketPrice = new(big.Int).Set(common.DefaultBucketApplyGasPerGPerDay)
+		}
+
+		if v, ok := bucketsMap[s.BucketID]; ok {
+			bucketPropertie := v.(BucketPropertie)
+
+			if s.Size != 0 && s.Duration == 0{
+				calSize := s.Size
+				var subtraction float64
+				if uint64(time.Now().Unix()) > bucketPropertie.TimeStart  {
+					subtraction = float64(time.Now().Unix())
+				} else {
+					subtraction = float64(bucketPropertie.TimeStart)
+				}
+				calDuration := math.Ceil(math.Abs(float64(bucketPropertie.TimeEnd) - subtraction)/86400)
+				totalCost = new(big.Int).Mul(bucketPrice, big.NewInt(int64(calSize) * int64(calDuration)))
+			} else if s.Size == 0 && s.Duration != 0 {
+				calSize := bucketPropertie.Size
+				calDuration := math.Ceil(float64(s.Duration)/86400)
+				totalCost = new(big.Int).Mul(bucketPrice, big.NewInt(int64(calSize) * int64(calDuration)))
+			}else if s.Size != 0 && s.Duration != 0 {
+				calSize := bucketPropertie.Size + s.Size
+				calDuration := math.Ceil(float64(s.Duration)/86400)
+				totalCost1 := new(big.Int).Mul(bucketPrice, big.NewInt(int64(calSize) * int64(calDuration)))
+
+
+				var subtraction float64
+				if uint64(time.Now().Unix()) > bucketPropertie.TimeStart  {
+					subtraction = float64(time.Now().Unix())
+				} else {
+					subtraction = float64(bucketPropertie.TimeStart)
+				}
+				calSize2 := s.Size
+				calDuration2 := math.Ceil(math.Abs(float64(bucketPropertie.TimeEnd) - subtraction)/86400)
+				totalCost2 := new(big.Int).Mul(bucketPrice, big.NewInt(int64(calSize2) * int64(calDuration2)))
+
+				totalCost = new(big.Int).Add(totalCost1, totalCost2)
+			}
+
+
+		}
+
+		log.Info(fmt.Sprintf("bucket supplement cost:%s", totalCost.String()))
 		return *totalCost
 	case common.SpecialTxTypeTrafficApply.Uint64():
 

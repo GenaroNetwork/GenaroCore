@@ -888,6 +888,38 @@ func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backu
 	}
 }
 
+func (self *stateObject) UpdateBucket(bucket types.BucketPropertie) bool {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.Buckets != nil {
+			for k, v := range genaroData.Buckets {
+				if v.BucketId == bucket.BucketId {
+					bp := new(types.BucketPropertie)
+					bp.BucketId = bucket.BucketId
+					bp.TimeEnd = bucket.TimeEnd
+					bp.TimeStart = bucket.TimeStart
+					bp.Size = bucket.Size
+					bp.Backup = bucket.Backup
+					genaroData.Buckets[k] = bp
+					break
+				}
+			}
+		}
+
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+		return true
+	}
+	return false
+}
+
 func (self *stateObject)getBucketPropertie(bucketID string) *types.BucketPropertie {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData

@@ -867,6 +867,14 @@ func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid strin
 	return true
 }
 
+func (self *StateDB)UpdateBucket(addr common.Address, bucket types.BucketPropertie) bool {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.UpdateBucket(bucket)
+	}
+	return false
+}
+
 // GetStorageSize gets the "SSIZE" value of user's file
 func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)

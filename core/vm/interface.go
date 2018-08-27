@@ -83,6 +83,7 @@ type StateDB interface {
 	IsCandidateExist(candidate common.Address) bool
 
 	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
+	UpdateBucket(common.Address, types.BucketPropertie) bool
 	GetStorageSize(common.Address, [32]byte)  (uint64, error)
 	GetStorageGasPrice(common.Address, [32]byte)  (uint64, error)
 	GetStorageGasUsed(common.Address, [32]byte)  (uint64, error)

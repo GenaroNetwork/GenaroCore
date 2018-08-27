@@ -123,7 +123,13 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 				err = json.Unmarshal(msg.Data(), &s)
 				if err == nil{
 					currentPrice := vmenv.StateDB.GetGenaroPrice()
-					costInfo := s.SpecialCost(currentPrice)
+
+					bucketsMap := make(map[string]interface{})
+					if s.Type.ToInt().Uint64() == common.SpecialTxBucketSupplement.Uint64() {
+						bucketsMap, _ = vmenv.StateDB.GetBuckets(common.HexToAddress(s.Address))
+					}
+
+					costInfo := s.SpecialCost(currentPrice, bucketsMap)
 					receipt.ExtraInfo = costInfo.String()
 				}
 			}

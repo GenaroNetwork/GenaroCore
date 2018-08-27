@@ -195,6 +195,45 @@ func CheckApplyBucketTx(s types.SpecialTxInput) error {
 	return nil
 }
 
+
+
+func CheckBucketSupplement(s types.SpecialTxInput, state StateDB) error {
+
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
+	if s.BucketID == "" {
+		return errors.New("param [bucketId] missing or can't be null string")
+	}
+
+	if s.Size == 0 && s.Duration < 86400{
+		return errors.New("param [size / duration] missing or must be larger than zero")
+	}
+
+	adress := common.HexToAddress(s.Address)
+	if isSpecialAddress(adress){
+		return errors.New("param [address] can't be special address")
+	}
+
+	//对应address是否存在对应buckedId的存贮空间
+	buckets, _ := state.GetBuckets(adress)
+	if buckets == nil {
+		return errors.New("the user does not have the bucket corresponding to the bucketId")
+	}
+
+	if b, ok := buckets[s.BucketID]; ok {
+		bucketInDb := b.(types.BucketPropertie)
+		if bucketInDb.TimeEnd <= uint64(time.Now().Unix()) {
+			return errors.New("the bucket corresponding to the bucketId has has been expired")
+		}
+	}else {
+		return errors.New("the user does not have the bucket corresponding to the bucketId")
+	}
+
+	return nil
+}
+
 func CheckTrafficTx(s types.SpecialTxInput) error {
 
 	if s.Address == "" {

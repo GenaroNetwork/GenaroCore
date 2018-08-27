@@ -233,6 +233,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64(), caller)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		err = updateStorageProperties(evm, s, caller)
+	case common.SpecialTxBucketSupplement.Uint64(): // 存储空间续命
+		err = bucketSupplement(evm, s, caller)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		err = specialTxTypeMortgageInit(evm, s,caller)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
@@ -623,11 +625,50 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	return nil
 }
 
+func bucketSupplement(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if err := CheckBucketSupplement(s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	address := common.HexToAddress(s.Address)
+	bucketsMap, _:= (*evm).StateDB.GetBuckets(address)
+	currentPrice := (*evm).StateDB.GetGenaroPrice()
+	currentCost := s.SpecialCost(currentPrice, bucketsMap)
+	totalGas := new(big.Int).Set(&currentCost)
+	log.Info(fmt.Sprintf("evm bucketSupplement cost:%s", totalGas.String()))
+
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
+
+	var bucket types.BucketPropertie
+	b, _ := bucketsMap[s.BucketID]
+	bucketInDb := b.(types.BucketPropertie)
+
+	bucket.BucketId = bucketInDb.BucketId
+	bucket.Backup = bucketInDb.Backup
+	bucket.TimeStart = bucketInDb.TimeStart
+	bucket.Size = bucketInDb.Size + s.Size
+	bucket.TimeEnd = bucketInDb.TimeEnd + s.Duration
+
+	if (*evm).StateDB.UpdateBucket(address, bucket){
+		//扣除费用
+		(*evm).StateDB.SubBalance(caller, totalGas)
+		(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
+	}
+	return nil
+}
+
 func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+	if err := CheckApplyBucketTx(s); err != nil {
+		return err
+	}
 	adress := common.HexToAddress(s.Address)
 
 	currentPrice := (*evm).StateDB.GetGenaroPrice()
-	currentCost := s.SpecialCost(currentPrice)
+	currentCost := s.SpecialCost(currentPrice, nil)
 	totalGas := new(big.Int).Set(&currentCost)
 	log.Info(fmt.Sprintf("evm bucketApply cost:%s", totalGas.String()))
 
@@ -682,7 +723,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 	adress := common.HexToAddress(s.Address)
 
 	currentPrice := (*evm).StateDB.GetGenaroPrice()
-	currentCost := s.SpecialCost(currentPrice)
+	currentCost := s.SpecialCost(currentPrice,nil)
 	totalGas := new(big.Int).Set(&currentCost)
 	log.Info(fmt.Sprintf("evm trafficApply cost:%s", totalGas.String()))
 
@@ -708,7 +749,7 @@ func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 	}
 
 	// the unit of stake is GNX， one stake means one GNX
-	currentCost := s.SpecialCost(nil)
+	currentCost := s.SpecialCost(nil,nil)
 	amount := new(big.Int).Set(&currentCost)
 
 	// judge if there is enough balance to stake（balance must larger than stake value)

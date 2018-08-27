@@ -592,9 +592,23 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInsufficientFunds
 	}
 
-	currentPrice := pool.currentState.GetGenaroPrice()
+	if nil != tx.To() {
+		if common.SpecialSyncAddress == *tx.To(){
+			err := pool.dispatchHandlerValidateTx(tx.Data(), from)
+			if err != nil{
+				return err
+			}
+		}
+	}
+	var s types.SpecialTxInput
+	bucketsMap := make(map[string]interface{})
+	json.Unmarshal(tx.Data(), &s)
+	if s.Type.ToInt().Uint64() == common.SpecialTxBucketSupplement.Uint64() {
+		bucketsMap, _ = pool.currentState.GetBuckets(common.HexToAddress(s.Address))
+	}
 
-	totalCost := new(big.Int).Add(tx.Cost(), tx.SpecialCost(currentPrice))
+	currentPrice := pool.currentState.GetGenaroPrice()
+	totalCost := new(big.Int).Add(tx.Cost(), tx.SpecialCost(currentPrice, bucketsMap))
 	//log.Info(fmt.Sprintf("total cost:%s", totalCost.String()))
 	if pool.currentState.GetBalance(from).Cmp(totalCost) < 0 {
 		return ErrInsufficientFundsForSpecialTx
@@ -606,11 +620,6 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	}
 	if tx.Gas() < intrGas {
 		return ErrIntrinsicGas
-	}
-	if nil != tx.To() {
-		if common.SpecialSyncAddress == *tx.To(){
-			return pool.dispatchHandlerValidateTx(tx.Data(), from)
-		}
 	}
 	return nil
 }
@@ -635,6 +644,8 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckSyncHeftTx(caller, s)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		return vm.CheckApplyBucketTx(s)
+	case common.SpecialTxBucketSupplement.Uint64(): // 存储空间续命
+		return vm.CheckBucketSupplement(s, pool.currentState)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
