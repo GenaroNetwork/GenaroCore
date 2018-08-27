@@ -424,7 +424,6 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 		return errors.New("mainAddr is not a candidate")
 	}
 	// 主账号绑定数量是否超出限制
-	genaroPrice := state.GetGenaroPrice()
 	if state.GetSubAccountsCount(mainAccount) > int(genaroPrice.MaxBinding) {
 		return errors.New("binding enough")
 	}
