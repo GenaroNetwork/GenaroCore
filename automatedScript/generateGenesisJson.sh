@@ -3,14 +3,15 @@
 array=($(cat fileName))
 
 balanceKey="balance"
-balanceVal=400000000000000000000
+balanceVal=400000000000000000000000000
 
 heftKey="heft"
 heftVal=200
 
 stakeKey="stake"
-stakeVal=400
+stakeVal=5001
 printf "{\n"
+printf "\"accounts\":{\n"
 for ((i=0;i<${#array[@]};i++))
 do
 	line=${array[$i]}
@@ -33,9 +34,21 @@ do
 	let "heftVal=$heftVal+10"
 	let "stakeVal=$stakeVal+10"
 done
+printf "},\n"
+
+printf "\"config\": {
+    \"PromissoryNoteEnable\": true,
+    \"PromissoryNotePercentage\": 90,
+    \"PromissoryNotePrice\":  2000,
+    \"LastPromissoryNoteBlockNumber\": 3600,
+    \"PromissoryNotePeriod\": 100,
+    \"SurplusCoin\": 175000000,
+    \"SynStateAccount\": \"0xebb97ad3ca6b4f609da161c0b2b0eaa4ad58f3e8\",
+    \"HeftAccount\": \"0xad188b762f9e3ef76c972960b80c9dc99b9cfc73\",
+    \"BindingAccount\": \"0xad188b762f9e3ef76c972960b80c9dc99b9cfc73\"
+  }\n"
+
 printf "}\n"
-
-
 
 
 

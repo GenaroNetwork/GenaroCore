@@ -159,6 +159,20 @@ type StateDB interface {
 	GetRewardsValues() *types.RewardsValues
 	SetRewardsValues(rewardsValues types.RewardsValues) bool
 
+	PromissoryNotesWithdrawCash(common.Address,uint64) uint64
+	GetPromissoryNotes(address common.Address) types.PromissoryNotes
+	AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
+	DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
+
+	GetOptionTxTable(common.Hash, uint64) *types.OptionTxTable
+	GetOptionTxTableByAddress(common.Address) *types.OptionTxTable
+	DelTxInOptionTxTable(common.Hash, uint64) bool
+	AddTxInOptionTxTable(common.Hash, types.PromissoryNotesOptionTx, uint64) bool
+	SetTxStatusInOptionTxTable(common.Hash, bool,uint64) bool
+	BuyPromissoryNotes(common.Hash,common.Address,uint64) types.PromissoryNotesOptionTx
+	CarriedOutPromissoryNotes(common.Hash,common.Address,uint64) types.PromissoryNotesOptionTx
+	TurnBuyPromissoryNotes(common.Hash,*hexutil.Big,common.Address,uint64) bool
+	GetBeforPromissoryNotesNum(common.Address,uint64) uint64
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

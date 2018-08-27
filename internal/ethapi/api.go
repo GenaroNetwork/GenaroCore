@@ -48,6 +48,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
 
 const (
@@ -218,6 +219,16 @@ func (s *PublicBlockChainAPI) GetCommitteeRank(ctx context.Context,blockNr rpc.B
 		return nil
 	}
 	committees,_ := state.GetCommitteeRank(0,uint64(blockNr))
+	return committees
+}
+
+// get MainAccount by rank
+func (s *PublicBlockChainAPI) GetMainAccountRank(ctx context.Context,blockNr rpc.BlockNumber) []common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	committees,_ := state.GetMainAccountRank()
 	return committees
 }
 
@@ -791,6 +802,14 @@ func (s *PublicBlockChainAPI) GetStorageAt(ctx context.Context, address common.A
 	}
 	res := state.GetState(address, common.HexToHash(key))
 	return res[:], state.Error()
+}
+
+func (s *PublicBlockChainAPI)GetAccountData(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*state.Account,error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return state.GetAccountData(address),nil
 }
 
 // CallArgs represents the arguments for a call.
@@ -2060,4 +2079,65 @@ func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address 
 		return false
 	}
 	return state.CheckUnlockSharedKey(address, shareKeyId)
+}
+
+
+// get All Promissory NotesNum
+func (s *PublicBlockChainAPI) GetAllPromissoryNotesNum(ctx context.Context,address common.Address) uint64 {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return uint64(0)
+	}
+	return state.GetAllPromissoryNotesNum(address)
+}
+
+
+// get Befor Promissory Notes
+func (s *PublicBlockChainAPI) GetBeforPromissoryNotesNum(ctx context.Context,address common.Address) uint64 {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return uint64(0)
+	}
+	return state.GetBeforPromissoryNotesNum(address,s.BlockNumber().Uint64())
+}
+
+// get All Promissory Notes
+func (s *PublicBlockChainAPI) GetPromissoryNotes(ctx context.Context,address common.Address) types.PromissoryNotes {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetPromissoryNotes(address)
+}
+
+
+func (s *PublicBlockChainAPI) GetOptionTx(ctx context.Context,address common.Address) types.OptionTxTable {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	optionTxMemorySize := s.b.ChainConfig().Genaro.OptionTxMemorySize
+	optionTxTableRet := make(types.OptionTxTable)
+
+	for i := int64(0) ; i < int64(optionTxMemorySize) ; i++ {
+		optionSaveAddr := common.GetOptionSaveAddrByPos(i)
+		optionTxTable := state.GetOptionTxTableByAddress(optionSaveAddr)
+		if optionTxTable != nil {
+			txTableMap := *optionTxTable
+			for k, v := range txTableMap {
+				if v.PromissoryNotesOwner == address {
+					optionTxTableRet[k] = v
+				}
+			}
+		}
+	}
+
+	return optionTxTableRet
 }

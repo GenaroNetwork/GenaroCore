@@ -816,6 +816,15 @@ func (self *StateDB)GetCommitteeRank(blockNumStart uint64, blockNumEnd uint64) (
 	return nil,nil
 }
 
+func (self *StateDB)GetMainAccountRank() ([]common.Address, []uint64){
+	stateObject := self.getStateObject(common.CandidateSaveAddress)
+	if stateObject != nil {
+		candidateInfos := self.GetCandidatesInfoWithAllSubAccounts()
+		return Rank(candidateInfos)
+	}
+	return nil,nil
+}
+
 // get CandidateInfo in given range
 func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
@@ -1423,3 +1432,150 @@ func (self *StateDB)SetRewardsValues(rewardsValues types.RewardsValues) bool{
 	return false
 }
 
+func (self *StateDB)AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool{
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		stateObject.AddPromissoryNote(promissoryNote)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool{
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.DelPromissoryNote(promissoryNote)
+	}
+	return false
+}
+
+func (self *StateDB)GetPromissoryNotes(address common.Address) types.PromissoryNotes {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetPromissoryNotes()
+	}
+	return nil
+}
+
+
+func (self *StateDB)GetOptionTxTable(hash common.Hash, optionTxMemorySize uint64) *types.OptionTxTable {
+
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
+	if stateObject != nil {
+		return stateObject.GetOptionTxTable()
+	}
+	return nil
+}
+
+func (self *StateDB)GetOptionTxTableByAddress(address common.Address) *types.OptionTxTable {
+
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetOptionTxTable()
+	}
+	return nil
+}
+
+func (self *StateDB)DelTxInOptionTxTable(hash common.Hash, optionTxMemorySize uint64) bool{
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
+	if stateObject != nil {
+		stateObject.DelTxInOptionTxTable(hash)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx, optionTxMemorySize uint64) bool{
+
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
+	if stateObject != nil {
+		stateObject.AddTxInOptionTxTable(hash, promissoryNotesOptionTx)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)PromissoryNotesWithdrawCash(address common.Address,blockNumber uint64) uint64 {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.PromissoryNotesWithdrawCash(blockNumber)
+	}
+	return uint64(0)
+}
+
+func (self *StateDB)GetAllPromissoryNotesNum(address common.Address) uint64 {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetAllPromissoryNotesNum()
+	}
+	return uint64(0)
+}
+
+func (self *StateDB)GetBeforPromissoryNotesNum(address common.Address,blockNumber uint64) uint64 {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.GetBeforPromissoryNotesNum(blockNumber)
+	}
+	return uint64(0)
+}
+
+func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool, optionTxMemorySize uint64) bool{
+	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
+	if stateObject != nil {
+		stateObject.SetTxStatusInOptionTxTable(hash, status)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB)GetAccountData(address common.Address) *Account {
+	stateObject := self.GetOrNewStateObject(address)
+	return &stateObject.data
+}
+
+func (self *StateDB)BuyPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
+
+	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
+	if stateObject != nil {
+		return stateObject.BuyPromissoryNotes(orderId, address)
+	}
+	return types.PromissoryNotesOptionTx{}
+}
+
+func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
+	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
+	stateObjectAddress := self.GetOrNewStateObject(address)
+	if stateObject != nil && nil != stateObjectAddress{
+		result :=  stateObject.DeletePromissoryNotes(orderId, address)
+		if 0 < result.TxNum{
+			promissoryNote := types.PromissoryNote{
+				RestoreBlock:result.RestoreBlock,
+				Num:result.TxNum,
+			}
+			stateObjectAddress.AddPromissoryNote(promissoryNote)
+			return result
+		}
+	}
+	return types.PromissoryNotesOptionTx{}
+}
+
+func (self *StateDB)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big,address common.Address, optionTxMemorySize uint64) bool{
+	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
+
+	stateObject := self.GetOrNewStateObject(optionSaveAddr)
+	if stateObject != nil {
+		return stateObject.TurnBuyPromissoryNotes(orderId,optionPrice, address)
+	}
+	return false
+}

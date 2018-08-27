@@ -42,6 +42,8 @@ func (self Code) String() string {
 	return string(self) //strings.Join(Disassemble(self), " ")
 }
 
+
+
 type Storage map[common.Hash]common.Hash
 
 func (self Storage) String() (str string) {
@@ -1815,3 +1817,279 @@ func (self *stateObject)SetRewardsValues(rewardsValues types.RewardsValues) {
 	}
 }
 
+
+func (self *stateObject)PromissoryNotesWithdrawCash(blockNumber uint64) uint64{
+	var genaroData types.GenaroData
+	var promissoryNotesNum uint64
+	if self.data.CodeHash == nil{
+		return 0
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		promissoryNotesNum = genaroData.PromissoryNotes.DelBefor(blockNumber)
+		if 0 == promissoryNotesNum {
+			return promissoryNotesNum
+		}
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+
+	}
+	return promissoryNotesNum
+}
+
+func (self *stateObject)GetAllPromissoryNotesNum() uint64{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return uint64(0)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetAllNum()
+	}
+	return uint64(0)
+}
+
+
+func (self *stateObject)GetBeforPromissoryNotesNum(blockNumber uint64) uint64{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return uint64(0)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetBefor(blockNumber)
+	}
+	return uint64(0)
+}
+
+func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		promissoryNotes := new(types.PromissoryNotes)
+		promissoryNotes.Add(promissoryNote)
+		genaroData.PromissoryNotes = *promissoryNotes
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.PromissoryNotes.Add(promissoryNote)
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject)DelPromissoryNote(promissoryNote types.PromissoryNote) bool{
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+	}
+	promissoryNotes := genaroData.PromissoryNotes
+	if !(&promissoryNotes).Del(promissoryNote) {
+		return false
+	}
+	genaroData.PromissoryNotes = promissoryNotes
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+
+	return true
+}
+
+func (self *stateObject)GetPromissoryNotes() types.PromissoryNotes {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil{
+		return nil
+	}else {
+		err := json.Unmarshal(self.data.CodeHash, &genaroData)
+		if err != nil {
+			return nil
+		}
+		return genaroData.PromissoryNotes
+	}
+}
+
+func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil {
+		return nil
+	}else{
+		err := json.Unmarshal(self.data.CodeHash, &optionTxTable)
+		if err != nil {
+			return nil
+		}
+	}
+	return &optionTxTable
+}
+
+
+func (self *stateObject)DelTxInOptionTxTable(hash common.Hash){
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash == nil{
+		optionTxTable = *new(types.OptionTxTable)
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+
+	if _, ok := optionTxTable[hash]; ok{
+		delete(optionTxTable,hash)
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx){
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash != nil{
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+
+	if _, ok := optionTxTable[hash]; !ok{
+		optionTxTable[hash] = promissoryNotesOptionTx
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject)SetTxStatusInOptionTxTable(hash common.Hash, status bool) {
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash != nil{
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	if promissoryNotesOptionTx, ok := optionTxTable[hash]; ok{
+		promissoryNotesOptionTx.IsSell = status
+		optionTxTable[hash] = promissoryNotesOptionTx
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject)BuyPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil{
+		return types.PromissoryNotesOptionTx{}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	buyPromissoryNotes := optionTxTable[orderId]
+
+	if true != buyPromissoryNotes.IsSell {
+		return types.PromissoryNotesOptionTx{}
+	}
+	if 0 >= buyPromissoryNotes.TxNum {
+		return types.PromissoryNotesOptionTx{}
+	}
+	var tmpAddr common.Address
+	var turnBuy = 0
+	if true == buyPromissoryNotes.IsSell &&  tmpAddr != buyPromissoryNotes.OptionOwner {
+		tmpAddr = buyPromissoryNotes.OptionOwner
+		turnBuy = 1
+	}
+	buyPromissoryNotes.IsSell = false
+	buyPromissoryNotes.OptionOwner = address
+	optionTxTable[orderId] = buyPromissoryNotes
+	b, _ := json.Marshal(optionTxTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	if 1 == turnBuy {
+		buyPromissoryNotes.PromissoryNotesOwner = tmpAddr
+	}
+	return buyPromissoryNotes
+}
+
+func (self *stateObject)DeletePromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil{
+		return types.PromissoryNotesOptionTx{}
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	buyPromissoryNotes := optionTxTable[orderId]
+	if false != buyPromissoryNotes.IsSell {
+		return types.PromissoryNotesOptionTx{}
+	}
+	if 0 >= buyPromissoryNotes.TxNum {
+		return types.PromissoryNotesOptionTx{}
+	}
+	if buyPromissoryNotes.OptionOwner != address {
+		return types.PromissoryNotesOptionTx{}
+	}
+	delete(optionTxTable,orderId)
+	fmt.Println(optionTxTable)
+	b, _ := json.Marshal(optionTxTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return buyPromissoryNotes
+
+}
+
+
+func (self *stateObject)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big, address common.Address) bool {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil{
+		return false
+	}else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	buyPromissoryNotes := optionTxTable[orderId]
+	if buyPromissoryNotes.OptionOwner != address {
+		return false
+	}
+	if 0 >= buyPromissoryNotes.TxNum {
+		return false
+	}
+	buyPromissoryNotes.IsSell = true
+	buyPromissoryNotes.OptionPrice = optionPrice.ToInt()
+	optionTxTable[orderId] = buyPromissoryNotes
+	b, _ := json.Marshal(optionTxTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
+}

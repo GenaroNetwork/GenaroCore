@@ -395,6 +395,12 @@ web3._extend({
 	property: 'eth',
 	methods: [
 		new web3._extend.Method({
+			name: 'getAccountData',
+			call: 'eth_getAccountData',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getAlreadyBackStakeList',
 			call: 'eth_getAlreadyBackStakeList',
 			params: 1,
@@ -457,6 +463,12 @@ web3._extend({
 		new web3._extend.Method({
         	name: 'getCommitteeRank',
         	call: 'eth_getCommitteeRank',
+        	params: 1,
+        	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+        	name: 'getMainAccountRank',
+        	call: 'eth_getMainAccountRank',
         	params: 1,
         	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
@@ -534,6 +546,30 @@ web3._extend({
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputString]
 		}),
+		new web3._extend.Method({
+			name: 'getAllPromissoryNotesNum',
+			call: 'eth_getAllPromissoryNotesNum',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getBeforPromissoryNotesNum',
+			call: 'eth_getBeforPromissoryNotesNum',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getPromissoryNotes',
+			call: 'eth_getPromissoryNotes',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getOptionTx',
+			call: 'eth_getOptionTx',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		})
 	],
 	properties: [
 		new web3._extend.Property({

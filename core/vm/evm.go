@@ -235,7 +235,7 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
 		err = updateStake(evm, s, caller)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-		err = updateHeft(&evm.StateDB, s, evm.BlockNumber.Uint64(), caller)
+		err = updateHeft(evm, s, caller)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		err = updateStorageProperties(evm, s, caller)
 	case common.SpecialTxBucketSupplement.Uint64(): // 存储空间续命
@@ -276,6 +276,20 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		err = setGlobalVar(evm, s, caller)
 	case common.SpecialTxAddCoinpool.Uint64():	// 增加币池
 		err = addCoinpool(evm, s, caller)
+	case common.SpecialTxRevoke.Uint64(): // 撤销期权交易
+		err = revokePromissoryNotesTx(evm, s, caller)
+	case common.SpecialTxWithdrawCash.Uint64():	//提现
+		err = PromissoryNotesWithdrawCash(evm, caller)
+	case common.SpecialTxPublishOption.Uint64():	//发布期权交易
+		err = publishOption(evm, s, caller)
+	case common.SpecialTxSetOptionTxStatus.Uint64():
+		err = setOptionTxStatus(evm, s, caller)
+	case common.SpecialTxBuyPromissoryNotes.Uint64(): //购买期权
+		err = buyPromissoryNotes(evm, s, caller)
+	case common.SpecialTxCarriedOutPromissoryNotes.Uint64(): //购买期权
+		err = CarriedOutPromissoryNotes(evm, s, caller)
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64(): //购买期权
+		err = turnBuyPromissoryNotes(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -285,6 +299,64 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetOptionTxStatus(caller, s, (*evm).StateDB, (*evm).chainConfig.Genaro.OptionTxMemorySize); err != nil {
+		return err
+	}
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	(*evm).StateDB.SetTxStatusInOptionTxTable(s.OrderId, s.IsSell, optionTxMemorySize)
+
+	return nil
+}
+
+func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckPublishOption(caller, s, (*evm).StateDB, (*evm).BlockNumber); err != nil {
+		return err
+	}
+	var promissoryNote types.PromissoryNote
+	promissoryNote.RestoreBlock = s.RestoreBlock
+	promissoryNote.Num = s.TxNum
+
+	optionHash := types.GenOptionTxHash(caller, (*evm).StateDB.GetNonce(caller))
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	if (*evm).StateDB.DelPromissoryNote(caller, promissoryNote){
+		var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+		promissoryNotesOptionTx.TxNum = s.TxNum
+		promissoryNotesOptionTx.RestoreBlock = s.RestoreBlock
+		promissoryNotesOptionTx.PromissoryNotesOwner = caller
+		promissoryNotesOptionTx.IsSell = true
+		promissoryNotesOptionTx.PromissoryNoteTxPrice = s.PromissoryNoteTxPrice.ToInt()
+		promissoryNotesOptionTx.OptionPrice = s.OptionPrice.ToInt()
+		(*evm).StateDB.AddTxInOptionTxTable(optionHash, promissoryNotesOptionTx, optionTxMemorySize)
+	}
+
+	return nil
+}
+
+func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckPromissoryNoteRevoke(caller, s, (*evm).StateDB, (*evm).BlockNumber, (*evm).chainConfig.Genaro.OptionTxMemorySize); err != nil {
+		return err
+	}
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	//从交易中心移除本次交易并将期权还原到用户账户中
+	optionTxTable := (*evm).StateDB.GetOptionTxTable(s.OrderId, optionTxMemorySize)
+	promissoryNotesOptionTx := (*optionTxTable)[s.OrderId]
+
+	if (*evm).StateDB.DelTxInOptionTxTable(s.OrderId, optionTxMemorySize) {
+		var promissoryNote types.PromissoryNote
+		promissoryNote.Num = promissoryNotesOptionTx.TxNum
+		promissoryNote.RestoreBlock = promissoryNotesOptionTx.RestoreBlock
+		(*evm).StateDB.AddPromissoryNote(caller, promissoryNote)
+	}
+
+	return nil
 }
 
 func delAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
@@ -469,6 +541,14 @@ func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error
 		genaroPrice.SynStateAccount = s.SynStateAccount
 	}
 
+	if len(s.HeftAccount) > 0 {
+		genaroPrice.HeftAccount = s.HeftAccount
+	}
+
+	if len(s.BindingAccount) > 0 {
+		genaroPrice.BindingAccount = s.BindingAccount
+	}
+
 	ok := (*evm).StateDB.SetGenaroPrice(*genaroPrice)
 	if !ok {
 		return errors.New("setGlobalVar fail")
@@ -515,7 +595,7 @@ func userBackStake(evm *EVM, caller common.Address) error {
 
 func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
-	if err := CheckPunishmentTx(caller,s); err != nil  {
+	if err := CheckPunishmentTx(caller,s,evm.chainConfig.Genaro); err != nil  {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)
@@ -542,7 +622,7 @@ func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckSynchronizeShareKeyParameter(s); err != nil  {
+	if err := CheckSynchronizeShareKeyParameter(s,evm.chainConfig.Genaro); err != nil  {
 		return err
 	}
 	s.SynchronizeShareKey.Status = 0
@@ -554,7 +634,7 @@ func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address)
 }
 
 func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckSyncFileSharePublicKeyTx(s); nil != err  {
+	if err := CheckSyncFileSharePublicKeyTx(s,evm.chainConfig.Genaro); nil != err  {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)
@@ -582,7 +662,7 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error  {
-	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller); nil != err {
+	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, evm.chainConfig.Genaro); nil != err {
 		return err
 	}
 
@@ -706,14 +786,14 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 }
 
 
-func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64, caller common.Address) error {
-	if err := CheckSyncHeftTx(caller, s); err != nil {
+func updateHeft(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSyncHeftTx(caller, s, evm.StateDB, evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 
 	adress := common.HexToAddress(s.Address)
 	// 根据nodeid更新heft值
-	if !(*statedb).UpdateHeft(adress, s.Heft, blockNumber) {
+	if !(evm.StateDB).UpdateHeft(adress, s.Heft, evm.BlockNumber.Uint64()) {
 		return errors.New("update user's heft fail")
 	}
 	return nil
@@ -721,7 +801,7 @@ func updateHeft(statedb *StateDB, s types.SpecialTxInput, blockNumber uint64, ca
 
 func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
-	if err := CheckTrafficTx(s); err != nil {
+	if err := CheckTrafficTx(s,evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 
@@ -749,7 +829,7 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 }
 
 func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckStakeTx(s,evm.StateDB); err != nil {
+	if err := CheckStakeTx(s,evm.StateDB,evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 
@@ -773,6 +853,61 @@ func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 		return errors.New("add candidate fail")
 	}
 	(*evm).StateDB.SubBalance(caller, amount)
+	return nil
+}
+
+
+
+//提现
+func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
+	blockNumber := evm.BlockNumber.Uint64()
+	withdrawCashNum := (*evm).StateDB.PromissoryNotesWithdrawCash(caller,blockNumber)
+	if withdrawCashNum <= 0 {
+		return errors.New("WithdrawCash error")
+	}
+	promissoryPrice := big.NewInt(int64(evm.chainConfig.Genaro.PromissoryNotePrice*withdrawCashNum))
+	promissoryPrice.Mul(promissoryPrice,common.BaseCompany)
+	(*evm).StateDB.AddBalance(caller, promissoryPrice)
+	return nil
+}
+
+//购买期权
+func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId, caller, optionTxMemorySize)
+	if result.TxNum > 0 {
+		//result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
+		//result.OptionPrice.Mul(result.OptionPrice,common.BaseCompany)
+		(*evm).StateDB.AddBalance(result.PromissoryNotesOwner, result.OptionPrice)
+		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
+func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.CarriedOutPromissoryNotes(s.OrderId,caller, optionTxMemorySize)
+	if result.TxNum > 0{
+		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,big.NewInt(int64(result.TxNum)))
+		//result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
+		(*evm).StateDB.AddBalance(result.PromissoryNotesOwner, result.OptionPrice)
+		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
+func turnBuyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.TurnBuyPromissoryNotes(s.OrderId, s.OptionPrice, caller, optionTxMemorySize)
+	if false == result{
+		errors.New("update error")
+	}
 	return nil
 }
 

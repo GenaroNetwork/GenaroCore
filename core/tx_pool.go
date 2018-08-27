@@ -639,29 +639,29 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 
 	switch s.Type.ToInt().Uint64(){
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
-		return vm.CheckStakeTx(s, pool.currentState)
+		return vm.CheckStakeTx(s, pool.currentState,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
-		return vm.CheckSyncHeftTx(caller, s)
+		return vm.CheckSyncHeftTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
-		return vm.CheckApplyBucketTx(s)
+		return vm.CheckApplyBucketTx(s,pool.chainconfig.Genaro)
 	case common.SpecialTxBucketSupplement.Uint64(): // 存储空间续命
 		return vm.CheckBucketSupplement(s, pool.currentState)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
-		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller)
+		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
-		return vm.CheckTrafficTx(s)
+		return vm.CheckTrafficTx(s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		return vm.CheckSyncNodeTx(caller, s, pool.currentState)
 	case common.SynchronizeShareKey.Uint64():
-		return vm.CheckSynchronizeShareKeyParameter(s)
+		return vm.CheckSynchronizeShareKeyParameter(s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
-		return vm.CheckSyncFileSharePublicKeyTx(s)
+		return vm.CheckSyncFileSharePublicKeyTx(s,pool.chainconfig.Genaro)
 	case common.UnlockSharedKey.Uint64():
 		return vm.CheckUnlockSharedKeyParameter(s)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
-		return vm.CheckPunishmentTx(caller,s)
+		return vm.CheckPunishmentTx(caller,s,pool.chainconfig.Genaro)
 	case common.SpecialTxTypeBackStake.Uint64():
 		return vm.CheckBackStakeTx(caller, pool.currentState)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
@@ -684,6 +684,26 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return vm.CheckSetGlobalVar(caller, s)
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
+	case common.SpecialTxPublishOption.Uint64():
+	//发布期权售卖交易
+		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())
+	case common.SpecialTxRevoke.Uint64():
+	//撤回期权售卖交易
+		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState, pool.chain.CurrentBlock().Number(),pool.chainconfig.Genaro.OptionTxMemorySize)
+	case common.SpecialTxSetOptionTxStatus.Uint64():
+	// 更改期权售卖交易状态
+		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
+	//购买期权
+	case common.SpecialTxBuyPromissoryNotes.Uint64():
+		return vm.CheckBuyPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
+	//执行期权
+	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
+		return vm.CheckCarriedOutPromissoryNotes(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
+	//转卖期权
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
+		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
+	case common.SpecialTxWithdrawCash.Uint64():
+		return vm.WithdrawCash(caller, pool.currentState, pool.chain.CurrentBlock().Number())
 
 	}
 	return errors.New("undefined type of special transaction")
@@ -713,7 +733,7 @@ func (pool *TxPool) add(tx *types.Transaction, local bool) (bool, error) {
 	// If the transaction pool is full, discard underpriced transactions
 	if uint64(len(pool.all)) >= pool.config.GlobalSlots+pool.config.GlobalQueue {
 		// If the new transaction is underpriced, don't accept it
-		if !local && pool.priced.Underpriced(tx, pool.locals) {
+		if pool.priced.Underpriced(tx, pool.locals) {
 			log.Trace("Discarding underpriced transaction", "hash", hash, "price", tx.GasPrice())
 			underpricedTxCounter.Inc(1)
 			return false, ErrUnderpriced

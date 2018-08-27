@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"time"
 )
 
@@ -22,7 +24,13 @@ type SpecialTxInput struct {
 	BlockNumber string       `json:"blockNr"`
 	Message     string       `json:"msg"`
 	Sign        string       `json:"sign"`
-	AddCoin	*hexutil.Big `json:"addCoin"`
+	AddCoin	*hexutil.Big     `json:"addCoin"`
+	OrderId     common.Hash       `json:"orderId"`
+	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
+	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
+	PromissoryNoteTxPrice	*hexutil.Big	`json:"PromissoryNoteTxPrice"`	// 期票的交易单价
+	OptionPrice		*hexutil.Big	`json:"OptionPrice"`	// 期权的价格
+	IsSell			bool		`json:"IsSell"`	// 期权是否在售
 	GenaroPrice
 }
 
@@ -40,6 +48,8 @@ type GenaroPrice struct {
 	StorageRewardsRatio	uint64	`json:"StorageRewardsRatio"`	// 存储收益比率
 	RatioPerYear	uint64	`json:"RatioPerYear"`	// 年收益比率
 	SynStateAccount	string	`json:"SynStateAccount"`	// 区块同步信号的发送地址
+	HeftAccount		string	`json:"HeftAccount"`	// 用于同步链上Heft值的账号
+	BindingAccount	string	`json:"BindingAccount"`	// 用于账号绑定的账号
 	ExtraPrice     []byte   `json:"extraPrice"` //该版本用不上，考虑后期版本兼容性使用
 }
 
@@ -143,21 +153,130 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 	}
 }
 
+// 用户账户下的期票
+type PromissoryNote struct {
+	RestoreBlock uint64	`json:"restoreBlock"`	// 返还的块号
+	Num	uint64			`json:"Num"`	// 期票数量
+}
+
+type PromissoryNotes	[]PromissoryNote
+
+// 增加期票
+func (notes *PromissoryNotes) Add(newNote PromissoryNote){
+	isExist := false
+	for i,note := range *notes {
+		if note.RestoreBlock == newNote.RestoreBlock {
+			(*notes)[i].Num += newNote.Num
+			isExist = true
+			break
+		}
+	}
+
+	if !isExist {
+		*notes = append(*notes,newNote)
+	}
+}
+
+// 减少期票,返回是否成功减少
+func (notes *PromissoryNotes) Del(newNote PromissoryNote) bool{
+	isSuccess := false
+	for i,note := range *notes {
+		if note.RestoreBlock == newNote.RestoreBlock {
+			if (*notes)[i].Num >= newNote.Num {
+				(*notes)[i].Num -= newNote.Num
+				isSuccess = true
+				if (*notes)[i].Num == 0 {
+					(*notes) = append((*notes)[:i],(*notes)[i+1:]...)
+				}
+			}
+			break
+		}
+	}
+	return isSuccess
+}
+
+// 删除到期的期票，返回删除的数量
+func (notes *PromissoryNotes) DelBefor(blockNum uint64) uint64 {
+	delNum := uint64(0)
+	for i:=0;i<len(*notes);i++ {
+		if (*notes)[i].RestoreBlock <= blockNum {
+			delNum += (*notes)[i].Num
+			(*notes) = append((*notes)[:i],(*notes)[i+1:]...)
+			i--
+		}
+	}
+	return delNum
+}
+
+// 到期的期票数量
+func (notes *PromissoryNotes) GetBefor(blockNum uint64) uint64 {
+	num := uint64(0)
+	for i:=0;i<len(*notes);i++ {
+		if (*notes)[i].RestoreBlock <= blockNum {
+			num += (*notes)[i].Num
+		}
+	}
+	return num
+}
+
+// 返回某一类期票的数量
+func (notes *PromissoryNotes) GetNum(restoreBlock uint64) uint64 {
+	for _,note := range *notes {
+		if note.RestoreBlock == restoreBlock {
+			return note.Num
+		}
+	}
+	return 0
+}
+
+// 获取期票总数
+func (notes *PromissoryNotes) GetAllNum() uint64 {
+	allNum := uint64(0)
+	for _,note := range *notes {
+		allNum += note.Num
+	}
+	return allNum
+}
+
+// 期票期权交易
+type PromissoryNotesOptionTx struct {
+	IsSell			bool		`json:"IsSell"`	// 期权是否在售
+	OptionPrice		*big.Int	`json:"OptionPrice"`	// 期权的价格
+	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
+	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
+	PromissoryNoteTxPrice	*big.Int	`json:"PromissoryNoteTxPrice"`	// 期票的交易单价
+	PromissoryNotesOwner	common.Address	`json:"PromissoryNotesOwner"`	// 期票的拥有者
+	OptionOwner		common.Address	`json:"OptionOwner"`
+}
+
+// 期权交易表
+type OptionTxTable map[common.Hash]PromissoryNotesOptionTx
+
+// 生成期权交易hash
+func GenOptionTxHash(addr common.Address, nonce uint64) common.Hash {
+	data, _ := rlp.EncodeToBytes([]interface{}{addr, nonce})
+	crypto.Keccak256()
+	var hash common.Hash
+	hash.SetBytes(crypto.Keccak256(data))
+	return hash
+}
+
 // Genaro is the Ethereum consensus representation of Genaro's data.
 // these objects are stored in the main genaro trie.
 type GenaroData struct {
 	Heft                         uint64                               `json:"heft"`
 	Stake                        uint64                               `json:"stake"`
-	HeftLog						 NumLogs						`json:"heftlog"`
-	StakeLog					 NumLogs						`json:"stakelog"`
-	FileSharePublicKey           string                               `json:"publicKey"`
-	Node                         []string                             `json:"syncNode"`
-	SpecialTxTypeMortgageInit    SpecialTxTypeMortgageInit            `json:"specialTxTypeMortgageInit"`
+	HeftLog						 NumLogs								`json:"heftlog"`
+	StakeLog					 NumLogs								`json:"stakelog"`
+	FileSharePublicKey           string                               	`json:"publicKey"`
+	Node                         []string                             	`json:"syncNode"`
+	SpecialTxTypeMortgageInit    SpecialTxTypeMortgageInit            	`json:"specialTxTypeMortgageInit"`
 	SpecialTxTypeMortgageInitArr map[string]SpecialTxTypeMortgageInit `json:"specialTxTypeMortgageInitArr"`
-	Traffic                      uint64                               `json:"traffic"`
-	Buckets                      []*BucketPropertie                   `json:"buckets"`
-	SynchronizeShareKeyArr 		 map[string] SynchronizeShareKey	  `json:"synchronizeShareKeyArr"`
-	SynchronizeShareKey			 SynchronizeShareKey				   `json:"synchronizeShareKey"`
+	Traffic                      uint64                               	`json:"traffic"`
+	Buckets                      []*BucketPropertie                   	`json:"buckets"`
+	SynchronizeShareKeyArr 		 map[string] SynchronizeShareKey	  	`json:"synchronizeShareKeyArr"`
+	SynchronizeShareKey			 SynchronizeShareKey				   	`json:"synchronizeShareKey"`
+	PromissoryNotes				PromissoryNotes							`json:"PromissoryNotes"`
 }
 
 type SynchronizeShareKey struct {
