@@ -711,7 +711,7 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 }
 
 func bucketSupplement(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckBucketSupplement(s, (*evm).StateDB); err != nil {
+	if err := CheckBucketSupplement(s, (*evm).StateDB, (*evm).chainConfig.Genaro); err != nil {
 		return err
 	}
 
@@ -747,7 +747,7 @@ func bucketSupplement(evm *EVM, s types.SpecialTxInput,caller common.Address) er
 }
 
 func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckApplyBucketTx(s); err != nil {
+	if err := CheckApplyBucketTx(s,(*evm).chainConfig.Genaro); err != nil {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)

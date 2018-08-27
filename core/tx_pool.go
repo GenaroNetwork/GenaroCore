@@ -645,7 +645,7 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
 		return vm.CheckApplyBucketTx(s,pool.chainconfig.Genaro)
 	case common.SpecialTxBucketSupplement.Uint64(): // 存储空间续命
-		return vm.CheckBucketSupplement(s, pool.currentState)
+		return vm.CheckBucketSupplement(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
 		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算

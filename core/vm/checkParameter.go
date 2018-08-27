@@ -202,7 +202,7 @@ func CheckApplyBucketTx(s types.SpecialTxInput,genaroConfig *params.GenaroConfig
 	return nil
 }
 
-func CheckBucketSupplement(s types.SpecialTxInput, state StateDB) error {
+func CheckBucketSupplement(s types.SpecialTxInput, state StateDB,genaroConfig *params.GenaroConfig) error {
 
 	if s.Address == "" {
 		return errors.New("param [address] missing or can't be null string")
@@ -217,7 +217,7 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB) error {
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress){
+	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
 	}
 
