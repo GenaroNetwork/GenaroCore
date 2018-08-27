@@ -79,6 +79,9 @@ var (
 	// 存放禁止退注的名单
 	ForbidBackStakeSaveAddress Address = HexToAddress("0x9000000000000000000000000000000000000000")
 
+	//已购买空间补充
+	SpecialTxBucketSupplement = big.NewInt(41)
+
 )
 
 var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress}
