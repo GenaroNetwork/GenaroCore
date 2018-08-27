@@ -546,7 +546,10 @@ func (self *StateDB) GetRefund() uint64 {
 // and clears the journal as well as the refunds.
 func (s *StateDB) Finalise(deleteEmptyObjects bool) {
 	for addr := range s.stateObjectsDirty {
-		stateObject := s.stateObjects[addr]
+		stateObject, exist := s.stateObjects[addr]
+		if !exist {
+			continue
+		}
 		if stateObject.suicided || (deleteEmptyObjects && stateObject.empty()) {
 			s.deleteStateObject(stateObject)
 		} else {

@@ -107,7 +107,7 @@ func ecrecover(header *types.Header) (common.Address, error) {
 	var signer common.Address
 	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
 	return signer, nil
-	return header.Coinbase, nil
+	//return header.Coinbase, nil
 }
 
 func Ecrecover(header *types.Header) (common.Address, error) {

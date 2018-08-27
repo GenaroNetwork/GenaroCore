@@ -213,7 +213,7 @@ func TestNew(t *testing.T) {
 //}
 
 func newTestStateDB() *state.StateDB {
-	diskdb, _ := ethdb.NewMemDatabase()
+	diskdb := ethdb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(diskdb))
 
 	return statedb
