@@ -13,7 +13,7 @@ if [[ $committees -le 0 ]];then
 fi
 
 cd ../
-make geth
+make go-genaro
 cd automatedScript/
 
 ls keystore/* | head -n $committees > fileName
@@ -88,13 +88,13 @@ do
 
 
 	#初始化
-	./../build/bin/geth  init  ./genaro.json --datadir "./chainNode/chainNode$i"
+	./../build/bin/go-genaro  init  ./genaro.json --datadir "./chainNode/chainNode$i"
 	
 	#key复制到keystore下
 	cp $line  ./chainNode/chainNode$i/keystore/${line##*/}
 	
 	#启动
-	nohup ./../build/bin/geth --rpc --rpccorsdomain "*" --rpcvhosts=* --rpcapi "eth,net,web3,admin,personal,miner" --datadir "./chainNode/chainNode$i" --port "$port" --rpcport "$rpcport" --rpcaddr 0.0.0.0  --bootnodes "$bootnode_addr" --unlock "0x${line##*--}" --password "./password"  --syncmode "full" --mine  > ./nohupNodeLog/nohupNode$i.out &
+	nohup ./../build/bin/go-genaro --rpc --rpccorsdomain "*" --rpcvhosts=* --rpcapi "eth,net,web3,admin,personal,miner" --datadir "./chainNode/chainNode$i" --port "$port" --rpcport "$rpcport" --rpcaddr 0.0.0.0  --bootnodes "$bootnode_addr" --unlock "0x${line##*--}" --password "./password"  --syncmode "full" --mine  > ./nohupNodeLog/nohupNode$i.out &
 	let "i=$i+1"
 	let "port=$port+1"
 	let "rpcport=$rpcport+1"
