@@ -196,8 +196,10 @@ func CheckApplyBucketTx(s types.SpecialTxInput, state StateDB, genaroConfig *par
 	}
 
 	if state.IsContract(adress) {
-		return errors.New("Account is Contract")
+		return errors.New("Account is Contract ")
 	}
+
+	bucketMap, _ := state.GetBuckets(adress)
 
 	for _, v := range s.Buckets {
 		if len(v.BucketId) != 64 {
@@ -218,6 +220,12 @@ func CheckApplyBucketTx(s types.SpecialTxInput, state StateDB, genaroConfig *par
 
 		if v.Size == 0 {
 			return errors.New("param [size] missing or can't be zero ")
+		}
+
+		if bucketMap != nil{
+			if _, ok := bucketMap[v.BucketId]; ok {
+				return errors.New("param [bucketId] already exists")
+			}
 		}
 	}
 	return nil

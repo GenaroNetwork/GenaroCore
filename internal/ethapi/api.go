@@ -46,7 +46,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"math/rand"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 )
@@ -1641,19 +1640,6 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 			s.SpecialTxTypeMortgageInit.EndTime =  tmp.Add(&tmp,big.NewInt(s.SpecialTxTypeMortgageInit.CreateTime)).Int64()
 			s.SpecialTxTypeMortgageInit.FileID = hex.EncodeToString(timeUnixSha256[:])
 			s.SpecialTxTypeMortgageInit.FromAccount = args.From
-			input,_ := json.Marshal(s)
-			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		case common.SpecialTxTypeSpaceApply.Uint64():
-			var b []*types.BucketPropertie
-			for _, v := range s.Buckets{
-				t := time.Now()
-				r := rand.New(rand.NewSource(t.Unix()))
-				bucketID := s.Address + strconv.FormatInt(t.Unix(),10) + strconv.Itoa(r.Int())
-				bucketIdSha256 := sha256.Sum256([]byte(bucketID))
-				v.BucketId = hex.EncodeToString(bucketIdSha256[:])
-				b = append(b, v)
-			}
-			s.Buckets = b
 			input,_ := json.Marshal(s)
 			return  types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 		case common.SpecialTxTypeSyncSidechainStatus.Uint64():
