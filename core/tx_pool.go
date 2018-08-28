@@ -592,19 +592,20 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInsufficientFunds
 	}
 
+	var s types.SpecialTxInput
+	bucketsMap := make(map[string]interface{})
 	if nil != tx.To() {
 		if common.SpecialSyncAddress == *tx.To(){
 			err := pool.dispatchHandlerValidateTx(tx.Data(), from)
 			if err != nil{
 				return err
 			}
+
+			json.Unmarshal(tx.Data(), &s)
+			if s.Type.ToInt().Uint64() == common.SpecialTxBucketSupplement.Uint64() {
+				bucketsMap, _ = pool.currentState.GetBuckets(common.HexToAddress(s.Address))
+			}
 		}
-	}
-	var s types.SpecialTxInput
-	bucketsMap := make(map[string]interface{})
-	json.Unmarshal(tx.Data(), &s)
-	if s.Type.ToInt().Uint64() == common.SpecialTxBucketSupplement.Uint64() {
-		bucketsMap, _ = pool.currentState.GetBuckets(common.HexToAddress(s.Address))
 	}
 
 	currentPrice := pool.currentState.GetGenaroPrice()
