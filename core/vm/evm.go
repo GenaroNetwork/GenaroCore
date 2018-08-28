@@ -595,7 +595,7 @@ func userBackStake(evm *EVM, caller common.Address) error {
 
 func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
-	if err := CheckPunishmentTx(caller,s,evm.chainConfig.Genaro); err != nil  {
+	if err := CheckPunishmentTx(caller,s,evm.StateDB,evm.chainConfig.Genaro); err != nil  {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)
@@ -622,7 +622,7 @@ func UnlockSharedKey(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckSynchronizeShareKeyParameter(s,evm.chainConfig.Genaro); err != nil  {
+	if err := CheckSynchronizeShareKeyParameter(s,evm.StateDB,evm.chainConfig.Genaro); err != nil  {
 		return err
 	}
 	s.SynchronizeShareKey.Status = 0
@@ -634,7 +634,7 @@ func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput,caller common.Address)
 }
 
 func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckSyncFileSharePublicKeyTx(s,evm.chainConfig.Genaro); nil != err  {
+	if err := CheckSyncFileSharePublicKeyTx(s,evm.StateDB,evm.chainConfig.Genaro); nil != err  {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)
@@ -662,7 +662,7 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 }
 
 func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error  {
-	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, evm.chainConfig.Genaro); nil != err {
+	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, evm.StateDB, evm.chainConfig.Genaro); nil != err {
 		return err
 	}
 
@@ -747,7 +747,7 @@ func bucketSupplement(evm *EVM, s types.SpecialTxInput,caller common.Address) er
 }
 
 func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
-	if err := CheckApplyBucketTx(s,(*evm).chainConfig.Genaro); err != nil {
+	if err := CheckApplyBucketTx(s,evm.StateDB,(*evm).chainConfig.Genaro); err != nil {
 		return err
 	}
 	adress := common.HexToAddress(s.Address)
@@ -801,7 +801,7 @@ func updateHeft(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 
 func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
-	if err := CheckTrafficTx(s,evm.chainConfig.Genaro); err != nil {
+	if err := CheckTrafficTx(s,evm.StateDB,evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 

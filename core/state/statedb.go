@@ -215,6 +215,14 @@ func (self *StateDB) GetCode(addr common.Address) []byte {
 	return nil
 }
 
+func (self *StateDB) IsContract(addr common.Address) bool {
+	stateObject := self.getStateObject(addr)
+	if stateObject != nil {
+		return stateObject.IsContract()
+	}
+	return false
+}
+
 func (self *StateDB) GetCodeSize(addr common.Address) int {
 	stateObject := self.getStateObject(addr)
 	if stateObject == nil {

@@ -456,6 +456,10 @@ func CheckCodeEmpty(codeHash []byte) bool {
 	}
 }
 
+func (self *stateObject) IsContract() bool {
+	return !CheckCodeEmpty(self.CodeHash())
+}
+
 // Code returns the contract code associated with this object, if any.
 func (self *stateObject) Code(db Database) []byte {
 	if self.code != nil {

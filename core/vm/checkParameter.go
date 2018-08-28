@@ -31,10 +31,15 @@ func isSpecialAddress(address common.Address,optionTxMemorySize uint64) bool {
 	return false
 }
 
-func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address, genaroConfig *params.GenaroConfig) error {
+func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address, state StateDB, genaroConfig *params.GenaroConfig) error {
 	if true == isSpecialAddress(s.SpecialTxTypeMortgageInit.FromAccount,genaroConfig.OptionTxMemorySize) {
 		return errors.New("fromAccount error")
 	}
+
+	if state.IsContract(s.SpecialTxTypeMortgageInit.FromAccount) {
+		return errors.New("Account is Contract")
+	}
+
 
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
@@ -98,10 +103,14 @@ func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller comm
 	return nil
 }
 
-func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 
 	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress,genaroConfig.OptionTxMemorySize) {
 		return errors.New("update  chain SynchronizeShareKey fail")
+	}
+
+	if state.IsContract(s.SynchronizeShareKey.RecipientAddress) {
+		return errors.New("Account is Contract")
 	}
 
 	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
@@ -133,6 +142,10 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.Ge
 		return errors.New("param [address] can't be special address")
 	}
 
+	if state.IsContract(adress) {
+		return errors.New("Account is Contract")
+	}
+
 	genaroPrice := state.GetGenaroPrice()
 	if s.Stake < genaroPrice.MinStake {
 		return errors.New("value of stake must larger than MinStake")
@@ -161,6 +174,10 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, state StateD
 		return errors.New("param [address] can't be special address")
 	}
 
+	if state.IsContract(adress) {
+		return errors.New("Account is Contract")
+	}
+
 	if s.Heft <= 0 {
 		return errors.New("value of heft must larger than zero")
 	}
@@ -168,7 +185,7 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, state StateD
 	return nil
 }
 
-func CheckApplyBucketTx(s types.SpecialTxInput,genaroConfig *params.GenaroConfig) error {
+func CheckApplyBucketTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 	if s.Address == "" {
 		return errors.New("param [address] missing or can't be null string")
 	}
@@ -176,6 +193,10 @@ func CheckApplyBucketTx(s types.SpecialTxInput,genaroConfig *params.GenaroConfig
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
+	}
+
+	if state.IsContract(adress) {
+		return errors.New("Account is Contract")
 	}
 
 	for _, v := range s.Buckets {
@@ -221,6 +242,10 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB,genaroConfig *p
 		return errors.New("param [address] can't be special address")
 	}
 
+	if state.IsContract(adress) {
+		return errors.New("Account is Contract")
+	}
+
 	//对应address是否存在对应buckedId的存贮空间
 	buckets, _ := state.GetBuckets(adress)
 	if buckets == nil {
@@ -240,7 +265,7 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB,genaroConfig *p
 }
 
 
-func CheckTrafficTx(s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+func CheckTrafficTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 
 	if s.Address == "" {
 		return errors.New("param [address] missing or can't be null string")
@@ -249,6 +274,10 @@ func CheckTrafficTx(s types.SpecialTxInput, genaroConfig *params.GenaroConfig) e
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
+	}
+
+	if state.IsContract(adress) {
+		return errors.New("Account is Contract")
 	}
 
 	if s.Traffic <= 0 {
@@ -343,7 +372,7 @@ func generateNodeId(b []byte) string {
 	return nodeId
 }
 
-func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+func CheckPunishmentTx(caller common.Address, s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 	if s.Address == "" {
 		return errors.New("param [address] missing or can't be null string")
 	}
@@ -355,6 +384,10 @@ func CheckPunishmentTx(caller common.Address,s types.SpecialTxInput, genaroConfi
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
+	}
+
+	if state.IsContract(adress) {
+		return errors.New("Account is Contract")
 	}
 
 	if caller !=  common.OfficialAddress {
@@ -396,7 +429,7 @@ func CheckSynStateTx(caller common.Address, state StateDB) error {
 	return nil
 }
 
-func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 	if s.Address == "" {
 		return errors.New("param [address] missing or can't be null string")
 	}
@@ -404,6 +437,10 @@ func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput, genaroConfig *params.
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
 		return errors.New("param [address] can't be special address")
+	}
+
+	if state.IsContract(adress) {
+		return errors.New("Account is Contract")
 	}
 
 	if s.FileSharePublicKey == "" {
