@@ -85,7 +85,7 @@ func GetBlockHash(url string,blockNum uint64) (string,error){
 }
 
 func SendSynState(url string,blockHash string) (string,error){
-	ret,err := HttpPost(url,"application/json",`{"jsonrpc": "2.0","method": "eth_sendTransaction","params": [{"from": "`+SynStateAccount+`","to": "`+common.SpecialSyncAddress.String()+`","gasPrice": "0x430e23400","value": "0x1","extraData": "{\"msg\": \"`+blockHash+`\",\"type\": \"0xd\"}"}],"id": 1}`)
+	ret,err := HttpPost(url,"application/json",`{"jsonrpc": "2.0","method": "eth_sendTransaction","params": [{"from": "`+SynStateAccount+`","to": "`+common.SpecialSyncAddress.String()+`","gasPrice": "0x430e23400","value": "0x0","extraData": "{\"msg\": \"`+blockHash+`\",\"type\": \"0xd\"}"}],"id": 1}`)
 	if err != nil {
 		return "",err
 	}
