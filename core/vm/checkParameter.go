@@ -532,7 +532,6 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
-	// 检查账号是否有押注
 	stake,err := state.GetStake(account)
 	if err != nil {
 		return err
@@ -547,12 +546,10 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 }
 
 func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error {
-	// 检查是否是官方账号
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
-	// 检查账号是否在禁止名单中
 	ok := state.IsAccountExistInForbidBackStakeList(account)
 	if !ok {
 		return errors.New("account is not in forbid list")
@@ -561,7 +558,6 @@ func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 }
 
 func CheckSetGlobalVar(caller common.Address,s types.SpecialTxInput) error {
-	// 检查是否是官方账号
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}

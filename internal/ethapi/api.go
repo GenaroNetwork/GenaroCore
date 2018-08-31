@@ -594,7 +594,6 @@ func (s *PublicBlockChainAPI) GetAlreadyBackStakeList(ctx context.Context, block
 	return
 }
 
-// 获取账号下的子账号队列
 func (s *PublicBlockChainAPI) GetSubAccounts(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (accounts []common.Address, err error) {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
@@ -611,7 +610,6 @@ func (s *PublicBlockChainAPI) GetMainAccount(ctx context.Context, address common
 	return state.GetMainAccount(address),nil
 }
 
-// 获取所有全局变量
 func (s *PublicBlockChainAPI) GetGlobalVar(ctx context.Context, blockNr rpc.BlockNumber) *types.GenaroPrice{
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
@@ -1221,7 +1219,6 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.
 	if startBlockNr > endBlockNr {
 		return nil,errors.New("startBlockNumber can't larger than endBlockNumber")
 	}
-	//最大遍历区间86400
 	var maxRange int64 = 86400
 	var currentRange = endBlockNr.Int64() - startBlockNr.Int64()
 	if currentRange > maxRange {
@@ -1250,7 +1247,6 @@ func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txTy
 }
 
 func txWithType(tx *types.Transaction, txType *big.Int) bool {
-	// 解析transaction的Payload域值
 	if tx.Data() == nil || len(tx.Data()) == 0{
 		return false
 	}
