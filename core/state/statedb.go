@@ -658,7 +658,6 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	return root, err
 }
 
-
 func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
@@ -668,7 +667,6 @@ func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint
 	return false
 }
 
-
 func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -677,7 +675,6 @@ func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	return 0, nil
 }
 
-
 func (self *StateDB)GetHeftLog(id common.Address) types.NumLogs{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -685,7 +682,6 @@ func (self *StateDB)GetHeftLog(id common.Address) types.NumLogs{
 	}
 	return nil
 }
-
 
 func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
 	stateObject := self.getStateObject(id)
@@ -862,7 +858,6 @@ func (self *StateDB)GetCandidatesInfoWithAllSubAccounts() []CandidateInfo {
 	return nil
 }
 
-
 func (self *StateDB)GetCandidateInfoWithAllSubAccounts(candidate common.Address) (candidateInfo CandidateInfo) {
 	candidateInfo.Signer = candidate
 	candidateInfo.Heft,_ = self.GetHeft(candidate)
@@ -894,7 +889,6 @@ func (self *StateDB)UpdateBucket(addr common.Address, bucket types.BucketPropert
 	return false
 }
 
-
 func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
@@ -902,7 +896,6 @@ func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (u
 	}
 	return 0, nil
 }
-
 
 func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
@@ -912,7 +905,6 @@ func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID [32]byte)
 	return 0, nil
 }
 
-
 func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
@@ -920,7 +912,6 @@ func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID [32]byte) 
 	}
 	return 0, nil
 }
-
 
 func (self *StateDB)GetStorageGas(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
