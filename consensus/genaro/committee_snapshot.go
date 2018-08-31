@@ -29,12 +29,6 @@ type Stake struct {
 	Staker      common.Address
 }
 
-//type CommitteeInfo struct {
-//	Signer       common.Address // peer address
-//	SentinelHEFT uint64         // the sentinel of the peer
-//	Stake        uint64         // the stake of the peer
-//}
-
 // newSnapshot creates a new snapshot with the specified startup parameters.
 func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, epochNumber uint64,
 	committeeRank []common.Address, proportion []uint64, CommitteeAccountBinding map[common.Address][]common.Address) *CommitteeSnapshot {

@@ -12,7 +12,6 @@ func init() {
 	DefaultStakeValuePerNode, _ = math.ParseBig256("5000000000000000000000")
 	DefaultTrafficApplyGasPerG, _ = math.ParseBig256("50000000000000000")
 	DefaultBucketApplyGasPerGPerDay, _ = math.ParseBig256("500000000000000")
-
 	DefaultOneDaySyncLogGsaCost, _ = math.ParseBig256("1000000000000000000")
 	DefaultOneDayMortgageGes, _ = math.ParseBig256("1000000000000000000")
 }

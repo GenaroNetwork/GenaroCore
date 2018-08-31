@@ -19,12 +19,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"runtime"
-	"sort"
-	"strings"
-	"time"
-
 	"github.com/GenaroNetwork/Genaro-Core/accounts"
 	"github.com/GenaroNetwork/Genaro-Core/accounts/keystore"
 	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
@@ -36,6 +30,11 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/metrics"
 	"github.com/GenaroNetwork/Genaro-Core/node"
 	"gopkg.in/urfave/cli.v1"
+	"os"
+	"runtime"
+	"sort"
+	"strings"
+	"time"
 )
 
 const (

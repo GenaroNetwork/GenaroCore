@@ -67,9 +67,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 		}
 		for _, v := range s.Buckets {
 			duration := math.Ceil(math.Abs(float64(v.TimeStart)-float64(v.TimeEnd)) / 86400)
-
 			oneCost := new(big.Int).Mul(bucketPrice, big.NewInt(int64(v.Size)*int64(duration)))
-
 			totalCost.Add(totalCost, oneCost)
 		}
 		return *totalCost
@@ -384,7 +382,6 @@ func (bindingTable *BindingTable) DelMainAccount(mainAccount common.Address) []c
 }
 
 func (bindingTable *BindingTable) UpdateBinding(mainAccount, subAccount common.Address) {
-
 	if bytes.Compare(bindingTable.SubAccounts[subAccount].Bytes(), mainAccount.Bytes()) == 0 {
 		return
 	}

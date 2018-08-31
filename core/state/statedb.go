@@ -760,7 +760,6 @@ func (self *StateDB) GetStakeRangeDiff(id common.Address, blockNumStart uint64, 
 }
 
 func (self *StateDB) AddCandidate(candidate common.Address) bool {
-
 	stateBindingObject := self.GetOrNewStateObject(common.BindingSaveAddress)
 	if stateBindingObject != nil && stateBindingObject.IsBindingAccount(candidate) {
 		return true

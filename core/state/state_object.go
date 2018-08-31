@@ -193,7 +193,6 @@ func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64) {
 
 func RankWithLenth(candidateInfos CandidateInfos, lenth int, committeeMinStake uint64) ([]common.Address, []uint64) {
 	candidateInfos.Apply()
-
 	for i := 0; i < len(candidateInfos); i++ {
 		if candidateInfos[i].Stake < committeeMinStake {
 			candidateInfos = append(candidateInfos[:i], candidateInfos[i+1:]...)

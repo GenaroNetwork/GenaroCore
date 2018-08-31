@@ -488,6 +488,7 @@ func CheckAccountBindingTx(caller common.Address, s types.SpecialTxInput, state 
 	if !state.IsCandidateExist(subAccount) && thisMainAccount == nil {
 		return errors.New("subAddr is not a candidate")
 	}
+
 	if thisMainAccount != nil && bytes.Compare(thisMainAccount.Bytes(), mainAccount.Bytes()) == 0 {
 		return errors.New("has binding")
 	}

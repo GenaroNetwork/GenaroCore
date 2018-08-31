@@ -239,6 +239,7 @@ func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber ui
 		return new(big.Int).SetUint64(0)
 	}
 	distance := snap.getDistance(addr, blockNumber)
+
 	difficult := snap.CommitteeSize - uint64(distance)
 	return new(big.Int).SetUint64(uint64(difficult))
 }
@@ -267,6 +268,7 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64, paren
 	if s, ok := g.recents.Get(epollNumber); ok {
 		snap = s.(*CommitteeSnapshot)
 	} else if epollNumber < g.config.ValidPeriod+g.config.ElectionPeriod {
+
 		h := chain.GetHeaderByNumber(0)
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
 		committeeAccountBinding := GetCommitteeAccountBinding(h)
@@ -752,7 +754,6 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	//Coefficient adjustment
 	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
-
 	//allocate blockReward
 	cs := state.GetCandidates()
 	total := uint64(0)
