@@ -1,6 +1,6 @@
 ## Go Genaro
 
-Fork from go-ethereum(https://github.com/ethereum/go-ethereum/tree/v1.8.3).
+Fork from [go-ethereum](https://github.com/ethereum/go-ethereum/tree/v1.8.3).
 
 ## Building the source
 
@@ -42,6 +42,15 @@ The go-genaro project comes with several wrappers/executables found in the `cmd`
 ### Send synchronization transaction
 
     SendSynState -u "http://127.0.0.1:8545" -t 1 -a "myaccount"
+
+## Develop Dapp
+
+Genaro blockchain support for Ethernet contract.You can directly transplant your Ethernet contract to Genaro network without any changes.
+If you need to use the new features of Genaro network, you need to compile the contract with the new [Solc](https://github.com/GenaroNetwork/genaro-solidity).
+You can get more development information from the [yellow book](https://github.com/GenaroNetwork/genaro-document).
+
+## Useful links
+Our [official network](https://gnxtech.io).
 
 ## License
 
