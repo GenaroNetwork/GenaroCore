@@ -96,7 +96,7 @@ func ecrecover(header *types.Header) (common.Address, error) {
 		return common.Address{}, errEmptyExtra
 	}
 	signature := extraData.Signature
-	//Why resetjQuery21109674833611916935_1529615114868
+
 	ResetHeaderSignature(header)
 	// Recover the public key and the Ethereum address
 	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
@@ -107,7 +107,6 @@ func ecrecover(header *types.Header) (common.Address, error) {
 	var signer common.Address
 	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
 	return signer, nil
-	//return header.Coinbase, nil
 }
 
 func Ecrecover(header *types.Header) (common.Address, error) {
@@ -161,35 +160,14 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	if err != nil {
 		return err
 	}
-
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, g.signer, number)
-	// if we reach the point that should get Committee written in the block
-	//if number == GetLastBlockNumberOfEpoch(g.config, currEpochNumber) {
-	//	// get committee rank material period
-	//	materialPeriod := currEpochNumber - g.config.ElectionPeriod
-	//	// load committee rank from db or generateCommittee from material period
-	//	writeSnap, err := g.snapshot(chain, materialPeriod)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	// write the committee rank into Block's Extra
-	//	err = SetHeaderCommitteeRankList(header, writeSnap.CommitteeRank)
-	//	if err != nil {
-	//		return err
-	//	}
-	//}
-	// Mix digest is reserved for now, set to empty
 	header.MixDigest = common.Hash{}
 	// Ensure the timestamp has the correct delay
 	parent := chain.GetHeader(header.ParentHash, number-1)
 	if parent == nil {
 		return consensus.ErrUnknownAncestor
 	}
-	//header.Time = new(big.Int).SetInt64(time.Now().Unix())
-	//if header.Time.Int64() < parent.Time.Int64() {
-	//	header.Time = new(big.Int).SetInt64(parent.Time.Int64() + 1)
-	//}
 	delayTime := snap.getDelayTime(header)
 	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(g.config.Period + delayTime))
 	if header.Time.Int64() < time.Now().Unix() {
@@ -213,16 +191,6 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	signer, signFn := g.signer, g.signFn
 	g.lock.RUnlock()
 
-	// Sweet, wait some time if not in-turn
-	//snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number))
-	//if err != nil {
-	//	return nil, err
-	//}
-	//when address is not in committee, reverseDifficult is snap.CommitteeSize + 1,
-	//when address is in committee, reverseDifficult is index + 1, intrun address delay is about 1s
-	//reverseDifficult := snap.getDelayTime(header)
-	//delay := time.Duration(reverseDifficult * uint64(time.Second))
-	//delay += time.Duration(rand.Int63n(int64(wiggleTime)))
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
 	log.Info("delay:"+delay.String())
 	select {
@@ -271,7 +239,6 @@ func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber ui
 		return new(big.Int).SetUint64(0)
 	}
 	distance := snap.getDistance(addr,blockNumber)
-	//difficult := snap.CommitteeSize - uint64(distance)
 	difficult := snap.CommitteeSize - uint64(distance)
 	return new(big.Int).SetUint64(uint64(difficult))
 }
@@ -300,31 +267,6 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64, paren
 	if s, ok := g.recents.Get(epollNumber); ok {
 		snap = s.(*CommitteeSnapshot)
 	}else if epollNumber < g.config.ValidPeriod + g.config.ElectionPeriod {
-		// If we're at block 0 ~ ElectionPeriod + ValidPeriod - 1, make a snapshot by genesis block
-		// TODO
-		//committeeRank := make([]common.Address, 10)
-		//committeeRank[0] = common.HexToAddress("0xe5f0b187f916eaee5c87074d5d185f3eaf527dc9")
-		//committeeRank[1] = common.HexToAddress("0xed19295615336ee56D4889BcdB90563b7abA02F7")
-		//committeeRank[2] = common.HexToAddress("0x4180B3a9059cb43dc93e72e641B466fEBeFEa902")
-		//committeeRank[3] = common.HexToAddress("0x8d024417f284B10B1fE8f6b02533F5aeFb7C8e23")
-		//committeeRank[4] = common.HexToAddress("0xCc3b246d887435490409eC9037B7320e797B195a")
-		//committeeRank[5] = common.HexToAddress("0xE45815411FBE2607C7E944C2E94baFc4BD7c7163")
-		//committeeRank[6] = common.HexToAddress("0x51AAddb5f44525151D3554d1876bbc9d6E9Bff1F")
-		//committeeRank[7] = common.HexToAddress("0x3C3DD12E1F11d56423adF3dC204E91e78a1f1FCa")
-		//committeeRank[8] = common.HexToAddress("0x53Bd332D7c34f8ca0bFCA3f51c71BC1C523F6B4A")
-		//committeeRank[9] = common.HexToAddress("0xdFc387187b63af2Ed108b153187d7B2cfDD93F73")
-		//proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-		//genaroConfig := &params.GenaroConfig{
-		//	Epoch:				5000,
-		//	BlockInterval:		10,
-		//	ElectionPeriod:		1,
-		//	ValidPeriod:		1,
-		//	CurrencyRates:		10,
-		//	CommitteeMaxSize:	5,
-		//}
-		//blockHash := new(common.Hash)
-		//snap = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
-
 		h := chain.GetHeaderByNumber(0)
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
 		committeeAccountBinding := GetCommitteeAccountBinding(h)
@@ -550,36 +492,26 @@ func GetPreSurplusCoin(state *state.StateDB) *big.Int {
 	return rewardsValues.PreStorageActualRewards
 }
 
-// 一届委员会结束后的数据重置
 func updateEpochRewards(state *state.StateDB)  {
 	//reset CoinActualRewards and StorageActualRewards, add TotalActualRewards
-	// 获取这一届实际发放的的收益
 	coinrewards := GetCoinActualRewards(state)
 	storagerewards := GetStorageActualRewards(state)
-	// 设置上一届实际发放的的收益
 	SetPreCoinActualRewards(state, coinrewards)
 	SetPreStorageActualRewards(state, storagerewards)
-	// 本届实际收益归零
 	SetCoinActualRewards(state, big.NewInt(0))
 	SetStorageActualRewards(state, big.NewInt(0))
-	// 将一届的实际收益加入总的实际收益
 	AddTotalActualRewards(state, coinrewards)
 	AddTotalActualRewards(state, storagerewards)
 }
 
-// 更新年收益参数
 func updateEpochYearRewards(state *state.StateDB) {
-	// 获取这一年的未发放收益
 	surplusrewards := GetSurplusCoin(state)
-	// 设置上一年的未发放收益
 	SetPreSurplusCoin(state, surplusrewards)
-	// 更新上一年的未发放收益和重置总收益
 	totalRewards := GetTotalActualRewards(state)
 	SubSurplusCoin(state, totalRewards)
 	SetTotalActualRewards(state, big.NewInt(0))
 }
 
-// 获取委员会的绑定表
 func genCommitteeAccountBinding(thisstate *state.StateDB,commitee []common.Address) (committeeAccountBinding map[common.Address][]common.Address) {
 	committeeAccountBinding = make(map[common.Address][]common.Address)
 	mainAccounts := thisstate.GetMainAccounts()
@@ -592,15 +524,10 @@ func genCommitteeAccountBinding(thisstate *state.StateDB,commitee []common.Addre
 	return
 }
 
-// 换届时的更新
 func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
 	blockNumber := header.Number.Uint64()
 	// 换届块
 	if blockNumber%config.Epoch == 0 {
-		//rank
-		//epochStartBlockNumber := blockNumber - config.Epoch
-		//epochEndBlockNumber := blockNumber
-		//candidateInfos := thisstate.GetCandidatesInfoInRange(0, epochEndBlockNumber)
 		candidateInfos := thisstate.GetCandidatesInfoWithAllSubAccounts()
 		genaroPrice := thisstate.GetGenaroPrice()
 		commiteeRank, proportion := state.RankWithLenth(candidateInfos,int(config.CommitteeMaxSize),genaroPrice.CommitteeMinStake)
@@ -616,7 +543,7 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 		//CoinActualRewards and StorageActualRewards should update per epoch
 		updateEpochRewards(thisstate)
 	}
-	// 一年时间到
+
 	if blockNumber%(calEpochPerYear(config)*config.Epoch) == 0 {
 		//CoinActualRewards and StorageActualRewards should update per epoch, surplusCoin should update per year
 		updateEpochYearRewards(thisstate)
@@ -662,9 +589,7 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	if err != nil {
 		return nil, err
 	}
-	// 按账户设定收益权重
-	//proportion := snap.Committee[header.Coinbase]
-	// 按照顺位设定收益权重
+
 	proportion := snap.Committee[snap.CommitteeRank[blockNumber % snap.CommitteeSize]]
 
 	//  coin interest reward
@@ -720,7 +645,6 @@ func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusR
 	return storageRatio
 }
 
-// 对账号及其子账号进行一次收益分配
 func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward *big.Int, subAccounts []common.Address){
 	coinbaseStake,_ := state.GetStake(coinbase)
 	totleStake := uint64(0)
@@ -729,10 +653,10 @@ func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward
 		stake,_ := state.GetStake(subAccount)
 		totleStake += stake
 	}
-	// 结算收益
+
 	surplusReward := big.NewInt(0)
 	surplusReward.Set(reward)
-	// 子账号的收益
+
 	for _,subAccount := range subAccounts {
 		stake,_ := state.GetStake(subAccount)
 		accountReward := big.NewInt(0)
@@ -742,7 +666,7 @@ func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward
 		state.AddBalance(subAccount, accountReward)
 		surplusReward.Sub(surplusReward,accountReward)
 	}
-	// 主账号的收益
+
 	state.AddBalance(coinbase, surplusReward)
 }
 
@@ -763,7 +687,6 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	ratioPerYear := common.Base*genaroPrice.RatioPerYear/100
 	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards,coinRewardsRatio,ratioPerYear)
 	surplusRewards := GetSurplusCoin(state)
-	//fmt.Printf("surplusRewards is %v\n", surplusRewards.String())
 	//plan rewards per year
 	planRewards := big.NewInt(0)
 	planRewards.Mul(surplusRewards, big.NewInt(int64(coinRewardsRatio)))
@@ -771,10 +694,8 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	//get Reward perYear
 	planRewards.Mul(planRewards, big.NewInt(int64(ratioPerYear)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
-	//fmt.Printf("Plan rewards this year %v\n", planRewards.String())
 	//plan rewards per epoch
 	planRewards.Div(planRewards, big.NewInt(int64(calEpochPerYear(config))))
-	//fmt.Printf("Plan rewards this epoch %v\n", planRewards.String())
 	//Coefficient adjustment
 	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
@@ -782,15 +703,13 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	//this addr should get
 	planRewards.Mul(planRewards, big.NewInt(int64(proportion)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
-	//fmt.Printf("Plan rewards peer %v, proportion %v\n", planRewards.String(), proportion)
 
 	blockReward := big.NewInt(0)
 	blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch/committeeSize)))
 
 	reward := blockReward
 	log.Info("accumulateInterestRewards", "reward", reward.String())
-	//fmt.Printf("final reward %v\n",  reward.String())
-	// 判断是否拥有子账号
+
 	subAccounts,ok := committeeAccountBinding[header.Coinbase]
 	if ok {
 		settleInterestRewards(state,header.Coinbase,reward,subAccounts)
@@ -836,11 +755,6 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	//Coefficient adjustment
 	planRewards.Mul(planRewards, big.NewInt(int64(coefficient)))
 	planRewards.Div(planRewards, big.NewInt(int64(common.Base)))
-	//plan rewards per block
-	//blockReward := big.NewInt(0)
-	//blockReward = planRewards.Div(planRewards, big.NewInt(int64(config.Epoch/committeeSize)))
-	// 一届的收益 为 planRewards
-
 
 	//allocate blockReward
 	cs := state.GetCandidates()

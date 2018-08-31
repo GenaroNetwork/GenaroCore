@@ -184,7 +184,6 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 			return nil, gas, err
 		}
 
-		//如果是特殊交易，往官方账号转账
 		evm.Transfer(evm.StateDB, caller.Address(), common.OfficialAddress, value)
 	}else {
 		evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
@@ -232,63 +231,63 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error{
 		return errors.New("special tx error： the extraData parameters of the wrong format")
 	}
 	switch s.Type.ToInt().Uint64(){
-	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
+	case common.SpecialTxTypeStakeSync.Uint64():
 		err = updateStake(evm, s, caller)
-	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
+	case common.SpecialTxTypeHeftSync.Uint64():
 		err = updateHeft(evm, s, caller)
-	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
+	case common.SpecialTxTypeSpaceApply.Uint64():
 		err = updateStorageProperties(evm, s, caller)
-	case common.SpecialTxBucketSupplement.Uint64(): // 存储空间续命
+	case common.SpecialTxBucketSupplement.Uint64():
 		err = bucketSupplement(evm, s, caller)
-	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
+	case common.SpecialTxTypeMortgageInit.Uint64():
 		err = specialTxTypeMortgageInit(evm, s,caller)
-	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64():
 		err = SpecialTxTypeSyncSidechainStatus(evm, s, caller)
-	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
+	case common.SpecialTxTypeTrafficApply.Uint64():
 		err = updateTraffic(evm, s, caller)
-	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
+	case common.SpecialTxTypeSyncNode.Uint64():
 		err = updateStakeNode(evm, s, caller)
 	case common.SynchronizeShareKey.Uint64():
 		err = SynchronizeShareKey(evm, s, caller)
-	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
+	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64():
 		err = updateFileShareSecretKey(evm, s, caller)
 	case common.UnlockSharedKey.Uint64():
 		err = UnlockSharedKey(evm, s, caller)
-	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
+	case common.SpecialTxTypePunishment.Uint64():
 		err = userPunishment(evm, s, caller)
-	case common.SpecialTxTypeBackStake.Uint64():	// 退注
+	case common.SpecialTxTypeBackStake.Uint64():
 		err = userBackStake(evm, caller)
-	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
+	case common.SpecialTxTypePriceRegulation.Uint64():
 		err = genaroPriceRegulation(evm, s, caller)
-	case common.SpecialTxSynState.Uint64():	// 同步信号
+	case common.SpecialTxSynState.Uint64():
 		err = SynState(evm, s, caller)
-	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
+	case common.SpecialTxUnbindNode.Uint64():
 		err = unbindNode(evm, s, caller)
-	case common.SpecialTxAccountBinding.Uint64():	// 账号绑定
+	case common.SpecialTxAccountBinding.Uint64():
 		err = accountBinding(evm, s, caller)
-	case common.SpecialTxAccountCancelBinding.Uint64(): // 账号解除绑定
+	case common.SpecialTxAccountCancelBinding.Uint64():
 		err = accountCancelBinding(evm, s, caller)
-	case common.SpecialTxAddAccountInForbidBackStakeList.Uint64(): // 加入禁止退注名单
+	case common.SpecialTxAddAccountInForbidBackStakeList.Uint64():
 		err = addAccountInForbidBackStakeList(evm, s, caller)
-	case common.SpecialTxDelAccountInForbidBackStakeList.Uint64(): // 移除禁止退注名单
+	case common.SpecialTxDelAccountInForbidBackStakeList.Uint64():
 		err = delAccountInForbidBackStakeList(evm, s, caller)
-	case common.SpecialTxSetGlobalVar.Uint64():	// 设置全局变量
+	case common.SpecialTxSetGlobalVar.Uint64():
 		err = setGlobalVar(evm, s, caller)
-	case common.SpecialTxAddCoinpool.Uint64():	// 增加币池
+	case common.SpecialTxAddCoinpool.Uint64():
 		err = addCoinpool(evm, s, caller)
-	case common.SpecialTxRevoke.Uint64(): // 撤销期权交易
+	case common.SpecialTxRevoke.Uint64():
 		err = revokePromissoryNotesTx(evm, s, caller)
-	case common.SpecialTxWithdrawCash.Uint64():	//提现
+	case common.SpecialTxWithdrawCash.Uint64():
 		err = PromissoryNotesWithdrawCash(evm, caller)
-	case common.SpecialTxPublishOption.Uint64():	//发布期权交易
+	case common.SpecialTxPublishOption.Uint64():
 		err = publishOption(evm, s, caller)
 	case common.SpecialTxSetOptionTxStatus.Uint64():
 		err = setOptionTxStatus(evm, s, caller)
-	case common.SpecialTxBuyPromissoryNotes.Uint64(): //购买期权
+	case common.SpecialTxBuyPromissoryNotes.Uint64():
 		err = buyPromissoryNotes(evm, s, caller)
-	case common.SpecialTxCarriedOutPromissoryNotes.Uint64(): //购买期权
+	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
 		err = CarriedOutPromissoryNotes(evm, s, caller)
-	case common.SpecialTxTurnBuyPromissoryNotes.Uint64(): //购买期权
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
 		err = turnBuyPromissoryNotes(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
@@ -345,7 +344,6 @@ func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Add
 
 	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
 
-	//从交易中心移除本次交易并将期权还原到用户账户中
 	optionTxTable := (*evm).StateDB.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	promissoryNotesOptionTx := (*optionTxTable)[s.OrderId]
 
@@ -392,7 +390,7 @@ func unbindNode(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	var err error = nil
 	err = (*evm).StateDB.UnbindNode(caller, s.NodeID)
 
-	if err == nil { // 倒排索引中移除关联关系
+	if err == nil {
 		node2UserAccountIndexAddress := common.StakeNode2StakeAddress
 		(*evm).StateDB.UbindNode2Address(node2UserAccountIndexAddress, s.NodeID)
 	}
@@ -400,22 +398,18 @@ func unbindNode(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	return nil
 }
 
-// 账号之间建立绑定，由官方账号完成绑定连接
 func accountBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	err := CheckAccountBindingTx(caller, s,(*evm).StateDB)
 	if err != nil {
 		return err
 	}
 
-	// 主账号
 	mainAddr := common.HexToAddress(s.Address)
-	// 子账号
 	subAddr := common.HexToAddress(s.Message)
-	// 账号绑定
 	if !(*evm).StateDB.UpdateAccountBinding(mainAddr,subAddr) {
 		return errors.New("binding failed")
 	}
-	// 将子账号从候选者列表中去除
+
 	if !(*evm).StateDB.DelCandidate(subAddr) {
 		return errors.New("DelCandidate failed")
 	}
@@ -423,18 +417,15 @@ func accountBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) err
 	return nil
 }
 
-// 解除账号绑定
 func accountCancelBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	t,err := CheckAccountCancelBindingTx(caller, s,(*evm).StateDB)
 	if err != nil {
 		return err
 	}
 
-	// 判断账号处理类型
 	switch t{
 	case 1:
 		subAccounts := (*evm).StateDB.DelMainAccountBinding(caller)
-		// 恢复候选者身份
 		for _,subAccount := range subAccounts {
 			(*evm).StateDB.AddCandidate(subAccount)
 		}
@@ -601,12 +592,11 @@ func userPunishment(evm *EVM, s types.SpecialTxInput,caller common.Address) erro
 	adress := common.HexToAddress(s.Address)
 	var actualPunishment uint64
 	var ok bool
-	// 根据address扣除对应用户的stake
 	if ok, actualPunishment = (*evm).StateDB.DeleteStake(adress, s.Stake, evm.BlockNumber.Uint64()); !ok {
 		return errors.New("delete user's stake fail")
 	}
 	amount := new(big.Int).Mul(common.BaseCompany, new(big.Int).SetUint64(actualPunishment))
-	// 将实际扣除的钱转到官方账号中
+
 	(*evm).StateDB.AddBalance(common.OfficialAddress, amount)
 	return nil
 }
@@ -653,7 +643,7 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput,caller common.Address) err
 	var err error = nil
 	err = (*evm).StateDB.SyncStakeNode(caller, s.NodeID)
 
-	if err == nil { // 存储倒排索引
+	if err == nil {
 		node2UserAccountIndexAddress := common.StakeNode2StakeAddress
 		(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.NodeID, caller.String())
 	}
@@ -701,11 +691,10 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput,caller common.Ad
 	}
 	temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(),big.NewInt(int64(len(mortgageTable))))
 	timeLimitGas := temp.Mul(temp,(*evm).StateDB.GetOneDayGesCost())
-	//timeLimitGas = (*big.Int)()s.SpecialTxTypeMortgageInit.TimeLimit *
-	//扣除抵押表全部费用+按照时间期限收费
+
 	sumMortgageTable.Add(sumMortgageTable,timeLimitGas)
 	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
-	//时间期限收取的费用转账到官方账号
+
 	(*evm).StateDB.AddBalance(common.OfficialAddress, timeLimitGas)
 	return nil
 }
@@ -739,7 +728,6 @@ func bucketSupplement(evm *EVM, s types.SpecialTxInput,caller common.Address) er
 	bucket.TimeEnd = bucketInDb.TimeEnd + s.Duration
 
 	if (*evm).StateDB.UpdateBucket(address, bucket){
-		//扣除费用
 		(*evm).StateDB.SubBalance(caller, totalGas)
 		(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
 	}
@@ -772,13 +760,11 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput,caller common.Addr
 			return errors.New("endTime must larger then startTime")
 		}
 
-		// 根据nodeid更新storage属性
 		if !(*evm).StateDB.UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
 			return errors.New("update user's bucket fail")
 		}
 	}
 
-	//扣除费用
 	(*evm).StateDB.SubBalance(caller, totalGas)
 	(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
 
@@ -792,7 +778,6 @@ func updateHeft(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
 	}
 
 	adress := common.HexToAddress(s.Address)
-	// 根据nodeid更新heft值
 	if !(evm.StateDB).UpdateHeft(adress, s.Heft, evm.BlockNumber.Uint64()) {
 		return errors.New("update user's heft fail")
 	}
@@ -817,7 +802,6 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput,caller common.Address) error
 		return ErrInsufficientBalance
 	}
 
-	// 根据nodeid更新heft值
 	if !(*evm).StateDB.UpdateTraffic(adress, s.Traffic) {
 		return errors.New("update user's teraffic fail")
 	}
@@ -843,7 +827,6 @@ func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 	}
 
 	adress := common.HexToAddress(s.Address)
-	// 根据nodeid更新stake值
 	if !(*evm).StateDB.UpdateStake(adress, s.Stake, evm.BlockNumber.Uint64()) {
 		return errors.New("update sentinel's stake fail")
 
@@ -856,9 +839,6 @@ func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 	return nil
 }
 
-
-
-//提现
 func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 	blockNumber := evm.BlockNumber.Uint64()
 	withdrawCashNum := (*evm).StateDB.PromissoryNotesWithdrawCash(caller,blockNumber)
@@ -871,7 +851,6 @@ func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
 	return nil
 }
 
-//购买期权
 func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput,caller common.Address) error {
 
 	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize

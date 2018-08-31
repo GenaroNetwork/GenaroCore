@@ -151,7 +151,6 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.Ge
 		return errors.New("value of stake must larger than MinStake")
 	}
 
-	// 判断是否已经申请了退注
 	if state.IsAlreadyBackStake(adress) {
 		return errors.New("account in back stake list")
 	}
@@ -254,7 +253,6 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB,genaroConfig *p
 		return errors.New("Account is Contract")
 	}
 
-	//对应address是否存在对应buckedId的存贮空间
 	buckets, _ := state.GetBuckets(adress)
 	if buckets == nil {
 		return errors.New("the user does not have the bucket corresponding to the bucketId")
@@ -315,19 +313,14 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	}
 
 	paramAddress := common.HexToAddress(s.Address)
-	//caller和节点待绑定账户是否一致
 	if caller != paramAddress {
 		return errors.New("address in param is not equal with callerAddress of this Tx")
 	}
 
-
-	//校验节点是否已经绑定过
 	if db.GetAddressByNode(s.NodeID) != "" {
 		return errors.New("the input node have been bound by themselves or others")
 	}
 
-	// 验证节点绑定签名
-	// 拼接message
 	msg := s.NodeID + s.Address
 
 	sig, err := hexutil.Decode(s.Sign)
@@ -340,13 +333,9 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 		return errors.New("ECRecover error when valid sign")
 	}
 
-	//get publickey
 	pubKey := crypto.CompressPubkey(recoveredPub)
 
-	//log.Info(fmt.Sprintf("publicKey:%x", pubKey))
 	genNodeID := generateNodeId(pubKey)
-	//log.Info(fmt.Sprintf("genNodeId:%s", genNodeID))
-	//log.Info(fmt.Sprintf("s.nodeId:%s", s.NodeID))
 	if genNodeID != s.NodeID {
 		return errors.New("sign valid error, nodeId mismatch")
 	}
@@ -360,9 +349,6 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	needStakeVale.Mul(big.NewInt(int64(nodeNum)), stakeVlauePerNode)
 
 	currentStake := new(big.Int).Mul(new(big.Int).SetUint64(stake), common.BaseCompany)
-
-	//log.Info(fmt.Sprintf("currentStake:%s", currentStake.String()))
-	//log.Info(fmt.Sprintf("needStakeVale:%s", needStakeVale.String()))
 
 	if needStakeVale.Cmp(currentStake) == 1 {
 		return errors.New("none enough stake to synchronize node")
@@ -413,15 +399,12 @@ func CheckBackStakeTx(caller common.Address, state StateDB) error {
 	if len(backStakeList) > int(genaroPrice.BackStackListMax) {
 		return errors.New("BackStackList too long")
 	}
-	// 判断是否是绑定用户
 	if state.IsBindingAccount(caller) {
 		return errors.New("account is binding")
 	}
-	// 判断是否已经申请了退注
 	if state.IsAlreadyBackStake(caller) {
 		return errors.New("account in back stake list")
 	}
-	// 判断账号是否在禁止退注的名单中
 	if state.IsAccountExistInForbidBackStakeList(caller) {
 		return errors.New("account in forbid backstake list")
 	}
@@ -486,40 +469,31 @@ func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes 
 	return errors.New("this node does not belong to this account")
 }
 
-// 账号绑定检查
 func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
-	// 检查是否是官方绑定账号
 	genaroPrice := state.GetGenaroPrice()
 	bindingAccount := common.HexToAddress(genaroPrice.BindingAccount)
 	if caller != bindingAccount {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
-	// 主账号
 	mainAccount := common.HexToAddress(s.Address)
-	// 子账号
 	subAccount := common.HexToAddress(s.Message)
 	if bytes.EqualFold(mainAccount.Bytes(),subAccount.Bytes()) {
 		return errors.New("same account")
 	}
-	// 主账号是否是候选者
 	if !state.IsCandidateExist(mainAccount) {
 		return errors.New("mainAddr is not a candidate")
 	}
-	// 主账号绑定数量是否超出限制
 	if state.GetSubAccountsCount(mainAccount) > int(genaroPrice.MaxBinding) {
 		return errors.New("binding enough")
 	}
-	// 绑定的子账号是否已经是一个主账号
 	if state.IsBindingMainAccount(subAccount) {
 		return errors.New("sub account is a main account")
 	}
-	// 子账号是否是候选者或存在于子账号队列中
 	thisMainAccount := state.GetMainAccount(subAccount)
 	if !state.IsCandidateExist(subAccount) && thisMainAccount == nil{
 		return errors.New("subAddr is not a candidate")
 	}
-	// 账号是否已经处于绑定状态
 	if thisMainAccount != nil && bytes.Compare(thisMainAccount.Bytes(),mainAccount.Bytes()) == 0 {
 		return errors.New("has binding")
 	}
@@ -527,12 +501,7 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 	return nil
 }
 
-// 检查输入参数，并返回执行类型
-// 1 主账号解绑
-// 2 子账号解绑
-// 3 主账号解绑子账号
 func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) (t int,err error){
-	// 判断账号类型
 	if state.IsBindingMainAccount(caller) {
 		if strings.EqualFold(s.Address,"") {
 			t = 1
@@ -558,9 +527,7 @@ func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, s
 	return
 }
 
-// 添加禁止退注名单的交易检查
 func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
-	// 检查是否是官方账号
 	if caller !=  common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
@@ -573,14 +540,12 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 	if stake == 0 {
 		return errors.New("account stake is zero")
 	}
-	// 判断是否已经在禁止名单中
 	if state.IsAccountExistInForbidBackStakeList(account) {
 		return errors.New("account is in forbid list")
 	}
 	return nil
 }
 
-// 移除退注账号禁止名单的检查
 func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error {
 	// 检查是否是官方账号
 	if caller !=  common.OfficialAddress {
@@ -595,7 +560,6 @@ func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 	return nil
 }
 
-// 设置全局变量交易参数检查
 func CheckSetGlobalVar(caller common.Address,s types.SpecialTxInput) error {
 	// 检查是否是官方账号
 	if caller !=  common.OfficialAddress {
@@ -609,7 +573,6 @@ func CheckSetGlobalVar(caller common.Address,s types.SpecialTxInput) error {
 	return nil
 }
 
-// 增加币池的检查
 func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateDB) error {
 	balance := state.GetBalance(caller)
 	if s.AddCoin.ToInt().Cmp(big.NewInt(0)) <= 0 {
@@ -626,25 +589,21 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 		return errors.New("param [OrderId] Missing")
 	}
 
-	//根据订单号从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
 
-	// 从交易列表中获取指定id的交易
 	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
 	var ok bool
 	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
 		return errors.New("None promissory note tx with this hash ")
 	}
 
-	// 检查订单id对应的交易的拥有者是否是本次交易的发起人
 	if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
 		return errors.New("You can't revoke someone else's options trading，check the order id ")
 	}
 
-	//如果交易被认购，且时间超出认购期后没有被执行，则仍然可以撤回。
 	if (common.Address{} != promissoryNotesOptionTx.OptionOwner) {
 		if promissoryNotesOptionTx.RestoreBlock <= blockNum.Uint64() {
 			return errors.New("You can't revoke this options trading, current options have been purchased ")
@@ -675,7 +634,6 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 		return errors.New("param [OptionPrice] Missing")
 	}
 
-	//检查交易发起方是否有足够的期票可出售
 	promissoryNotes := state.GetPromissoryNotes(caller)
 	for _, v := range promissoryNotes {
 		if v.RestoreBlock == s.RestoreBlock && v.Num >= s.TxNum {
@@ -687,29 +645,22 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 
 
 func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
-	// 1、当前交易从未被人认购，此时只能由该笔交易中期票的拥有者改变状态
-	// 2、交易已被认购，此时只能由该笔交易中的认购人更改售卖状态
-
 	if (s.OrderId == common.Hash{}) {
 		return errors.New("param [OrderId] Missing")
 	}
 
-	//从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
 
-	// 从交易列表中获取指定id的交易
 	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
 	var ok bool
 	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
 		return errors.New("None promissory note tx with this hash ")
 	}
 
-	// 当前交易是否被认购, 期票拥有者不为零值，则认为已被人认购
 	if (common.Address{} == promissoryNotesOptionTx.OptionOwner) {
-		// 检查订单id对应的交易的拥有者是否是本次交易的发起人
 		if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
 			return errors.New("You can't revoke someone else's options trading，check the order id ")
 		}
@@ -721,14 +672,11 @@ func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state
 	return nil
 }
 
-
 func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
-	//根据订单号从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
-	// 从交易列表中获取指定id的交易
 	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
 	var ok bool
 	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
@@ -747,12 +695,10 @@ func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, stat
 
 
 func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB,  optionTxMemorySize uint64) error {
-	//根据订单号从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
-	// 从交易列表中获取指定id的交易
 	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
 	var ok bool
 	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {
@@ -772,12 +718,11 @@ func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInpu
 
 
 func CheckTurnBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB,  optionTxMemorySize uint64) error {
-	//从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
 		return errors.New("None promissory note tx with this hash ")
 	}
-	// 从交易列表中获取指定id的交易
+
 	var promissoryNotesOptionTx types.PromissoryNotesOptionTx
 	var ok bool
 	if promissoryNotesOptionTx, ok = (*optionTxTable)[s.OrderId]; !ok {

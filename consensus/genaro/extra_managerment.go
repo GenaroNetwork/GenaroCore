@@ -7,7 +7,6 @@ import (
 )
 
 // the field "extra" store the json of ExtraData
-// TODO re-design the struct to speed up
 type ExtraData struct {
 	CommitteeRank []common.Address 	`json:"committeeRank"` // rank of committee
 	LastSynBlockNum  uint64           `json:"lastBlockNum"`
@@ -57,7 +56,6 @@ func SetHeaderCommitteeRankList(header *types.Header, committeeRank []common.Add
 	return nil
 }
 
-// 设置委员会的绑定表
 func SetCommitteeAccountBinding(header *types.Header, committeeAccountBinding map[common.Address][]common.Address) error{
 	extraData := UnmarshalToExtra(header)
 	extraData.CommitteeAccountBinding = committeeAccountBinding
@@ -69,19 +67,6 @@ func SetCommitteeAccountBinding(header *types.Header, committeeAccountBinding ma
 	copy(header.Extra, extraByte)
 	return nil
 }
-
-//func SetHeaderSentinelHeft(header *types.Header, sentinelHeft uint64) {
-//	extraData := UnmarshalToExtra(header)
-//	extraData.SentinelHeft = sentinelHeft
-//	extraByte, _ := json.Marshal(extraData)
-//	header.Extra = make([]byte, len(extraByte))
-//	copy(header.Extra, extraByte)
-//}
-//
-//func GetHeaderSentinelHeft(header *types.Header) uint64{
-//	extraData := UnmarshalToExtra(header)
-//	return extraData.SentinelHeft
-//}
 
 func GetHeaderCommitteeRankList(header *types.Header) ([]common.Address, []uint64) {
 	extraData := UnmarshalToExtra(header)

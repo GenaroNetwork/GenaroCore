@@ -9,7 +9,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"time"
 	"fmt"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"io/ioutil"
 	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
@@ -24,16 +23,15 @@ import (
 
 var accountfile string
 
-// 初始化相关参数
-var PromissoryNoteEnable bool // 是否分发期票
-var PromissoryNotePercentage uint64	// 初始期票占比
-var PromissoryNotePrice uint64	// 期票面值
-var LastPromissoryNoteBlockNumber uint64	// 最后的期票返还块号
-var PromissoryNotePeriod uint64	// 期票返还周期间隔
-var SurplusCoin int64	// 初始币池中的金额，单位GNX
-var SynStateAccount string	// 用于同步
-var HeftAccount string	// 用于heft设置
-var BindingAccount string	// 用于账号绑定
+var PromissoryNoteEnable bool
+var PromissoryNotePercentage uint64
+var PromissoryNotePrice uint64
+var LastPromissoryNoteBlockNumber uint64
+var PromissoryNotePeriod uint64
+var SurplusCoin int64
+var SynStateAccount string
+var HeftAccount string
+var BindingAccount string
 
 func initarg() {
 	flag.StringVar(&accountfile, "f", "account.json", "account file")
@@ -204,18 +202,6 @@ type account struct {
 }
 type MyAlloc map[common.Address]account
 
-//type firstAccounts struct {
-//	Alloc      FirstAlloc        `json:"alloc"      gencodec:"required"`
-//}
-
-type header struct {
-	Encryption  string `json:"encryption"`
-	Timestamp   int64  `json:"timestamp"`
-	Key         string `json:"key"`
-	Partnercode int    `json:"partnercode"`
-}
-
-
 func parseConfig(fileData []byte){
 	PromissoryNoteEnable = gjson.GetBytes(fileData,"config.PromissoryNoteEnable").Bool()
 	fmt.Println("PromissoryNoteEnable:",PromissoryNoteEnable)
@@ -325,17 +311,4 @@ func main() {
 	}
 	file.Write(byt)
 	file.Close()
-}
-
-func genAddrs(n int) []common.Address {
-	addrs := make([]common.Address, 0)
-
-	for i := 0; i < n; i++ {
-		prikey, _ := crypto.GenerateKey()
-		addr := crypto.PubkeyToAddress(prikey.PublicKey)
-
-		fmt.Println(addr.String())
-		addrs = append(addrs, addr)
-	}
-	return addrs
 }
