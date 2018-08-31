@@ -1,38 +1,31 @@
 package genaro
 
 import (
-	"testing"
-	"github.com/GenaroNetwork/Genaro-Core/params"
+	"bytes"
 	"fmt"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"log"
-	//"bytes"
-	//"github.com/GenaroNetwork/Genaro-Core/core/vm"
-	//"github.com/GenaroNetwork/Genaro-Core/core"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	//"math/big"
-	//"time"
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
-	"github.com/GenaroNetwork/Genaro-Core/core/state"
-	"bytes"
+	"github.com/GenaroNetwork/Genaro-Core/params"
+	"log"
 	"math/big"
-
-	//"github.com/GenaroNetwork/Genaro-Core/core"
+	"testing"
 )
 
-func TestGetDependTurnByBlockNumber(t *testing.T){
+func TestGetDependTurnByBlockNumber(t *testing.T) {
 	var turn uint64 = 0
 
-	for i:=0;i<20;i++ {
-		turn = GetDependTurnByBlockNumber(params.MainnetChainConfig.Genaro,uint64(i))
+	for i := 0; i < 20; i++ {
+		turn = GetDependTurnByBlockNumber(params.MainnetChainConfig.Genaro, uint64(i))
 		fmt.Println(turn)
 	}
 
 }
 
-func TestAuthor(t *testing.T){
+func TestAuthor(t *testing.T) {
 	db, remove := newTestLDB()
 	defer remove()
 
@@ -45,10 +38,10 @@ func TestAuthor(t *testing.T){
 	addrs := genAddrs(n)
 	byt := CreateCommitteeRankByte(addrs)
 	head := types.Header{
-		Extra:byt,
+		Extra: byt,
 	}
 
-	prikey,err := crypto.GenerateKey()
+	prikey, err := crypto.GenerateKey()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +50,7 @@ func TestAuthor(t *testing.T){
 	fmt.Println(hexutil.Encode(addr.Bytes()))
 
 	hash := sigHash(&head)
-	sig,err := crypto.Sign(hash.Bytes(), prikey)
+	sig, err := crypto.Sign(hash.Bytes(), prikey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,14 +58,14 @@ func TestAuthor(t *testing.T){
 	genaro.signer = addr
 	SetHeaderSignature(&head, sig)
 
-	signer,err := genaro.Author(&head)
+	signer, err := genaro.Author(&head)
 	if err != nil {
 		t.Error(err)
 	}
 	fmt.Println("singer")
 	fmt.Println(hexutil.Encode(signer.Bytes()))
 
-	if bytes.Compare(addr.Bytes(),signer.Bytes()) != 0 {
+	if bytes.Compare(addr.Bytes(), signer.Bytes()) != 0 {
 		t.Error("sign error")
 	}
 
@@ -82,11 +75,11 @@ func TestNew(t *testing.T) {
 	db, remove := newTestLDB()
 	defer remove()
 	genaroConfig := &params.GenaroConfig{
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 	genaro := New(genaroConfig, db)
 	if genaro.config.Epoch != epochLength {
@@ -111,12 +104,12 @@ func newTestStateDB() *state.StateDB {
 
 func TestUpdateSpecialBlock(t *testing.T) {
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            5000,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 	header := &types.Header{
 		Number:   big.NewInt(0),
@@ -128,55 +121,28 @@ func TestUpdateSpecialBlock(t *testing.T) {
 	updateSpecialBlock(genaroConfig, header, newTestStateDB())
 }
 
-//func TestCalcDifficulty2(t *testing.T) {
-//	genaroConfig := &params.GenaroConfig{
-//		Epoch:				5000,
-//		BlockInterval:		10,
-//		ElectionPeriod:		1,
-//		ValidPeriod:		1,
-//		CurrencyRates:		10,
-//		CommitteeMaxSize:	5,
-//	}
-//	committeeRank := genAddrs(10)
-//	proportion := make([]uint64, 10)
-//	for i := range committeeRank{
-//		proportion[i] = uint64(i)
-//	}
-//
-//	snapshot := newSnapshot(genaroConfig,0, common.StringToHash("0"), 0, committeeRank, proportion)
-//
-//	var i uint64
-//	for i = 0; i < 10000; i++ {
-//		x := CalcDifficulty(snapshot, committeeRank[0], i)
-//		println(x.Uint64())
-//	}
-//
-//	xx := CalcDifficulty(snapshot, genAddrs(1)[0], 100)
-//	println(xx.Uint64())
-//}
-
 func TestCandidateInfos(t *testing.T) {
 	var candidateInfos state.CandidateInfos
 	candidateInfos = make([]state.CandidateInfo, 4)
 	candidateInfos[0] = state.CandidateInfo{
-		Signer:		common.StringToAddress("xx"),
-		Heft:		10,
-		Stake:		25,
+		Signer: common.StringToAddress("xx"),
+		Heft:   10,
+		Stake:  25,
 	}
 	candidateInfos[1] = state.CandidateInfo{
-		Signer:		common.StringToAddress("xx"),
-		Heft:		11,
-		Stake:		35,
+		Signer: common.StringToAddress("xx"),
+		Heft:   11,
+		Stake:  35,
 	}
 	candidateInfos[2] = state.CandidateInfo{
-		Signer:		common.StringToAddress("xx"),
-		Heft:		12,
-		Stake:		45,
+		Signer: common.StringToAddress("xx"),
+		Heft:   12,
+		Stake:  45,
 	}
 	candidateInfos[3] = state.CandidateInfo{
-		Signer:		common.StringToAddress("xx"),
-		Heft:		13,
-		Stake:		15,
+		Signer: common.StringToAddress("xx"),
+		Heft:   13,
+		Stake:  15,
 	}
 
 	candidateInfos.Apply()
@@ -185,7 +151,7 @@ func TestCandidateInfos(t *testing.T) {
 	fmt.Println(commiteeRank)
 	fmt.Println(proportion)
 	fmt.Println(candidateInfos)
-	commiteeRank, proportion = state.RankWithLenth(candidateInfos,3,5000)
+	commiteeRank, proportion = state.RankWithLenth(candidateInfos, 3, 5000)
 	fmt.Println("RankWithLenth")
 	fmt.Println(commiteeRank)
 	fmt.Println(proportion)
@@ -193,14 +159,14 @@ func TestCandidateInfos(t *testing.T) {
 
 func TestGetCoinCofficient(t *testing.T) {
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				86400,
-		Period:				1,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            86400,
+		Period:           1,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
-	cofficient := getCoinCofficient(genaroConfig, big.NewInt(500),big.NewInt(20857142),common.Base*50/100,common.Base*7/100)
+	cofficient := getCoinCofficient(genaroConfig, big.NewInt(500), big.NewInt(20857142), common.Base*50/100, common.Base*7/100)
 	fmt.Println(cofficient)
 }

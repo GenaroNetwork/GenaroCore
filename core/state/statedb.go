@@ -23,15 +23,15 @@ import (
 	"sort"
 	"sync"
 
+	"encoding/hex"
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/trie"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"time"
-	"encoding/hex"
 )
 
 type revision struct {
@@ -649,7 +649,7 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 			s.db.TrieDB().Reference(account.Root, parent)
 		}
 		code := common.BytesToHash(account.CodeHash)
-		if code != emptyCode && !CheckCodeEmpty(account.CodeHash){
+		if code != emptyCode && !CheckCodeEmpty(account.CodeHash) {
 			s.db.TrieDB().Reference(code, parent)
 		}
 		return nil
@@ -658,7 +658,7 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	return root, err
 }
 
-func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint64) bool{
+func (self *StateDB) UpdateHeft(id common.Address, heft uint64, blockNumber uint64) bool {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
 		stateObject.UpdateHeft(heft, blockNumber)
@@ -667,7 +667,7 @@ func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint
 	return false
 }
 
-func (self *StateDB)GetHeft(id common.Address) (uint64, error){
+func (self *StateDB) GetHeft(id common.Address) (uint64, error) {
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
 		return stateObject.GetHeft(), nil
@@ -675,7 +675,7 @@ func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	return 0, nil
 }
 
-func (self *StateDB)GetHeftLog(id common.Address) types.NumLogs{
+func (self *StateDB) GetHeftLog(id common.Address) types.NumLogs {
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
 		return stateObject.GetHeftLog()
@@ -683,20 +683,19 @@ func (self *StateDB)GetHeftLog(id common.Address) types.NumLogs{
 	return nil
 }
 
-func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
+func (self *StateDB) GetHeftRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64 {
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
-		return stateObject.GetHeftRangeDiff(blockNumStart,blockNumEnd)
+		return stateObject.GetHeftRangeDiff(blockNumStart, blockNumEnd)
 	}
 	return 0
 }
 
-
-func (self *StateDB)GetHeftLastDiff(id common.Address, lastBlockNum uint64) uint64{
+func (self *StateDB) GetHeftLastDiff(id common.Address, lastBlockNum uint64) uint64 {
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
 		logs := stateObject.GetHeftLog()
-		diff,blockNum := logs.GetLastDiff()
+		diff, blockNum := logs.GetLastDiff()
 		if blockNum != lastBlockNum {
 			diff = 0
 		}
@@ -705,31 +704,29 @@ func (self *StateDB)GetHeftLastDiff(id common.Address, lastBlockNum uint64) uint
 	return 0
 }
 
-
-func (self *StateDB)UpdateStake(id common.Address, stake uint64, blockNumber uint64) bool{
+func (self *StateDB) UpdateStake(id common.Address, stake uint64, blockNumber uint64) bool {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		stateObject.UpdateStake(stake,blockNumber)
+		stateObject.UpdateStake(stake, blockNumber)
 		return true
 	}
 	return false
 }
 
-
-func (self *StateDB)DeleteStake(id common.Address, stake uint64, blockNumber uint64) (bool, uint64) {
+func (self *StateDB) DeleteStake(id common.Address, stake uint64, blockNumber uint64) (bool, uint64) {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
-		alreadyPunishment := stateObject.DeleteStake(stake,blockNumber)
+		alreadyPunishment := stateObject.DeleteStake(stake, blockNumber)
 		return true, alreadyPunishment
 	}
 	return false, 0
 }
 
-func (self *StateDB)BackStake(id common.Address, blockNumber uint64) (bool, uint64) {
+func (self *StateDB) BackStake(id common.Address, blockNumber uint64) (bool, uint64) {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
 		stake := stateObject.GetStake()
-		stateObject.DeleteStake(stake,blockNumber)
+		stateObject.DeleteStake(stake, blockNumber)
 		mount := big.NewInt(int64(stake))
 		mount.Mul(mount, big.NewInt(1000000000000000000))
 		stateObject.AddBalance(mount)
@@ -738,8 +735,7 @@ func (self *StateDB)BackStake(id common.Address, blockNumber uint64) (bool, uint
 	return false, 0
 }
 
-
-func (self *StateDB)GetStake(id common.Address) (uint64, error){
+func (self *StateDB) GetStake(id common.Address) (uint64, error) {
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
 		return stateObject.GetStake(), nil
@@ -747,9 +743,7 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 	return 0, nil
 }
 
-
-
-func (self *StateDB)GetStakeLog(id common.Address) types.NumLogs{
+func (self *StateDB) GetStakeLog(id common.Address) types.NumLogs {
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
 		return stateObject.GetStakeLog()
@@ -757,20 +751,18 @@ func (self *StateDB)GetStakeLog(id common.Address) types.NumLogs{
 	return nil
 }
 
-
-func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
+func (self *StateDB) GetStakeRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64 {
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
-		return stateObject.GetStakeRangeDiff(blockNumStart,blockNumEnd)
+		return stateObject.GetStakeRangeDiff(blockNumStart, blockNumEnd)
 	}
 	return 0
 }
 
-
-func (self *StateDB)AddCandidate(candidate common.Address) bool {
+func (self *StateDB) AddCandidate(candidate common.Address) bool {
 
 	stateBindingObject := self.GetOrNewStateObject(common.BindingSaveAddress)
-	if stateBindingObject !=nil && stateBindingObject.IsBindingAccount(candidate){
+	if stateBindingObject != nil && stateBindingObject.IsBindingAccount(candidate) {
 		return true
 	}
 
@@ -782,8 +774,7 @@ func (self *StateDB)AddCandidate(candidate common.Address) bool {
 	return false
 }
 
-
-func (self *StateDB)IsCandidateExist(candidate common.Address) bool {
+func (self *StateDB) IsCandidateExist(candidate common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		return stateObject.IsCandidateExist(candidate)
@@ -791,8 +782,7 @@ func (self *StateDB)IsCandidateExist(candidate common.Address) bool {
 	return false
 }
 
-
-func (self *StateDB)DelCandidate(candidate common.Address) bool {
+func (self *StateDB) DelCandidate(candidate common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		stateObject.DelCandidate(candidate)
@@ -801,8 +791,7 @@ func (self *StateDB)DelCandidate(candidate common.Address) bool {
 	return false
 }
 
-
-func (self *StateDB)GetCandidates() Candidates{
+func (self *StateDB) GetCandidates() Candidates {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		return stateObject.GetCandidates()
@@ -810,31 +799,30 @@ func (self *StateDB)GetCandidates() Candidates{
 	return nil
 }
 
-func (self *StateDB)GetCommitteeRank(blockNumStart uint64, blockNumEnd uint64) ([]common.Address, []uint64){
+func (self *StateDB) GetCommitteeRank(blockNumStart uint64, blockNumEnd uint64) ([]common.Address, []uint64) {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		candidateInfos := self.GetCandidatesInfoInRange(blockNumStart, blockNumEnd)
 		return Rank(candidateInfos)
 	}
-	return nil,nil
+	return nil, nil
 }
 
-func (self *StateDB)GetMainAccountRank() ([]common.Address, []uint64){
+func (self *StateDB) GetMainAccountRank() ([]common.Address, []uint64) {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		candidateInfos := self.GetCandidatesInfoWithAllSubAccounts()
 		return Rank(candidateInfos)
 	}
-	return nil,nil
+	return nil, nil
 }
 
-
-func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
+func (self *StateDB) GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		candidates := stateObject.GetCandidates()
-		CandidateInfoArray := make([]CandidateInfo,len(candidates))
-		for id,candidate := range candidates {
+		CandidateInfoArray := make([]CandidateInfo, len(candidates))
+		for id, candidate := range candidates {
 			CandidateInfoArray[id].Signer = candidate
 			CandidateInfoArray[id].Heft = self.GetHeftRangeDiff(candidate, blockNumStart, blockNumEnd)
 			CandidateInfoArray[id].Stake = self.GetStakeRangeDiff(candidate, blockNumStart, blockNumEnd)
@@ -844,13 +832,12 @@ func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd u
 	return nil
 }
 
-
-func (self *StateDB)GetCandidatesInfoWithAllSubAccounts() []CandidateInfo {
+func (self *StateDB) GetCandidatesInfoWithAllSubAccounts() []CandidateInfo {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
 		candidates := stateObject.GetCandidates()
-		CandidateInfoArray := make([]CandidateInfo,len(candidates))
-		for id,candidate := range candidates {
+		CandidateInfoArray := make([]CandidateInfo, len(candidates))
+		for id, candidate := range candidates {
 			CandidateInfoArray[id] = self.GetCandidateInfoWithAllSubAccounts(candidate)
 		}
 		return CandidateInfoArray
@@ -858,21 +845,21 @@ func (self *StateDB)GetCandidatesInfoWithAllSubAccounts() []CandidateInfo {
 	return nil
 }
 
-func (self *StateDB)GetCandidateInfoWithAllSubAccounts(candidate common.Address) (candidateInfo CandidateInfo) {
+func (self *StateDB) GetCandidateInfoWithAllSubAccounts(candidate common.Address) (candidateInfo CandidateInfo) {
 	candidateInfo.Signer = candidate
-	candidateInfo.Heft,_ = self.GetHeft(candidate)
-	candidateInfo.Stake,_ = self.GetStake(candidate)
+	candidateInfo.Heft, _ = self.GetHeft(candidate)
+	candidateInfo.Stake, _ = self.GetStake(candidate)
 	subAccounts := self.GetSubAccounts(candidate)
-	for _,subAccount := range subAccounts {
-		heft,_ := self.GetHeft(subAccount)
-		stake,_ := self.GetStake(subAccount)
+	for _, subAccount := range subAccounts {
+		heft, _ := self.GetHeft(subAccount)
+		stake, _ := self.GetStake(subAccount)
 		candidateInfo.Heft += heft
 		candidateInfo.Stake += stake
 	}
 	return
 }
 
-func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid string, size uint64, backup uint64, timestart uint64, timeend uint64) bool {
+func (self *StateDB) UpdateBucketProperties(userid common.Address, bucketid string, size uint64, backup uint64, timestart uint64, timeend uint64) bool {
 	stateObject := self.GetOrNewStateObject(userid)
 	if stateObject != nil {
 		stateObject.UpdateBucketProperties(bucketid, size, backup, timestart, timeend)
@@ -881,7 +868,7 @@ func (self *StateDB)UpdateBucketProperties(userid common.Address, bucketid strin
 	return true
 }
 
-func (self *StateDB)UpdateBucket(addr common.Address, bucket types.BucketPropertie) bool {
+func (self *StateDB) UpdateBucket(addr common.Address, bucket types.BucketPropertie) bool {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.UpdateBucket(bucket)
@@ -889,7 +876,7 @@ func (self *StateDB)UpdateBucket(addr common.Address, bucket types.BucketPropert
 	return false
 }
 
-func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (uint64, error) {
+func (self *StateDB) GetStorageSize(userid common.Address, bucketID [32]byte) (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
 		return stateObject.GetStorageSize(string(bucketID[:])), nil
@@ -897,7 +884,7 @@ func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (u
 	return 0, nil
 }
 
-func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID [32]byte)  (uint64, error) {
+func (self *StateDB) GetStorageGasPrice(userid common.Address, bucketID [32]byte) (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
 		return stateObject.GetStorageGasPrice(string(bucketID[:])), nil
@@ -905,7 +892,7 @@ func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID [32]byte)
 	return 0, nil
 }
 
-func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID [32]byte)  (uint64, error) {
+func (self *StateDB) GetStorageGasUsed(userid common.Address, bucketID [32]byte) (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
 		return stateObject.GetStorageGasUsed(string(bucketID[:])), nil
@@ -913,7 +900,7 @@ func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID [32]byte) 
 	return 0, nil
 }
 
-func (self *StateDB)GetStorageGas(userid common.Address, bucketID [32]byte)  (uint64, error) {
+func (self *StateDB) GetStorageGas(userid common.Address, bucketID [32]byte) (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
 		return stateObject.GetStorageGas(string(bucketID[:])), nil
@@ -921,7 +908,7 @@ func (self *StateDB)GetStorageGas(userid common.Address, bucketID [32]byte)  (ui
 	return 0, nil
 }
 
-func (self *StateDB)SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
+func (self *StateDB) SpecialTxTypeMortgageInit(address common.Address, specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		return stateObject.SpecialTxTypeMortgageInit(specialTxTypeMortgageInit)
@@ -937,7 +924,7 @@ func (self *StateDB) SynchronizeShareKey(address common.Address, synchronizeShar
 	return false
 }
 
-func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
+func (self *StateDB) UpdateTraffic(id common.Address, traffic uint64) bool {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
 		stateObject.UpdateTraffic(traffic)
@@ -946,7 +933,7 @@ func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
 	return false
 }
 
-func (self *StateDB) GetTraffic(addr common.Address) uint64{
+func (self *StateDB) GetTraffic(addr common.Address) uint64 {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
 		return stateObject.GetTraffic()
@@ -970,27 +957,26 @@ func (self *StateDB) GetStorageNodes(addr common.Address) []string {
 	return nil
 }
 
-
-func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID [32]byte,dataVersion string) (map[common.Address] *hexutil.Big, error){
+func (self *StateDB) TxLogByDataVersionRead(address common.Address, fileID [32]byte, dataVersion string) (map[common.Address]*hexutil.Big, error) {
 	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
-		return stateObject.TxLogByDataVersionRead(fileIDToString,dataVersion)
+		return stateObject.TxLogByDataVersionRead(fileIDToString, dataVersion)
 	}
-	return nil,nil
+	return nil, nil
 }
 
-func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]byte) bool {
+func (self *StateDB) TxLogBydataVersionUpdate(address common.Address, fileID [32]byte) bool {
 	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
-		resultTmp,tag := stateObject.TxLogBydataVersionUpdate(fileIDToString)
+		resultTmp, tag := stateObject.TxLogBydataVersionUpdate(fileIDToString)
 		if !tag {
 			return false
 		}
-		TimeLimit := (resultTmp.EndTime - time.Now().Unix())/86400
+		TimeLimit := (resultTmp.EndTime - time.Now().Unix()) / 86400
 		tmp := big.NewInt(TimeLimit * int64(len(resultTmp.MortgageTable)))
-		timeLimitGas := tmp.Mul(tmp,self.GetOneDaySyncLogGsaCost())
+		timeLimitGas := tmp.Mul(tmp, self.GetOneDaySyncLogGsaCost())
 		stateObject.setBalance(timeLimitGas)
 		newStateObject := self.getStateObject(common.OfficialAddress)
 		newStateObject.AddBalance(timeLimitGas)
@@ -998,7 +984,6 @@ func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]b
 	}
 	return false
 }
-
 
 func (self *StateDB) GetAccountAttributes(addr common.Address) types.GenaroData {
 	stateObject := self.getStateObject(addr)
@@ -1008,19 +993,18 @@ func (self *StateDB) GetAccountAttributes(addr common.Address) types.GenaroData 
 	return types.GenaroData{}
 }
 
-
-func (self *StateDB)SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (map[common.Address] *big.Int, bool) {
+func (self *StateDB) SpecialTxTypeSyncSidechainStatus(address common.Address, SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (map[common.Address]*big.Int, bool) {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
-		restlt,flag := stateObject.SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus)
+		restlt, flag := stateObject.SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus)
 		if true == flag {
 			return restlt, true
 		}
 	}
-	return nil,false
+	return nil, false
 }
 
-func (self *StateDB)SyncStakeNode(address common.Address,s string) error {
+func (self *StateDB) SyncStakeNode(address common.Address, s string) error {
 	stateObject := self.GetOrNewStateObject(address)
 	var err error = nil
 	if stateObject != nil {
@@ -1029,8 +1013,7 @@ func (self *StateDB)SyncStakeNode(address common.Address,s string) error {
 	return err
 }
 
-
-func (self *StateDB)SyncNode2Address(node2UserAccountIndexAddress common.Address, s string, userAddress string) error {
+func (self *StateDB) SyncNode2Address(node2UserAccountIndexAddress common.Address, s string, userAddress string) error {
 	stateObject := self.GetOrNewStateObject(node2UserAccountIndexAddress)
 	var err error = nil
 	if stateObject != nil {
@@ -1039,7 +1022,7 @@ func (self *StateDB)SyncNode2Address(node2UserAccountIndexAddress common.Address
 	return err
 }
 
-func (self *StateDB)GetAddressByNode(s string) string {
+func (self *StateDB) GetAddressByNode(s string) string {
 	stateObject := self.GetOrNewStateObject(common.StakeNode2StakeAddress)
 	var address string
 	if stateObject != nil {
@@ -1048,8 +1031,7 @@ func (self *StateDB)GetAddressByNode(s string) string {
 	return address
 }
 
-
-func (self *StateDB)AddAlreadyBackStack(backStack common.AlreadyBackStake) bool {
+func (self *StateDB) AddAlreadyBackStack(backStack common.AlreadyBackStake) bool {
 	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
 	if stateObject != nil {
 		stateObject.AddAlreadyBackStack(backStack)
@@ -1058,27 +1040,24 @@ func (self *StateDB)AddAlreadyBackStack(backStack common.AlreadyBackStake) bool 
 	return false
 }
 
-
-func (self *StateDB)GetAlreadyBackStakeList() (bool,common.BackStakeList) {
+func (self *StateDB) GetAlreadyBackStakeList() (bool, common.BackStakeList) {
 	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
 	if stateObject != nil {
 		backStacks := stateObject.GetAlreadyBackStakeList()
-		return true,backStacks
+		return true, backStacks
 	}
-	return false,nil
+	return false, nil
 }
 
-
-func (self *StateDB)IsAlreadyBackStake(addr common.Address) bool {
-	ok,backStakeList := self.GetAlreadyBackStakeList()
+func (self *StateDB) IsAlreadyBackStake(addr common.Address) bool {
+	ok, backStakeList := self.GetAlreadyBackStakeList()
 	if !ok {
 		return ok
 	}
 	return backStakeList.IsAccountExist(addr)
 }
 
-
-func (self *StateDB)SetAlreadyBackStakeList(backStacks common.BackStakeList) bool {
+func (self *StateDB) SetAlreadyBackStakeList(backStacks common.BackStakeList) bool {
 	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
 	if stateObject != nil {
 		stateObject.SetAlreadyBackStakeList(backStacks)
@@ -1087,9 +1066,7 @@ func (self *StateDB)SetAlreadyBackStakeList(backStacks common.BackStakeList) boo
 	return false
 }
 
-
-
-func (self *StateDB)UpdateFileSharePublicKey(id common.Address, publicKey string) bool{
+func (self *StateDB) UpdateFileSharePublicKey(id common.Address, publicKey string) bool {
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
 		stateObject.UpdateFileSharePublicKey(publicKey)
@@ -1106,7 +1083,7 @@ func (self *StateDB) GetFileSharePublicKey(addr common.Address) string {
 	return ""
 }
 
-func (self *StateDB) UnlockSharedKey(address common.Address,shareKeyId string) bool{
+func (self *StateDB) UnlockSharedKey(address common.Address, shareKeyId string) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		synchronizeShareKey := stateObject.UnlockSharedKey(shareKeyId)
@@ -1124,7 +1101,7 @@ func (self *StateDB) UnlockSharedKey(address common.Address,shareKeyId string) b
 	return false
 }
 
-func (self *StateDB) CheckUnlockSharedKey(address common.Address,shareKeyId string) bool {
+func (self *StateDB) CheckUnlockSharedKey(address common.Address, shareKeyId string) bool {
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
 		return stateObject.CheckUnlockSharedKey(shareKeyId)
@@ -1132,27 +1109,25 @@ func (self *StateDB) CheckUnlockSharedKey(address common.Address,shareKeyId stri
 	return false
 }
 
-func (self *StateDB)UpdateBucketApplyPrice(address common.Address,	price *hexutil.Big) bool {
+func (self *StateDB) UpdateBucketApplyPrice(address common.Address, price *hexutil.Big) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.UpdateBucketApplyPrice(price)
-                return true
-        }
-        return false
-}
-
-
-func (self *StateDB)AddLastRootState(statehash common.Hash, blockNumber uint64) bool {
-	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
-	if stateObject != nil {
-		stateObject.AddLastRootState(statehash,blockNumber)
 		return true
 	}
 	return false
 }
 
+func (self *StateDB) AddLastRootState(statehash common.Hash, blockNumber uint64) bool {
+	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
+	if stateObject != nil {
+		stateObject.AddLastRootState(statehash, blockNumber)
+		return true
+	}
+	return false
+}
 
-func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool {
+func (self *StateDB) UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		stateObject.UpdateAccountBinding(mainAccount, subAccount)
@@ -1161,8 +1136,7 @@ func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount 
 	return false
 }
 
-
-func (self *StateDB)DelSubAccountBinding(subAccount common.Address) bool {
+func (self *StateDB) DelSubAccountBinding(subAccount common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		return stateObject.DelSubAccountBinding(subAccount)
@@ -1170,8 +1144,7 @@ func (self *StateDB)DelSubAccountBinding(subAccount common.Address) bool {
 	return false
 }
 
-
-func (self *StateDB)GetSubAccountsCount(mainAccount common.Address) int {
+func (self *StateDB) GetSubAccountsCount(mainAccount common.Address) int {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		return stateObject.GetSubAccountsCount(mainAccount)
@@ -1179,8 +1152,7 @@ func (self *StateDB)GetSubAccountsCount(mainAccount common.Address) int {
 	return 0
 }
 
-
-func (self *StateDB)GetSubAccounts(mianAccount common.Address) []common.Address {
+func (self *StateDB) GetSubAccounts(mianAccount common.Address) []common.Address {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		mainAccount := stateObject.GetSubAccounts(mianAccount)
@@ -1189,8 +1161,7 @@ func (self *StateDB)GetSubAccounts(mianAccount common.Address) []common.Address 
 	return nil
 }
 
-
-func (self *StateDB)GetMainAccounts() map[common.Address][]common.Address {
+func (self *StateDB) GetMainAccounts() map[common.Address][]common.Address {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		mainAccounts := stateObject.GetMainAccounts()
@@ -1199,8 +1170,7 @@ func (self *StateDB)GetMainAccounts() map[common.Address][]common.Address {
 	return nil
 }
 
-
-func (self *StateDB)DelMainAccountBinding(mianAccount common.Address) []common.Address {
+func (self *StateDB) DelMainAccountBinding(mianAccount common.Address) []common.Address {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		subAccounts := stateObject.DelMainAccountBinding(mianAccount)
@@ -1209,8 +1179,7 @@ func (self *StateDB)DelMainAccountBinding(mianAccount common.Address) []common.A
 	return nil
 }
 
-
-func (self *StateDB)GetMainAccount(subAccount common.Address) (*common.Address) {
+func (self *StateDB) GetMainAccount(subAccount common.Address) *common.Address {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		mainAccount := stateObject.GetMainAccount(subAccount)
@@ -1219,8 +1188,7 @@ func (self *StateDB)GetMainAccount(subAccount common.Address) (*common.Address) 
 	return nil
 }
 
-
-func (self *StateDB)IsBindingSubAccount(account common.Address) bool {
+func (self *StateDB) IsBindingSubAccount(account common.Address) bool {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		return stateObject.IsSubAccount(account)
@@ -1228,8 +1196,7 @@ func (self *StateDB)IsBindingSubAccount(account common.Address) bool {
 	return false
 }
 
-
-func (self *StateDB)IsBindingMainAccount(account common.Address) bool {
+func (self *StateDB) IsBindingMainAccount(account common.Address) bool {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		return stateObject.IsMainAccount(account)
@@ -1237,8 +1204,7 @@ func (self *StateDB)IsBindingMainAccount(account common.Address) bool {
 	return false
 }
 
-
-func (self *StateDB)IsBindingAccount(account common.Address) bool {
+func (self *StateDB) IsBindingAccount(account common.Address) bool {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
 		return stateObject.IsBindingAccount(account)
@@ -1246,7 +1212,7 @@ func (self *StateDB)IsBindingAccount(account common.Address) bool {
 	return false
 }
 
-func (self *StateDB)GetBucketApplyPrice() *big.Int {
+func (self *StateDB) GetBucketApplyPrice() *big.Int {
 	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
 	if stateObject != nil {
 		return stateObject.GetBucketApplyPrice()
@@ -1254,25 +1220,25 @@ func (self *StateDB)GetBucketApplyPrice() *big.Int {
 	return common.DefaultBucketApplyGasPerGPerDay
 }
 
-func (self *StateDB)UpdateTrafficApplyPrice(address common.Address, price *hexutil.Big) bool {
+func (self *StateDB) UpdateTrafficApplyPrice(address common.Address, price *hexutil.Big) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.UpdateTrafficApplyPrice(price)
-                return true
-        }
-        return false
-}
-
-func (self *StateDB)SetLastSynBlock(blockNumber uint64,blockHash common.Hash) bool {
-	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
-	if stateObject != nil {
-		stateObject.SetLastSynBlock(blockNumber,blockHash)
 		return true
 	}
 	return false
 }
 
-func (self *StateDB)GetTrafficApplyPrice() *big.Int {
+func (self *StateDB) SetLastSynBlock(blockNumber uint64, blockHash common.Hash) bool {
+	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
+	if stateObject != nil {
+		stateObject.SetLastSynBlock(blockNumber, blockHash)
+		return true
+	}
+	return false
+}
+
+func (self *StateDB) GetTrafficApplyPrice() *big.Int {
 	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
 	if stateObject != nil {
 		return stateObject.GetTrafficApplyPrice()
@@ -1280,7 +1246,7 @@ func (self *StateDB)GetTrafficApplyPrice() *big.Int {
 	return common.DefaultTrafficApplyGasPerG
 }
 
-func (self *StateDB)UpdateStakePerNodePrice(address common.Address, price *hexutil.Big) bool {
+func (self *StateDB) UpdateStakePerNodePrice(address common.Address, price *hexutil.Big) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.UpdateStakePerNodePrice(price)
@@ -1289,7 +1255,7 @@ func (self *StateDB)UpdateStakePerNodePrice(address common.Address, price *hexut
 	return false
 }
 
-func (self *StateDB)GetStakePerNodePrice() *big.Int {
+func (self *StateDB) GetStakePerNodePrice() *big.Int {
 	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
 	if stateObject != nil {
 		return stateObject.GetStakePerNodePrice()
@@ -1297,16 +1263,16 @@ func (self *StateDB)GetStakePerNodePrice() *big.Int {
 	return common.DefaultStakeValuePerNode
 }
 
-func (self *StateDB)GetGenaroPrice() *types.GenaroPrice {
+func (self *StateDB) GetGenaroPrice() *types.GenaroPrice {
 	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
 	if stateObject != nil {
 		return stateObject.GetGenaroPrice()
-        }
-    return nil
+	}
+	return nil
 
 }
 
-func (self *StateDB)SetGenaroPrice(genaroPrice types.GenaroPrice) bool {
+func (self *StateDB) SetGenaroPrice(genaroPrice types.GenaroPrice) bool {
 	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
 	if stateObject != nil {
 		stateObject.SetGenaroPrice(genaroPrice)
@@ -1315,7 +1281,7 @@ func (self *StateDB)SetGenaroPrice(genaroPrice types.GenaroPrice) bool {
 	return false
 }
 
-func (self *StateDB)GetLastSynState() *types.LastSynState{
+func (self *StateDB) GetLastSynState() *types.LastSynState {
 	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
 	if stateObject != nil {
 		return stateObject.GetLastSynState()
@@ -1323,8 +1289,7 @@ func (self *StateDB)GetLastSynState() *types.LastSynState{
 	return nil
 }
 
-
-func (self *StateDB)UpdateOneDayGesCost(address common.Address, price *hexutil.Big) bool {
+func (self *StateDB) UpdateOneDayGesCost(address common.Address, price *hexutil.Big) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.UpdateOneDayGesCost(price)
@@ -1333,7 +1298,7 @@ func (self *StateDB)UpdateOneDayGesCost(address common.Address, price *hexutil.B
 	return false
 }
 
-func (self *StateDB)UpdateOneDaySyncLogGsaCost(address common.Address, price *hexutil.Big) bool {
+func (self *StateDB) UpdateOneDaySyncLogGsaCost(address common.Address, price *hexutil.Big) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.UpdateOneDaySyncLogGsaCost(price)
@@ -1342,7 +1307,7 @@ func (self *StateDB)UpdateOneDaySyncLogGsaCost(address common.Address, price *he
 	return false
 }
 
-func (self *StateDB)GetOneDayGesCost() *big.Int {
+func (self *StateDB) GetOneDayGesCost() *big.Int {
 	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
 	if stateObject != nil {
 		return stateObject.GetOneDayGesCost()
@@ -1350,7 +1315,7 @@ func (self *StateDB)GetOneDayGesCost() *big.Int {
 	return common.DefaultOneDayMortgageGes
 }
 
-func (self *StateDB)GetOneDaySyncLogGsaCost() *big.Int {
+func (self *StateDB) GetOneDaySyncLogGsaCost() *big.Int {
 	stateObject := self.GetOrNewStateObject(common.GenaroPriceAddress)
 	if stateObject != nil {
 		return stateObject.GetOneDaySyncLogGsaCost()
@@ -1358,7 +1323,7 @@ func (self *StateDB)GetOneDaySyncLogGsaCost() *big.Int {
 	return common.DefaultOneDaySyncLogGsaCost
 }
 
-func (self *StateDB)UnbindNode(address common.Address, nodeId string) error {
+func (self *StateDB) UnbindNode(address common.Address, nodeId string) error {
 	stateObject := self.GetOrNewStateObject(address)
 	var err error = nil
 	if stateObject != nil {
@@ -1367,8 +1332,7 @@ func (self *StateDB)UnbindNode(address common.Address, nodeId string) error {
 	return err
 }
 
-
-func (self *StateDB)UbindNode2Address(address common.Address, nodeId string) error{
+func (self *StateDB) UbindNode2Address(address common.Address, nodeId string) error {
 	stateObject := self.GetOrNewStateObject(address)
 	var err error = nil
 	if stateObject != nil {
@@ -1377,7 +1341,7 @@ func (self *StateDB)UbindNode2Address(address common.Address, nodeId string) err
 	return err
 }
 
-func (self *StateDB)AddAccountInForbidBackStakeList(address common.Address) bool {
+func (self *StateDB) AddAccountInForbidBackStakeList(address common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
 	if stateObject != nil {
 		stateObject.AddAccountInForbidBackStakeList(address)
@@ -1386,7 +1350,7 @@ func (self *StateDB)AddAccountInForbidBackStakeList(address common.Address) bool
 	return false
 }
 
-func (self *StateDB)DelAccountInForbidBackStakeList(address common.Address) bool {
+func (self *StateDB) DelAccountInForbidBackStakeList(address common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
 	if stateObject != nil {
 		stateObject.DelAccountInForbidBackStakeList(address)
@@ -1395,7 +1359,7 @@ func (self *StateDB)DelAccountInForbidBackStakeList(address common.Address) bool
 	return false
 }
 
-func (self *StateDB)IsAccountExistInForbidBackStakeList(address common.Address) bool {
+func (self *StateDB) IsAccountExistInForbidBackStakeList(address common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
 	if stateObject != nil {
 		return stateObject.IsAccountExistInForbidBackStakeList(address)
@@ -1403,7 +1367,7 @@ func (self *StateDB)IsAccountExistInForbidBackStakeList(address common.Address) 
 	return false
 }
 
-func (self *StateDB)GetForbidBackStakeList() types.ForbidBackStakeList {
+func (self *StateDB) GetForbidBackStakeList() types.ForbidBackStakeList {
 	stateObject := self.GetOrNewStateObject(common.ForbidBackStakeSaveAddress)
 	if stateObject != nil {
 		return stateObject.GetForbidBackStakeList()
@@ -1411,7 +1375,7 @@ func (self *StateDB)GetForbidBackStakeList() types.ForbidBackStakeList {
 	return nil
 }
 
-func (self *StateDB)GetRewardsValues() *types.RewardsValues {
+func (self *StateDB) GetRewardsValues() *types.RewardsValues {
 	stateObject := self.GetOrNewStateObject(common.RewardsSaveAddress)
 	if stateObject != nil {
 		return stateObject.GetRewardsValues()
@@ -1419,7 +1383,7 @@ func (self *StateDB)GetRewardsValues() *types.RewardsValues {
 	return nil
 }
 
-func (self *StateDB)SetRewardsValues(rewardsValues types.RewardsValues) bool{
+func (self *StateDB) SetRewardsValues(rewardsValues types.RewardsValues) bool {
 	stateObject := self.GetOrNewStateObject(common.RewardsSaveAddress)
 	if stateObject != nil {
 		stateObject.SetRewardsValues(rewardsValues)
@@ -1428,7 +1392,7 @@ func (self *StateDB)SetRewardsValues(rewardsValues types.RewardsValues) bool{
 	return false
 }
 
-func (self *StateDB)AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool{
+func (self *StateDB) AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		stateObject.AddPromissoryNote(promissoryNote)
@@ -1437,7 +1401,7 @@ func (self *StateDB)AddPromissoryNote(address common.Address, promissoryNote typ
 	return false
 }
 
-func (self *StateDB)DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool{
+func (self *StateDB) DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		return stateObject.DelPromissoryNote(promissoryNote)
@@ -1445,7 +1409,7 @@ func (self *StateDB)DelPromissoryNote(address common.Address, promissoryNote typ
 	return false
 }
 
-func (self *StateDB)GetPromissoryNotes(address common.Address) types.PromissoryNotes {
+func (self *StateDB) GetPromissoryNotes(address common.Address) types.PromissoryNotes {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		return stateObject.GetPromissoryNotes()
@@ -1453,8 +1417,7 @@ func (self *StateDB)GetPromissoryNotes(address common.Address) types.PromissoryN
 	return nil
 }
 
-
-func (self *StateDB)GetOptionTxTable(hash common.Hash, optionTxMemorySize uint64) *types.OptionTxTable {
+func (self *StateDB) GetOptionTxTable(hash common.Hash, optionTxMemorySize uint64) *types.OptionTxTable {
 
 	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
 
@@ -1465,7 +1428,7 @@ func (self *StateDB)GetOptionTxTable(hash common.Hash, optionTxMemorySize uint64
 	return nil
 }
 
-func (self *StateDB)GetOptionTxTableByAddress(address common.Address) *types.OptionTxTable {
+func (self *StateDB) GetOptionTxTableByAddress(address common.Address) *types.OptionTxTable {
 
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
@@ -1474,7 +1437,7 @@ func (self *StateDB)GetOptionTxTableByAddress(address common.Address) *types.Opt
 	return nil
 }
 
-func (self *StateDB)DelTxInOptionTxTable(hash common.Hash, optionTxMemorySize uint64) bool{
+func (self *StateDB) DelTxInOptionTxTable(hash common.Hash, optionTxMemorySize uint64) bool {
 	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
 
 	stateObject := self.GetOrNewStateObject(optionSaveAddr)
@@ -1485,7 +1448,7 @@ func (self *StateDB)DelTxInOptionTxTable(hash common.Hash, optionTxMemorySize ui
 	return false
 }
 
-func (self *StateDB)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx, optionTxMemorySize uint64) bool{
+func (self *StateDB) AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx, optionTxMemorySize uint64) bool {
 
 	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
 	stateObject := self.GetOrNewStateObject(optionSaveAddr)
@@ -1496,7 +1459,7 @@ func (self *StateDB)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOption
 	return false
 }
 
-func (self *StateDB)PromissoryNotesWithdrawCash(address common.Address,blockNumber uint64) uint64 {
+func (self *StateDB) PromissoryNotesWithdrawCash(address common.Address, blockNumber uint64) uint64 {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		return stateObject.PromissoryNotesWithdrawCash(blockNumber)
@@ -1504,7 +1467,7 @@ func (self *StateDB)PromissoryNotesWithdrawCash(address common.Address,blockNumb
 	return uint64(0)
 }
 
-func (self *StateDB)GetAllPromissoryNotesNum(address common.Address) uint64 {
+func (self *StateDB) GetAllPromissoryNotesNum(address common.Address) uint64 {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		return stateObject.GetAllPromissoryNotesNum()
@@ -1512,7 +1475,7 @@ func (self *StateDB)GetAllPromissoryNotesNum(address common.Address) uint64 {
 	return uint64(0)
 }
 
-func (self *StateDB)GetBeforPromissoryNotesNum(address common.Address,blockNumber uint64) uint64 {
+func (self *StateDB) GetBeforPromissoryNotesNum(address common.Address, blockNumber uint64) uint64 {
 	stateObject := self.GetOrNewStateObject(address)
 	if stateObject != nil {
 		return stateObject.GetBeforPromissoryNotesNum(blockNumber)
@@ -1520,7 +1483,7 @@ func (self *StateDB)GetBeforPromissoryNotesNum(address common.Address,blockNumbe
 	return uint64(0)
 }
 
-func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool, optionTxMemorySize uint64) bool{
+func (self *StateDB) SetTxStatusInOptionTxTable(hash common.Hash, status bool, optionTxMemorySize uint64) bool {
 	optionSaveAddr := common.GetOptionSaveAddr(hash, optionTxMemorySize)
 
 	stateObject := self.GetOrNewStateObject(optionSaveAddr)
@@ -1531,12 +1494,12 @@ func (self *StateDB)SetTxStatusInOptionTxTable(hash common.Hash, status bool, op
 	return false
 }
 
-func (self *StateDB)GetAccountData(address common.Address) *Account {
+func (self *StateDB) GetAccountData(address common.Address) *Account {
 	stateObject := self.GetOrNewStateObject(address)
 	return &stateObject.data
 }
 
-func (self *StateDB)BuyPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
+func (self *StateDB) BuyPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
 
 	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
 
@@ -1547,17 +1510,17 @@ func (self *StateDB)BuyPromissoryNotes(orderId common.Hash, address common.Addre
 	return types.PromissoryNotesOptionTx{}
 }
 
-func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
+func (self *StateDB) CarriedOutPromissoryNotes(orderId common.Hash, address common.Address, optionTxMemorySize uint64) types.PromissoryNotesOptionTx {
 	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
 
 	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	stateObjectAddress := self.GetOrNewStateObject(address)
-	if stateObject != nil && nil != stateObjectAddress{
-		result :=  stateObject.DeletePromissoryNotes(orderId, address)
-		if 0 < result.TxNum{
+	if stateObject != nil && nil != stateObjectAddress {
+		result := stateObject.DeletePromissoryNotes(orderId, address)
+		if 0 < result.TxNum {
 			promissoryNote := types.PromissoryNote{
-				RestoreBlock:result.RestoreBlock,
-				Num:result.TxNum,
+				RestoreBlock: result.RestoreBlock,
+				Num:          result.TxNum,
 			}
 			stateObjectAddress.AddPromissoryNote(promissoryNote)
 			return result
@@ -1566,12 +1529,12 @@ func (self *StateDB)CarriedOutPromissoryNotes(orderId common.Hash, address commo
 	return types.PromissoryNotesOptionTx{}
 }
 
-func (self *StateDB)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big,address common.Address, optionTxMemorySize uint64) bool{
+func (self *StateDB) TurnBuyPromissoryNotes(orderId common.Hash, optionPrice *hexutil.Big, address common.Address, optionTxMemorySize uint64) bool {
 	optionSaveAddr := common.GetOptionSaveAddr(orderId, optionTxMemorySize)
 
 	stateObject := self.GetOrNewStateObject(optionSaveAddr)
 	if stateObject != nil {
-		return stateObject.TurnBuyPromissoryNotes(orderId,optionPrice, address)
+		return stateObject.TurnBuyPromissoryNotes(orderId, optionPrice, address)
 	}
 	return false
 }

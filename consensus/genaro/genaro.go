@@ -6,32 +6,32 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/accounts"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"github.com/hashicorp/golang-lru"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
-	"encoding/json"
+	"github.com/hashicorp/golang-lru"
 )
 
 const (
-	inmemorySnapshots				= 128                    // Number of recent snapshots to keep in memory
-	epochLength					= uint64(5000)           // Default number of blocks a turn
-	minDistance					= uint64(500)
+	inmemorySnapshots = 128          // Number of recent snapshots to keep in memory
+	epochLength       = uint64(5000) // Default number of blocks a turn
+	minDistance       = uint64(500)
 )
 
 var (
-	//coinRewardsRatio				 = common.Base*50/100
-	//storageRewardsRatio				 = common.Base*50/100
-	//ratioPerYear					 = common.Base*7/100
+//coinRewardsRatio				 = common.Base*50/100
+//storageRewardsRatio				 = common.Base*50/100
+//ratioPerYear					 = common.Base*7/100
 )
 
 var (
@@ -42,7 +42,7 @@ var (
 	// errUnauthorized is returned if epoch block has no committee list
 	errInvalidEpochBlock = errors.New("epoch block has no committee list")
 	errInvalidDifficulty = errors.New("invalid difficulty")
-	errInvalidBlockTime = errors.New("invalid block time")
+	errInvalidBlockTime  = errors.New("invalid block time")
 )
 
 // Various error messages to mark blocks invalid.
@@ -114,12 +114,12 @@ func Ecrecover(header *types.Header) (common.Address, error) {
 }
 
 type Genaro struct {
-	config     *params.GenaroConfig // genaro config
-	db         ethdb.Database       // Database to store and retrieve snapshot checkpoints
-	recents    *lru.ARCCache        // snapshot cache
-	signer     common.Address       // Ethereum address of the signing key
-	lock       sync.RWMutex         // Protects the signer fields
-	signFn     SignerFn             // sign function
+	config  *params.GenaroConfig // genaro config
+	db      ethdb.Database       // Database to store and retrieve snapshot checkpoints
+	recents *lru.ARCCache        // snapshot cache
+	signer  common.Address       // Ethereum address of the signing key
+	lock    sync.RWMutex         // Protects the signer fields
+	signFn  SignerFn             // sign function
 }
 
 // New creates a Genaro consensus engine
@@ -156,7 +156,7 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	header.Nonce = types.BlockNonce{}
 	number := header.Number.Uint64()
 
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number),nil)
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, number), nil)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (g *Genaro) Prepare(chain consensus.ChainReader, header *types.Header) erro
 		return consensus.ErrUnknownAncestor
 	}
 	delayTime := snap.getDelayTime(header)
-	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(g.config.Period + delayTime))
+	header.Time = new(big.Int).Add(parent.Time, new(big.Int).SetUint64(g.config.Period+delayTime))
 	if header.Time.Int64() < time.Now().Unix() {
 		header.Time = big.NewInt(time.Now().Unix())
 	}
@@ -192,7 +192,7 @@ func (g *Genaro) Seal(chain consensus.ChainReader, block *types.Block, stop <-ch
 	g.lock.RUnlock()
 
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now())
-	log.Info("delay:"+delay.String())
+	log.Info("delay:" + delay.String())
 	select {
 	case <-stop:
 		return nil, nil
@@ -216,7 +216,7 @@ func (g *Genaro) CalcDifficulty(chain consensus.ChainReader, time uint64, parent
 	blockNumber := parent.Number.Uint64() + 1
 	dependEpoch := GetTurnOfCommiteeByBlockNumber(g.config, blockNumber)
 
-	snap, err := g.snapshot(chain, dependEpoch,nil)
+	snap, err := g.snapshot(chain, dependEpoch, nil)
 	if err != nil {
 		return nil
 	}
@@ -226,7 +226,7 @@ func (g *Genaro) CalcDifficulty(chain consensus.ChainReader, time uint64, parent
 func max(x uint64, y uint64) uint64 {
 	if x > y {
 		return x
-	}else{
+	} else {
 		return y
 	}
 }
@@ -238,7 +238,7 @@ func CalcDifficulty(snap *CommitteeSnapshot, addr common.Address, blockNumber ui
 	if index < 0 {
 		return new(big.Int).SetUint64(0)
 	}
-	distance := snap.getDistance(addr,blockNumber)
+	distance := snap.getDistance(addr, blockNumber)
 	difficult := snap.CommitteeSize - uint64(distance)
 	return new(big.Int).SetUint64(uint64(difficult))
 }
@@ -266,30 +266,30 @@ func (g *Genaro) snapshot(chain consensus.ChainReader, epollNumber uint64, paren
 	// If an in-memory snapshot was found, use that
 	if s, ok := g.recents.Get(epollNumber); ok {
 		snap = s.(*CommitteeSnapshot)
-	}else if epollNumber < g.config.ValidPeriod + g.config.ElectionPeriod {
+	} else if epollNumber < g.config.ValidPeriod+g.config.ElectionPeriod {
 		h := chain.GetHeaderByNumber(0)
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
 		committeeAccountBinding := GetCommitteeAccountBinding(h)
-		snap = newSnapshot(chain.Config().Genaro, 0, h.Hash(), 0, committeeRank, proportion,committeeAccountBinding)
+		snap = newSnapshot(chain.Config().Genaro, 0, h.Hash(), 0, committeeRank, proportion, committeeAccountBinding)
 		isCreateNew = true
-	}else{
+	} else {
 		// visit the blocks in epollNumber - ValidPeriod - ElectionPeriod tern
-		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
-		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber - g.config.ValidPeriod - g.config.ElectionPeriod)
+		startBlock := GetFirstBlockNumberOfEpoch(g.config, epollNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
+		endBlock := GetLastBlockNumberOfEpoch(g.config, epollNumber-g.config.ValidPeriod-g.config.ElectionPeriod)
 		var h *types.Header
-		if parents != nil && len(parents) > 0 && parents[0].Number.Uint64()<endBlock+1{
-			num := endBlock+1 - parents[0].Number.Uint64()
+		if parents != nil && len(parents) > 0 && parents[0].Number.Uint64() < endBlock+1 {
+			num := endBlock + 1 - parents[0].Number.Uint64()
 			if parents[num].Number.Uint64() == endBlock+1 {
 				h = parents[num]
 			}
 		}
 		if h == nil {
-			h = chain.GetHeaderByNumber(endBlock+1)
+			h = chain.GetHeaderByNumber(endBlock + 1)
 		}
 		committeeRank, proportion := GetHeaderCommitteeRankList(h)
 		committeeAccountBinding := GetCommitteeAccountBinding(h)
-		snap = newSnapshot(chain.Config().Genaro, h.Number.Uint64(), h.Hash(), epollNumber -
-			g.config.ValidPeriod - g.config.ElectionPeriod, committeeRank, proportion,committeeAccountBinding)
+		snap = newSnapshot(chain.Config().Genaro, h.Number.Uint64(), h.Hash(), epollNumber-
+			g.config.ValidPeriod-g.config.ElectionPeriod, committeeRank, proportion, committeeAccountBinding)
 
 		log.Trace("computing rank from", startBlock, "to", endBlock)
 		isCreateNew = true
@@ -319,7 +319,7 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	}
 	// check syn state
 	extraData := UnmarshalToExtra(header)
-	if blockNumber - extraData.LastSynBlockNum > common.SynBlockLen+1 {
+	if blockNumber-extraData.LastSynBlockNum > common.SynBlockLen+1 {
 		return errors.New("need SynState")
 	}
 
@@ -337,7 +337,7 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		}
 	}
 	// get current committee snapshot
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, blockNumber),parents)
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, blockNumber), parents)
 	if err != nil {
 		return err
 	}
@@ -365,7 +365,7 @@ func (g *Genaro) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		return errUnknownBlock
 	}
 	// Ensure that difficulty corresponds to the turn of the signer
-	diffcult := CalcDifficulty(snap,signer,blockNumber)
+	diffcult := CalcDifficulty(snap, signer, blockNumber)
 	if header.Difficulty.Cmp(diffcult) != 0 {
 		return errInvalidDifficulty
 	}
@@ -398,7 +398,7 @@ func GetCoinActualRewards(state *state.StateDB) *big.Int {
 
 func AddCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
-	rewardsValues.CoinActualRewards.Add(rewardsValues.CoinActualRewards,coinrewards)
+	rewardsValues.CoinActualRewards.Add(rewardsValues.CoinActualRewards, coinrewards)
 	state.SetRewardsValues(*rewardsValues)
 }
 
@@ -408,7 +408,7 @@ func SetCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
 	state.SetRewardsValues(*rewardsValues)
 }
 
-func SetPreCoinActualRewards(state *state.StateDB,coinrewards *big.Int) {
+func SetPreCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
 	rewardsValues.PreCoinActualRewards.Set(coinrewards)
 	state.SetRewardsValues(*rewardsValues)
@@ -432,7 +432,7 @@ func SetStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
 
 func AddStorageActualRewards(state *state.StateDB, storagerewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
-	rewardsValues.StorageActualRewards.Add(rewardsValues.StorageActualRewards,storagerewards)
+	rewardsValues.StorageActualRewards.Add(rewardsValues.StorageActualRewards, storagerewards)
 	state.SetRewardsValues(*rewardsValues)
 }
 
@@ -449,7 +449,7 @@ func GetPreStorageActualRewards(state *state.StateDB) *big.Int {
 
 func AddTotalActualRewards(state *state.StateDB, rewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
-	rewardsValues.TotalActualRewards.Add(rewardsValues.TotalActualRewards,rewards)
+	rewardsValues.TotalActualRewards.Add(rewardsValues.TotalActualRewards, rewards)
 	state.SetRewardsValues(*rewardsValues)
 }
 
@@ -471,7 +471,7 @@ func GetSurplusCoin(state *state.StateDB) *big.Int {
 
 func SubSurplusCoin(state *state.StateDB, rewards *big.Int) {
 	rewardsValues := state.GetRewardsValues()
-	rewardsValues.SurplusCoin.Sub(rewardsValues.SurplusCoin,rewards)
+	rewardsValues.SurplusCoin.Sub(rewardsValues.SurplusCoin, rewards)
 	state.SetRewardsValues(*rewardsValues)
 }
 
@@ -492,7 +492,7 @@ func GetPreSurplusCoin(state *state.StateDB) *big.Int {
 	return rewardsValues.PreStorageActualRewards
 }
 
-func updateEpochRewards(state *state.StateDB)  {
+func updateEpochRewards(state *state.StateDB) {
 	//reset CoinActualRewards and StorageActualRewards, add TotalActualRewards
 	coinrewards := GetCoinActualRewards(state)
 	storagerewards := GetStorageActualRewards(state)
@@ -512,11 +512,11 @@ func updateEpochYearRewards(state *state.StateDB) {
 	SetTotalActualRewards(state, big.NewInt(0))
 }
 
-func genCommitteeAccountBinding(thisstate *state.StateDB,commitee []common.Address) (committeeAccountBinding map[common.Address][]common.Address) {
+func genCommitteeAccountBinding(thisstate *state.StateDB, commitee []common.Address) (committeeAccountBinding map[common.Address][]common.Address) {
 	committeeAccountBinding = make(map[common.Address][]common.Address)
 	mainAccounts := thisstate.GetMainAccounts()
-	for _,account := range commitee{
-		subAccounts,ok := mainAccounts[account]
+	for _, account := range commitee {
+		subAccounts, ok := mainAccounts[account]
 		if ok {
 			committeeAccountBinding[account] = subAccounts
 		}
@@ -524,20 +524,19 @@ func genCommitteeAccountBinding(thisstate *state.StateDB,commitee []common.Addre
 	return
 }
 
-func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
+func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB) {
 	blockNumber := header.Number.Uint64()
-	// 换届块
 	if blockNumber%config.Epoch == 0 {
 		candidateInfos := thisstate.GetCandidatesInfoWithAllSubAccounts()
 		genaroPrice := thisstate.GetGenaroPrice()
-		commiteeRank, proportion := state.RankWithLenth(candidateInfos,int(config.CommitteeMaxSize),genaroPrice.CommitteeMinStake)
+		commiteeRank, proportion := state.RankWithLenth(candidateInfos, int(config.CommitteeMaxSize), genaroPrice.CommitteeMinStake)
 		var committeeAccountBinding map[common.Address][]common.Address
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
-			committeeAccountBinding = genCommitteeAccountBinding(thisstate,commiteeRank)
-		}else{
-			SetHeaderCommitteeRankList(header, commiteeRank[:config.CommitteeMaxSize],proportion[:config.CommitteeMaxSize])
-			committeeAccountBinding = genCommitteeAccountBinding(thisstate,commiteeRank[:config.CommitteeMaxSize])
+			committeeAccountBinding = genCommitteeAccountBinding(thisstate, commiteeRank)
+		} else {
+			SetHeaderCommitteeRankList(header, commiteeRank[:config.CommitteeMaxSize], proportion[:config.CommitteeMaxSize])
+			committeeAccountBinding = genCommitteeAccountBinding(thisstate, commiteeRank[:config.CommitteeMaxSize])
 		}
 		SetCommitteeAccountBinding(header, committeeAccountBinding)
 		//CoinActualRewards and StorageActualRewards should update per epoch
@@ -550,13 +549,13 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 	}
 }
 
-func handleAlreadyBackStakeList(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB)  {
+func handleAlreadyBackStakeList(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB) {
 	blockNumber := header.Number.Uint64()
-	_,backlist := thisstate.GetAlreadyBackStakeList()
+	_, backlist := thisstate.GetAlreadyBackStakeList()
 	for i := 0; i < len(backlist); i++ {
 		back := backlist[i]
 		if IsBackStakeBlockNumber(config, back.BackBlockNumber, blockNumber) {
-			thisstate.BackStake(back.Addr,blockNumber)
+			thisstate.BackStake(back.Addr, blockNumber)
 			backlist = append(backlist[:i], backlist[i+1:]...)
 			i--
 		}
@@ -581,16 +580,15 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 		header.Extra, _ = json.Marshal(extraData)
 	}
 	if header.Number.Uint64() > common.SynBlockLen {
-		state.AddLastRootState(header.ParentHash,header.Number.Uint64()-1)
+		state.AddLastRootState(header.ParentHash, header.Number.Uint64()-1)
 	}
 
-
-	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()),nil)
+	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	proportion := snap.Committee[snap.CommitteeRank[blockNumber % snap.CommitteeSize]]
+	proportion := snap.Committee[snap.CommitteeRank[blockNumber%snap.CommitteeSize]]
 
 	//  coin interest reward
 	accumulateInterestRewards(g.config, state, header, proportion, blockNumber, snap.CommitteeSize, snap.CommitteeAccountBinding)
@@ -607,7 +605,7 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	return types.NewBlock(header, txs, nil, receipts), nil
 }
 
-func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards *big.Int,coinRewardsRatio uint64,ratioPerYear uint64) uint64 {
+func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards *big.Int, coinRewardsRatio uint64, ratioPerYear uint64) uint64 {
 	if coinrewards.Cmp(big.NewInt(0)) == 0 {
 		return uint64(common.Base)
 	}
@@ -626,7 +624,7 @@ func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards 
 	return coinRatio
 }
 
-func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusRewards *big.Int,storageRewardsRatio uint64,ratioPerYear uint64) uint64 {
+func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusRewards *big.Int, storageRewardsRatio uint64, ratioPerYear uint64) uint64 {
 	if storagerewards.Cmp(big.NewInt(0)) == 0 {
 		return uint64(common.Base)
 	}
@@ -645,26 +643,26 @@ func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusR
 	return storageRatio
 }
 
-func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward *big.Int, subAccounts []common.Address){
-	coinbaseStake,_ := state.GetStake(coinbase)
+func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward *big.Int, subAccounts []common.Address) {
+	coinbaseStake, _ := state.GetStake(coinbase)
 	totleStake := uint64(0)
 	totleStake += coinbaseStake
-	for _,subAccount := range subAccounts {
-		stake,_ := state.GetStake(subAccount)
+	for _, subAccount := range subAccounts {
+		stake, _ := state.GetStake(subAccount)
 		totleStake += stake
 	}
 
 	surplusReward := big.NewInt(0)
 	surplusReward.Set(reward)
 
-	for _,subAccount := range subAccounts {
-		stake,_ := state.GetStake(subAccount)
+	for _, subAccount := range subAccounts {
+		stake, _ := state.GetStake(subAccount)
 		accountReward := big.NewInt(0)
 		accountReward.Set(reward)
-		accountReward.Mul(accountReward,big.NewInt(int64(stake)))
-		accountReward.Div(accountReward,big.NewInt(int64(totleStake)))
+		accountReward.Mul(accountReward, big.NewInt(int64(stake)))
+		accountReward.Div(accountReward, big.NewInt(int64(totleStake)))
 		state.AddBalance(subAccount, accountReward)
-		surplusReward.Sub(surplusReward,accountReward)
+		surplusReward.Sub(surplusReward, accountReward)
 	}
 
 	state.AddBalance(coinbase, surplusReward)
@@ -672,20 +670,20 @@ func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward
 
 // AccumulateInterestRewards credits the reward to the block author by coin  interest
 func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB, header *types.Header, proportion uint64,
-	blockNumber uint64, committeeSize uint64, committeeAccountBinding 	map[common.Address][]common.Address) error {
+	blockNumber uint64, committeeSize uint64, committeeAccountBinding map[common.Address][]common.Address) error {
 	preCoinRewards := GetPreCoinActualRewards(state)
 	preSurplusRewards := big.NewInt(0)
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
 	if blockNumber%(config.Epoch*calEpochPerYear(config)) == 0 {
 		preSurplusRewards = GetPreSurplusCoin(state)
-	}else{
+	} else {
 		preSurplusRewards = GetSurplusCoin(state)
 	}
 
 	genaroPrice := state.GetGenaroPrice()
-	coinRewardsRatio := common.Base*genaroPrice.CoinRewardsRatio/100
-	ratioPerYear := common.Base*genaroPrice.RatioPerYear/100
-	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards,coinRewardsRatio,ratioPerYear)
+	coinRewardsRatio := common.Base * genaroPrice.CoinRewardsRatio / 100
+	ratioPerYear := common.Base * genaroPrice.RatioPerYear / 100
+	coefficient := getCoinCofficient(config, preCoinRewards, preSurplusRewards, coinRewardsRatio, ratioPerYear)
 	surplusRewards := GetSurplusCoin(state)
 	//plan rewards per year
 	planRewards := big.NewInt(0)
@@ -710,20 +708,19 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	reward := blockReward
 	log.Info("accumulateInterestRewards", "reward", reward.String())
 
-	subAccounts,ok := committeeAccountBinding[header.Coinbase]
+	subAccounts, ok := committeeAccountBinding[header.Coinbase]
 	if ok {
-		settleInterestRewards(state,header.Coinbase,reward,subAccounts)
+		settleInterestRewards(state, header.Coinbase, reward, subAccounts)
 	} else {
 		state.AddBalance(header.Coinbase, reward)
 	}
-	AddCoinActualRewards(state,reward)
+	AddCoinActualRewards(state, reward)
 	return nil
 }
 
 // AccumulateStorageRewards credits the reward to the sentinel owner
 func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB, blockNumber uint64, committeeSize uint64) error {
-	// 存储收益每一届结算一次
-	if blockNumber % config.Epoch != 0 {
+	if blockNumber%config.Epoch != 0 {
 		return nil
 	}
 	preStorageRewards := GetPreStorageActualRewards(state)
@@ -731,15 +728,15 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	//when now is the start of year, preSurplusRewards should get "Pre + SurplusCoinAddress"
 	if blockNumber%(config.Epoch*calEpochPerYear(config)) == 0 {
 		preSurplusRewards = GetPreSurplusCoin(state)
-	}else{
+	} else {
 		preSurplusRewards = GetSurplusCoin(state)
 	}
 
 	genaroPrice := state.GetGenaroPrice()
-	storageRewardsRatio := common.Base*genaroPrice.StorageRewardsRatio/100
-	ratioPerYear := common.Base*genaroPrice.RatioPerYear/100
+	storageRewardsRatio := common.Base * genaroPrice.StorageRewardsRatio / 100
+	ratioPerYear := common.Base * genaroPrice.RatioPerYear / 100
 
-	coefficient := getStorageCoefficient(config, preStorageRewards, preSurplusRewards,storageRewardsRatio,ratioPerYear)
+	coefficient := getStorageCoefficient(config, preStorageRewards, preSurplusRewards, storageRewardsRatio, ratioPerYear)
 
 	surplusRewards := GetSurplusCoin(state)
 
@@ -760,7 +757,7 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 	cs := state.GetCandidates()
 	total := uint64(0)
 	contributes := make([]uint64, len(cs))
-	for i, c := range cs{
+	for i, c := range cs {
 		//contributes[i] = state.GetHeftLastDiff(c, blockNumber)
 		contributes[i] = state.GetHeftRangeDiff(c, blockNumber-config.Epoch, blockNumber)
 		total += contributes[i]
@@ -769,7 +766,7 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 		return nil
 	}
 
-	for i, c := range cs{
+	for i, c := range cs {
 		reward := big.NewInt(0)
 		reward.Mul(planRewards, big.NewInt(int64(contributes[i])))
 		reward.Div(planRewards, big.NewInt(int64(total)))

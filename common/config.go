@@ -1,8 +1,8 @@
 package common
 
 import (
-	"math/big"
 	"github.com/GenaroNetwork/Genaro-Core/common/math"
+	"math/big"
 )
 
 func init() {
