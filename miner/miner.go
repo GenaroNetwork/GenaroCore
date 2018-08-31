@@ -127,9 +127,9 @@ func (self *Miner) Start(coinbase common.Address) {
 }
 
 // genaro commit work
-func GenaroCommitNewWork(wk *worker){
+func GenaroCommitNewWork(wk *worker) {
 	err := wk.commitNewWork()
-	for err != nil && strings.EqualFold(err.Error(),SynError.Error()) && atomic.LoadInt32(&wk.mining) > 0{
+	for err != nil && strings.EqualFold(err.Error(), SynError.Error()) && atomic.LoadInt32(&wk.mining) > 0 {
 		time.Sleep(time.Second)
 		err = wk.commitNewWork()
 	}

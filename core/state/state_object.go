@@ -18,19 +18,19 @@ package state
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
-	"encoding/json"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"time"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/pkg/errors"
 	"sort"
+	"time"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -41,8 +41,6 @@ type Code []byte
 func (self Code) String() string {
 	return string(self) //strings.Join(Disassemble(self), " ")
 }
-
-
 
 type Storage map[common.Hash]common.Hash
 
@@ -113,32 +111,31 @@ type Account struct {
 	CodeHash []byte
 }
 
-
 type Candidates []common.Address
 
-func (self *Candidates)isExist(addr common.Address) bool{
-	for _,addrIn := range *self {
-		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
+func (self *Candidates) isExist(addr common.Address) bool {
+	for _, addrIn := range *self {
+		if bytes.Compare(addrIn.Bytes(), addr.Bytes()) == 0 {
 			return true
 		}
 	}
 	return false
 }
 
-func (self *Candidates)DelCandidate(addr common.Address) {
-	for i,addrIn := range *self {
-		if bytes.Compare(addrIn.Bytes(),addr.Bytes()) == 0 {
-			(*self) = append((*self)[:i],(*self)[i+1:]...)
+func (self *Candidates) DelCandidate(addr common.Address) {
+	for i, addrIn := range *self {
+		if bytes.Compare(addrIn.Bytes(), addr.Bytes()) == 0 {
+			(*self) = append((*self)[:i], (*self)[i+1:]...)
 		}
 	}
 }
 
 type CandidateInfo struct {
-	Signer       common.Address // peer address
-	Heft uint64         // the sentinel of the peer
+	Signer common.Address // peer address
+	Heft   uint64         // the sentinel of the peer
 	//TODO May need to convert big int
-	Stake        uint64         // the stake of the peer
-	Point		 uint64
+	Stake uint64 // the stake of the peer
+	Point uint64
 }
 
 type CandidateInfos []CandidateInfo
@@ -161,12 +158,12 @@ func (c CandidateInfos) Less(i, j int) bool {
 func (c CandidateInfos) Apply() {
 	totleHeft := uint64(0)
 	totleStake := uint64(0)
-	for _, candidate := range c{
+	for _, candidate := range c {
 		totleHeft += candidate.Heft
 		totleStake += candidate.Stake
 	}
 	//TODO define how to get point
-	for i, candidate := range c{
+	for i, candidate := range c {
 		if candidate.Heft == 0 {
 			c[i].Point = 0
 		} else {
@@ -176,32 +173,32 @@ func (c CandidateInfos) Apply() {
 }
 
 // 全员排名，无限制长度
-func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
+func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64) {
 	candidateInfos.Apply()
 	sort.Sort(sort.Reverse(candidateInfos))
 	committeeRank := make([]common.Address, len(candidateInfos))
 	proportion := make([]uint64, len(candidateInfos))
 	total := uint64(0)
-	for _, c := range candidateInfos{
+	for _, c := range candidateInfos {
 		total += c.Stake
 	}
 	if total == 0 {
 		return committeeRank, proportion
 	}
-	for i, c := range candidateInfos{
+	for i, c := range candidateInfos {
 		committeeRank[i] = c.Signer
-		proportion[i] = c.Stake*uint64(common.Base)/total
+		proportion[i] = c.Stake * uint64(common.Base) / total
 	}
 	return committeeRank, proportion
 }
 
 // 限制排名的长度后，进行排名
-func RankWithLenth(candidateInfos CandidateInfos, lenth int, committeeMinStake uint64) ([]common.Address, []uint64){
+func RankWithLenth(candidateInfos CandidateInfos, lenth int, committeeMinStake uint64) ([]common.Address, []uint64) {
 	candidateInfos.Apply()
 	// 除去低于stake最小限制的账号
-	for i:=0;i<len(candidateInfos);i++ {
+	for i := 0; i < len(candidateInfos); i++ {
 		if candidateInfos[i].Stake < committeeMinStake {
-			candidateInfos = append(candidateInfos[:i],candidateInfos[i+1:]...)
+			candidateInfos = append(candidateInfos[:i], candidateInfos[i+1:]...)
 			i--
 		}
 	}
@@ -215,25 +212,25 @@ func RankWithLenth(candidateInfos CandidateInfos, lenth int, committeeMinStake u
 	proportion := make([]uint64, rankLenth)
 	total := uint64(0)
 
-	for i:=0;i<rankLenth;i++ {
+	for i := 0; i < rankLenth; i++ {
 		total += candidateInfos[i].Stake
 	}
 	if total == 0 {
 		return committeeRank, proportion
 	}
-	for i:=0;i<rankLenth;i++ {
-		committeeRank[i] =  candidateInfos[i].Signer
-		proportion[i] = candidateInfos[i].Stake*uint64(common.Base)/total
+	for i := 0; i < rankLenth; i++ {
+		committeeRank[i] = candidateInfos[i].Signer
+		proportion[i] = candidateInfos[i].Stake * uint64(common.Base) / total
 	}
 	return committeeRank, proportion
 }
 
 type FilePropertie struct {
-	StorageGas       uint64	`json:"sgas"`
-	StorageGasUsed  uint64	`json:"sGasUsed"`
-	StorageGasPrice  uint64 `josn:"sGasPrice"`
+	StorageGas      uint64 `json:"sgas"`
+	StorageGasUsed  uint64 `json:"sGasUsed"`
+	StorageGasPrice uint64 `josn:"sGasPrice"`
 	// Ssize represents Storage Size
-	Ssize            uint64 `json:"sSize"`
+	Ssize uint64 `json:"sSize"`
 }
 
 // newObject creates a state object.
@@ -449,7 +446,7 @@ func (c *stateObject) Address() common.Address {
 
 // if empty return true
 func CheckCodeEmpty(codeHash []byte) bool {
-	if bytes.Equal(codeHash, emptyCodeHash) || len(codeHash)!=32 {
+	if bytes.Equal(codeHash, emptyCodeHash) || len(codeHash) != 32 {
 		return true
 	} else {
 		return false
@@ -542,13 +539,13 @@ func (self *stateObject) Value() *big.Int {
 }
 
 // update heft and add heft log
-func (self *stateObject)UpdateHeft(heft uint64, blockNumber uint64){
+func (self *stateObject) UpdateHeft(heft uint64, blockNumber uint64) {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroData = types.GenaroData{
-			Heft:heft,
+			Heft: heft,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Heft = heft
 	}
@@ -570,7 +567,7 @@ func (self *stateObject)UpdateHeft(heft uint64, blockNumber uint64){
 	}
 }
 
-func (self *stateObject)GetHeft() (uint64){
+func (self *stateObject) GetHeft() uint64 {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -580,7 +577,7 @@ func (self *stateObject)GetHeft() (uint64){
 	return 0
 }
 
-func (self *stateObject)GetHeftLog() (types.NumLogs){
+func (self *stateObject) GetHeftLog() types.NumLogs {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -590,24 +587,24 @@ func (self *stateObject)GetHeftLog() (types.NumLogs){
 	return nil
 }
 
-func (self *stateObject)GetHeftRangeDiff(blockNumStart uint64, blockNumEnd uint64) (uint64){
+func (self *stateObject) GetHeftRangeDiff(blockNumStart uint64, blockNumEnd uint64) uint64 {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		return genaroData.HeftLog.GetRangeDiff(blockNumStart,blockNumEnd)
+		return genaroData.HeftLog.GetRangeDiff(blockNumStart, blockNumEnd)
 	}
 
 	return 0
 }
 
 // update stake and add stake log
-func (self *stateObject)UpdateStake(stake uint64, blockNumber uint64){
+func (self *stateObject) UpdateStake(stake uint64, blockNumber uint64) {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroData = types.GenaroData{
-			Stake:stake,
+			Stake: stake,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Stake += stake
 	}
@@ -629,7 +626,7 @@ func (self *stateObject)UpdateStake(stake uint64, blockNumber uint64){
 	}
 }
 
-func (self *stateObject)DeleteStake(stake uint64, blockNumber uint64) uint64 {
+func (self *stateObject) DeleteStake(stake uint64, blockNumber uint64) uint64 {
 	var currentPunishment uint64
 	var genaroData types.GenaroData
 	if self.data.CodeHash != nil {
@@ -638,7 +635,7 @@ func (self *stateObject)DeleteStake(stake uint64, blockNumber uint64) uint64 {
 		if genaroData.Stake <= stake {
 			currentPunishment = genaroData.Stake
 			genaroData.Stake = 0
-		}else {
+		} else {
 			currentPunishment = stake
 			genaroData.Stake -= stake
 		}
@@ -660,7 +657,7 @@ func (self *stateObject)DeleteStake(stake uint64, blockNumber uint64) uint64 {
 	return currentPunishment
 }
 
-func (self *stateObject)GetStake() (uint64){
+func (self *stateObject) GetStake() uint64 {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -670,8 +667,7 @@ func (self *stateObject)GetStake() (uint64){
 	return 0
 }
 
-
-func (self *stateObject)GetStakeLog() (types.NumLogs){
+func (self *stateObject) GetStakeLog() types.NumLogs {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -681,11 +677,11 @@ func (self *stateObject)GetStakeLog() (types.NumLogs){
 	return nil
 }
 
-func (self *stateObject)GetStakeRangeDiff(blockNumStart uint64, blockNumEnd uint64) (uint64){
+func (self *stateObject) GetStakeRangeDiff(blockNumStart uint64, blockNumEnd uint64) uint64 {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
-		return genaroData.StakeLog.GetRangeDiff(blockNumStart,blockNumEnd)
+		return genaroData.StakeLog.GetRangeDiff(blockNumStart, blockNumEnd)
 	}
 
 	return 0
@@ -693,13 +689,13 @@ func (self *stateObject)GetStakeRangeDiff(blockNumStart uint64, blockNumEnd uint
 
 func (self *stateObject) AddCandidate(candidate common.Address) {
 	var candidates Candidates
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		candidates = *new(Candidates)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &candidates)
 	}
 	if !candidates.isExist(candidate) {
-		candidates = append(candidates,candidate)
+		candidates = append(candidates, candidate)
 		b, _ := json.Marshal(candidates)
 		self.code = nil
 		self.data.CodeHash = b[:]
@@ -712,11 +708,11 @@ func (self *stateObject) AddCandidate(candidate common.Address) {
 }
 
 // 判断候选者是否存在
-func (self *stateObject) IsCandidateExist(candidate common.Address) bool{
+func (self *stateObject) IsCandidateExist(candidate common.Address) bool {
 	var candidates Candidates
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		candidates = *new(Candidates)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &candidates)
 	}
 
@@ -725,9 +721,9 @@ func (self *stateObject) IsCandidateExist(candidate common.Address) bool{
 
 func (self *stateObject) DelCandidate(candidate common.Address) {
 	var candidates Candidates
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		candidates = *new(Candidates)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &candidates)
 	}
 
@@ -744,7 +740,7 @@ func (self *stateObject) DelCandidate(candidate common.Address) {
 	}
 }
 
-func (self *stateObject)GetCandidates() (Candidates){
+func (self *stateObject) GetCandidates() Candidates {
 	if self.data.CodeHash != nil {
 		var candidates Candidates
 		json.Unmarshal(self.data.CodeHash, &candidates)
@@ -756,9 +752,9 @@ func (self *stateObject)GetCandidates() (Candidates){
 // 将账号加入禁止退注列表
 func (self *stateObject) AddAccountInForbidBackStakeList(addr common.Address) {
 	var forbidList types.ForbidBackStakeList
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		forbidList = *new(types.ForbidBackStakeList)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &forbidList)
 	}
 	if !forbidList.IsExist(addr) {
@@ -775,11 +771,11 @@ func (self *stateObject) AddAccountInForbidBackStakeList(addr common.Address) {
 }
 
 // 判断账号是否存在于禁止退注列表中
-func (self *stateObject) IsAccountExistInForbidBackStakeList(addr common.Address) bool{
+func (self *stateObject) IsAccountExistInForbidBackStakeList(addr common.Address) bool {
 	var forbidList types.ForbidBackStakeList
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		forbidList = *new(types.ForbidBackStakeList)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &forbidList)
 	}
 
@@ -789,9 +785,9 @@ func (self *stateObject) IsAccountExistInForbidBackStakeList(addr common.Address
 // 将账号从禁止退注名单中删除
 func (self *stateObject) DelAccountInForbidBackStakeList(addr common.Address) {
 	var forbidList types.ForbidBackStakeList
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		forbidList = *new(types.ForbidBackStakeList)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &forbidList)
 	}
 
@@ -809,7 +805,7 @@ func (self *stateObject) DelAccountInForbidBackStakeList(addr common.Address) {
 }
 
 // 获取禁止退注名单
-func (self *stateObject)GetForbidBackStakeList() (types.ForbidBackStakeList){
+func (self *stateObject) GetForbidBackStakeList() types.ForbidBackStakeList {
 	if self.data.CodeHash != nil {
 		var forbidList types.ForbidBackStakeList
 		json.Unmarshal(self.data.CodeHash, &forbidList)
@@ -818,16 +814,15 @@ func (self *stateObject)GetForbidBackStakeList() (types.ForbidBackStakeList){
 	return nil
 }
 
-
 func (self *stateObject) AddAlreadyBackStack(backStake common.AlreadyBackStake) {
 	var backStakes common.BackStakeList
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		backStakes = *new(common.BackStakeList)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &backStakes)
 	}
-	if !backStakes.IsExist(backStake){
-		backStakes = append(backStakes,backStake)
+	if !backStakes.IsExist(backStake) {
+		backStakes = append(backStakes, backStake)
 
 		b, _ := json.Marshal(backStakes)
 		self.code = nil
@@ -840,7 +835,7 @@ func (self *stateObject) AddAlreadyBackStack(backStake common.AlreadyBackStake) 
 	}
 }
 
-func (self *stateObject)GetAlreadyBackStakeList() (common.BackStakeList){
+func (self *stateObject) GetAlreadyBackStakeList() common.BackStakeList {
 	if self.data.CodeHash != nil {
 		var backStakes common.BackStakeList
 		json.Unmarshal(self.data.CodeHash, &backStakes)
@@ -849,7 +844,7 @@ func (self *stateObject)GetAlreadyBackStakeList() (common.BackStakeList){
 	return nil
 }
 
-func (self *stateObject)SetAlreadyBackStakeList(backStakes common.BackStakeList){
+func (self *stateObject) SetAlreadyBackStakeList(backStakes common.BackStakeList) {
 	b, _ := json.Marshal(backStakes)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -860,26 +855,36 @@ func (self *stateObject)SetAlreadyBackStakeList(backStakes common.BackStakeList)
 	}
 }
 
-func (self *stateObject)UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
+func (self *stateObject) UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
 	var bpArr []*types.BucketPropertie
 	bp := new(types.BucketPropertie)
-	if buckid != "" {bp.BucketId = buckid}
-	if szie != 0 {bp.Size = szie}
-	if backup != 0 {bp.Backup = backup}
-	if timestart != 0 {bp.TimeStart = timestart}
-	if timeend != 0 {bp.TimeEnd = timeend}
+	if buckid != "" {
+		bp.BucketId = buckid
+	}
+	if szie != 0 {
+		bp.Size = szie
+	}
+	if backup != 0 {
+		bp.Backup = backup
+	}
+	if timestart != 0 {
+		bp.TimeStart = timestart
+	}
+	if timeend != 0 {
+		bp.TimeEnd = timeend
+	}
 	bpArr = append(bpArr, bp)
 
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroData = types.GenaroData{
 			Buckets: bpArr,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if genaroData.Buckets == nil {
 			genaroData.Buckets = bpArr
-		}else {
+		} else {
 			genaroData.Buckets = append(genaroData.Buckets, bpArr...)
 		}
 	}
@@ -926,7 +931,7 @@ func (self *stateObject) UpdateBucket(bucket types.BucketPropertie) bool {
 	return false
 }
 
-func (self *stateObject)getBucketPropertie(bucketID string) *types.BucketPropertie {
+func (self *stateObject) getBucketPropertie(bucketID string) *types.BucketPropertie {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -942,43 +947,41 @@ func (self *stateObject)getBucketPropertie(bucketID string) *types.BucketPropert
 	return nil
 }
 
-func (self *stateObject)GetStorageSize(bucketID string) uint64 {
-	if bp:= self.getBucketPropertie(bucketID); bp != nil{
+func (self *stateObject) GetStorageSize(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
 		return bp.Size
 	}
 	return 0
 }
 
-
-func (self *stateObject)GetStorageGasPrice(bucketID string) uint64 {
-	if bp:= self.getBucketPropertie(bucketID); bp != nil{
+func (self *stateObject) GetStorageGasPrice(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
 		return bp.Backup
 	}
 	return 0
 }
 
-
-func (self *stateObject)GetStorageGasUsed(bucketID string) uint64 {
-	if bp:= self.getBucketPropertie(bucketID); bp != nil{
+func (self *stateObject) GetStorageGasUsed(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
 		return bp.Backup * bp.Size
 	}
 	return 0
 }
 
-func (self *stateObject)GetStorageGas(bucketID string) uint64 {
-	if bp:= self.getBucketPropertie(bucketID); bp != nil{
-		return bp.TimeEnd-bp.TimeStart
+func (self *stateObject) GetStorageGas(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
+		return bp.TimeEnd - bp.TimeStart
 	}
 	return 0
 }
 
-func (self *stateObject)UpdateTraffic(traffic uint64){
+func (self *stateObject) UpdateTraffic(traffic uint64) {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroData = types.GenaroData{
-			Traffic:traffic,
+			Traffic: traffic,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Traffic += traffic
 	}
@@ -993,7 +996,7 @@ func (self *stateObject)UpdateTraffic(traffic uint64){
 	}
 }
 
-func (self *stateObject)GetTraffic() uint64 {
+func (self *stateObject) GetTraffic() uint64 {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -1003,7 +1006,7 @@ func (self *stateObject)GetTraffic() uint64 {
 	return 0
 }
 
-func (self *stateObject)GetBuckets() map[string]interface{} {
+func (self *stateObject) GetBuckets() map[string]interface{} {
 	rtMap := make(map[string]interface{})
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
@@ -1014,11 +1017,11 @@ func (self *stateObject)GetBuckets() map[string]interface{} {
 			}
 		}
 	}
-	return  rtMap
+	return rtMap
 }
 
-func (self *stateObject)GetStorageNodes() []string {
-	if self.data.CodeHash == nil{
+func (self *stateObject) GetStorageNodes() []string {
+	if self.data.CodeHash == nil {
 		return nil
 	}
 
@@ -1031,24 +1034,24 @@ func (self *stateObject)GetStorageNodes() []string {
 }
 
 //Cross-chain storage processing
-func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
+func (self *stateObject) SpecialTxTypeMortgageInit(specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
 	var genaroData types.GenaroData
 	if len(specialTxTypeMortgageInit.AuthorityTable) != len(specialTxTypeMortgageInit.MortgageTable) {
 		return false
 	}
-	for k,_ := range  specialTxTypeMortgageInit.AuthorityTable {
+	for k, _ := range specialTxTypeMortgageInit.AuthorityTable {
 		if _, ok := specialTxTypeMortgageInit.MortgageTable[k]; !ok {
 			return false
 		}
 	}
 	if nil == self.data.CodeHash {
 		genaroData = types.GenaroData{
-			SpecialTxTypeMortgageInitArr:map[string]types.SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit},
+			SpecialTxTypeMortgageInitArr: map[string]types.SpecialTxTypeMortgageInit{specialTxTypeMortgageInit.FileID: specialTxTypeMortgageInit},
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if nil == genaroData.SpecialTxTypeMortgageInitArr {
-			genaroData.SpecialTxTypeMortgageInitArr = map[string]types.SpecialTxTypeMortgageInit {specialTxTypeMortgageInit.FileID:specialTxTypeMortgageInit}
+			genaroData.SpecialTxTypeMortgageInitArr = map[string]types.SpecialTxTypeMortgageInit{specialTxTypeMortgageInit.FileID: specialTxTypeMortgageInit}
 		} else {
 			genaroData.SpecialTxTypeMortgageInitArr[specialTxTypeMortgageInit.FileID] = specialTxTypeMortgageInit
 		}
@@ -1065,7 +1068,7 @@ func (self *stateObject)SpecialTxTypeMortgageInit(specialTxTypeMortgageInit type
 	return true
 }
 
-func (self *stateObject)GetAccountAttributes() types.GenaroData{
+func (self *stateObject) GetAccountAttributes() types.GenaroData {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -1074,48 +1077,48 @@ func (self *stateObject)GetAccountAttributes() types.GenaroData{
 	return types.GenaroData{}
 }
 
-func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit)(map[common.Address] *big.Int, bool) {
+func (self *stateObject) SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (map[common.Address]*big.Int, bool) {
 	var genaroData types.GenaroData
-	AddBalance :=make(map[common.Address] *big.Int)
+	AddBalance := make(map[common.Address]*big.Int)
 	if nil == self.data.CodeHash {
-		return  nil,false
-	}else {
+		return nil, false
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		fileID := SpecialTxTypeSyncSidechainStatus.FileID
 		result := genaroData.SpecialTxTypeMortgageInitArr[fileID]
 		if 0 == len(result.MortgageTable) || len(result.MortgageTable) != len(result.AuthorityTable) ||
-			len(result.MortgageTable) != len(SpecialTxTypeSyncSidechainStatus.Sidechain){
-			return nil,false
+			len(result.MortgageTable) != len(SpecialTxTypeSyncSidechainStatus.Sidechain) {
+			return nil, false
 		}
-		if result.EndTime > time.Now().Unix() && false == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate{
+		if result.EndTime > time.Now().Unix() && false == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate {
 			if 0 == len(result.SidechainStatus) {
-				result.SidechainStatus = make(map[string] map[common.Address] *hexutil.Big)
+				result.SidechainStatus = make(map[string]map[common.Address]*hexutil.Big)
 			}
 			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
-		}else if  true == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate{
+		} else if true == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate {
 			if 0 == len(result.SidechainStatus) {
-				result.SidechainStatus = make(map[string] map[common.Address] *hexutil.Big)
+				result.SidechainStatus = make(map[string]map[common.Address]*hexutil.Big)
 			}
 			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
 			useMortgagTotal := new(big.Int)
 			zero := big.NewInt(0)
-			for k,v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
+			for k, v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
 				if common.ReadWrite == result.AuthorityTable[k] || common.Write == result.AuthorityTable[k] {
 					if v.ToInt().Cmp(zero) < 0 {
 						return nil, false
 					}
-					if result.MortgageTable[k].ToInt().Cmp(v.ToInt()) > -1{
+					if result.MortgageTable[k].ToInt().Cmp(v.ToInt()) > -1 {
 						AddBalance[k] = v.ToInt()
-						useMortgagTotal.Add(useMortgagTotal,v.ToInt())
+						useMortgagTotal.Add(useMortgagTotal, v.ToInt())
 					} else {
 						AddBalance[k] = result.MortgageTable[k].ToInt()
-						useMortgagTotal.Add(useMortgagTotal,result.MortgageTable[k].ToInt())
+						useMortgagTotal.Add(useMortgagTotal, result.MortgageTable[k].ToInt())
 					}
 				}
 			}
-			AddBalance[result.FromAccount] = result.MortgagTotal.Sub(result.MortgagTotal,useMortgagTotal)
+			AddBalance[result.FromAccount] = result.MortgagTotal.Sub(result.MortgagTotal, useMortgagTotal)
 			result.Terminate = true
-		}else {
+		} else {
 			return nil, false
 		}
 		genaroData.SpecialTxTypeMortgageInitArr[fileID] = result
@@ -1132,17 +1135,17 @@ func (self *stateObject)SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidech
 	return AddBalance, true
 }
 
-func (self *stateObject) TxLogBydataVersionUpdate(fileID string) (types.SpecialTxTypeMortgageInit, bool)  {
+func (self *stateObject) TxLogBydataVersionUpdate(fileID string) (types.SpecialTxTypeMortgageInit, bool) {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		accountAttributes := genaroData.SpecialTxTypeMortgageInitArr
 		resultTmp := accountAttributes[fileID]
 		if true == resultTmp.Terminate || resultTmp.EndTime < time.Now().Unix() {
-			return types.SpecialTxTypeMortgageInit{},false
+			return types.SpecialTxTypeMortgageInit{}, false
 		}
-		if  0 == len(resultTmp.AuthorityTable) {
-			return  types.SpecialTxTypeMortgageInit{},false
+		if 0 == len(resultTmp.AuthorityTable) {
+			return types.SpecialTxTypeMortgageInit{}, false
 		}
 		resultTmp.LogSwitch = true
 		genaroData.SpecialTxTypeMortgageInitArr[fileID] = resultTmp
@@ -1154,31 +1157,31 @@ func (self *stateObject) TxLogBydataVersionUpdate(fileID string) (types.SpecialT
 			self.onDirty(self.Address())
 			self.onDirty = nil
 		}
-		return  resultTmp, true
+		return resultTmp, true
 	}
-	return types.SpecialTxTypeMortgageInit{},false
+	return types.SpecialTxTypeMortgageInit{}, false
 }
 
-func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[common.Address] *hexutil.Big, error) {
+func (self *stateObject) TxLogByDataVersionRead(fileID, dataVersion string) (map[common.Address]*hexutil.Big, error) {
 	if self.data.CodeHash != nil {
 		var genaroData types.GenaroData
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		accountAttributes := genaroData.SpecialTxTypeMortgageInitArr
 		resultTmp := accountAttributes[fileID]
-		if  0 == len(resultTmp.AuthorityTable) {
-			return  nil,nil
+		if 0 == len(resultTmp.AuthorityTable) {
+			return nil, nil
 		}
-		return  resultTmp.SidechainStatus[dataVersion],nil
+		return resultTmp.SidechainStatus[dataVersion], nil
 	}
-	return nil,nil
+	return nil, nil
 }
 
-func (self *stateObject)SyncStakeNode(s string) error {
+func (self *stateObject) SyncStakeNode(s string) error {
 	var err error
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{ // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
+	if self.data.CodeHash == nil { // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
 		err = ErrSyncNode
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.Node = append(genaroData.Node, s)
 		b, _ := json.Marshal(genaroData)
@@ -1194,11 +1197,11 @@ func (self *stateObject)SyncStakeNode(s string) error {
 	return err
 }
 
-func (self *stateObject)SyncNode2Address(s string, address string) error {
+func (self *stateObject) SyncNode2Address(s string, address string) error {
 	d := make(map[string]string)
 	if self.data.CodeHash == nil {
-			d[s] = address
-	}else{
+		d[s] = address
+	} else {
 		json.Unmarshal(self.data.CodeHash, &d)
 		d[s] = address
 	}
@@ -1213,33 +1216,33 @@ func (self *stateObject)SyncNode2Address(s string, address string) error {
 	return nil
 }
 
-func (self *stateObject)GetAddressByNode (s string) string{
+func (self *stateObject) GetAddressByNode(s string) string {
 	if self.data.CodeHash == nil {
 		return ""
-	}else {
+	} else {
 		d := make(map[string]string)
 		err := json.Unmarshal(self.data.CodeHash, &d)
-		if err != nil{
+		if err != nil {
 			return ""
 		}
 		if v, ok := d[s]; !ok {
 			return ""
-		}else {
+		} else {
 			return v
 		}
 	}
 }
 
-func (self *stateObject)SynchronizeShareKey(synchronizeShareKey types.SynchronizeShareKey) bool {
+func (self *stateObject) SynchronizeShareKey(synchronizeShareKey types.SynchronizeShareKey) bool {
 	var genaroData types.GenaroData
 	if nil == self.data.CodeHash {
 		genaroData = types.GenaroData{
-			SynchronizeShareKeyArr:map[string]types.SynchronizeShareKey {synchronizeShareKey.ShareKeyId:synchronizeShareKey},
+			SynchronizeShareKeyArr: map[string]types.SynchronizeShareKey{synchronizeShareKey.ShareKeyId: synchronizeShareKey},
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if nil == genaroData.SynchronizeShareKeyArr {
-			genaroData.SynchronizeShareKeyArr = map[string]types.SynchronizeShareKey {synchronizeShareKey.ShareKeyId:synchronizeShareKey}
+			genaroData.SynchronizeShareKeyArr = map[string]types.SynchronizeShareKey{synchronizeShareKey.ShareKeyId: synchronizeShareKey}
 		} else {
 			genaroData.SynchronizeShareKeyArr[synchronizeShareKey.ShareKeyId] = synchronizeShareKey
 		}
@@ -1256,13 +1259,13 @@ func (self *stateObject)SynchronizeShareKey(synchronizeShareKey types.Synchroniz
 	return true
 }
 
-func (self *stateObject)UpdateFileSharePublicKey(publicKey string){
+func (self *stateObject) UpdateFileSharePublicKey(publicKey string) {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroData = types.GenaroData{
-			FileSharePublicKey:publicKey,
+			FileSharePublicKey: publicKey,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.FileSharePublicKey = publicKey
 	}
@@ -1277,9 +1280,8 @@ func (self *stateObject)UpdateFileSharePublicKey(publicKey string){
 	}
 }
 
-
-func (self *stateObject)GetFileSharePublicKey() string {
-	if self.data.CodeHash == nil{
+func (self *stateObject) GetFileSharePublicKey() string {
+	if self.data.CodeHash == nil {
 		return ""
 	}
 
@@ -1291,19 +1293,18 @@ func (self *stateObject)GetFileSharePublicKey() string {
 	return genaroData.FileSharePublicKey
 }
 
-
-func (self *stateObject)UnlockSharedKey(shareKeyId string) types.SynchronizeShareKey {
+func (self *stateObject) UnlockSharedKey(shareKeyId string) types.SynchronizeShareKey {
 	var genaroData types.GenaroData
-	var synchronizeShareKey	types.SynchronizeShareKey
+	var synchronizeShareKey types.SynchronizeShareKey
 	if nil == self.data.CodeHash {
 		return types.SynchronizeShareKey{}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if nil == genaroData.SynchronizeShareKeyArr {
 			return types.SynchronizeShareKey{}
 		} else {
 			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
-			if 1 == synchronizeShareKey.Status{
+			if 1 == synchronizeShareKey.Status {
 				return synchronizeShareKey
 			}
 			synchronizeShareKey.Status = 1
@@ -1323,18 +1324,18 @@ func (self *stateObject)UnlockSharedKey(shareKeyId string) types.SynchronizeShar
 	return synchronizeShareKey
 }
 
-func (self *stateObject)CheckUnlockSharedKey(shareKeyId string) bool {
+func (self *stateObject) CheckUnlockSharedKey(shareKeyId string) bool {
 	var genaroData types.GenaroData
-	var synchronizeShareKey	types.SynchronizeShareKey
+	var synchronizeShareKey types.SynchronizeShareKey
 	if nil == self.data.CodeHash {
 		return false
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		if nil == genaroData.SynchronizeShareKeyArr {
 			return false
 		} else {
 			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
-			if 1 == synchronizeShareKey.Status{
+			if 1 == synchronizeShareKey.Status {
 				return true
 			}
 
@@ -1343,13 +1344,13 @@ func (self *stateObject)CheckUnlockSharedKey(shareKeyId string) bool {
 	return false
 }
 
-func (self *stateObject)UpdateBucketApplyPrice(price *hexutil.Big) {
+func (self *stateObject) UpdateBucketApplyPrice(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroPrice = types.GenaroPrice{
-			BucketApplyGasPerGPerDay :price,
+			BucketApplyGasPerGPerDay: price,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
 		genaroPrice.BucketApplyGasPerGPerDay = price
 	}
@@ -1364,7 +1365,7 @@ func (self *stateObject)UpdateBucketApplyPrice(price *hexutil.Big) {
 	}
 }
 
-func (self *stateObject)GetBucketApplyPrice() *big.Int{
+func (self *stateObject) GetBucketApplyPrice() *big.Int {
 	if self.data.CodeHash != nil {
 		var genaroPrice types.GenaroPrice
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
@@ -1376,13 +1377,13 @@ func (self *stateObject)GetBucketApplyPrice() *big.Int{
 	return common.DefaultBucketApplyGasPerGPerDay
 }
 
-func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
+func (self *stateObject) UpdateTrafficApplyPrice(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroPrice = types.GenaroPrice{
-			TrafficApplyGasPerG :price,
+			TrafficApplyGasPerG: price,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
 		genaroPrice.TrafficApplyGasPerG = price
 	}
@@ -1392,24 +1393,24 @@ func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
 	self.data.CodeHash = b[:]
 	self.dirtyCode = true
 	if self.onDirty != nil {
-			self.onDirty(self.Address())
-			self.onDirty = nil
+		self.onDirty(self.Address())
+		self.onDirty = nil
 	}
 }
 
 // 添加最近块的信息
-func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint64) {
+func (self *stateObject) AddLastRootState(statehash common.Hash, blockNumber uint64) {
 	var lastSynState types.LastSynState
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		lastSynState = types.LastSynState{
-			LastRootStates:	make(map[common.Hash]uint64),
+			LastRootStates:  make(map[common.Hash]uint64),
 			LastSynBlockNum: 0,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &lastSynState)
 	}
 
-	lastSynState.AddLastSynState(statehash,blockNumber)
+	lastSynState.AddLastSynState(statehash, blockNumber)
 
 	b, _ := json.Marshal(lastSynState)
 	self.code = nil
@@ -1422,7 +1423,7 @@ func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint
 }
 
 // 更新账号绑定
-func (self *stateObject)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address){
+func (self *stateObject) UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1434,7 +1435,7 @@ func (self *stateObject)UpdateAccountBinding(mainAccount common.Address, subAcco
 		bindingTable.SubAccounts = make(map[common.Address]common.Address)
 	}
 
-	bindingTable.UpdateBinding(mainAccount,subAccount)
+	bindingTable.UpdateBinding(mainAccount, subAccount)
 
 	b, _ := json.Marshal(bindingTable)
 	self.code = nil
@@ -1448,9 +1449,9 @@ func (self *stateObject)UpdateAccountBinding(mainAccount common.Address, subAcco
 
 // 删除子账号绑定
 // 成功删除一个绑定账号返回true，否则返回false
-func (self *stateObject)DelSubAccountBinding(subAccount common.Address) bool{
+func (self *stateObject) DelSubAccountBinding(subAccount common.Address) bool {
 	var bindingTable types.BindingTable
-	if self.data.CodeHash != nil{
+	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
 	} else {
 		return false
@@ -1474,7 +1475,7 @@ func (self *stateObject)DelSubAccountBinding(subAccount common.Address) bool{
 
 // 主账号删除所有绑定
 // 返回删除主账号后的关联删除的子账号列表
-func (self *stateObject)DelMainAccountBinding(mainAccount common.Address) []common.Address{
+func (self *stateObject) DelMainAccountBinding(mainAccount common.Address) []common.Address {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1499,7 +1500,7 @@ func (self *stateObject)DelMainAccountBinding(mainAccount common.Address) []comm
 }
 
 // 获取所属子账号
-func (self *stateObject)GetSubAccounts(mainAccount common.Address) []common.Address{
+func (self *stateObject) GetSubAccounts(mainAccount common.Address) []common.Address {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1514,7 +1515,7 @@ func (self *stateObject)GetSubAccounts(mainAccount common.Address) []common.Addr
 }
 
 // 获取子账号数量
-func (self *stateObject)GetSubAccountsCount(mainAccount common.Address) int{
+func (self *stateObject) GetSubAccountsCount(mainAccount common.Address) int {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1526,7 +1527,7 @@ func (self *stateObject)GetSubAccountsCount(mainAccount common.Address) int{
 }
 
 // 获取账号映射表
-func (self *stateObject)GetMainAccounts() map[common.Address][]common.Address{
+func (self *stateObject) GetMainAccounts() map[common.Address][]common.Address {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1539,7 +1540,7 @@ func (self *stateObject)GetMainAccounts() map[common.Address][]common.Address{
 
 // 获取所属主账号
 // 如果子账号不存在，则返回nil
-func (self *stateObject)GetMainAccount(subAccount common.Address) *common.Address{
+func (self *stateObject) GetMainAccount(subAccount common.Address) *common.Address {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1556,7 +1557,7 @@ func (self *stateObject)GetMainAccount(subAccount common.Address) *common.Addres
 }
 
 // 检查是否是绑定账号
-func (self *stateObject)IsBindingAccount(account common.Address) bool {
+func (self *stateObject) IsBindingAccount(account common.Address) bool {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1568,7 +1569,7 @@ func (self *stateObject)IsBindingAccount(account common.Address) bool {
 }
 
 // 检查是否是主账号
-func (self *stateObject)IsMainAccount(account common.Address) bool {
+func (self *stateObject) IsMainAccount(account common.Address) bool {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1580,7 +1581,7 @@ func (self *stateObject)IsMainAccount(account common.Address) bool {
 }
 
 // 检查是否是子账号
-func (self *stateObject)IsSubAccount(account common.Address) bool {
+func (self *stateObject) IsSubAccount(account common.Address) bool {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &bindingTable)
@@ -1591,7 +1592,7 @@ func (self *stateObject)IsSubAccount(account common.Address) bool {
 	return bindingTable.IsSubAccountExist(account)
 }
 
-func (self *stateObject)GetTrafficApplyPrice() *big.Int {
+func (self *stateObject) GetTrafficApplyPrice() *big.Int {
 
 	genaroPrice := self.GetGenaroPrice()
 	if genaroPrice != nil {
@@ -1602,35 +1603,35 @@ func (self *stateObject)GetTrafficApplyPrice() *big.Int {
 	return common.DefaultTrafficApplyGasPerG
 }
 
-func (self *stateObject)UpdateStakePerNodePrice(price *hexutil.Big) {
+func (self *stateObject) UpdateStakePerNodePrice(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroPrice = types.GenaroPrice{
-			StakeValuePerNode :price,
+			StakeValuePerNode: price,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
 		genaroPrice.StakeValuePerNode = price
 	}
 
 	b, _ := json.Marshal(genaroPrice)
-        self.code = nil
-        self.data.CodeHash = b[:]
-        self.dirtyCode = true
-        if self.onDirty != nil {
-                self.onDirty(self.Address())
-                self.onDirty = nil
-        }
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
 }
 
-func (self *stateObject)SetLastSynBlock(blockNumber uint64,blockHash common.Hash) {
+func (self *stateObject) SetLastSynBlock(blockNumber uint64, blockHash common.Hash) {
 	var lastsynState types.LastSynState
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		lastsynState = types.LastSynState{
-			LastRootStates:	make(map[common.Hash]uint64),
+			LastRootStates:  make(map[common.Hash]uint64),
 			LastSynBlockNum: 0,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &lastsynState)
 	}
 
@@ -1647,7 +1648,7 @@ func (self *stateObject)SetLastSynBlock(blockNumber uint64,blockHash common.Hash
 	}
 }
 
-func (self *stateObject)GetStakePerNodePrice() *big.Int {
+func (self *stateObject) GetStakePerNodePrice() *big.Int {
 
 	genaroPrice := self.GetGenaroPrice()
 	if genaroPrice != nil {
@@ -1659,16 +1660,16 @@ func (self *stateObject)GetStakePerNodePrice() *big.Int {
 	return common.DefaultTrafficApplyGasPerG
 }
 
-func (self *stateObject)GetGenaroPrice() *types.GenaroPrice {
+func (self *stateObject) GetGenaroPrice() *types.GenaroPrice {
 	if self.data.CodeHash != nil {
 		var genaroPrice types.GenaroPrice
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
-		return  &genaroPrice
+		return &genaroPrice
 	}
 	return nil
 }
 
-func (self *stateObject)SetGenaroPrice(genaroPrice types.GenaroPrice) {
+func (self *stateObject) SetGenaroPrice(genaroPrice types.GenaroPrice) {
 	b, _ := json.Marshal(genaroPrice)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -1679,14 +1680,13 @@ func (self *stateObject)SetGenaroPrice(genaroPrice types.GenaroPrice) {
 	}
 }
 
-
-func (self *stateObject)UpdateOneDayGesCost(price *hexutil.Big) {
+func (self *stateObject) UpdateOneDayGesCost(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroPrice = types.GenaroPrice{
-			OneDayMortgageGes :price,
+			OneDayMortgageGes: price,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
 		genaroPrice.OneDayMortgageGes = price
 	}
@@ -1701,13 +1701,13 @@ func (self *stateObject)UpdateOneDayGesCost(price *hexutil.Big) {
 	}
 }
 
-func (self *stateObject)UpdateOneDaySyncLogGsaCost(price *hexutil.Big) {
+func (self *stateObject) UpdateOneDaySyncLogGsaCost(price *hexutil.Big) {
 	var genaroPrice types.GenaroPrice
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		genaroPrice = types.GenaroPrice{
-			OneDaySyncLogGsaCost :price,
+			OneDaySyncLogGsaCost: price,
 		}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroPrice)
 		genaroPrice.OneDaySyncLogGsaCost = price
 	}
@@ -1722,8 +1722,7 @@ func (self *stateObject)UpdateOneDaySyncLogGsaCost(price *hexutil.Big) {
 	}
 }
 
-
-func (self *stateObject)GetOneDayGesCost() *big.Int {
+func (self *stateObject) GetOneDayGesCost() *big.Int {
 
 	genaroPrice := self.GetGenaroPrice()
 	if genaroPrice != nil {
@@ -1735,7 +1734,7 @@ func (self *stateObject)GetOneDayGesCost() *big.Int {
 	return common.DefaultOneDayMortgageGes
 }
 
-func (self *stateObject)GetOneDaySyncLogGsaCost() *big.Int {
+func (self *stateObject) GetOneDaySyncLogGsaCost() *big.Int {
 	genaroPrice := self.GetGenaroPrice()
 	if genaroPrice != nil {
 		if genaroPrice.OneDaySyncLogGsaCost != nil {
@@ -1744,7 +1743,7 @@ func (self *stateObject)GetOneDaySyncLogGsaCost() *big.Int {
 	}
 	return common.DefaultOneDaySyncLogGsaCost
 }
-func (self *stateObject)GetLastSynState() *types.LastSynState{
+func (self *stateObject) GetLastSynState() *types.LastSynState {
 	if self.data.CodeHash != nil {
 		var lastSynState types.LastSynState
 		json.Unmarshal(self.data.CodeHash, &lastSynState)
@@ -1753,12 +1752,12 @@ func (self *stateObject)GetLastSynState() *types.LastSynState{
 	return nil
 }
 
-func (self *stateObject)UnbindNode(nodeId string) error{
+func (self *stateObject) UnbindNode(nodeId string) error {
 	var err error
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		err = errors.New("no node of this account")
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 
 		var a []string
@@ -1781,11 +1780,11 @@ func (self *stateObject)UnbindNode(nodeId string) error{
 	return err
 }
 
-func (self *stateObject)UbindNode2Address(nodeId string) error{
+func (self *stateObject) UbindNode2Address(nodeId string) error {
 	d := make(map[string]string)
 	if self.data.CodeHash == nil {
 		return nil
-	}else{
+	} else {
 		json.Unmarshal(self.data.CodeHash, &d)
 		delete(d, nodeId)
 	}
@@ -1800,17 +1799,17 @@ func (self *stateObject)UbindNode2Address(nodeId string) error{
 	return nil
 }
 
-func (self *stateObject)GetRewardsValues() *types.RewardsValues {
+func (self *stateObject) GetRewardsValues() *types.RewardsValues {
 	var rewardsValues types.RewardsValues
 	if self.data.CodeHash == nil {
 		return nil
-	}else{
+	} else {
 		json.Unmarshal(self.data.CodeHash, &rewardsValues)
 	}
 	return &rewardsValues
 }
 
-func (self *stateObject)SetRewardsValues(rewardsValues types.RewardsValues) {
+func (self *stateObject) SetRewardsValues(rewardsValues types.RewardsValues) {
 	b, _ := json.Marshal(rewardsValues)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -1821,13 +1820,12 @@ func (self *stateObject)SetRewardsValues(rewardsValues types.RewardsValues) {
 	}
 }
 
-
-func (self *stateObject)PromissoryNotesWithdrawCash(blockNumber uint64) uint64{
+func (self *stateObject) PromissoryNotesWithdrawCash(blockNumber uint64) uint64 {
 	var genaroData types.GenaroData
 	var promissoryNotesNum uint64
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return 0
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		promissoryNotesNum = genaroData.PromissoryNotes.DelBefor(blockNumber)
 		if 0 == promissoryNotesNum {
@@ -1846,36 +1844,35 @@ func (self *stateObject)PromissoryNotesWithdrawCash(blockNumber uint64) uint64{
 	return promissoryNotesNum
 }
 
-func (self *stateObject)GetAllPromissoryNotesNum() uint64{
+func (self *stateObject) GetAllPromissoryNotesNum() uint64 {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return uint64(0)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.PromissoryNotes.GetAllNum()
 	}
 	return uint64(0)
 }
 
-
-func (self *stateObject)GetBeforPromissoryNotesNum(blockNumber uint64) uint64{
+func (self *stateObject) GetBeforPromissoryNotesNum(blockNumber uint64) uint64 {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return uint64(0)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		return genaroData.PromissoryNotes.GetBefor(blockNumber)
 	}
 	return uint64(0)
 }
 
-func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
+func (self *stateObject) AddPromissoryNote(promissoryNote types.PromissoryNote) {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		promissoryNotes := new(types.PromissoryNotes)
 		promissoryNotes.Add(promissoryNote)
 		genaroData.PromissoryNotes = *promissoryNotes
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 		genaroData.PromissoryNotes.Add(promissoryNote)
 	}
@@ -1890,11 +1887,11 @@ func (self *stateObject)AddPromissoryNote(promissoryNote types.PromissoryNote) {
 	}
 }
 
-func (self *stateObject)DelPromissoryNote(promissoryNote types.PromissoryNote) bool{
+func (self *stateObject) DelPromissoryNote(promissoryNote types.PromissoryNote) bool {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return false
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
 	}
 	promissoryNotes := genaroData.PromissoryNotes
@@ -1914,11 +1911,11 @@ func (self *stateObject)DelPromissoryNote(promissoryNote types.PromissoryNote) b
 	return true
 }
 
-func (self *stateObject)GetPromissoryNotes() types.PromissoryNotes {
+func (self *stateObject) GetPromissoryNotes() types.PromissoryNotes {
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return nil
-	}else {
+	} else {
 		err := json.Unmarshal(self.data.CodeHash, &genaroData)
 		if err != nil {
 			return nil
@@ -1927,11 +1924,11 @@ func (self *stateObject)GetPromissoryNotes() types.PromissoryNotes {
 	}
 }
 
-func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
+func (self *stateObject) GetOptionTxTable() *types.OptionTxTable {
 	var optionTxTable types.OptionTxTable
 	if self.data.CodeHash == nil {
 		return nil
-	}else{
+	} else {
 		err := json.Unmarshal(self.data.CodeHash, &optionTxTable)
 		if err != nil {
 			return nil
@@ -1940,17 +1937,16 @@ func (self *stateObject)GetOptionTxTable() *types.OptionTxTable {
 	return &optionTxTable
 }
 
-
-func (self *stateObject)DelTxInOptionTxTable(hash common.Hash){
+func (self *stateObject) DelTxInOptionTxTable(hash common.Hash) {
 	optionTxTable := make(types.OptionTxTable)
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		optionTxTable = *new(types.OptionTxTable)
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
 
-	if _, ok := optionTxTable[hash]; ok{
-		delete(optionTxTable,hash)
+	if _, ok := optionTxTable[hash]; ok {
+		delete(optionTxTable, hash)
 		b, _ := json.Marshal(optionTxTable)
 		self.code = nil
 		self.data.CodeHash = b[:]
@@ -1962,13 +1958,13 @@ func (self *stateObject)DelTxInOptionTxTable(hash common.Hash){
 	}
 }
 
-func (self *stateObject)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx){
+func (self *stateObject) AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx) {
 	optionTxTable := make(types.OptionTxTable)
-	if self.data.CodeHash != nil{
+	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
 
-	if _, ok := optionTxTable[hash]; !ok{
+	if _, ok := optionTxTable[hash]; !ok {
 		optionTxTable[hash] = promissoryNotesOptionTx
 		b, _ := json.Marshal(optionTxTable)
 		self.code = nil
@@ -1981,12 +1977,12 @@ func (self *stateObject)AddTxInOptionTxTable(hash common.Hash, promissoryNotesOp
 	}
 }
 
-func (self *stateObject)SetTxStatusInOptionTxTable(hash common.Hash, status bool) {
+func (self *stateObject) SetTxStatusInOptionTxTable(hash common.Hash, status bool) {
 	optionTxTable := make(types.OptionTxTable)
-	if self.data.CodeHash != nil{
+	if self.data.CodeHash != nil {
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
-	if promissoryNotesOptionTx, ok := optionTxTable[hash]; ok{
+	if promissoryNotesOptionTx, ok := optionTxTable[hash]; ok {
 		promissoryNotesOptionTx.IsSell = status
 		optionTxTable[hash] = promissoryNotesOptionTx
 		b, _ := json.Marshal(optionTxTable)
@@ -2000,11 +1996,11 @@ func (self *stateObject)SetTxStatusInOptionTxTable(hash common.Hash, status bool
 	}
 }
 
-func (self *stateObject)BuyPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+func (self *stateObject) BuyPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
 	var optionTxTable types.OptionTxTable
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return types.PromissoryNotesOptionTx{}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
 	buyPromissoryNotes := optionTxTable[orderId]
@@ -2017,7 +2013,7 @@ func (self *stateObject)BuyPromissoryNotes(orderId common.Hash, address common.A
 	}
 	var tmpAddr common.Address
 	var turnBuy = 0
-	if true == buyPromissoryNotes.IsSell &&  tmpAddr != buyPromissoryNotes.OptionOwner {
+	if true == buyPromissoryNotes.IsSell && tmpAddr != buyPromissoryNotes.OptionOwner {
 		tmpAddr = buyPromissoryNotes.OptionOwner
 		turnBuy = 1
 	}
@@ -2038,11 +2034,11 @@ func (self *stateObject)BuyPromissoryNotes(orderId common.Hash, address common.A
 	return buyPromissoryNotes
 }
 
-func (self *stateObject)DeletePromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+func (self *stateObject) DeletePromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
 	var optionTxTable types.OptionTxTable
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return types.PromissoryNotesOptionTx{}
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
 	buyPromissoryNotes := optionTxTable[orderId]
@@ -2055,7 +2051,7 @@ func (self *stateObject)DeletePromissoryNotes(orderId common.Hash, address commo
 	if buyPromissoryNotes.OptionOwner != address {
 		return types.PromissoryNotesOptionTx{}
 	}
-	delete(optionTxTable,orderId)
+	delete(optionTxTable, orderId)
 	fmt.Println(optionTxTable)
 	b, _ := json.Marshal(optionTxTable)
 	self.code = nil
@@ -2069,12 +2065,11 @@ func (self *stateObject)DeletePromissoryNotes(orderId common.Hash, address commo
 
 }
 
-
-func (self *stateObject)TurnBuyPromissoryNotes(orderId common.Hash,optionPrice *hexutil.Big, address common.Address) bool {
+func (self *stateObject) TurnBuyPromissoryNotes(orderId common.Hash, optionPrice *hexutil.Big, address common.Address) bool {
 	var optionTxTable types.OptionTxTable
-	if self.data.CodeHash == nil{
+	if self.data.CodeHash == nil {
 		return false
-	}else {
+	} else {
 		json.Unmarshal(self.data.CodeHash, &optionTxTable)
 	}
 	buyPromissoryNotes := optionTxTable[orderId]

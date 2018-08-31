@@ -30,6 +30,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/mclock"
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
@@ -43,7 +44,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/trie"
 	"github.com/hashicorp/golang-lru"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
-	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 	"strings"
 )
 
@@ -684,7 +684,7 @@ func (bc *BlockChain) procFutureBlocks() {
 
 		// Insert one by one as chain insertion needs contiguous ancestry between blocks
 		for i := range blocks {
-			bc.InsertChain(blocks[i: i+1])
+			bc.InsertChain(blocks[i : i+1])
 		}
 	}
 }
@@ -693,7 +693,7 @@ func (bc *BlockChain) procFutureBlocks() {
 type WriteStatus byte
 
 const (
-	NonStatTy   WriteStatus = iota
+	NonStatTy WriteStatus = iota
 	CanonStatTy
 	SideStatTy
 )
@@ -972,7 +972,7 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 		currentBlockExtra := genaro.UnmarshalToExtra(currentBlock.Header())
 		if blockExtra.LastSynBlockNum < currentBlockExtra.LastSynBlockNum {
 			reorg = false
-		} else if blockExtra.LastSynBlockNum == currentBlockExtra.LastSynBlockNum && !strings.EqualFold(blockExtra.LastSynBlockHash.String(),currentBlockExtra.LastSynBlockHash.String()) {
+		} else if blockExtra.LastSynBlockNum == currentBlockExtra.LastSynBlockNum && !strings.EqualFold(blockExtra.LastSynBlockHash.String(), currentBlockExtra.LastSynBlockHash.String()) {
 			reorg = false
 		}
 	}
@@ -1229,7 +1229,7 @@ func (st *insertStats) report(chain []*types.Block, index int, cache common.Stor
 	if index == len(chain)-1 || elapsed >= statsReportLimit {
 		var (
 			end = chain[index]
-			txs = countTransactions(chain[st.lastIndex: index+1])
+			txs = countTransactions(chain[st.lastIndex : index+1])
 		)
 		context := []interface{}{
 			"blocks", st.processed, "txs", txs, "mgas", float64(st.usedGas) / 1000000,

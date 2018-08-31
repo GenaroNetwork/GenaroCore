@@ -1,43 +1,42 @@
 package genaro
 
 import (
-	"testing"
-	"github.com/GenaroNetwork/Genaro-Core/params"
-	"math/rand"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"bytes"
+	"fmt"
+	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/ethdb"
+	"github.com/GenaroNetwork/Genaro-Core/params"
+	"io/ioutil"
+	"math/rand"
+	"os"
+	"testing"
 )
 
-func genHash(n int) []byte{
-	hash := make([]byte,n)
-	for i:=0;i<n;i++ {
+func genHash(n int) []byte {
+	hash := make([]byte, n)
+	for i := 0; i < n; i++ {
 		hash[i] = byte(rand.Int())
 	}
 	return hash
 }
 
-
-func genProportion(n uint64) []uint64{
-	proportion := make([]uint64,10)
+func genProportion(n uint64) []uint64 {
+	proportion := make([]uint64, 10)
 	for i, _ := range proportion {
 		proportion[i] = uint64(rand.Int63())
 	}
 	return proportion
 }
 
-func displaySnapshot(snapshot CommitteeSnapshot){
+func displaySnapshot(snapshot CommitteeSnapshot) {
 	fmt.Print("CommitteeSize:")
 	fmt.Println(snapshot.CommitteeSize)
 	fmt.Print("CommitteeRank:")
-	for _,committee := range snapshot.CommitteeRank {
+	for _, committee := range snapshot.CommitteeRank {
 		fmt.Println(committee.String())
 	}
 	fmt.Println("Committee:")
-	for k,v := range snapshot.Committee {
+	for k, v := range snapshot.Committee {
 		fmt.Print(k.String())
 		fmt.Print(":")
 		fmt.Println(v)
@@ -69,24 +68,24 @@ func newTestLDB() (*ethdb.LDBDatabase, func()) {
 	}
 }
 
-func TestNewSnapshot(t *testing.T){
+func TestNewSnapshot(t *testing.T) {
 	blockHash := new(common.Hash)
 	blockHash.SetBytes(genHash(32))
 	committeeRank := genAddrs(10)
 	proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            5000,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 	committeeAccountBinding := make(map[common.Address][]common.Address)
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion, committeeAccountBinding)
 
 	if snapshot.config.Epoch != 5000 || snapshot.config.CommitteeMaxSize != 5 || snapshot.config.BlockInterval != 10 ||
-		snapshot.config.ElectionPeriod != 1 || snapshot.config.ValidPeriod != 1 || snapshot.config.CurrencyRates != 10{
+		snapshot.config.ElectionPeriod != 1 || snapshot.config.ValidPeriod != 1 || snapshot.config.CurrencyRates != 10 {
 		t.Errorf("genaro config is not match!")
 	}
 	if snapshot.CommitteeSize != 5 {
@@ -107,13 +106,13 @@ func TestNewSnapshot(t *testing.T){
 	}
 
 	genaroConfig.CommitteeMaxSize = 20
-	snapshot = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
+	snapshot = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion, committeeAccountBinding)
 	if snapshot.CommitteeSize != 10 {
 		t.Errorf("commitee size get %v but expect 10", snapshot.CommitteeSize)
 	}
 }
 
-func TestStoreAndLoadSnapshot(t *testing.T){
+func TestStoreAndLoadSnapshot(t *testing.T) {
 	db, remove := newTestLDB()
 	defer remove()
 
@@ -122,15 +121,15 @@ func TestStoreAndLoadSnapshot(t *testing.T){
 	committeeRank := genAddrs(10)
 	proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            5000,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 	committeeAccountBinding := make(map[common.Address][]common.Address)
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion, committeeAccountBinding)
 	err := snapshot.store(db)
 	if err != nil {
 		t.Errorf("store error [%v]", err)
@@ -141,26 +140,26 @@ func TestStoreAndLoadSnapshot(t *testing.T){
 	}
 }
 
-func TestCopy(t *testing.T){
+func TestCopy(t *testing.T) {
 	blockHash := new(common.Hash)
 	blockHash.SetBytes(genHash(32))
 	committeeRank := genAddrs(10)
 	proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            5000,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 	committeeAccountBinding := make(map[common.Address][]common.Address)
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion, committeeAccountBinding)
 
 	cp := snapshot.copy()
 
 	if cp.config.Epoch != 5000 || snapshot.config.CommitteeMaxSize != 5 || snapshot.config.BlockInterval != 10 ||
-		snapshot.config.ElectionPeriod != 1 || snapshot.config.ValidPeriod != 1 || snapshot.config.CurrencyRates != 10{
+		snapshot.config.ElectionPeriod != 1 || snapshot.config.ValidPeriod != 1 || snapshot.config.CurrencyRates != 10 {
 		t.Errorf("genaro config is not match!")
 	}
 	if snapshot.CommitteeSize != 5 {
@@ -181,21 +180,21 @@ func TestCopy(t *testing.T){
 	}
 }
 
-func TestGetCurrentRankIndex(t *testing.T){
+func TestGetCurrentRankIndex(t *testing.T) {
 	blockHash := new(common.Hash)
 	blockHash.SetBytes(genHash(32))
 	committeeRank := genAddrs(10)
 	proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            5000,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 	committeeAccountBinding := make(map[common.Address][]common.Address)
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion, committeeAccountBinding)
 	if snapshot.getCurrentRankIndex(committeeRank[0]) != 0 {
 		t.Errorf("the index get %v but except 0", snapshot.getCurrentRankIndex(committeeRank[0]))
 	}
@@ -213,43 +212,42 @@ func TestGetCurrentRankIndex(t *testing.T){
 	}
 }
 
-func TestInturn(t *testing.T){
+func TestInturn(t *testing.T) {
 	blockHash := new(common.Hash)
 	blockHash.SetBytes(genHash(32))
 	committeeRank := genAddrs(10)
 	proportion := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            5000,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 	committeeAccountBinding := make(map[common.Address][]common.Address)
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
-	loopSize := snapshot.config.BlockInterval * snapshot.CommitteeSize;
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion, committeeAccountBinding)
+	loopSize := snapshot.config.BlockInterval * snapshot.CommitteeSize
 	for i := 0; i < 10000; i++ {
-		rank :=uint64(i)%snapshot.config.Epoch%loopSize/snapshot.config.BlockInterval
+		rank := uint64(i) % snapshot.config.Epoch % loopSize / snapshot.config.BlockInterval
 		inturnAddress := snapshot.CommitteeRank[rank]
-		if !snapshot.inturn(uint64(i), inturnAddress){
+		if !snapshot.inturn(uint64(i), inturnAddress) {
 			t.Errorf("the inturn address is not %v(rank is %v)", inturnAddress, rank)
 		}
 	}
 }
 
-
-func TestGetFirstBlockNumberOfEpoch(t *testing.T){
+func TestGetFirstBlockNumberOfEpoch(t *testing.T) {
 	genaroConfig := &params.GenaroConfig{
-		Epoch:				5000,
-		BlockInterval:		10,
-		ElectionPeriod:		1,
-		ValidPeriod:		1,
-		CurrencyRates:		10,
-		CommitteeMaxSize:	5,
+		Epoch:            5000,
+		BlockInterval:    10,
+		ElectionPeriod:   1,
+		ValidPeriod:      1,
+		CurrencyRates:    10,
+		CommitteeMaxSize: 5,
 	}
 
-	for i:= 0; i<100; i++ {
+	for i := 0; i < 100; i++ {
 		if GetFirstBlockNumberOfEpoch(genaroConfig, uint64(i)) != uint64(i)*genaroConfig.Epoch {
 			t.Errorf("the first block number of epoch get %v but except %v",
 				GetFirstBlockNumberOfEpoch(genaroConfig, 0), uint64(i)*genaroConfig.Epoch)

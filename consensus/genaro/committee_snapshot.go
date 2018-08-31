@@ -3,25 +3,25 @@ package genaro
 import (
 	"encoding/json"
 
+	"encoding/binary"
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/ethdb"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"encoding/binary"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
 // Each turn has a Snapshot. EpochNumber means the "electoral materials" period.
 // Snapshot will not be stored immediately. It will be stored in EpochNumber + ElectionPeriod
 // Snapshot will be valid in EpochNumber + ElectionPeriod + ValidPeriod
 type CommitteeSnapshot struct {
-	config					*params.GenaroConfig             //genaro config
-	WriteBlockNumber		uint64                           // Block number where the snapshot was created
-	WriteBlockHash			common.Hash                      // BlockHash as the snapshot key
-	EpochNumber				uint64                           // the turn of Committee
-	CommitteeSize			uint64                           // the size of Committee
-	CommitteeRank			[]common.Address                 // the rank of committee
-	Committee				map[common.Address]uint64		 // committee members
-	CommitteeAccountBinding 	map[common.Address][]common.Address	// account binding map
+	config                  *params.GenaroConfig                //genaro config
+	WriteBlockNumber        uint64                              // Block number where the snapshot was created
+	WriteBlockHash          common.Hash                         // BlockHash as the snapshot key
+	EpochNumber             uint64                              // the turn of Committee
+	CommitteeSize           uint64                              // the size of Committee
+	CommitteeRank           []common.Address                    // the rank of committee
+	Committee               map[common.Address]uint64           // committee members
+	CommitteeAccountBinding map[common.Address][]common.Address // account binding map
 }
 
 type Stake struct {
@@ -38,30 +38,30 @@ type Stake struct {
 
 // newSnapshot creates a new snapshot with the specified startup parameters.
 func newSnapshot(config *params.GenaroConfig, number uint64, hash common.Hash, epochNumber uint64,
-	committeeRank []common.Address, proportion []uint64, CommitteeAccountBinding 	map[common.Address][]common.Address) *CommitteeSnapshot {
+	committeeRank []common.Address, proportion []uint64, CommitteeAccountBinding map[common.Address][]common.Address) *CommitteeSnapshot {
 	if config.Epoch == 0 {
 		config.Epoch = epochLength
 	}
 	committeeLenth := len(committeeRank)
 	snap := &CommitteeSnapshot{
-		config:				config,
-		WriteBlockNumber:	number,
-		WriteBlockHash:		hash,
-		EpochNumber:		epochNumber,
-		CommitteeRank:		make([]common.Address, committeeLenth),
-		Committee:			make(map[common.Address]uint64, committeeLenth),
-		CommitteeAccountBinding:	make(map[common.Address][]common.Address),
+		config:                  config,
+		WriteBlockNumber:        number,
+		WriteBlockHash:          hash,
+		EpochNumber:             epochNumber,
+		CommitteeRank:           make([]common.Address, committeeLenth),
+		Committee:               make(map[common.Address]uint64, committeeLenth),
+		CommitteeAccountBinding: make(map[common.Address][]common.Address),
 	}
 
 	total := uint64(0)
-	for i := 0; i <len(proportion); i++ {
+	for i := 0; i < len(proportion); i++ {
 		total += proportion[i]
 	}
 
 	for i, rank := range committeeRank {
 		if i < int(config.CommitteeMaxSize) {
 			snap.CommitteeRank[i] = rank
-			snap.Committee[rank] = proportion[i]*uint64(common.Base)/total
+			snap.Committee[rank] = proportion[i] * uint64(common.Base) / total
 		}
 	}
 	if config.CommitteeMaxSize < uint64(len(snap.CommitteeRank)) {
@@ -107,14 +107,14 @@ func (s *CommitteeSnapshot) store(db ethdb.Database) error {
 // copy creates a deep copy of the snapshot
 func (s *CommitteeSnapshot) copy() *CommitteeSnapshot {
 	cpy := &CommitteeSnapshot{
-		config:           s.config,
-		WriteBlockNumber: s.WriteBlockNumber,
-		WriteBlockHash:   s.WriteBlockHash,
-		EpochNumber:      s.EpochNumber,
-		CommitteeSize:    s.CommitteeSize,
-		CommitteeRank:    make([]common.Address, s.CommitteeSize),
-		Committee:        make(map[common.Address]uint64),
-		CommitteeAccountBinding:	make(map[common.Address][]common.Address),
+		config:                  s.config,
+		WriteBlockNumber:        s.WriteBlockNumber,
+		WriteBlockHash:          s.WriteBlockHash,
+		EpochNumber:             s.EpochNumber,
+		CommitteeSize:           s.CommitteeSize,
+		CommitteeRank:           make([]common.Address, s.CommitteeSize),
+		Committee:               make(map[common.Address]uint64),
+		CommitteeAccountBinding: make(map[common.Address][]common.Address),
 	}
 	for i, rank := range s.CommitteeRank {
 		cpy.CommitteeRank[i] = rank
@@ -148,7 +148,7 @@ func GetDependTurnByBlockNumber(config *params.GenaroConfig, number uint64) uint
 
 //  get the  written BlockNumber by the turn of committee
 func GetCommiteeWrittenBlockNumberByTurn(config *params.GenaroConfig, turn uint64) uint64 {
-	return (turn - config.ValidPeriod + 1)*config.Epoch - 1
+	return (turn-config.ValidPeriod+1)*config.Epoch - 1
 }
 
 func (s *CommitteeSnapshot) getCurrentRankIndex(addr common.Address) int {
@@ -191,7 +191,7 @@ func (s *CommitteeSnapshot) getInturnRank(number uint64) int {
 }
 
 func GetFirstBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
-	return config.Epoch*epochNumber
+	return config.Epoch * epochNumber
 }
 
 func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) uint64 {
@@ -199,7 +199,7 @@ func GetLastBlockNumberOfEpoch(config *params.GenaroConfig, epochNumber uint64) 
 }
 
 func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBlockNumber uint64) bool {
-	if nowBlockNumber - applyBlockNumber > (config.ElectionPeriod + config.ValidPeriod + common.BackStakePeriod) * config.Epoch {
+	if nowBlockNumber-applyBlockNumber > (config.ElectionPeriod+config.ValidPeriod+common.BackStakePeriod)*config.Epoch {
 		return true
 	}
 	return false
@@ -207,7 +207,7 @@ func IsBackStakeBlockNumber(config *params.GenaroConfig, applyBlockNumber, nowBl
 
 // cal block delay time
 func (s *CommitteeSnapshot) getDelayTime(header *types.Header) uint64 {
-	return s.getDistance(header.Coinbase,header.Number.Uint64())
+	return s.getDistance(header.Coinbase, header.Number.Uint64())
 }
 
 func (s *CommitteeSnapshot) getDistance(addr common.Address, blockNumber uint64) uint64 {
@@ -218,11 +218,11 @@ func (s *CommitteeSnapshot) getDistance(addr common.Address, blockNumber uint64)
 	}
 	distance := bias - index
 	if distance < 0 {
-		distance = int(s.CommitteeSize)+distance
+		distance = int(s.CommitteeSize) + distance
 	}
 	return uint64(distance)
 }
 
-func calEpochPerYear(config *params.GenaroConfig)uint64{
-	return (365*3600*24)/(config.Epoch*config.Period)
+func calEpochPerYear(config *params.GenaroConfig) uint64 {
+	return (365 * 3600 * 24) / (config.Epoch * config.Period)
 }
