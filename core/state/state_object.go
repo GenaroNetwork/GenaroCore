@@ -175,7 +175,7 @@ func (c CandidateInfos) Apply() {
 	}
 }
 
-// 全员排名，无限制长度
+
 func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
 	candidateInfos.Apply()
 	sort.Sort(sort.Reverse(candidateInfos))
@@ -195,10 +195,10 @@ func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64){
 	return committeeRank, proportion
 }
 
-// 限制排名的长度后，进行排名
+
 func RankWithLenth(candidateInfos CandidateInfos, lenth int, committeeMinStake uint64) ([]common.Address, []uint64){
 	candidateInfos.Apply()
-	// 除去低于stake最小限制的账号
+
 	for i:=0;i<len(candidateInfos);i++ {
 		if candidateInfos[i].Stake < committeeMinStake {
 			candidateInfos = append(candidateInfos[:i],candidateInfos[i+1:]...)
@@ -711,7 +711,7 @@ func (self *stateObject) AddCandidate(candidate common.Address) {
 	}
 }
 
-// 判断候选者是否存在
+
 func (self *stateObject) IsCandidateExist(candidate common.Address) bool{
 	var candidates Candidates
 	if self.data.CodeHash == nil{
@@ -753,7 +753,7 @@ func (self *stateObject)GetCandidates() (Candidates){
 	return nil
 }
 
-// 将账号加入禁止退注列表
+
 func (self *stateObject) AddAccountInForbidBackStakeList(addr common.Address) {
 	var forbidList types.ForbidBackStakeList
 	if self.data.CodeHash == nil{
@@ -774,7 +774,7 @@ func (self *stateObject) AddAccountInForbidBackStakeList(addr common.Address) {
 	}
 }
 
-// 判断账号是否存在于禁止退注列表中
+
 func (self *stateObject) IsAccountExistInForbidBackStakeList(addr common.Address) bool{
 	var forbidList types.ForbidBackStakeList
 	if self.data.CodeHash == nil{
@@ -786,7 +786,7 @@ func (self *stateObject) IsAccountExistInForbidBackStakeList(addr common.Address
 	return forbidList.IsExist(addr)
 }
 
-// 将账号从禁止退注名单中删除
+
 func (self *stateObject) DelAccountInForbidBackStakeList(addr common.Address) {
 	var forbidList types.ForbidBackStakeList
 	if self.data.CodeHash == nil{
@@ -808,7 +808,7 @@ func (self *stateObject) DelAccountInForbidBackStakeList(addr common.Address) {
 	}
 }
 
-// 获取禁止退注名单
+
 func (self *stateObject)GetForbidBackStakeList() (types.ForbidBackStakeList){
 	if self.data.CodeHash != nil {
 		var forbidList types.ForbidBackStakeList
@@ -1176,7 +1176,7 @@ func (self *stateObject) TxLogByDataVersionRead(fileID,dataVersion string) (map[
 func (self *stateObject)SyncStakeNode(s string) error {
 	var err error
 	var genaroData types.GenaroData
-	if self.data.CodeHash == nil{ // 用户数据为空，表示用户未进行stake操作，不能同步节点到链上
+	if self.data.CodeHash == nil{
 		err = ErrSyncNode
 	}else {
 		json.Unmarshal(self.data.CodeHash, &genaroData)
@@ -1397,7 +1397,7 @@ func (self *stateObject)UpdateTrafficApplyPrice(price *hexutil.Big) {
 	}
 }
 
-// 添加最近块的信息
+
 func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint64) {
 	var lastSynState types.LastSynState
 	if self.data.CodeHash == nil{
@@ -1421,7 +1421,7 @@ func (self *stateObject)AddLastRootState(statehash common.Hash, blockNumber uint
 	}
 }
 
-// 更新账号绑定
+
 func (self *stateObject)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address){
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1446,8 +1446,7 @@ func (self *stateObject)UpdateAccountBinding(mainAccount common.Address, subAcco
 	}
 }
 
-// 删除子账号绑定
-// 成功删除一个绑定账号返回true，否则返回false
+
 func (self *stateObject)DelSubAccountBinding(subAccount common.Address) bool{
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil{
@@ -1472,8 +1471,7 @@ func (self *stateObject)DelSubAccountBinding(subAccount common.Address) bool{
 	return false
 }
 
-// 主账号删除所有绑定
-// 返回删除主账号后的关联删除的子账号列表
+
 func (self *stateObject)DelMainAccountBinding(mainAccount common.Address) []common.Address{
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1498,7 +1496,7 @@ func (self *stateObject)DelMainAccountBinding(mainAccount common.Address) []comm
 	return nil
 }
 
-// 获取所属子账号
+
 func (self *stateObject)GetSubAccounts(mainAccount common.Address) []common.Address{
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1513,7 +1511,7 @@ func (self *stateObject)GetSubAccounts(mainAccount common.Address) []common.Addr
 	return nil
 }
 
-// 获取子账号数量
+
 func (self *stateObject)GetSubAccountsCount(mainAccount common.Address) int{
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1525,7 +1523,7 @@ func (self *stateObject)GetSubAccountsCount(mainAccount common.Address) int{
 	return bindingTable.GetSubAccountSizeInMainAccount(mainAccount)
 }
 
-// 获取账号映射表
+
 func (self *stateObject)GetMainAccounts() map[common.Address][]common.Address{
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1537,8 +1535,7 @@ func (self *stateObject)GetMainAccounts() map[common.Address][]common.Address{
 	return bindingTable.MainAccounts
 }
 
-// 获取所属主账号
-// 如果子账号不存在，则返回nil
+
 func (self *stateObject)GetMainAccount(subAccount common.Address) *common.Address{
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1555,7 +1552,7 @@ func (self *stateObject)GetMainAccount(subAccount common.Address) *common.Addres
 	return nil
 }
 
-// 检查是否是绑定账号
+
 func (self *stateObject)IsBindingAccount(account common.Address) bool {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1567,7 +1564,7 @@ func (self *stateObject)IsBindingAccount(account common.Address) bool {
 	return bindingTable.IsAccountInBinding(account)
 }
 
-// 检查是否是主账号
+
 func (self *stateObject)IsMainAccount(account common.Address) bool {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {
@@ -1579,7 +1576,7 @@ func (self *stateObject)IsMainAccount(account common.Address) bool {
 	return bindingTable.IsMainAccountExist(account)
 }
 
-// 检查是否是子账号
+
 func (self *stateObject)IsSubAccount(account common.Address) bool {
 	var bindingTable types.BindingTable
 	if self.data.CodeHash != nil {

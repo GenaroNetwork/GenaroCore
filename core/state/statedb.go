@@ -658,7 +658,7 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	return root, err
 }
 
-// UpdateHeft updates the heft value of sentinel's nodeid
+
 func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
@@ -668,7 +668,7 @@ func (self *StateDB)UpdateHeft(id common.Address, heft uint64 , blockNumber uint
 	return false
 }
 
-// GetHeft gets the heft value of sentinel's nodeid
+
 func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -677,7 +677,7 @@ func (self *StateDB)GetHeft(id common.Address) (uint64, error){
 	return 0, nil
 }
 
-// get heft log by sentinel's nodeid
+
 func (self *StateDB)GetHeftLog(id common.Address) types.NumLogs{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -686,7 +686,7 @@ func (self *StateDB)GetHeftLog(id common.Address) types.NumLogs{
 	return nil
 }
 
-// get heft change in (blockNumStart,blockNumEnd)
+
 func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -695,8 +695,7 @@ func (self *StateDB)GetHeftRangeDiff(id common.Address, blockNumStart uint64, bl
 	return 0
 }
 
-// get the heft change in lastBlock
-// lastBlockNum the last block number
+
 func (self *StateDB)GetHeftLastDiff(id common.Address, lastBlockNum uint64) uint64{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -710,7 +709,7 @@ func (self *StateDB)GetHeftLastDiff(id common.Address, lastBlockNum uint64) uint
 	return 0
 }
 
-// UpdateStake updates the stake value of sentinel's nodeid
+
 func (self *StateDB)UpdateStake(id common.Address, stake uint64, blockNumber uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
@@ -743,7 +742,7 @@ func (self *StateDB)BackStake(id common.Address, blockNumber uint64) (bool, uint
 	return false, 0
 }
 
-// GetStake gets the stake value of sentinel's nodeid
+
 func (self *StateDB)GetStake(id common.Address) (uint64, error){
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -753,7 +752,7 @@ func (self *StateDB)GetStake(id common.Address) (uint64, error){
 }
 
 
-// get stake log by sentinel's nodeid
+
 func (self *StateDB)GetStakeLog(id common.Address) types.NumLogs{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -762,7 +761,7 @@ func (self *StateDB)GetStakeLog(id common.Address) types.NumLogs{
 	return nil
 }
 
-// get stake change in (blockNumStart,blockNumEnd)
+
 func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, blockNumEnd uint64) uint64{
 	stateObject := self.getStateObject(id)
 	if stateObject != nil {
@@ -771,9 +770,9 @@ func (self *StateDB)GetStakeRangeDiff(id common.Address, blockNumStart uint64, b
 	return 0
 }
 
-// add a new candidate
+
 func (self *StateDB)AddCandidate(candidate common.Address) bool {
-	// 判断是否属于绑定账号，是则无需加入委员会
+
 	stateBindingObject := self.GetOrNewStateObject(common.BindingSaveAddress)
 	if stateBindingObject !=nil && stateBindingObject.IsBindingAccount(candidate){
 		return true
@@ -787,7 +786,7 @@ func (self *StateDB)AddCandidate(candidate common.Address) bool {
 	return false
 }
 
-// 判断是否为候选者
+
 func (self *StateDB)IsCandidateExist(candidate common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
@@ -796,7 +795,7 @@ func (self *StateDB)IsCandidateExist(candidate common.Address) bool {
 	return false
 }
 
-// delete a candidate
+
 func (self *StateDB)DelCandidate(candidate common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
@@ -806,7 +805,7 @@ func (self *StateDB)DelCandidate(candidate common.Address) bool {
 	return false
 }
 
-// get all Candidates
+
 func (self *StateDB)GetCandidates() Candidates{
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
@@ -833,7 +832,7 @@ func (self *StateDB)GetMainAccountRank() ([]common.Address, []uint64){
 	return nil,nil
 }
 
-// get CandidateInfo in given range
+
 func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd uint64) []CandidateInfo {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
@@ -849,7 +848,7 @@ func (self *StateDB)GetCandidatesInfoInRange(blockNumStart uint64, blockNumEnd u
 	return nil
 }
 
-// 获取委员会权重信息，包含了子账号的权重
+
 func (self *StateDB)GetCandidatesInfoWithAllSubAccounts() []CandidateInfo {
 	stateObject := self.getStateObject(common.CandidateSaveAddress)
 	if stateObject != nil {
@@ -863,7 +862,7 @@ func (self *StateDB)GetCandidatesInfoWithAllSubAccounts() []CandidateInfo {
 	return nil
 }
 
-// 获取委员权重信息，包含了子账号的权重
+
 func (self *StateDB)GetCandidateInfoWithAllSubAccounts(candidate common.Address) (candidateInfo CandidateInfo) {
 	candidateInfo.Signer = candidate
 	candidateInfo.Heft,_ = self.GetHeft(candidate)
@@ -895,7 +894,7 @@ func (self *StateDB)UpdateBucket(addr common.Address, bucket types.BucketPropert
 	return false
 }
 
-// GetStorageSize gets the "SSIZE" value of user's file
+
 func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
@@ -904,7 +903,7 @@ func (self *StateDB)GetStorageSize(userid common.Address, bucketID [32]byte)  (u
 	return 0, nil
 }
 
-// GetStorageGasPrice gets the "STORAGEGASPRICE" value of user's file
+
 func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
@@ -913,7 +912,7 @@ func (self *StateDB)GetStorageGasPrice(userid common.Address, bucketID [32]byte)
 	return 0, nil
 }
 
-// GetStorageUsed gets the the "STORAGEGASUSED" value of user's file
+
 func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
@@ -922,7 +921,7 @@ func (self *StateDB)GetStorageGasUsed(userid common.Address, bucketID [32]byte) 
 	return 0, nil
 }
 
-// GetStorageGas gets the the "STORAGEGAS" value of user's file
+
 func (self *StateDB)GetStorageGas(userid common.Address, bucketID [32]byte)  (uint64, error) {
 	stateObject := self.getStateObject(userid)
 	if stateObject != nil {
@@ -946,7 +945,7 @@ func (self *StateDB) SynchronizeShareKey(address common.Address, synchronizeShar
 	}
 	return false
 }
-// UpdateTraffic updates the traffic value of sentinel's nodeid
+
 func (self *StateDB)UpdateTraffic(id common.Address, traffic uint64) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
@@ -980,7 +979,7 @@ func (self *StateDB) GetStorageNodes(addr common.Address) []string {
 	return nil
 }
 
-//根据用户id和fileID,dataVersion获取交易日志
+
 func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID [32]byte,dataVersion string) (map[common.Address] *hexutil.Big, error){
 	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
@@ -989,7 +988,7 @@ func (self *StateDB)TxLogByDataVersionRead(address common.Address,fileID [32]byt
 	}
 	return nil,nil
 }
-//根据用户id和fileID开启定时同步日志接口
+
 func (self *StateDB)TxLogBydataVersionUpdate(address common.Address,fileID [32]byte) bool {
 	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
@@ -1058,7 +1057,7 @@ func (self *StateDB)GetAddressByNode(s string) string {
 	return address
 }
 
-//add one back stake to list
+
 func (self *StateDB)AddAlreadyBackStack(backStack common.AlreadyBackStake) bool {
 	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
 	if stateObject != nil {
@@ -1068,7 +1067,7 @@ func (self *StateDB)AddAlreadyBackStack(backStack common.AlreadyBackStake) bool 
 	return false
 }
 
-//get all back stake
+
 func (self *StateDB)GetAlreadyBackStakeList() (bool,common.BackStakeList) {
 	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
 	if stateObject != nil {
@@ -1078,7 +1077,7 @@ func (self *StateDB)GetAlreadyBackStakeList() (bool,common.BackStakeList) {
 	return false,nil
 }
 
-// 判断是否已经申请退注
+
 func (self *StateDB)IsAlreadyBackStake(addr common.Address) bool {
 	ok,backStakeList := self.GetAlreadyBackStakeList()
 	if !ok {
@@ -1087,7 +1086,7 @@ func (self *StateDB)IsAlreadyBackStake(addr common.Address) bool {
 	return backStakeList.IsAccountExist(addr)
 }
 
-//set back stake list
+
 func (self *StateDB)SetAlreadyBackStakeList(backStacks common.BackStakeList) bool {
 	stateObject := self.GetOrNewStateObject(common.BackStakeAddress)
 	if stateObject != nil {
@@ -1098,7 +1097,7 @@ func (self *StateDB)SetAlreadyBackStakeList(backStacks common.BackStakeList) boo
 }
 
 
-// UpdateFileSharePublicKey updates the user's public key
+
 func (self *StateDB)UpdateFileSharePublicKey(id common.Address, publicKey string) bool{
 	stateObject := self.GetOrNewStateObject(id)
 	if stateObject != nil {
@@ -1151,7 +1150,7 @@ func (self *StateDB)UpdateBucketApplyPrice(address common.Address,	price *hexuti
         return false
 }
 
-// 添加同步使用的最近块信息
+
 func (self *StateDB)AddLastRootState(statehash common.Hash, blockNumber uint64) bool {
 	stateObject := self.getStateObject(common.LastSynStateSaveAddress)
 	if stateObject != nil {
@@ -1161,7 +1160,7 @@ func (self *StateDB)AddLastRootState(statehash common.Hash, blockNumber uint64) 
 	return false
 }
 
-// 账号绑定更新
+
 func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1171,7 +1170,7 @@ func (self *StateDB)UpdateAccountBinding(mainAccount common.Address, subAccount 
 	return false
 }
 
-// 取消子账号的绑定
+
 func (self *StateDB)DelSubAccountBinding(subAccount common.Address) bool {
 	stateObject := self.GetOrNewStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1180,7 +1179,7 @@ func (self *StateDB)DelSubAccountBinding(subAccount common.Address) bool {
 	return false
 }
 
-// 获取子账号数量
+
 func (self *StateDB)GetSubAccountsCount(mainAccount common.Address) int {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1189,8 +1188,7 @@ func (self *StateDB)GetSubAccountsCount(mainAccount common.Address) int {
 	return 0
 }
 
-// 获得相关主账号的子账号
-// 如果子账号不存在，则返回nil
+
 func (self *StateDB)GetSubAccounts(mianAccount common.Address) []common.Address {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1200,7 +1198,7 @@ func (self *StateDB)GetSubAccounts(mianAccount common.Address) []common.Address 
 	return nil
 }
 
-// 获取账号映射表
+
 func (self *StateDB)GetMainAccounts() map[common.Address][]common.Address {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1210,7 +1208,7 @@ func (self *StateDB)GetMainAccounts() map[common.Address][]common.Address {
 	return nil
 }
 
-// 解除主账号的绑定
+
 func (self *StateDB)DelMainAccountBinding(mianAccount common.Address) []common.Address {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1220,8 +1218,7 @@ func (self *StateDB)DelMainAccountBinding(mianAccount common.Address) []common.A
 	return nil
 }
 
-// 获得相关子账号的主账号
-// 如果子账号不存在，则返回nil
+
 func (self *StateDB)GetMainAccount(subAccount common.Address) (*common.Address) {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1231,7 +1228,7 @@ func (self *StateDB)GetMainAccount(subAccount common.Address) (*common.Address) 
 	return nil
 }
 
-// 检查账号是否是子账号
+
 func (self *StateDB)IsBindingSubAccount(account common.Address) bool {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1240,7 +1237,7 @@ func (self *StateDB)IsBindingSubAccount(account common.Address) bool {
 	return false
 }
 
-// 检查账号是否是主账号
+
 func (self *StateDB)IsBindingMainAccount(account common.Address) bool {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {
@@ -1249,7 +1246,7 @@ func (self *StateDB)IsBindingMainAccount(account common.Address) bool {
 	return false
 }
 
-// 检查账号是否是绑定账号
+
 func (self *StateDB)IsBindingAccount(account common.Address) bool {
 	stateObject := self.getStateObject(common.BindingSaveAddress)
 	if stateObject != nil {

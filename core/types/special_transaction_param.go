@@ -6,8 +6,6 @@ import (
 	"math/big"
 	"math"
 	"bytes"
-	"fmt"
-	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"time"
@@ -26,11 +24,11 @@ type SpecialTxInput struct {
 	Sign        string       `json:"sign"`
 	AddCoin	*hexutil.Big     `json:"addCoin"`
 	OrderId     common.Hash       `json:"orderId"`
-	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
-	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
-	PromissoryNoteTxPrice	*hexutil.Big	`json:"PromissoryNoteTxPrice"`	// 期票的交易单价
-	OptionPrice		*hexutil.Big	`json:"OptionPrice"`	// 期权的价格
-	IsSell			bool		`json:"IsSell"`	// 期权是否在售
+	RestoreBlock	uint64		`json:"RestoreBlock"`
+	TxNum			uint64		`json:"TxNum"`
+	PromissoryNoteTxPrice	*hexutil.Big	`json:"PromissoryNoteTxPrice"`
+	OptionPrice		*hexutil.Big	`json:"OptionPrice"`
+	IsSell			bool		`json:"IsSell"`
 	GenaroPrice
 }
 
@@ -40,17 +38,17 @@ type GenaroPrice struct {
 	StakeValuePerNode *hexutil.Big `json:"stakeValuePerNode"`
 	OneDayMortgageGes	*hexutil.Big `json:"oneDayMortgageGes"`
 	OneDaySyncLogGsaCost  *hexutil.Big `json:"oneDaySyncLogGsaCost"`
-	MaxBinding	uint64	`json:"MaxBinding"`	// 一个主节点最大的绑定数量
-	MinStake	uint64	`json:"MinStake"`	// 一次最小的押注额度
-	CommitteeMinStake	uint64	`json:"CommitteeMinStake"`	// 进入委员会需要的最小stake
-	BackStackListMax	uint64	`json:"BackStackListMax"`	// 最大退注长度
-	CoinRewardsRatio	uint64	`json:"CoinRewardsRatio"`	// 币息收益比率
-	StorageRewardsRatio	uint64	`json:"StorageRewardsRatio"`	// 存储收益比率
-	RatioPerYear	uint64	`json:"RatioPerYear"`	// 年收益比率
-	SynStateAccount	string	`json:"SynStateAccount"`	// 区块同步信号的发送地址
-	HeftAccount		string	`json:"HeftAccount"`	// 用于同步链上Heft值的账号
-	BindingAccount	string	`json:"BindingAccount"`	// 用于账号绑定的账号
-	ExtraPrice     []byte   `json:"extraPrice"` //该版本用不上，考虑后期版本兼容性使用
+	MaxBinding	uint64	`json:"MaxBinding"`
+	MinStake	uint64	`json:"MinStake"`
+	CommitteeMinStake	uint64	`json:"CommitteeMinStake"`
+	BackStackListMax	uint64	`json:"BackStackListMax"`
+	CoinRewardsRatio	uint64	`json:"CoinRewardsRatio"`
+	StorageRewardsRatio	uint64	`json:"StorageRewardsRatio"`
+	RatioPerYear	uint64	`json:"RatioPerYear"`
+	SynStateAccount	string	`json:"SynStateAccount"`
+	HeftAccount		string	`json:"HeftAccount"`
+	BindingAccount	string	`json:"BindingAccount"`
+	ExtraPrice     []byte   `json:"extraPrice"`
 }
 
 func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[string]interface{}) big.Int {
@@ -69,12 +67,11 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 		}
 		for _, v := range s.Buckets {
 			duration := math.Ceil(math.Abs(float64(v.TimeStart) - float64(v.TimeEnd))/86400)
-			//log.Info(fmt.Sprintf("duration: %f",duration))
+
 			oneCost := new(big.Int).Mul(bucketPrice, big.NewInt(int64(v.Size) * int64(duration)))
-			//log.Info(fmt.Sprintf("oneCost: %s",oneCost.String()))
+
 			totalCost.Add(totalCost, oneCost)
 		}
-		log.Info(fmt.Sprintf("bucket apply cost:%s", totalCost.String()))
 		return *totalCost
 	case common.SpecialTxBucketSupplement.Uint64():
 		var totalCost *big.Int = big.NewInt(0)
@@ -124,7 +121,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 
 		}
 
-		log.Info(fmt.Sprintf("bucket supplement cost:%s", totalCost.String()))
+
 		return *totalCost
 	case common.SpecialTxTypeTrafficApply.Uint64():
 
@@ -136,7 +133,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 		}
 
 		totalGas := new(big.Int).Mul(trafficPrice, big.NewInt(int64(s.Traffic)))
-		log.Info(fmt.Sprintf("traffic apply cost:%s", totalGas.String()))
+
 		return *totalGas
 	case common.SpecialTxTypeMortgageInit.Uint64():
 		sumMortgageTable := new(big.Int)
@@ -153,15 +150,15 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 	}
 }
 
-// 用户账户下的期票
+
 type PromissoryNote struct {
-	RestoreBlock uint64	`json:"restoreBlock"`	// 返还的块号
-	Num	uint64			`json:"Num"`	// 期票数量
+	RestoreBlock uint64	`json:"restoreBlock"`
+	Num	uint64			`json:"Num"`
 }
 
 type PromissoryNotes	[]PromissoryNote
 
-// 增加期票
+
 func (notes *PromissoryNotes) Add(newNote PromissoryNote){
 	isExist := false
 	for i,note := range *notes {
@@ -177,7 +174,7 @@ func (notes *PromissoryNotes) Add(newNote PromissoryNote){
 	}
 }
 
-// 减少期票,返回是否成功减少
+
 func (notes *PromissoryNotes) Del(newNote PromissoryNote) bool{
 	isSuccess := false
 	for i,note := range *notes {
@@ -195,7 +192,7 @@ func (notes *PromissoryNotes) Del(newNote PromissoryNote) bool{
 	return isSuccess
 }
 
-// 删除到期的期票，返回删除的数量
+
 func (notes *PromissoryNotes) DelBefor(blockNum uint64) uint64 {
 	delNum := uint64(0)
 	for i:=0;i<len(*notes);i++ {
@@ -208,7 +205,7 @@ func (notes *PromissoryNotes) DelBefor(blockNum uint64) uint64 {
 	return delNum
 }
 
-// 到期的期票数量
+
 func (notes *PromissoryNotes) GetBefor(blockNum uint64) uint64 {
 	num := uint64(0)
 	for i:=0;i<len(*notes);i++ {
@@ -219,7 +216,7 @@ func (notes *PromissoryNotes) GetBefor(blockNum uint64) uint64 {
 	return num
 }
 
-// 返回某一类期票的数量
+
 func (notes *PromissoryNotes) GetNum(restoreBlock uint64) uint64 {
 	for _,note := range *notes {
 		if note.RestoreBlock == restoreBlock {
@@ -229,7 +226,7 @@ func (notes *PromissoryNotes) GetNum(restoreBlock uint64) uint64 {
 	return 0
 }
 
-// 获取期票总数
+
 func (notes *PromissoryNotes) GetAllNum() uint64 {
 	allNum := uint64(0)
 	for _,note := range *notes {
@@ -238,21 +235,21 @@ func (notes *PromissoryNotes) GetAllNum() uint64 {
 	return allNum
 }
 
-// 期票期权交易
+
 type PromissoryNotesOptionTx struct {
-	IsSell			bool		`json:"IsSell"`	// 期权是否在售
-	OptionPrice		*big.Int	`json:"OptionPrice"`	// 期权的价格
-	RestoreBlock	uint64		`json:"RestoreBlock"`	// 期票的返还块号
-	TxNum			uint64		`json:"TxNum"`	// 此单交易的数量
-	PromissoryNoteTxPrice	*big.Int	`json:"PromissoryNoteTxPrice"`	// 期票的交易单价
-	PromissoryNotesOwner	common.Address	`json:"PromissoryNotesOwner"`	// 期票的拥有者
+	IsSell			bool		`json:"IsSell"`
+	OptionPrice		*big.Int	`json:"OptionPrice"`
+	RestoreBlock	uint64		`json:"RestoreBlock"`
+	TxNum			uint64		`json:"TxNum"`
+	PromissoryNoteTxPrice	*big.Int	`json:"PromissoryNoteTxPrice"`
+	PromissoryNotesOwner	common.Address	`json:"PromissoryNotesOwner"`
 	OptionOwner		common.Address	`json:"OptionOwner"`
 }
 
-// 期权交易表
+
 type OptionTxTable map[common.Hash]PromissoryNotesOptionTx
 
-// 生成期权交易hash
+
 func GenOptionTxHash(addr common.Address, nonce uint64) common.Hash {
 	data, _ := rlp.EncodeToBytes([]interface{}{addr, nonce})
 	crypto.Keccak256()
@@ -292,14 +289,14 @@ type SynchronizeShareKey struct {
 type BucketPropertie struct {
 	BucketId string `json:"bucketId"`
 
-	// 开始时间和结束时间共同表示存储空间的时长，对应STORAGEGAS指令
+
 	TimeStart uint64 `json:"timeStart"`
 	TimeEnd   uint64 `json:"timeEnd"`
 
-	// 备份数，对应STORAGEGASPRICE指令
+
 	Backup uint64 `json:"backup"`
 
-	// 存储空间大小，对应SSIZE指令
+
 	Size uint64 `json:"size"`
 }
 
@@ -321,10 +318,10 @@ type FileIDArr struct {
 	Sidechain       Sidechain                                  `json:"sidechain"`
 }
 
-//Cross-chain storage processing
+
 type SpecialTxTypeMortgageInit FileIDArr
 
-// 区块同步信号的数据结构
+
 type LastSynState struct {
 	LastRootStates map[common.Hash]uint64	`json:"LastRootStates"`
 	LastSynBlockNum uint64					`json:"LastSynBlockNum"`
@@ -347,7 +344,7 @@ func (lastSynState *LastSynState)AddLastSynState(blockhash common.Hash, blockNum
 	}
 }
 
-// 父子账号绑定关系表
+
 type BindingTable struct {
 	MainAccounts	map[common.Address][]common.Address		`json:"MainAccounts"`
 	SubAccounts		map[common.Address]common.Address			`json:"SubAccounts"`
@@ -377,7 +374,7 @@ func (bindingTable *BindingTable) IsMainAccountExist(mainAccount common.Address)
 	return ok
 }
 
-// 删除子账号的绑定
+
 func (bindingTable *BindingTable) DelSubAccount(subAccount common.Address){
 	mainAccount,ok := bindingTable.SubAccounts[subAccount]
 	if ok {
@@ -396,8 +393,7 @@ func (bindingTable *BindingTable) DelSubAccount(subAccount common.Address){
 	}
 }
 
-// 删除主账号账号的绑定
-// 返回被关联删除的子账号列表
+
 func (bindingTable *BindingTable) DelMainAccount(mainAccount common.Address) []common.Address{
 	subAccounts,ok := bindingTable.MainAccounts[mainAccount]
 	if ok {
@@ -409,13 +405,13 @@ func (bindingTable *BindingTable) DelMainAccount(mainAccount common.Address) []c
 	return subAccounts
 }
 
-// 更新绑定信息
+
 func (bindingTable *BindingTable) UpdateBinding(mainAccount,subAccount common.Address) {
-	// 账号已绑定
+
 	if bytes.Compare(bindingTable.SubAccounts[subAccount].Bytes(),mainAccount.Bytes()) == 0{
 		return
 	}
-	// 账号已存在
+
 	if bindingTable.IsSubAccountExist(subAccount) {
 		bindingTable.DelSubAccount(subAccount)
 	}
@@ -428,7 +424,7 @@ func (bindingTable *BindingTable) UpdateBinding(mainAccount,subAccount common.Ad
 	bindingTable.SubAccounts[subAccount] = mainAccount
 }
 
-// 禁止退注的列表
+
 type ForbidBackStakeList []common.Address
 
 func (forbidList *ForbidBackStakeList) Add(addr common.Address) {
@@ -452,7 +448,7 @@ func (forbidList *ForbidBackStakeList)IsExist(addr common.Address) bool{
 	return false
 }
 
-// 收益计算中间值
+
 type RewardsValues struct {
 	CoinActualRewards *big.Int	`json:"CoinActualRewards"`
 	PreCoinActualRewards *big.Int	`json:"PreCoinActualRewards"`

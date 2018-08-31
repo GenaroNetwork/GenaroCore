@@ -109,7 +109,6 @@ func TestPromissoryNote(t *testing.T){
 	notes.Add(note2)
 	notes.Print(t)
 	t.Log(notes.GetAllNum())
-	t.Log(notes.getBefor(20))
 	t.Log(notes.DelBefor(20))
 	notes.Print(t)
 
