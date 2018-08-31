@@ -31,6 +31,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/clique"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/ethash"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 	"github.com/GenaroNetwork/Genaro-Core/core"
 	"github.com/GenaroNetwork/Genaro-Core/core/bloombits"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
@@ -48,7 +49,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
-	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 )
 
 type LesServer interface {

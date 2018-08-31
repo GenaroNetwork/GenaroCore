@@ -22,9 +22,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var unmarshalLogTests = map[string]struct {

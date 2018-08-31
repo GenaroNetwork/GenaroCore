@@ -23,9 +23,9 @@ import (
 	"math/rand"
 	"reflect"
 
+	"bytes"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
-	"bytes"
 )
 
 const (
@@ -243,67 +243,61 @@ func (a UnprefixedAddress) MarshalText() ([]byte, error) {
 }
 
 type AlreadyBackStake struct {
-	Addr				Address
-	BackBlockNumber		uint64
+	Addr            Address
+	BackBlockNumber uint64
 }
 
 type BackStakeList []AlreadyBackStake
 
-func (self *BackStakeList)IsExist(BackStake AlreadyBackStake) bool{
-	for _,BackStakeIn := range *self {
-		if bytes.Compare(BackStakeIn.Addr.Bytes(),BackStake.Addr.Bytes()) == 0 {
+func (self *BackStakeList) IsExist(BackStake AlreadyBackStake) bool {
+	for _, BackStakeIn := range *self {
+		if bytes.Compare(BackStakeIn.Addr.Bytes(), BackStake.Addr.Bytes()) == 0 {
 			return true
 		}
 	}
 	return false
 }
 
-func (self *BackStakeList)IsAccountExist(addr Address) bool{
-	for _,BackStakeIn := range *self {
-		if bytes.Compare(BackStakeIn.Addr.Bytes(),addr.Bytes()) == 0 {
+func (self *BackStakeList) IsAccountExist(addr Address) bool {
+	for _, BackStakeIn := range *self {
+		if bytes.Compare(BackStakeIn.Addr.Bytes(), addr.Bytes()) == 0 {
 			return true
 		}
 	}
 	return false
 }
-
 
 func (addr Address) Add(n int64) Address {
 	addrBig := addr.Big()
-	addrBig.Add(addrBig,big.NewInt(n))
+	addrBig.Add(addrBig, big.NewInt(n))
 	return BigToAddress(addrBig)
 }
-
 
 func (addr Address) Mod(n int64) int64 {
 	addrBig := addr.Big()
 	var m = new(big.Int)
-	addrBig.DivMod(addrBig,big.NewInt(n),m)
-	return  m.Int64()
+	addrBig.DivMod(addrBig, big.NewInt(n), m)
+	return m.Int64()
 }
-
 
 func (A Address) Sub(B Address) int64 {
 	v := A.Big()
-	return v.Sub(v,B.Big()).Int64()
+	return v.Sub(v, B.Big()).Int64()
 }
-
 
 func (hash Hash) Mod(n int64) int64 {
 	addrBig := hash.Big()
 	var m = new(big.Int)
-	addrBig.DivMod(addrBig,big.NewInt(n),m)
-	return  m.Int64()
+	addrBig.DivMod(addrBig, big.NewInt(n), m)
+	return m.Int64()
 }
 
-
-
-func GetOptionSaveAddr(optionTxHash Hash,optionTxMemorySize uint64) Address{
+func GetOptionSaveAddr(optionTxHash Hash, optionTxMemorySize uint64) Address {
 	pos := optionTxHash.Mod(int64(optionTxMemorySize))
 	retAddress := OptionTxBeginSaveAddress.Add(pos)
 	return retAddress
 }
 
-func GetOptionSaveAddrByPos(pos int64) Address{
+func GetOptionSaveAddrByPos(pos int64) Address {
 	return OptionTxBeginSaveAddress.Add(pos)
 }

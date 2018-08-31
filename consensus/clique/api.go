@@ -117,6 +117,3 @@ func (api *API) Discard(address common.Address) {
 
 	delete(api.clique.proposals, address)
 }
-
-
-

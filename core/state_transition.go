@@ -107,7 +107,7 @@ func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error)
 	}
 
 	// Only transfer transactions cost less gas
-	if !(contractCreation && homestead) && len(data) == 0{
+	if !(contractCreation && homestead) && len(data) == 0 {
 		gas = params.TxMinGas
 	}
 
@@ -247,7 +247,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		// The only possible consensus-error would be if there wasn't
 		// sufficient balance to make the transfer happen. The first
 		// balance transfer may never fail.
-		if vmerr == vm.ErrInsufficientBalance{
+		if vmerr == vm.ErrInsufficientBalance {
 			return nil, 0, false, vmerr
 		}
 	}

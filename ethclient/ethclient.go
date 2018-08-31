@@ -484,7 +484,7 @@ func (ec *Client) GetTraffic(ctx context.Context, account common.Address, blockN
 }
 
 func (ec *Client) GetBuckets(ctx context.Context, account common.Address, blockNumber *big.Int) (map[string]interface{}, error) {
-	result :=  make(map[string]interface{})
+	result := make(map[string]interface{})
 	err := ec.c.CallContext(ctx, &result, "eth_getBuckets", account, toBlockNumArg(blockNumber))
 	return result, err
 }
@@ -533,12 +533,9 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 	return arg
 }
 
-
 // Forking tool's client for the Ethereum RPC API
-func (ec *Client) AccountAttributes(ctx context.Context, account common.Address)(*big.Int, error){
+func (ec *Client) AccountAttributes(ctx context.Context, account common.Address) (*big.Int, error) {
 	var result hexutil.Big
 	err := ec.c.CallContext(ctx, &result, "eth_accountAttributes", account, "pending")
 	return (*big.Int)(&result), err
 }
-
-

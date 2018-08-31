@@ -67,7 +67,6 @@ func makealloc(g *core.Genesis) string {
 	return strconv.QuoteToASCII(string(data))
 }
 
-
 // First Use "cmd/GenGenaroGenesis/main.go" to get a json File
 func main() {
 	if len(os.Args) != 2 {
