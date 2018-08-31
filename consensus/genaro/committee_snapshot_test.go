@@ -82,7 +82,8 @@ func TestNewSnapshot(t *testing.T){
 		CurrencyRates:		10,
 		CommitteeMaxSize:	5,
 	}
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+	committeeAccountBinding := make(map[common.Address][]common.Address)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
 
 	if snapshot.config.Epoch != 5000 || snapshot.config.CommitteeMaxSize != 5 || snapshot.config.BlockInterval != 10 ||
 		snapshot.config.ElectionPeriod != 1 || snapshot.config.ValidPeriod != 1 || snapshot.config.CurrencyRates != 10{
@@ -106,7 +107,7 @@ func TestNewSnapshot(t *testing.T){
 	}
 
 	genaroConfig.CommitteeMaxSize = 20
-	snapshot = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+	snapshot = newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
 	if snapshot.CommitteeSize != 10 {
 		t.Errorf("commitee size get %v but expect 10", snapshot.CommitteeSize)
 	}
@@ -128,7 +129,8 @@ func TestStoreAndLoadSnapshot(t *testing.T){
 		CurrencyRates:		10,
 		CommitteeMaxSize:	5,
 	}
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+	committeeAccountBinding := make(map[common.Address][]common.Address)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
 	err := snapshot.store(db)
 	if err != nil {
 		t.Errorf("store error [%v]", err)
@@ -152,7 +154,8 @@ func TestCopy(t *testing.T){
 		CurrencyRates:		10,
 		CommitteeMaxSize:	5,
 	}
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+	committeeAccountBinding := make(map[common.Address][]common.Address)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
 
 	cp := snapshot.copy()
 
@@ -191,7 +194,8 @@ func TestGetCurrentRankIndex(t *testing.T){
 		CurrencyRates:		10,
 		CommitteeMaxSize:	5,
 	}
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+	committeeAccountBinding := make(map[common.Address][]common.Address)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
 	if snapshot.getCurrentRankIndex(committeeRank[0]) != 0 {
 		t.Errorf("the index get %v but except 0", snapshot.getCurrentRankIndex(committeeRank[0]))
 	}
@@ -222,7 +226,8 @@ func TestInturn(t *testing.T){
 		CurrencyRates:		10,
 		CommitteeMaxSize:	5,
 	}
-	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion)
+	committeeAccountBinding := make(map[common.Address][]common.Address)
+	snapshot := newSnapshot(genaroConfig, 0, *blockHash, 0, committeeRank, proportion,committeeAccountBinding)
 	loopSize := snapshot.config.BlockInterval * snapshot.CommitteeSize;
 	for i := 0; i < 10000; i++ {
 		rank :=uint64(i)%snapshot.config.Epoch%loopSize/snapshot.config.BlockInterval
