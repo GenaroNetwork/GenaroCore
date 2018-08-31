@@ -267,14 +267,14 @@ func (self *BackStakeList)IsAccountExist(addr Address) bool{
 	return false
 }
 
-// 地址增加偏移
+
 func (addr Address) Add(n int64) Address {
 	addrBig := addr.Big()
 	addrBig.Add(addrBig,big.NewInt(n))
 	return BigToAddress(addrBig)
 }
 
-// 地址对于一个整数的余数
+
 func (addr Address) Mod(n int64) int64 {
 	addrBig := addr.Big()
 	var m = new(big.Int)
@@ -282,13 +282,13 @@ func (addr Address) Mod(n int64) int64 {
 	return  m.Int64()
 }
 
-// A账号相对于B账号的偏移
+
 func (A Address) Sub(B Address) int64 {
 	v := A.Big()
 	return v.Sub(v,B.Big()).Int64()
 }
 
-// HASH对于一个整数的余数
+
 func (hash Hash) Mod(n int64) int64 {
 	addrBig := hash.Big()
 	var m = new(big.Int)
@@ -297,7 +297,7 @@ func (hash Hash) Mod(n int64) int64 {
 }
 
 
-// 获取用于存储期权交易的地址
+
 func GetOptionSaveAddr(optionTxHash Hash,optionTxMemorySize uint64) Address{
 	pos := optionTxHash.Mod(int64(optionTxMemorySize))
 	retAddress := OptionTxBeginSaveAddress.Add(pos)
