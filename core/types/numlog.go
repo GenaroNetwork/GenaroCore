@@ -21,6 +21,32 @@ func (logs *NumLogs) Add(log NumLog) {
 	}
 }
 
+// delete log befor blockNumBefor
+func (logs *NumLogs) Del(blockNumBefor uint64) {
+	lenth := len(*logs)
+	if lenth == 0 {
+		return
+	}
+	if blockNumBefor == 0 {
+		return
+	}
+	if logs.GetFirst().BlockNum > blockNumBefor {
+		return
+	}
+	if logs.GetLast().BlockNum < blockNumBefor {
+		*logs = (*logs)[lenth-1 : lenth]
+		return
+	}
+
+	deleteIndex := 0
+	for i := 0; i < lenth; i++ {
+		if (*logs)[i].BlockNum < blockNumBefor {
+			deleteIndex = i
+		}
+	}
+	*logs = (*logs)[deleteIndex:]
+}
+
 func (logs NumLogs) GetFirst() NumLog {
 	len := len(logs)
 	if len > 0 {

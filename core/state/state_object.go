@@ -554,6 +554,10 @@ func (self *stateObject) UpdateHeft(heft uint64, blockNumber uint64) {
 	newLog.BlockNum = blockNumber
 	genaroData.HeftLog.Add(newLog)
 
+	if blockNumber > common.BlockLogLenth {
+		genaroData.HeftLog.Del(blockNumber - common.BlockLogLenth)
+	}
+
 	b, _ := json.Marshal(genaroData)
 	self.code = nil
 	self.data.CodeHash = b[:]
@@ -612,6 +616,10 @@ func (self *stateObject) UpdateStake(stake uint64, blockNumber uint64) {
 	newLog.Num = genaroData.Stake
 	newLog.BlockNum = blockNumber
 	genaroData.StakeLog.Add(newLog)
+
+	if blockNumber > common.BlockLogLenth {
+		genaroData.StakeLog.Del(blockNumber - common.BlockLogLenth)
+	}
 
 	b, _ := json.Marshal(genaroData)
 	self.code = nil

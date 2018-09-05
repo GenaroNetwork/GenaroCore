@@ -141,5 +141,6 @@ var (
 	CoinRewardsRatio    = uint64(50)
 	StorageRewardsRatio = uint64(50)
 	RatioPerYear        = uint64(7)
+	BlockLogLenth       = uint64(300000)
 	SynStateAccount     = OfficialAddress
 )
