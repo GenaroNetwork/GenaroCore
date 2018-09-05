@@ -118,3 +118,25 @@ func TestGenaroData(t *testing.T) {
 	t.Log(data2.Stake)
 	t.Log(data2.StakeLog.GetRangeDiff(200, 2000))
 }
+
+func TestDel(t *testing.T) {
+	logs := new(NumLogs)
+	logs.Del(1000)
+	t.Log(logs.GetFirst())
+
+	for i := 0; i < 1000; i++ {
+		t.Log(i)
+		log := GenNumLog()
+		t.Log(log)
+		logs.Add(log)
+	}
+	logs.Del(2000)
+	t.Log(logs.GetFirst())
+
+	logs.Del(5000)
+	t.Log(logs.GetFirst())
+
+	logs.Del(6000)
+	t.Log(logs.GetFirst())
+
+}
