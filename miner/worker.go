@@ -26,6 +26,7 @@ import (
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/misc"
 	"github.com/GenaroNetwork/Genaro-Core/core"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
@@ -34,9 +35,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/event"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"gopkg.in/fatih/set.v0"
 	"github.com/pkg/errors"
-	"github.com/GenaroNetwork/Genaro-Core/consensus/misc"
+	"gopkg.in/fatih/set.v0"
 )
 
 const (
@@ -76,7 +76,6 @@ type Work struct {
 	tcount    int            // tx count in cycle
 
 	Block *types.Block // the new block
-
 
 	header   *types.Header
 	txs      []*types.Transaction
@@ -262,7 +261,6 @@ func (self *worker) update() {
 				self.commitNewWork()
 			}
 
-
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
 			self.uncleMu.Lock()
@@ -396,7 +394,7 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 	return nil
 }
 
-func (self *worker) commitNewWork() error{
+func (self *worker) commitNewWork() error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.uncleMu.Lock()
@@ -475,12 +473,11 @@ func (self *worker) commitNewWork() error{
 				log.Error("need SynState")
 				return SynError
 			}
-		}else {
+		} else {
 			log.Error("lastSynState nil")
 			return errors.New("lastSynState nil")
 		}
 	}
-
 
 	// compute uncles for the new block.
 	var (

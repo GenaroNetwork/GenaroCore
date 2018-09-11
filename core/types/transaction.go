@@ -24,11 +24,11 @@ import (
 	"math/big"
 	"sync/atomic"
 
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"encoding/json"
 )
 
 //go:generate gencodec -type txdata -field-override txdataMarshaling -out gen_tx_json.go

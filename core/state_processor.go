@@ -17,6 +17,7 @@
 package core
 
 import (
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/misc"
@@ -25,7 +26,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"encoding/json"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -121,7 +121,7 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 			if !failed {
 				var s types.SpecialTxInput
 				err = json.Unmarshal(msg.Data(), &s)
-				if err == nil{
+				if err == nil {
 					currentPrice := vmenv.StateDB.GetGenaroPrice()
 
 					bucketsMap := make(map[string]interface{})
@@ -150,12 +150,11 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 
 // ProcessStakeTxAfter attempts to add stake to stateDB and some global variable
 // no check because it must be invoked after tx has been processed.
-func ProcessStakeTxAfter(tx *types.Transaction, statedb *state.StateDB)(){
+func ProcessStakeTxAfter(tx *types.Transaction, statedb *state.StateDB) {
 
 }
 
 // verify the tx(trusted pubkey) and add sentinel to stateDB or some global variable
-func ProcessSentineTx(tx *types.Transaction, statedb *state.StateDB)(){
+func ProcessSentineTx(tx *types.Transaction, statedb *state.StateDB) {
 
 }
-

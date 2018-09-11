@@ -32,12 +32,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/elastic/gosigar"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/metrics"
 	"github.com/GenaroNetwork/Genaro-Core/p2p"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"github.com/elastic/gosigar"
 	"golang.org/x/net/websocket"
 )
 

@@ -80,12 +80,12 @@ func (ga *GenesisAlloc) UnmarshalJSON(data []byte) error {
 
 // GenesisAccount is an account in the state of the genesis block.
 type GenesisAccount struct {
-	Code          []byte                      `json:"code,omitempty"`
-	Storage       map[common.Hash]common.Hash `json:"storage,omitempty"`
-	Balance       *big.Int                    `json:"balance" gencodec:"required"`
-	CodeHash	  []byte                      `json:"CodeHash,omitempty"`	// genaro data
-	Nonce         uint64                      `json:"nonce,omitempty"`
-	PrivateKey    []byte                      `json:"secretKey,omitempty"` // for tests
+	Code       []byte                      `json:"code,omitempty"`
+	Storage    map[common.Hash]common.Hash `json:"storage,omitempty"`
+	Balance    *big.Int                    `json:"balance" gencodec:"required"`
+	CodeHash   []byte                      `json:"CodeHash,omitempty"` // genaro data
+	Nonce      uint64                      `json:"nonce,omitempty"`
+	PrivateKey []byte                      `json:"secretKey,omitempty"` // for tests
 }
 
 // field type overrides for gencodec
@@ -247,7 +247,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 		// check genaro data
 		if account.CodeHash != nil {
 			fmt.Printf("SetCodeHash address:%v, codehash:%v @genesis.go:260", addr, account.CodeHash)
-			statedb.SetCodeHash(addr,account.CodeHash)
+			statedb.SetCodeHash(addr, account.CodeHash)
 		} else {
 			statedb.SetCode(addr, account.Code)
 		}
@@ -401,7 +401,7 @@ func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 			common.BytesToAddress([]byte{6}): {Balance: big.NewInt(1)}, // ECAdd
 			common.BytesToAddress([]byte{7}): {Balance: big.NewInt(1)}, // ECScalarMul
 			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
-			faucet:                           {Balance: new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(9))},
+			faucet: {Balance: new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(9))},
 		},
 	}
 }

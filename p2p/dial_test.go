@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
 	"github.com/GenaroNetwork/Genaro-Core/p2p/netutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {

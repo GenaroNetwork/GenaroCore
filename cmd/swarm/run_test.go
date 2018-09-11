@@ -26,7 +26,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/pkg/reexec"
 	"github.com/GenaroNetwork/Genaro-Core/accounts"
 	"github.com/GenaroNetwork/Genaro-Core/accounts/keystore"
 	"github.com/GenaroNetwork/Genaro-Core/internal/cmdtest"
@@ -34,6 +33,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/p2p"
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/GenaroNetwork/Genaro-Core/swarm"
+	"github.com/docker/docker/pkg/reexec"
 )
 
 func init() {

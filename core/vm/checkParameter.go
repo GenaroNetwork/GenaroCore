@@ -1,38 +1,37 @@
 package vm
 
 import (
-	"fmt"
-	"time"
 	"bytes"
-	"errors"
-	"math/big"
 	"crypto/sha256"
+	"errors"
+	"fmt"
+	"math/big"
+	"time"
 
-	"golang.org/x/crypto/ripemd160"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"strings"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"golang.org/x/crypto/ripemd160"
+	"strings"
 )
 
-
-func isSpecialAddress(address common.Address,optionTxMemorySize uint64) bool {
+func isSpecialAddress(address common.Address, optionTxMemorySize uint64) bool {
 	for _, v := range common.SpecialAddressList {
-		if bytes.Compare(address.Bytes(), v.Bytes()) == 0{
-			return  true
+		if bytes.Compare(address.Bytes(), v.Bytes()) == 0 {
+			return true
 		}
 	}
 	dist := address.Sub(common.OptionTxBeginSaveAddress)
-	if dist>=0 && dist<int64(optionTxMemorySize) {
+	if dist >= 0 && dist < int64(optionTxMemorySize) {
 		return true
 	}
 	return false
 }
 
-func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,caller common.Address, state StateDB, genaroConfig *params.GenaroConfig) error {
-	if true == isSpecialAddress(s.SpecialTxTypeMortgageInit.FromAccount,genaroConfig.OptionTxMemorySize) {
+func CheckSpecialTxTypeSyncSidechainStatusParameter(s types.SpecialTxInput, caller common.Address, state StateDB, genaroConfig *params.GenaroConfig) error {
+	if true == isSpecialAddress(s.SpecialTxTypeMortgageInit.FromAccount, genaroConfig.OptionTxMemorySize) {
 		return errors.New("fromAccount error")
 	}
 
@@ -40,8 +39,7 @@ func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,call
 		return errors.New("Account is Contract")
 	}
 
-
-	if caller !=  common.OfficialAddress {
+	if caller != common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
@@ -56,7 +54,7 @@ func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,call
 		return errors.New("Parameter fromAccount  error")
 	}
 	if 1 < len(s.SpecialTxTypeMortgageInit.Sidechain) {
-		for k,v := range s.SpecialTxTypeMortgageInit.Sidechain{
+		for k, v := range s.SpecialTxTypeMortgageInit.Sidechain {
 			if 20 != len(k) {
 				return errors.New("Parameter mortgage account  error")
 			}
@@ -70,12 +68,11 @@ func CheckSpecialTxTypeSyncSidechainStatusParameter( s types.SpecialTxInput,call
 	return nil
 }
 
-
-func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller common.Address) error {
-	var tmp  big.Int
+func CheckspecialTxTypeMortgageInitParameter(s types.SpecialTxInput, caller common.Address) error {
+	var tmp big.Int
 	timeLimit := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt()
-	tmp.Mul(timeLimit,big.NewInt(86400))
-	endTime :=  tmp.Add(&tmp,big.NewInt(s.SpecialTxTypeMortgageInit.CreateTime)).Int64()
+	tmp.Mul(timeLimit, big.NewInt(86400))
+	endTime := tmp.Add(&tmp, big.NewInt(s.SpecialTxTypeMortgageInit.CreateTime)).Int64()
 	if s.SpecialTxTypeMortgageInit.CreateTime > s.SpecialTxTypeMortgageInit.EndTime ||
 		s.SpecialTxTypeMortgageInit.CreateTime > time.Now().Unix() ||
 		s.SpecialTxTypeMortgageInit.EndTime != endTime {
@@ -92,7 +89,7 @@ func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller comm
 	if len(authorityTable) != len(mortgageTable) {
 		return errors.New("Parameter authorityTable != mortgageTable  error")
 	}
-	for k,v := range authorityTable {
+	for k, v := range authorityTable {
 		if v < 0 || v > 3 {
 			return errors.New("Parameter authority type  error")
 		}
@@ -103,9 +100,9 @@ func CheckspecialTxTypeMortgageInitParameter( s types.SpecialTxInput,caller comm
 	return nil
 }
 
-func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
+func CheckSynchronizeShareKeyParameter(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 
-	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress,genaroConfig.OptionTxMemorySize) {
+	if true == isSpecialAddress(s.SynchronizeShareKey.RecipientAddress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("update  chain SynchronizeShareKey fail")
 	}
 
@@ -125,7 +122,7 @@ func CheckSynchronizeShareKeyParameter( s types.SpecialTxInput, state StateDB, g
 	return nil
 }
 
-func CheckUnlockSharedKeyParameter( s types.SpecialTxInput) error {
+func CheckUnlockSharedKeyParameter(s types.SpecialTxInput) error {
 	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
 		return errors.New("Parameter ShareKeyId  error")
 	}
@@ -138,7 +135,7 @@ func CheckStakeTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.Ge
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
+	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -170,7 +167,7 @@ func CheckSyncHeftTx(caller common.Address, s types.SpecialTxInput, state StateD
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
+	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -191,7 +188,7 @@ func CheckApplyBucketTx(s types.SpecialTxInput, state StateDB, genaroConfig *par
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
+	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -222,7 +219,7 @@ func CheckApplyBucketTx(s types.SpecialTxInput, state StateDB, genaroConfig *par
 			return errors.New("param [size] missing or can't be zero ")
 		}
 
-		if bucketMap != nil{
+		if bucketMap != nil {
 			if _, ok := bucketMap[v.BucketId]; ok {
 				return errors.New("param [bucketId] already exists")
 			}
@@ -231,7 +228,7 @@ func CheckApplyBucketTx(s types.SpecialTxInput, state StateDB, genaroConfig *par
 	return nil
 }
 
-func CheckBucketSupplement(s types.SpecialTxInput, state StateDB,genaroConfig *params.GenaroConfig) error {
+func CheckBucketSupplement(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 
 	if s.Address == "" {
 		return errors.New("param [address] missing or can't be null string")
@@ -241,12 +238,12 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB,genaroConfig *p
 		return errors.New("param [bucketId] missing or can't be null string")
 	}
 
-	if s.Size == 0 && s.Duration < 86400{
+	if s.Size == 0 && s.Duration < 86400 {
 		return errors.New("param [size / duration] missing or must be larger than zero")
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
+	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -265,13 +262,12 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB,genaroConfig *p
 		if bucketInDb.TimeEnd <= uint64(time.Now().Unix()) {
 			return errors.New("the bucket corresponding to the bucketId has has been expired")
 		}
-	}else {
+	} else {
 		return errors.New("the user does not have the bucket corresponding to the bucketId")
 	}
 
 	return nil
 }
-
 
 func CheckTrafficTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 
@@ -280,7 +276,7 @@ func CheckTrafficTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
+	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -293,7 +289,6 @@ func CheckTrafficTx(s types.SpecialTxInput, state StateDB, genaroConfig *params.
 	}
 	return nil
 }
-
 
 func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) error {
 	if s.Address == "" {
@@ -319,7 +314,6 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	if caller != paramAddress {
 		return errors.New("address in param is not equal with callerAddress of this Tx")
 	}
-
 
 	//校验节点是否已经绑定过
 	if db.GetAddressByNode(s.NodeID) != "" {
@@ -370,7 +364,6 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	return nil
 }
 
-
 func generateNodeId(b []byte) string {
 	sha256byte := sha256.Sum256(b)
 	ripemder := ripemd160.New()
@@ -390,7 +383,7 @@ func CheckPunishmentTx(caller common.Address, s types.SpecialTxInput, state Stat
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
+	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -398,14 +391,14 @@ func CheckPunishmentTx(caller common.Address, s types.SpecialTxInput, state Stat
 		return errors.New("Account is Contract")
 	}
 
-	if caller !=  common.OfficialAddress {
+	if caller != common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil
 }
 
 func CheckBackStakeTx(caller common.Address, state StateDB) error {
-	ok,backStakeList := state.GetAlreadyBackStakeList()
+	ok, backStakeList := state.GetAlreadyBackStakeList()
 	if !ok {
 		return errors.New("userBackStake fail")
 	}
@@ -443,7 +436,7 @@ func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput, state StateDB, genaro
 	}
 
 	adress := common.HexToAddress(s.Address)
-	if isSpecialAddress(adress,genaroConfig.OptionTxMemorySize){
+	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
 	}
 
@@ -457,8 +450,8 @@ func CheckSyncFileSharePublicKeyTx(s types.SpecialTxInput, state StateDB, genaro
 	return nil
 }
 
-func CheckPriceRegulation(caller common.Address ,s types.SpecialTxInput) error {
-	if caller !=  common.GenaroPriceAddress {
+func CheckPriceRegulation(caller common.Address, s types.SpecialTxInput) error {
+	if caller != common.GenaroPriceAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
@@ -469,7 +462,7 @@ func CheckPriceRegulation(caller common.Address ,s types.SpecialTxInput) error {
 	return nil
 }
 
-func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes []string) error{
+func CheckUnbindNodeTx(caller common.Address, s types.SpecialTxInput, existNodes []string) error {
 	if existNodes == nil {
 		return errors.New("none node of this account need to unbind")
 	}
@@ -478,7 +471,7 @@ func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes 
 		return errors.New("param [nodeId] is null or missing")
 	}
 
-	for _, v := range existNodes{
+	for _, v := range existNodes {
 		if v == s.NodeID {
 			return nil
 		}
@@ -487,7 +480,7 @@ func CheckUnbindNodeTx(caller common.Address,s types.SpecialTxInput, existNodes 
 }
 
 // 账号绑定检查
-func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
+func CheckAccountBindingTx(caller common.Address, s types.SpecialTxInput, state StateDB) error {
 	// 检查是否是官方绑定账号
 	genaroPrice := state.GetGenaroPrice()
 	bindingAccount := common.HexToAddress(genaroPrice.BindingAccount)
@@ -499,7 +492,7 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 	mainAccount := common.HexToAddress(s.Address)
 	// 子账号
 	subAccount := common.HexToAddress(s.Message)
-	if bytes.EqualFold(mainAccount.Bytes(),subAccount.Bytes()) {
+	if bytes.EqualFold(mainAccount.Bytes(), subAccount.Bytes()) {
 		return errors.New("same account")
 	}
 	// 主账号是否是候选者
@@ -516,11 +509,11 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 	}
 	// 子账号是否是候选者或存在于子账号队列中
 	thisMainAccount := state.GetMainAccount(subAccount)
-	if !state.IsCandidateExist(subAccount) && thisMainAccount == nil{
+	if !state.IsCandidateExist(subAccount) && thisMainAccount == nil {
 		return errors.New("subAddr is not a candidate")
 	}
 	// 账号是否已经处于绑定状态
-	if thisMainAccount != nil && bytes.Compare(thisMainAccount.Bytes(),mainAccount.Bytes()) == 0 {
+	if thisMainAccount != nil && bytes.Compare(thisMainAccount.Bytes(), mainAccount.Bytes()) == 0 {
 		return errors.New("has binding")
 	}
 
@@ -531,21 +524,21 @@ func CheckAccountBindingTx(caller common.Address,s types.SpecialTxInput, state S
 // 1 主账号解绑
 // 2 子账号解绑
 // 3 主账号解绑子账号
-func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, state StateDB) (t int,err error){
+func CheckAccountCancelBindingTx(caller common.Address, s types.SpecialTxInput, state StateDB) (t int, err error) {
 	// 判断账号类型
 	if state.IsBindingMainAccount(caller) {
-		if strings.EqualFold(s.Address,"") {
+		if strings.EqualFold(s.Address, "") {
 			t = 1
 		} else {
 			subAccount := common.HexToAddress(s.Address)
 			if state.IsBindingSubAccount(subAccount) {
 				thisMainAccount := state.GetMainAccount(subAccount)
-				if thisMainAccount !=nil && bytes.EqualFold(thisMainAccount.Bytes(),caller.Bytes()){
+				if thisMainAccount != nil && bytes.EqualFold(thisMainAccount.Bytes(), caller.Bytes()) {
 					t = 3
 				} else {
 					err = errors.New("not binding account")
 				}
-			}else {
+			} else {
 				err = errors.New("not binding account")
 			}
 		}
@@ -559,14 +552,14 @@ func CheckAccountCancelBindingTx(caller common.Address,s types.SpecialTxInput, s
 }
 
 // 添加禁止退注名单的交易检查
-func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error{
+func CheckAddAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB) error {
 	// 检查是否是官方账号
-	if caller !=  common.OfficialAddress {
+	if caller != common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
 	// 检查账号是否有押注
-	stake,err := state.GetStake(account)
+	stake, err := state.GetStake(account)
 	if err != nil {
 		return err
 	}
@@ -581,9 +574,9 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 }
 
 // 移除退注账号禁止名单的检查
-func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.SpecialTxInput, state StateDB) error {
+func CheckDelAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB) error {
 	// 检查是否是官方账号
-	if caller !=  common.OfficialAddress {
+	if caller != common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
@@ -596,13 +589,13 @@ func CheckDelAccountInForbidBackStakeListTx(caller common.Address,s types.Specia
 }
 
 // 设置全局变量交易参数检查
-func CheckSetGlobalVar(caller common.Address,s types.SpecialTxInput) error {
+func CheckSetGlobalVar(caller common.Address, s types.SpecialTxInput) error {
 	// 检查是否是官方账号
-	if caller !=  common.OfficialAddress {
+	if caller != common.OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
-	if s.RatioPerYear >= 100 || s.CoinRewardsRatio >= 100 || s.StorageRewardsRatio >= 100{
+	if s.RatioPerYear >= 100 || s.CoinRewardsRatio >= 100 || s.StorageRewardsRatio >= 100 {
 		return errors.New("Ratio is not invalid")
 	}
 
@@ -610,7 +603,7 @@ func CheckSetGlobalVar(caller common.Address,s types.SpecialTxInput) error {
 }
 
 // 增加币池的检查
-func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateDB) error {
+func CheckAddCoinpool(caller common.Address, s types.SpecialTxInput, state StateDB) error {
 	balance := state.GetBalance(caller)
 	if s.AddCoin.ToInt().Cmp(big.NewInt(0)) <= 0 {
 		return errors.New("Value is not invalid")
@@ -621,7 +614,7 @@ func CheckAddCoinpool(caller common.Address,s types.SpecialTxInput, state StateD
 	return nil
 }
 
-func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB, blockNum *big.Int,  optionTxMemorySize uint64) error {
+func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, state StateDB, blockNum *big.Int, optionTxMemorySize uint64) error {
 	if (s.OrderId == common.Hash{}) {
 		return errors.New("param [OrderId] Missing")
 	}
@@ -640,7 +633,7 @@ func CheckPromissoryNoteRevoke(caller common.Address, s types.SpecialTxInput, st
 	}
 
 	// 检查订单id对应的交易的拥有者是否是本次交易的发起人
-	if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
+	if promissoryNotesOptionTx.PromissoryNotesOwner != caller {
 		return errors.New("You can't revoke someone else's options trading，check the order id ")
 	}
 
@@ -667,7 +660,7 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 		return errors.New("param [txNum] must be larger than zero")
 	}
 
-	if s.PromissoryNoteTxPrice == nil{
+	if s.PromissoryNoteTxPrice == nil {
 		return errors.New("param [PromissoryNoteTxPrice] Missing")
 	}
 
@@ -684,7 +677,6 @@ func CheckPublishOption(caller common.Address, s types.SpecialTxInput, state Sta
 	}
 	return errors.New("None enough promissory notes to sell ")
 }
-
 
 func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
 	// 1、当前交易从未被人认购，此时只能由该笔交易中期票的拥有者改变状态
@@ -710,17 +702,16 @@ func CheckSetOptionTxStatus(caller common.Address, s types.SpecialTxInput, state
 	// 当前交易是否被认购, 期票拥有者不为零值，则认为已被人认购
 	if (common.Address{} == promissoryNotesOptionTx.OptionOwner) {
 		// 检查订单id对应的交易的拥有者是否是本次交易的发起人
-		if promissoryNotesOptionTx.PromissoryNotesOwner !=  caller {
+		if promissoryNotesOptionTx.PromissoryNotesOwner != caller {
 			return errors.New("You can't revoke someone else's options trading，check the order id ")
 		}
-	}else {
+	} else {
 		if promissoryNotesOptionTx.OptionOwner != caller {
 			return errors.New("You can't revoke someone else's options trading，check the order id ")
 		}
 	}
 	return nil
 }
-
 
 func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
 	//根据订单号从期权列表中取出交易列表
@@ -744,9 +735,7 @@ func CheckBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, stat
 	return nil
 }
 
-
-
-func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB,  optionTxMemorySize uint64) error {
+func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
 	//根据订单号从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
@@ -762,16 +751,14 @@ func CheckCarriedOutPromissoryNotes(caller common.Address, s types.SpecialTxInpu
 		return errors.New("No right turn buy promissoryNotes ")
 	}
 	balance := state.GetBalance(caller)
-	promissoryNotesOptionTx.PromissoryNoteTxPrice.Mul(promissoryNotesOptionTx.PromissoryNoteTxPrice,big.NewInt(int64(promissoryNotesOptionTx.TxNum)))
+	promissoryNotesOptionTx.PromissoryNoteTxPrice.Mul(promissoryNotesOptionTx.PromissoryNoteTxPrice, big.NewInt(int64(promissoryNotesOptionTx.TxNum)))
 	if balance.Cmp(promissoryNotesOptionTx.PromissoryNoteTxPrice) <= 0 {
 		return errors.New("Insufficient balance")
 	}
 	return nil
 }
 
-
-
-func CheckTurnBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB,  optionTxMemorySize uint64) error {
+func CheckTurnBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, state StateDB, optionTxMemorySize uint64) error {
 	//从期权列表中取出交易列表
 	optionTxTable := state.GetOptionTxTable(s.OrderId, optionTxMemorySize)
 	if optionTxTable == nil {
@@ -789,9 +776,8 @@ func CheckTurnBuyPromissoryNotes(caller common.Address, s types.SpecialTxInput, 
 	return nil
 }
 
-
 func WithdrawCash(caller common.Address, state StateDB, blockNum *big.Int) error {
-	beforPromissoryNotesNum := state.GetBeforPromissoryNotesNum(caller,blockNum.Uint64())
+	beforPromissoryNotesNum := state.GetBeforPromissoryNotesNum(caller, blockNum.Uint64())
 	if beforPromissoryNotesNum <= 0 {
 		return errors.New("The number of cashable notes available is 0")
 	}

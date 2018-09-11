@@ -17,13 +17,13 @@
 package params
 
 type GasTable struct {
-	ExtcodeSize uint64
-	ExtcodeCopy uint64
-	Balance     uint64
+	ExtcodeSize        uint64
+	ExtcodeCopy        uint64
+	Balance            uint64
 	StorageAttribution uint64
-	SLoad       uint64
-	Calls       uint64
-	Suicide     uint64
+	SLoad              uint64
+	Calls              uint64
+	Suicide            uint64
 
 	ExpByte uint64
 
@@ -39,41 +39,41 @@ var (
 	// GasTableHomestead contain the gas prices for
 	// the homestead phase.
 	GasTableHomestead = GasTable{
-		ExtcodeSize: 20,
-		ExtcodeCopy: 20,
-		Balance:     20,
-		StorageAttribution:  20,
-		SLoad:       50,
-		Calls:       40,
-		Suicide:     0,
-		ExpByte:     10,
+		ExtcodeSize:        20,
+		ExtcodeCopy:        20,
+		Balance:            20,
+		StorageAttribution: 20,
+		SLoad:              50,
+		Calls:              40,
+		Suicide:            0,
+		ExpByte:            10,
 	}
 
 	// GasTableHomestead contain the gas re-prices for
 	// the homestead phase.
 	GasTableEIP150 = GasTable{
-		ExtcodeSize: 800,
-		ExtcodeCopy: 700,
-		Balance:     400,
-		StorageAttribution:     800,
-		SLoad:       200,
-		Calls:       700,
-		Suicide:     5000,
-		ExpByte:     10,
+		ExtcodeSize:        800,
+		ExtcodeCopy:        700,
+		Balance:            400,
+		StorageAttribution: 800,
+		SLoad:              200,
+		Calls:              700,
+		Suicide:            5000,
+		ExpByte:            10,
 
 		CreateBySuicide: 25000,
 	}
 
 	GasTableEIP158 = GasTable{
-		ExtcodeSize: 800,
-		ExtcodeCopy: 700,
-		Balance:     400,
+		ExtcodeSize:        800,
+		ExtcodeCopy:        700,
+		Balance:            400,
 		StorageAttribution: 800,
-		SLoad:       200,
-		Calls:       700,
+		SLoad:              200,
+		Calls:              700,
 
-		Suicide:     5000,
-		ExpByte:     50,
+		Suicide: 5000,
+		ExpByte: 50,
 
 		CreateBySuicide: 25000,
 	}

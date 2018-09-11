@@ -591,7 +591,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 				}
 
 				code, _ := statedb.Database().TrieDB().Node(common.BytesToHash(account.CodeHash))
-				if state.CheckCodeEmpty(account.CodeHash) {// check code if exist
+				if state.CheckCodeEmpty(account.CodeHash) { // check code if exist
 					code = nil
 				}
 				data = append(data, code)

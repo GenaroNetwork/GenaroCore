@@ -18,8 +18,8 @@ package ethdb
 
 import (
 	"errors"
-	"sync"
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"sync"
 )
 
 /*

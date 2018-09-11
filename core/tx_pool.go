@@ -25,16 +25,16 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 	"github.com/GenaroNetwork/Genaro-Core/event"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/metrics"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
-	"encoding/json"
-	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 )
 
 const (
@@ -540,6 +540,7 @@ func (pool *TxPool) Pending() (map[common.Address]types.Transactions, error) {
 	}
 	return pending, nil
 }
+
 // local retrieves all currently known local transactions, groupped by origin
 // account and sorted by nonce. The returned transaction set is a copy and can be
 // freely modified by calling code.
@@ -595,9 +596,9 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	var s types.SpecialTxInput
 	bucketsMap := make(map[string]interface{})
 	if nil != tx.To() {
-		if common.SpecialSyncAddress == *tx.To(){
+		if common.SpecialSyncAddress == *tx.To() {
 			err := pool.dispatchHandlerValidateTx(tx.Data(), from)
-			if err != nil{
+			if err != nil {
 				return err
 			}
 
@@ -625,12 +626,12 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	return nil
 }
 
-func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address) error {
+func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Address) error {
 	var err error
 	// 解析数据
 	var s types.SpecialTxInput
 	err = json.Unmarshal(input, &s)
-	if err != nil{
+	if err != nil {
 		return errors.New("special tx error： the extraData parameters of the wrong format")
 	}
 
@@ -638,31 +639,31 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 		return errors.New("special tx error: miss param [type]")
 	}
 
-	switch s.Type.ToInt().Uint64(){
+	switch s.Type.ToInt().Uint64() {
 	case common.SpecialTxTypeStakeSync.Uint64(): // 同步stake
-		return vm.CheckStakeTx(s, pool.currentState,pool.chainconfig.Genaro)
+		return vm.CheckStakeTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeHeftSync.Uint64(): // 同步heft
 		return vm.CheckSyncHeftTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSpaceApply.Uint64(): // 申请存储空间
-		return vm.CheckApplyBucketTx(s,pool.currentState,pool.chainconfig.Genaro)
+		return vm.CheckApplyBucketTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxBucketSupplement.Uint64(): // 存储空间续命
 		return vm.CheckBucketSupplement(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeMortgageInit.Uint64(): // 交易代表用户押注初始化交易
-		return  vm.CheckspecialTxTypeMortgageInitParameter(s,s.SpecialTxTypeMortgageInit.FromAccount)
+		return vm.CheckspecialTxTypeMortgageInitParameter(s, s.SpecialTxTypeMortgageInit.FromAccount)
 	case common.SpecialTxTypeSyncSidechainStatus.Uint64(): //同步日志+结算
-		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller,pool.currentState,pool.chainconfig.Genaro)
+		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeTrafficApply.Uint64(): //用户申购流量
-		return vm.CheckTrafficTx(s,pool.currentState,pool.chainconfig.Genaro)
+		return vm.CheckTrafficTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSyncNode.Uint64(): //用户stake后同步节点Id
 		return vm.CheckSyncNodeTx(caller, s, pool.currentState)
 	case common.SynchronizeShareKey.Uint64():
-		return vm.CheckSynchronizeShareKeyParameter(s,pool.currentState,pool.chainconfig.Genaro)
+		return vm.CheckSynchronizeShareKeyParameter(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
-		return vm.CheckSyncFileSharePublicKeyTx(s,pool.currentState,pool.chainconfig.Genaro)
+		return vm.CheckSyncFileSharePublicKeyTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.UnlockSharedKey.Uint64():
 		return vm.CheckUnlockSharedKeyParameter(s)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
-		return vm.CheckPunishmentTx(caller,s,pool.currentState,pool.chainconfig.Genaro)
+		return vm.CheckPunishmentTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeBackStake.Uint64():
 		return vm.CheckBackStakeTx(caller, pool.currentState)
 	case common.SpecialTxTypePriceRegulation.Uint64(): //价格调整
@@ -672,10 +673,10 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxUnbindNode.Uint64(): //解除绑定
 		existNodes := pool.currentState.GetStorageNodes(caller)
 		return vm.CheckUnbindNodeTx(caller, s, existNodes)
-	case common.SpecialTxAccountBinding.Uint64():	//账号绑定
+	case common.SpecialTxAccountBinding.Uint64(): //账号绑定
 		return vm.CheckAccountBindingTx(caller, s, pool.currentState)
 	case common.SpecialTxAccountCancelBinding.Uint64(): // 账号解除绑定
-		_,err := vm.CheckAccountCancelBindingTx(caller, s, pool.currentState)
+		_, err := vm.CheckAccountCancelBindingTx(caller, s, pool.currentState)
 		return err
 	case common.SpecialTxAddAccountInForbidBackStakeList.Uint64():
 		return vm.CheckAddAccountInForbidBackStakeListTx(caller, s, pool.currentState)
@@ -686,23 +687,23 @@ func (pool *TxPool)dispatchHandlerValidateTx(input []byte, caller common.Address
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
 	case common.SpecialTxPublishOption.Uint64():
-	//发布期权售卖交易
+		//发布期权售卖交易
 		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())
 	case common.SpecialTxRevoke.Uint64():
-	//撤回期权售卖交易
-		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState, pool.chain.CurrentBlock().Number(),pool.chainconfig.Genaro.OptionTxMemorySize)
+		//撤回期权售卖交易
+		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState, pool.chain.CurrentBlock().Number(), pool.chainconfig.Genaro.OptionTxMemorySize)
 	case common.SpecialTxSetOptionTxStatus.Uint64():
-	// 更改期权售卖交易状态
-		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
+		// 更改期权售卖交易状态
+		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
 	//购买期权
 	case common.SpecialTxBuyPromissoryNotes.Uint64():
 		return vm.CheckBuyPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
 	//执行期权
 	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
-		return vm.CheckCarriedOutPromissoryNotes(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
+		return vm.CheckCarriedOutPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
 	//转卖期权
 	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
-		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState,pool.chainconfig.Genaro.OptionTxMemorySize)
+		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
 	case common.SpecialTxWithdrawCash.Uint64():
 		return vm.WithdrawCash(caller, pool.currentState, pool.chain.CurrentBlock().Number())
 
