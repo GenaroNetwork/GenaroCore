@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"strconv"
 	"golang.org/x/crypto/ripemd160"
 	"strings"
 )
@@ -240,6 +240,16 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB, genaroConfig *
 
 	if s.Size == 0 && s.Duration < 86400 {
 		return errors.New("param [size / duration] missing or must be larger than zero")
+	}
+
+	if s.Message == "" {
+		return errors.New("param [ msg ] missing or can't be null")
+	}
+
+
+	_, err := strconv.Atoi(s.Message)
+	if err != nil {
+		return errors.New("param [ msg ] is not timestamp")
 	}
 
 	adress := common.HexToAddress(s.Address)
