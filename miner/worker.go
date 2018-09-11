@@ -255,11 +255,11 @@ func (self *worker) update() {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			if self.config.Genaro != nil {
-				GenaroCommitNewWork(self)
-			} else {
-				self.commitNewWork()
-			}
+			//if self.config.Genaro != nil {
+			//	GenaroCommitNewWork(self)
+			//} else {
+			self.commitNewWork()
+			//}
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
