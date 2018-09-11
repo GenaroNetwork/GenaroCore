@@ -133,6 +133,20 @@ func GenaroCommitNewWork(wk *worker) {
 		time.Sleep(time.Second)
 		err = wk.commitNewWork()
 	}
+
+	go GenaroWorkCheck(wk)
+}
+
+func GenaroWorkCheck(wk *worker){
+	for atomic.LoadInt32(&wk.mining) > 0 {
+		if atomic.LoadInt32(&wk.workIdx) == 0 {
+			err := wk.commitNewWork()
+			if err != nil && !strings.EqualFold(err.Error(),SynError.Error()) {
+				break
+			}
+		}
+		time.Sleep(time.Second)
+	}
 }
 
 func (self *Miner) Stop() {
