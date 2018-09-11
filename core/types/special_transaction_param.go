@@ -74,7 +74,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 			//log.Info(fmt.Sprintf("oneCost: %s",oneCost.String()))
 			totalCost.Add(totalCost, oneCost)
 		}
-		log.Info(fmt.Sprintf("bucket apply cost:%s", totalCost.String()))
+		//log.Info(fmt.Sprintf("bucket apply cost:%s", totalCost.String()))
 		return *totalCost
 	case common.SpecialTxBucketSupplement.Uint64():
 		var totalCost *big.Int = big.NewInt(0)
@@ -124,7 +124,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 
 		}
 
-		log.Info(fmt.Sprintf("bucket supplement cost:%s", totalCost.String()))
+		//log.Info(fmt.Sprintf("bucket supplement cost:%s", totalCost.String()))
 		return *totalCost
 	case common.SpecialTxTypeTrafficApply.Uint64():
 
@@ -136,7 +136,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 		}
 
 		totalGas := new(big.Int).Mul(trafficPrice, big.NewInt(int64(s.Traffic)))
-		log.Info(fmt.Sprintf("traffic apply cost:%s", totalGas.String()))
+		//log.Info(fmt.Sprintf("traffic apply cost:%s", totalGas.String()))
 		return *totalGas
 	case common.SpecialTxTypeMortgageInit.Uint64():
 		sumMortgageTable := new(big.Int)
