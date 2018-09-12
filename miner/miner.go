@@ -143,6 +143,8 @@ func GenaroWorkCheck(wk *worker){
 			err := wk.commitNewWork()
 			if err != nil && !strings.EqualFold(err.Error(),SynError.Error()) {
 				break
+			} else if err != nil && strings.EqualFold(err.Error(),SynError.Error()) {
+				atomic.StoreInt32(&wk.workIdx, 0)
 			}
 		}
 		time.Sleep(time.Second)
