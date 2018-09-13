@@ -34,6 +34,7 @@ var SurplusCoin int64                    // 初始币池中的金额，单位GNX
 var SynStateAccount string               // 用于同步
 var HeftAccount string                   // 用于heft设置
 var BindingAccount string                // 用于账号绑定
+var OfficialAddress string               // 官方账号
 
 func initarg() {
 	flag.StringVar(&accountfile, "f", "account.json", "account file")
@@ -235,6 +236,8 @@ func parseConfig(fileData []byte) {
 	fmt.Println("SynStateAccount:", SynStateAccount)
 	fmt.Println("HeftAccount:", HeftAccount)
 	fmt.Println("BindingAccount:", BindingAccount)
+	OfficialAddress = gjson.GetBytes(fileData, "config.OfficialAddress").String()
+	fmt.Println("OfficialAddress:", OfficialAddress)
 }
 
 func main() {
@@ -252,12 +255,12 @@ func main() {
 
 	genaroConfig := &params.ChainConfig{
 		ChainId:        big.NewInt(300),
-		HomesteadBlock: big.NewInt(1),
-		EIP150Block:    big.NewInt(2),
+		HomesteadBlock: big.NewInt(0),
+		EIP150Block:    big.NewInt(0),
 		EIP150Hash:     common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
-		EIP155Block:    big.NewInt(3),
-		EIP158Block:    big.NewInt(3),
-		ByzantiumBlock: big.NewInt(4),
+		EIP155Block:    big.NewInt(0),
+		EIP158Block:    big.NewInt(0),
+		ByzantiumBlock: big.NewInt(0),
 		Genaro: &params.GenaroConfig{
 			Epoch:               86400,               //the number of blocks in one committee term
 			Period:              1,                   // Number of seconds between blocks to enforce
@@ -268,6 +271,7 @@ func main() {
 			CommitteeMaxSize:    101,                 //max number of committee member
 			OptionTxMemorySize:  20,                  //the number of save option tx
 			PromissoryNotePrice: PromissoryNotePrice, // Promissory Note Price
+			OfficialAddress:	OfficialAddress,
 		},
 	}
 	genesis := new(core.Genesis)
