@@ -271,7 +271,7 @@ func main() {
 			CommitteeMaxSize:    101,                 //max number of committee member
 			OptionTxMemorySize:  20,                  //the number of save option tx
 			PromissoryNotePrice: PromissoryNotePrice, // Promissory Note Price
-			OfficialAddress:	OfficialAddress,
+			OfficialAddress:     OfficialAddress,
 		},
 	}
 	genesis := new(core.Genesis)

@@ -5,16 +5,16 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"math/big"
-	"time"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
-	"strconv"
 	"golang.org/x/crypto/ripemd160"
+	"math/big"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func isSpecialAddress(address common.Address, optionTxMemorySize uint64) bool {
@@ -245,7 +245,6 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB, genaroConfig *
 	if s.Message == "" {
 		return errors.New("param [ msg ] missing or can't be null")
 	}
-
 
 	_, err := strconv.Atoi(s.Message)
 	if err != nil {

@@ -8,8 +8,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"math"
 	"math/big"
-	"time"
 	"strconv"
+	"time"
 )
 
 type SpecialTxInput struct {
@@ -87,8 +87,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 		if v, ok := bucketsMap[s.BucketID]; ok {
 			bucketPropertie := v.(BucketPropertie)
 
-
-			if s.Size != 0 && s.Duration == 0{
+			if s.Size != 0 && s.Duration == 0 {
 
 				timeInt, err := strconv.Atoi(s.Message)
 				if err != nil {
@@ -97,7 +96,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 				txTime := time.Unix(int64(timeInt), 0)
 				calSize := s.Size
 				var subtraction float64
-				if uint64(txTime.Unix()) > bucketPropertie.TimeStart  {
+				if uint64(txTime.Unix()) > bucketPropertie.TimeStart {
 					subtraction = float64(txTime.Unix())
 				} else {
 					subtraction = float64(bucketPropertie.TimeStart)
@@ -121,7 +120,7 @@ func (s SpecialTxInput) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[st
 				}
 				txTime := time.Unix(int64(timeInt), 0)
 
-				if uint64(txTime.Unix()) > bucketPropertie.TimeStart  {
+				if uint64(txTime.Unix()) > bucketPropertie.TimeStart {
 					subtraction = float64(txTime.Unix())
 
 				} else {
