@@ -137,13 +137,13 @@ func GenaroCommitNewWork(wk *worker) {
 	go GenaroWorkCheck(wk)
 }
 
-func GenaroWorkCheck(wk *worker){
+func GenaroWorkCheck(wk *worker) {
 	for atomic.LoadInt32(&wk.mining) > 0 {
 		if atomic.LoadInt32(&wk.workIdx) == 0 {
 			err := wk.commitNewWork()
-			if err != nil && !strings.EqualFold(err.Error(),SynError.Error()) {
+			if err != nil && !strings.EqualFold(err.Error(), SynError.Error()) {
 				break
-			} else if err != nil && strings.EqualFold(err.Error(),SynError.Error()) {
+			} else if err != nil && strings.EqualFold(err.Error(), SynError.Error()) {
 				atomic.StoreInt32(&wk.workIdx, 0)
 			}
 		}

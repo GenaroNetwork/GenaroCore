@@ -260,7 +260,7 @@ func (self *worker) update() {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
 			err := self.commitNewWork()
-			if err != nil && strings.EqualFold(err.Error(),SynError.Error()) {
+			if err != nil && strings.EqualFold(err.Error(), SynError.Error()) {
 				atomic.StoreInt32(&self.workIdx, 0)
 			}
 
