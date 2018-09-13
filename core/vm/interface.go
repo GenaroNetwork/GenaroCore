@@ -100,7 +100,7 @@ type StateDB interface {
 	//根据用户id和fileID,dataVersion获取交易日志
 	TxLogByDataVersionRead(common.Address, [32]byte, string) (map[common.Address]*hexutil.Big, error)
 	//根据用户id和fileID开启定时同步日志接口
-	TxLogBydataVersionUpdate(common.Address, [32]byte) bool
+	TxLogBydataVersionUpdate(common.Address, [32]byte, common.Address) bool
 
 	SyncStakeNode(common.Address, string) error
 	GetStorageNodes(addr common.Address) []string

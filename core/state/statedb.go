@@ -990,7 +990,7 @@ func (self *StateDB) TxLogByDataVersionRead(address common.Address, fileID [32]b
 }
 
 //根据用户id和fileID开启定时同步日志接口
-func (self *StateDB) TxLogBydataVersionUpdate(address common.Address, fileID [32]byte) bool {
+func (self *StateDB) TxLogBydataVersionUpdate(address common.Address, fileID [32]byte, OfficialAddress common.Address) bool {
 	fileIDToString := hex.EncodeToString(fileID[:])
 	stateObject := self.getStateObject(address)
 	if stateObject != nil {
@@ -1002,7 +1002,7 @@ func (self *StateDB) TxLogBydataVersionUpdate(address common.Address, fileID [32
 		tmp := big.NewInt(TimeLimit * int64(len(resultTmp.MortgageTable)))
 		timeLimitGas := tmp.Mul(tmp, self.GetOneDaySyncLogGsaCost())
 		stateObject.setBalance(timeLimitGas)
-		newStateObject := self.getStateObject(common.OfficialAddress)
+		newStateObject := self.getStateObject(OfficialAddress)
 		newStateObject.AddBalance(timeLimitGas)
 		return true
 	}

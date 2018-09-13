@@ -39,7 +39,8 @@ func CheckSpecialTxTypeSyncSidechainStatusParameter(s types.SpecialTxInput, call
 		return errors.New("Account is Contract")
 	}
 
-	if caller != common.OfficialAddress {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
@@ -400,7 +401,8 @@ func CheckPunishmentTx(caller common.Address, s types.SpecialTxInput, state Stat
 		return errors.New("Account is Contract")
 	}
 
-	if caller != common.OfficialAddress {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil
@@ -561,9 +563,10 @@ func CheckAccountCancelBindingTx(caller common.Address, s types.SpecialTxInput, 
 }
 
 // 添加禁止退注名单的交易检查
-func CheckAddAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckAddAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 	// 检查是否是官方账号
-	if caller != common.OfficialAddress {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
@@ -583,9 +586,10 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address, s types.Speci
 }
 
 // 移除退注账号禁止名单的检查
-func CheckDelAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+func CheckDelAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
 	// 检查是否是官方账号
-	if caller != common.OfficialAddress {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
@@ -598,9 +602,10 @@ func CheckDelAccountInForbidBackStakeListTx(caller common.Address, s types.Speci
 }
 
 // 设置全局变量交易参数检查
-func CheckSetGlobalVar(caller common.Address, s types.SpecialTxInput) error {
+func CheckSetGlobalVar(caller common.Address, s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
 	// 检查是否是官方账号
-	if caller != common.OfficialAddress {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 

@@ -183,7 +183,8 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}
 
 		//如果是特殊交易，往官方账号转账
-		evm.Transfer(evm.StateDB, caller.Address(), common.OfficialAddress, value)
+		OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+		evm.Transfer(evm.StateDB, caller.Address(), OfficialAddress, value)
 	} else {
 		evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
 	}
@@ -354,7 +355,7 @@ func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Add
 }
 
 func delAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckDelAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckDelAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB, evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 	account := common.HexToAddress(s.Address)
@@ -366,7 +367,7 @@ func delAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller co
 }
 
 func addAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckAddAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckAddAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB, evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 	account := common.HexToAddress(s.Address)
@@ -506,7 +507,7 @@ func addCoinpool(evm *EVM, s types.SpecialTxInput, caller common.Address) error 
 }
 
 func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckSetGlobalVar(caller, s); err != nil {
+	if err := CheckSetGlobalVar(caller, s, evm.chainConfig.Genaro); err != nil {
 		return err
 	}
 	genaroPrice := (*evm).StateDB.GetGenaroPrice()
@@ -601,7 +602,8 @@ func userPunishment(evm *EVM, s types.SpecialTxInput, caller common.Address) err
 	}
 	amount := new(big.Int).Mul(common.BaseCompany, new(big.Int).SetUint64(actualPunishment))
 	// 将实际扣除的钱转到官方账号中
-	(*evm).StateDB.AddBalance(common.OfficialAddress, amount)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, amount)
 	return nil
 }
 
@@ -700,7 +702,8 @@ func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput, caller common.A
 	sumMortgageTable.Add(sumMortgageTable, timeLimitGas)
 	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
 	//时间期限收取的费用转账到官方账号
-	(*evm).StateDB.AddBalance(common.OfficialAddress, timeLimitGas)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, timeLimitGas)
 	return nil
 }
 
@@ -734,7 +737,8 @@ func bucketSupplement(evm *EVM, s types.SpecialTxInput, caller common.Address) e
 	if (*evm).StateDB.UpdateBucket(address, bucket) {
 		//扣除费用
 		(*evm).StateDB.SubBalance(caller, totalGas)
-		(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
+		OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+		(*evm).StateDB.AddBalance(OfficialAddress, totalGas)
 	}
 	return nil
 }
@@ -773,7 +777,8 @@ func updateStorageProperties(evm *EVM, s types.SpecialTxInput, caller common.Add
 
 	//扣除费用
 	(*evm).StateDB.SubBalance(caller, totalGas)
-	(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, totalGas)
 
 	return nil
 }
@@ -815,7 +820,8 @@ func updateTraffic(evm *EVM, s types.SpecialTxInput, caller common.Address) erro
 	}
 
 	(*evm).StateDB.SubBalance(caller, totalGas)
-	(*evm).StateDB.AddBalance(common.OfficialAddress, totalGas)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, totalGas)
 
 	return nil
 }

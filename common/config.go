@@ -197,5 +197,4 @@ var (
 	StorageRewardsRatio = uint64(50)   // 存储收益比率
 	RatioPerYear        = uint64(7)    // 年收益比率
 	BlockLogLenth       = uint64(300000)
-	SynStateAccount     = OfficialAddress // 区块同步信号的发送地址
 )

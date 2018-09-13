@@ -538,7 +538,8 @@ func opDataVerisonUpdate(pc *uint64, evm *EVM, contract *Contract, memory *Memor
 	for i, v := range byteArr {
 		fileIdArr[i] = v
 	}
-	ret := evm.StateDB.TxLogBydataVersionUpdate(common.BigToAddress(address), fileIdArr)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	ret := evm.StateDB.TxLogBydataVersionUpdate(common.BigToAddress(address), fileIdArr, OfficialAddress)
 	if ret == true {
 		stack.push(evm.interpreter.intPool.get().SetUint64(1))
 	} else {
