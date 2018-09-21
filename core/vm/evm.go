@@ -608,7 +608,7 @@ func userPunishment(evm *EVM, s types.SpecialTxInput, caller common.Address) err
 }
 
 func UnlockSharedKey(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckUnlockSharedKeyParameter(s); nil != err {
+	if err := CheckUnlockSharedKeyParameter(s,(*evm).StateDB,caller); nil != err {
 		return err
 	}
 	if !(*evm).StateDB.UnlockSharedKey(caller, s.SynchronizeShareKey.ShareKeyId) {
