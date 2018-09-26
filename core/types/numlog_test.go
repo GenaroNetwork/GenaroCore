@@ -140,3 +140,14 @@ func TestDel(t *testing.T) {
 	t.Log(logs.GetFirst())
 
 }
+
+func TestGetDiff(t *testing.T) {
+	logs := new(NumLogs)
+	for i := 0; i < 2; i++ {
+		log := GenNumLog()
+		t.Log(log)
+		logs.Add(log)
+	}
+	t.Log(logs.GetRangeDiff(0,200))
+
+}
