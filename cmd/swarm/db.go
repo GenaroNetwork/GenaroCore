@@ -25,7 +25,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/swarm/storage"
-	"github.com/mkideal/cli"
 	"gopkg.in/urfave/cli.v1"
 )
 
