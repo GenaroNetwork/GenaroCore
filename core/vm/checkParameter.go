@@ -5,16 +5,16 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"math/big"
-	"time"
-
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 	"golang.org/x/crypto/ripemd160"
+	"math/big"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func isSpecialAddress(address common.Address, optionTxMemorySize uint64) bool {
@@ -39,7 +39,8 @@ func CheckSpecialTxTypeSyncSidechainStatusParameter(s types.SpecialTxInput, call
 		return errors.New("Account is Contract")
 	}
 
-	if caller != common.OfficialAddress {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 
@@ -241,6 +242,15 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB, genaroConfig *
 		return errors.New("param [size / duration] missing or must be larger than zero")
 	}
 
+	if s.Message == "" {
+		return errors.New("param [ msg ] missing or can't be null")
+	}
+
+	_, err := strconv.Atoi(s.Message)
+	if err != nil {
+		return errors.New("param [ msg ] is not timestamp")
+	}
+
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
 		return errors.New("param [address] can't be special address")
@@ -378,7 +388,8 @@ func CheckPunishmentTx(caller common.Address, s types.SpecialTxInput, state Stat
 		return errors.New("Account is Contract")
 	}
 
-	if caller != common.OfficialAddress {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	return nil
@@ -522,8 +533,9 @@ func CheckAccountCancelBindingTx(caller common.Address, s types.SpecialTxInput, 
 	return
 }
 
-func CheckAddAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB) error {
-	if caller != common.OfficialAddress {
+func CheckAddAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
@@ -540,8 +552,9 @@ func CheckAddAccountInForbidBackStakeListTx(caller common.Address, s types.Speci
 	return nil
 }
 
-func CheckDelAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB) error {
-	if caller != common.OfficialAddress {
+func CheckDelAccountInForbidBackStakeListTx(caller common.Address, s types.SpecialTxInput, state StateDB, genaroConfig *params.GenaroConfig) error {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 	account := common.HexToAddress(s.Address)
@@ -552,8 +565,9 @@ func CheckDelAccountInForbidBackStakeListTx(caller common.Address, s types.Speci
 	return nil
 }
 
-func CheckSetGlobalVar(caller common.Address, s types.SpecialTxInput) error {
-	if caller != common.OfficialAddress {
+func CheckSetGlobalVar(caller common.Address, s types.SpecialTxInput, genaroConfig *params.GenaroConfig) error {
+	OfficialAddress := common.HexToAddress(genaroConfig.OfficialAddress)
+	if caller != OfficialAddress {
 		return errors.New("caller address of this transaction is not invalid")
 	}
 

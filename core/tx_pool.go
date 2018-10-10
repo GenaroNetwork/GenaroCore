@@ -678,11 +678,11 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 		_, err := vm.CheckAccountCancelBindingTx(caller, s, pool.currentState)
 		return err
 	case common.SpecialTxAddAccountInForbidBackStakeList.Uint64():
-		return vm.CheckAddAccountInForbidBackStakeListTx(caller, s, pool.currentState)
+		return vm.CheckAddAccountInForbidBackStakeListTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxDelAccountInForbidBackStakeList.Uint64():
-		return vm.CheckDelAccountInForbidBackStakeListTx(caller, s, pool.currentState)
+		return vm.CheckDelAccountInForbidBackStakeListTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxSetGlobalVar.Uint64():
-		return vm.CheckSetGlobalVar(caller, s)
+		return vm.CheckSetGlobalVar(caller, s, pool.chainconfig.Genaro)
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
 	case common.SpecialTxPublishOption.Uint64():

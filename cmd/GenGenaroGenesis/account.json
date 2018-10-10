@@ -31,6 +31,7 @@
     "SurplusCoin": 175000000,
     "SynStateAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
     "HeftAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
-    "BindingAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73"
+    "BindingAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
+    "OfficialAddress": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73"
   }
 }

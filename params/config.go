@@ -180,6 +180,7 @@ type GenaroConfig struct {
 	CommitteeMaxSize    uint64 `json:"committeeMaxSize"`    //max number of committee member
 	OptionTxMemorySize  uint64 `json:"optionTxMemorySize"`  //the number of save option tx
 	PromissoryNotePrice uint64 `json:"PromissoryNotePrice"` // Promissory Note Price
+	OfficialAddress     string `json:"OfficialAddress"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
