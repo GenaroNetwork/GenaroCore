@@ -148,6 +148,6 @@ func TestGetDiff(t *testing.T) {
 		t.Log(log)
 		logs.Add(log)
 	}
-	t.Log(logs.GetRangeDiff(0,200))
+	t.Log(logs.GetRangeDiff(0, 200))
 
 }
