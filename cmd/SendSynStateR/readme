@@ -1,0 +1,5 @@
+127.0.0.1:8500  consul rpc
+127.0.0.1:9001  go-genaro rpc
+SendSynStateR -h "127.0.0.1:8500" -u "http://127.0.0.1:9001"
+
+consul(https://www.consul.io/)
