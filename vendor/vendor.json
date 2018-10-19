@@ -160,6 +160,12 @@
 			"revisionTime": "2017-02-15T23:32:05Z"
 		},
 		{
+			"checksumSHA1": "PJDKLws64a9Lb00kp9qgyhAD81s=",
+			"path": "github.com/hashicorp/consul/api",
+			"revision": "34e95314827d336e4893aa23ee651b67d320c3ee",
+			"revisionTime": "2018-10-11T20:31:27Z"
+		},
+		{
 			"checksumSHA1": "YAq1rqZIp+M74Q+jMBQkkMKm3VM=",
 			"origin": "github.com/hashicorp/consul/vendor/github.com/hashicorp/go-cleanhttp",
 			"path": "github.com/hashicorp/go-cleanhttp",
