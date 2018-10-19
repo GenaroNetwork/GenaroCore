@@ -111,10 +111,10 @@ func CheckSynchronizeShareKeyParameter(s types.SpecialTxInput, state StateDB, ge
 		return errors.New("Account is Contract")
 	}
 
-	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
+	if len(s.SynchronizeShareKey.ShareKeyId) == 0 {
 		return errors.New("Parameter ShareKeyId  error")
 	}
-	if len(s.SynchronizeShareKey.ShareKey) > 0 {
+	if len(s.SynchronizeShareKey.ShareKey) == 0 {
 		return errors.New("Parameter ShareKey  error")
 	}
 	if s.SynchronizeShareKey.Shareprice.ToInt().Cmp(big.NewInt(0)) < 0 {
@@ -123,9 +123,16 @@ func CheckSynchronizeShareKeyParameter(s types.SpecialTxInput, state StateDB, ge
 	return nil
 }
 
-func CheckUnlockSharedKeyParameter(s types.SpecialTxInput) error {
-	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
+func CheckUnlockSharedKeyParameter(s types.SpecialTxInput,state StateDB,caller common.Address) error {
+	if len(s.SynchronizeShareKey.ShareKeyId) == 0 {
 		return errors.New("Parameter ShareKeyId  error")
+	}
+	balance := state.GetBalance(caller)
+	shareKeyId := s.SynchronizeShareKey.ShareKeyId
+
+	getSharedFile := state.GetSharedFile(caller,shareKeyId)
+	if balance.Cmp(getSharedFile.Shareprice.ToInt()) <= 0 {
+		return errors.New("Insufficient balance")
 	}
 	return nil
 }

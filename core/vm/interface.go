@@ -116,7 +116,7 @@ type StateDB interface {
 
 	UpdateFileSharePublicKey(common.Address, string) bool
 	UnlockSharedKey(common.Address, string) bool
-
+	GetSharedFile(common.Address, string) types.SynchronizeShareKey
 	UpdateBucketApplyPrice(common.Address, *hexutil.Big) bool
 	GetBucketApplyPrice() *big.Int
 

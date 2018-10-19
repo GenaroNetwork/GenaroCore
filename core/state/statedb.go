@@ -1121,6 +1121,10 @@ func (self *StateDB) UnlockSharedKey(address common.Address, shareKeyId string) 
 			return false
 		}
 		if "" != synchronizeShareKey.ShareKeyId && 0 == synchronizeShareKey.Status {
+			balance := self.GetBalance(address)
+			if balance.Cmp(synchronizeShareKey.Shareprice.ToInt()) <= 0 {
+				return false
+			}
 			stateObject.SubBalance(synchronizeShareKey.Shareprice.ToInt())
 			FromAccountstateObject := self.GetOrNewStateObject(synchronizeShareKey.FromAccount)
 			FromAccountstateObject.AddBalance(synchronizeShareKey.Shareprice.ToInt())
@@ -1128,6 +1132,15 @@ func (self *StateDB) UnlockSharedKey(address common.Address, shareKeyId string) 
 		return true
 	}
 	return false
+}
+
+
+func (self *StateDB) GetSharedFile(address common.Address, shareKeyId string) types.SynchronizeShareKey {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.UnlockSharedKey(shareKeyId)
+	}
+	return types.SynchronizeShareKey{}
 }
 
 func (self *StateDB) CheckUnlockSharedKey(address common.Address, shareKeyId string) bool {
