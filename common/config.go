@@ -32,11 +32,6 @@ var (
 	DefaultOneDayMortgageGes *big.Int
 )
 
-var (
-	//官方账号
-	OfficialAddress Address = HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73")
-)
-
 /*
 Some special address prepared for special transactions.
 */
