@@ -271,6 +271,8 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		err = setGlobalVar(evm, s, caller)
 	case common.SpecialTxAddCoinpool.Uint64(): // 增加币池
 		err = addCoinpool(evm, s, caller)
+	case common.SpecialTxRegisterName.Uint64(): // 注册别名
+		err = registerName(evm, s, caller)
 	case common.SpecialTxRevoke.Uint64(): // 撤销期权交易
 		err = revokePromissoryNotesTx(evm, s, caller)
 	case common.SpecialTxWithdrawCash.Uint64(): //提现
@@ -294,6 +296,27 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func registerName(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetNameTxStatus(caller,s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	err := (*evm).StateDB.SetNameAccount(s.Message,caller)
+	if err != nil {
+		return err
+	}
+
+	var name types.AccountName
+	name.SetString(s.Message)
+	priceBig := name.GetBigPrice()
+
+	(*evm).StateDB.SubBalance(caller, priceBig)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, priceBig)
+
+	return nil
 }
 
 func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {

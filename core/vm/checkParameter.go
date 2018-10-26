@@ -804,3 +804,30 @@ func WithdrawCash(caller common.Address, state StateDB, blockNum *big.Int) error
 	}
 	return nil
 }
+
+func CheckSetNameTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if len(s.Message) == 0 {
+		return errors.New("name is null")
+	}
+	if (len(s.Message) > common.HashLength) {
+		return errors.New("name is too long")
+	}
+	exist,err := state.IsNameAccountExist(s.Message)
+	if err != nil {
+		return err
+	}
+	if exist {
+		return errors.New("name is exist")
+	}
+
+	var name types.AccountName
+	name.SetString(s.Message)
+	priceBig := name.GetBigPrice()
+
+	balance := state.GetBalance(caller)
+	if priceBig.Cmp(balance) > 0 {
+		return errors.New("There is not enough balance")
+	}
+
+	return nil
+}

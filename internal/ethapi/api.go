@@ -620,12 +620,34 @@ func (s *PublicBlockChainAPI) GetGlobalVar(ctx context.Context, blockNr rpc.Bloc
 	return state.GetGenaroPrice()
 }
 
+// 获取收益中间值
 func (s *PublicBlockChainAPI) GetRewardsValues(ctx context.Context, blockNr rpc.BlockNumber) *types.RewardsValues {
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil
 	}
 	return state.GetRewardsValues()
+}
+
+// 获取别名对应的账号
+func (s *PublicBlockChainAPI) GetAccountByName(ctx context.Context, name string, blockNr rpc.BlockNumber) *common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	exist,err := state.IsNameAccountExist(name)
+	if err != nil {
+		return nil
+	}
+	if !exist {
+		return nil
+	}
+	addr,err := state.GetNameAccount(name)
+	if err != nil {
+		return nil
+	}
+	return &addr
+
 }
 
 // GetStake returns the stake of ether for the given address in the state of the

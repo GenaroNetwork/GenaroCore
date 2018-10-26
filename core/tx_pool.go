@@ -686,6 +686,8 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 		return vm.CheckSetGlobalVar(caller, s, pool.chainconfig.Genaro)
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
+	case common.SpecialTxRegisterName.Uint64():
+		return vm.CheckSetNameTxStatus(caller,s, pool.currentState)
 	case common.SpecialTxPublishOption.Uint64():
 		//发布期权售卖交易
 		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())

@@ -56,6 +56,12 @@ func (h Hash) Bytes() []byte { return h[:] }
 func (h Hash) Big() *big.Int { return new(big.Int).SetBytes(h[:]) }
 func (h Hash) Hex() string   { return hexutil.Encode(h[:]) }
 
+func (h Hash) Address() (addr Address) {
+	b := h[HashLength-AddressLength:]
+	addr.SetBytes(b)
+	return
+}
+
 // TerminalString implements log.TerminalStringer, formatting a string for console
 // output during logging.
 func (h Hash) TerminalString() string {

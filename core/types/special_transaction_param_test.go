@@ -3,6 +3,7 @@ package types
 import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"testing"
+	"strings"
 )
 
 func TestBindingTable(t *testing.T) {
@@ -113,4 +114,37 @@ func TestPromissoryNote(t *testing.T) {
 	t.Log(notes.DelBefor(20))
 	notes.Print(t)
 
+}
+
+func TestAccountName(t *testing.T) {
+	var name AccountName
+	err := name.SetString("myname")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(name.String())
+	hash := name.ToHash()
+	t.Log(hash.String())
+	var name2 AccountName
+	name2.SetHash(hash)
+	t.Log(name2.String())
+	if !strings.EqualFold(name.String(),name2.String()) {
+		t.Fatal("AccountName trans error")
+	}
+	err = name2.SetString("myname.TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+	if err != nil {
+		t.Log(err)
+	}
+	name.SetString("asd.efwf..")
+	if !name.IsValid() {
+		t.Log("test1 name is invalid")
+	}
+	name.SetString("asd.efwf.23414.ttt")
+	if !name.IsValid() {
+		t.Log("test2 name is invalid")
+	}
+	name.SetString("qwd12EE@dw")
+	if !name.IsValid() {
+		t.Log("test3 name is invalid")
+	}
 }

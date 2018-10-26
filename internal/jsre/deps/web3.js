@@ -5465,6 +5465,13 @@ var methods = function () {
         inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
     });
 
+    var getAccountByName = new Method({
+        name: 'getAccountByName',
+        call: 'eth_getAccountByName',
+        params: 2,
+        inputFormatter: [utils.toString(),formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getStake = new Method({
         name: 'getStake',
         call: 'eth_getStake',
@@ -5709,7 +5716,8 @@ var methods = function () {
         getGlobalVar,
         getRewardsValues,
         getMainAccountRank,
-        getAccountData
+        getAccountData,
+        getAccountByName
     ];
 };
 

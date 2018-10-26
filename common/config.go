@@ -73,9 +73,12 @@ var (
 
 	// 存放期权交易的起始地址
 	OptionTxBeginSaveAddress Address = HexToAddress("0xa000000000000000000000000000000000000000")
+
+	// 账户的别名存储
+	NameSpaceSaveAddress Address = HexToAddress("0xb000000000000000000000000000000000000000")
 )
 
-var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress}
+var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress, NameSpaceSaveAddress}
 
 var (
 
@@ -138,6 +141,9 @@ var (
 	SpecialTxSetGlobalVar = big.NewInt(21)
 	// 增加币池的交易
 	SpecialTxAddCoinpool = big.NewInt(22)
+
+	// 注册别名的交易
+	SpecialTxRegisterName = big.NewInt(23)
 
 	/************期权交易类型**************/
 	//提现

@@ -32,6 +32,8 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/trie"
 	"time"
+	"errors"
+	"bytes"
 )
 
 type revision struct {
@@ -341,6 +343,40 @@ func (self *StateDB) SetState(addr common.Address, key common.Hash, value common
 	if stateObject != nil {
 		stateObject.SetState(self.db, key, value)
 	}
+}
+
+// 获取别名对应的账号
+func (self *StateDB) GetNameAccount(name string) (addr common.Address,err error){
+	var accountName types.AccountName
+	err = accountName.SetString(name)
+	if err != nil {
+		return
+	}
+	addr = self.GetState(common.NameSpaceSaveAddress, accountName.ToHash()).Address()
+	return
+}
+
+// 设置账号的别名
+func (self *StateDB) SetNameAccount(name string,addr common.Address) (err error){
+	if len(name) > common.HashLength {
+		return errors.New("name is too long")
+	}
+	var key common.Hash
+	key.SetString(name)
+	self.SetState(common.NameSpaceSaveAddress, key, addr.Hash())
+	return
+}
+
+// 判断别名是否已存在
+func (self *StateDB) IsNameAccountExist(name string) (bool,error) {
+	addr,err := self.GetNameAccount(name)
+	if err != nil {
+		return true,err
+	}
+	if 0==bytes.Compare(addr.Hash().Bytes(),common.Hash{}.Bytes()) {
+		return false,nil
+	}
+	return true,nil
 }
 
 // Suicide marks the given account as suicided.
