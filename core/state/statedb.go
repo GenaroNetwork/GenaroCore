@@ -361,9 +361,16 @@ func (self *StateDB) SetNameAccount(name string,addr common.Address) (err error)
 	if len(name) > common.HashLength {
 		return errors.New("name is too long")
 	}
-	var key common.Hash
-	key.SetString(name)
-	self.SetState(common.NameSpaceSaveAddress, key, addr.Hash())
+	var accountName types.AccountName
+	err = accountName.SetString(name)
+	if err != nil {
+		return
+	}
+	nonce := self.GetNonce(common.NameSpaceSaveAddress)
+	if nonce == 0 {
+		self.SetNonce(common.NameSpaceSaveAddress,1)
+	}
+	self.SetState(common.NameSpaceSaveAddress, accountName.ToHash(), addr.Hash())
 	return
 }
 
