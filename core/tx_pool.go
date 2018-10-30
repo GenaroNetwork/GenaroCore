@@ -661,7 +661,7 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64(): // 用户同步自己文件分享的publicKey到链上
 		return vm.CheckSyncFileSharePublicKeyTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.UnlockSharedKey.Uint64():
-		return vm.CheckUnlockSharedKeyParameter(s,pool.currentState,caller)
+		return vm.CheckUnlockSharedKeyParameter(s, pool.currentState, caller)
 	case common.SpecialTxTypePunishment.Uint64(): // 用户恶意行为后的惩罚措施
 		return vm.CheckPunishmentTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeBackStake.Uint64():
@@ -687,7 +687,7 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
 	case common.SpecialTxRegisterName.Uint64():
-		return vm.CheckSetNameTxStatus(caller,s, pool.currentState)
+		return vm.CheckSetNameTxStatus(caller, s, pool.currentState)
 	case common.SpecialTxPublishOption.Uint64():
 		//发布期权售卖交易
 		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())

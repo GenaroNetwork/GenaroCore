@@ -299,11 +299,11 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 }
 
 func registerName(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckSetNameTxStatus(caller,s, (*evm).StateDB); err != nil {
+	if err := CheckSetNameTxStatus(caller, s, (*evm).StateDB); err != nil {
 		return err
 	}
 
-	err := (*evm).StateDB.SetNameAccount(s.Message,caller)
+	err := (*evm).StateDB.SetNameAccount(s.Message, caller)
 	if err != nil {
 		return err
 	}
@@ -631,7 +631,7 @@ func userPunishment(evm *EVM, s types.SpecialTxInput, caller common.Address) err
 }
 
 func UnlockSharedKey(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckUnlockSharedKeyParameter(s,(*evm).StateDB,caller); nil != err {
+	if err := CheckUnlockSharedKeyParameter(s, (*evm).StateDB, caller); nil != err {
 		return err
 	}
 	if !(*evm).StateDB.UnlockSharedKey(caller, s.SynchronizeShareKey.ShareKeyId) {

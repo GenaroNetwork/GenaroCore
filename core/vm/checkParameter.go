@@ -123,14 +123,14 @@ func CheckSynchronizeShareKeyParameter(s types.SpecialTxInput, state StateDB, ge
 	return nil
 }
 
-func CheckUnlockSharedKeyParameter(s types.SpecialTxInput,state StateDB,caller common.Address) error {
+func CheckUnlockSharedKeyParameter(s types.SpecialTxInput, state StateDB, caller common.Address) error {
 	if len(s.SynchronizeShareKey.ShareKeyId) == 0 {
 		return errors.New("Parameter ShareKeyId  error")
 	}
 	balance := state.GetBalance(caller)
 	shareKeyId := s.SynchronizeShareKey.ShareKeyId
 
-	getSharedFile := state.GetSharedFile(caller,shareKeyId)
+	getSharedFile := state.GetSharedFile(caller, shareKeyId)
 	if balance.Cmp(getSharedFile.Shareprice.ToInt()) <= 0 {
 		return errors.New("Insufficient balance")
 	}
@@ -809,10 +809,10 @@ func CheckSetNameTxStatus(caller common.Address, s types.SpecialTxInput, state S
 	if len(s.Message) == 0 {
 		return errors.New("name is null")
 	}
-	if (len(s.Message) > common.HashLength) {
+	if len(s.Message) > common.HashLength {
 		return errors.New("name is too long")
 	}
-	exist,err := state.IsNameAccountExist(s.Message)
+	exist, err := state.IsNameAccountExist(s.Message)
 	if err != nil {
 		return err
 	}

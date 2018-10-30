@@ -2,8 +2,8 @@ package types
 
 import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
-	"testing"
 	"strings"
+	"testing"
 )
 
 func TestBindingTable(t *testing.T) {
@@ -128,7 +128,7 @@ func TestAccountName(t *testing.T) {
 	var name2 AccountName
 	name2.SetHash(hash)
 	t.Log(name2.String())
-	if !strings.EqualFold(name.String(),name2.String()) {
+	if !strings.EqualFold(name.String(), name2.String()) {
 		t.Fatal("AccountName trans error")
 	}
 	err = name2.SetString("myname.TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")

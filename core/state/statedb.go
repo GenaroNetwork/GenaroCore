@@ -23,7 +23,9 @@ import (
 	"sort"
 	"sync"
 
+	"bytes"
 	"encoding/hex"
+	"errors"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
@@ -32,8 +34,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 	"github.com/GenaroNetwork/Genaro-Core/trie"
 	"time"
-	"errors"
-	"bytes"
 )
 
 type revision struct {
@@ -346,7 +346,7 @@ func (self *StateDB) SetState(addr common.Address, key common.Hash, value common
 }
 
 // 获取别名对应的账号
-func (self *StateDB) GetNameAccount(name string) (addr common.Address,err error){
+func (self *StateDB) GetNameAccount(name string) (addr common.Address, err error) {
 	var accountName types.AccountName
 	err = accountName.SetString(name)
 	if err != nil {
@@ -357,7 +357,7 @@ func (self *StateDB) GetNameAccount(name string) (addr common.Address,err error)
 }
 
 // 设置账号的别名
-func (self *StateDB) SetNameAccount(name string,addr common.Address) (err error){
+func (self *StateDB) SetNameAccount(name string, addr common.Address) (err error) {
 	if len(name) > common.HashLength {
 		return errors.New("name is too long")
 	}
@@ -368,22 +368,22 @@ func (self *StateDB) SetNameAccount(name string,addr common.Address) (err error)
 	}
 	nonce := self.GetNonce(common.NameSpaceSaveAddress)
 	if nonce == 0 {
-		self.SetNonce(common.NameSpaceSaveAddress,1)
+		self.SetNonce(common.NameSpaceSaveAddress, 1)
 	}
 	self.SetState(common.NameSpaceSaveAddress, accountName.ToHash(), addr.Hash())
 	return
 }
 
 // 判断别名是否已存在
-func (self *StateDB) IsNameAccountExist(name string) (bool,error) {
-	addr,err := self.GetNameAccount(name)
+func (self *StateDB) IsNameAccountExist(name string) (bool, error) {
+	addr, err := self.GetNameAccount(name)
 	if err != nil {
-		return true,err
+		return true, err
 	}
-	if 0==bytes.Compare(addr.Hash().Bytes(),common.Hash{}.Bytes()) {
-		return false,nil
+	if 0 == bytes.Compare(addr.Hash().Bytes(), common.Hash{}.Bytes()) {
+		return false, nil
 	}
-	return true,nil
+	return true, nil
 }
 
 // Suicide marks the given account as suicided.
@@ -1176,7 +1176,6 @@ func (self *StateDB) UnlockSharedKey(address common.Address, shareKeyId string) 
 	}
 	return false
 }
-
 
 func (self *StateDB) GetSharedFile(address common.Address, shareKeyId string) types.SynchronizeShareKey {
 	stateObject := self.GetOrNewStateObject(address)

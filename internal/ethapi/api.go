@@ -635,19 +635,26 @@ func (s *PublicBlockChainAPI) GetAccountByName(ctx context.Context, name string,
 	if state == nil || err != nil {
 		return nil
 	}
-	exist,err := state.IsNameAccountExist(name)
+	exist, err := state.IsNameAccountExist(name)
 	if err != nil {
 		return nil
 	}
 	if !exist {
 		return nil
 	}
-	addr,err := state.GetNameAccount(name)
+	addr, err := state.GetNameAccount(name)
 	if err != nil {
 		return nil
 	}
 	return &addr
 
+}
+
+// get account name price
+func (s *PublicBlockChainAPI) GetNamePrice(name string) *big.Int {
+	var accountName types.AccountName
+	accountName.SetString(name)
+	return accountName.GetBigPrice()
 }
 
 // GetStake returns the stake of ether for the given address in the state of the

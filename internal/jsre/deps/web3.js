@@ -5472,6 +5472,14 @@ var methods = function () {
         inputFormatter: [utils.toString(),formatters.inputDefaultBlockNumberFormatter],
     });
 
+    var getBalance = new Method({
+        name: 'getNamePrice',
+        call: 'eth_getNamePrice',
+        params: 1,
+        inputFormatter: [utils.toString()],
+        outputFormatter: utils.toDecimal
+    });
+
     var getStake = new Method({
         name: 'getStake',
         call: 'eth_getStake',

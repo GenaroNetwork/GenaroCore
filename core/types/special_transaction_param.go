@@ -6,13 +6,13 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/syndtr/goleveldb/leveldb/errors"
 	"math"
 	"math/big"
-	"strconv"
-	"time"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type SpecialTxInput struct {
@@ -481,18 +481,18 @@ type AccountName [common.HashLength]byte
 
 func (name *AccountName) Bytes() []byte { return name[:] }
 
-func (name *AccountName) reset(){
-	for i:=0;i<len(name);i++ {
+func (name *AccountName) reset() {
+	for i := 0; i < len(name); i++ {
 		name[i] = 0
 	}
 }
 
-func (name *AccountName)ToHash() (hash common.Hash){
+func (name *AccountName) ToHash() (hash common.Hash) {
 	hash.SetBytes(name.Bytes())
 	return
 }
 
-func (name *AccountName)SetHash(hash common.Hash) {
+func (name *AccountName) SetHash(hash common.Hash) {
 	name.SetBytes(hash.Bytes())
 }
 
@@ -503,7 +503,7 @@ func (name *AccountName) SetBytes(b []byte) {
 	copy(name[common.HashLength-len(b):], b)
 }
 
-func (name *AccountName)SetString(nameStr string) error {
+func (name *AccountName) SetString(nameStr string) error {
 	if len(nameStr) > common.HashLength {
 		return errors.New("String is too long")
 	}
@@ -513,9 +513,9 @@ func (name *AccountName)SetString(nameStr string) error {
 	return nil
 }
 
-func (name *AccountName)String() string {
-	idx :=0
-	for i:=0;i<len(name);i++ {
+func (name *AccountName) String() string {
+	idx := 0
+	for i := 0; i < len(name); i++ {
 		if name[i] != 0 {
 			idx = i
 			break
@@ -524,44 +524,44 @@ func (name *AccountName)String() string {
 	return string(name[idx:])
 }
 
-func (name *AccountName)IsValid() bool {
+func (name *AccountName) IsValid() bool {
 	namestr := name.String()
 	reg := regexp.MustCompile("[a-z0-9\\.]+")
 	findstr := reg.FindAllString(namestr, 1)
-	if !strings.EqualFold(namestr,findstr[0]) {
+	if !strings.EqualFold(namestr, findstr[0]) {
 		return false
 	}
-	if strings.Contains(namestr,"..") {
+	if strings.Contains(namestr, "..") {
 		return false
 	}
 
 	return true
 }
 
-func (name *AccountName) CalPrice() int64{
+func (name *AccountName) CalPrice() int64 {
 	lenth := len(name.String())
-	if lenth>=28 {
+	if lenth >= 28 {
 		return 0
 	}
-	if lenth>=20 {
+	if lenth >= 20 {
 		return 1
 	}
-	if lenth>=15 {
-		return int64((20-lenth)*2)
+	if lenth >= 15 {
+		return int64((20 - lenth) * 2)
 	}
-	if lenth>=10 {
-		return int64((15-lenth)*5+10)
+	if lenth >= 10 {
+		return int64((15-lenth)*5 + 10)
 	}
-	if lenth>=5 {
-		return int64((10-lenth)*20+35)
+	if lenth >= 5 {
+		return int64((10-lenth)*20 + 35)
 	}
 	return 1000
 }
 
-func (name *AccountName) GetBigPrice() *big.Int{
+func (name *AccountName) GetBigPrice() *big.Int {
 	price := name.CalPrice()
 
 	priceBig := big.NewInt(price)
-	priceBig.Mul(priceBig,common.BaseCompany)
+	priceBig.Mul(priceBig, common.BaseCompany)
 	return priceBig
 }

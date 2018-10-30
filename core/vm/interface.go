@@ -175,9 +175,9 @@ type StateDB interface {
 	GetBeforPromissoryNotesNum(common.Address, uint64) uint64
 
 	// 别名
-	GetNameAccount(name string) (addr common.Address,err error)
-	SetNameAccount(name string,addr common.Address) (err error)
-	IsNameAccountExist(name string) (bool,error)
+	GetNameAccount(name string) (addr common.Address, err error)
+	SetNameAccount(name string, addr common.Address) (err error)
+	IsNameAccountExist(name string) (bool, error)
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
