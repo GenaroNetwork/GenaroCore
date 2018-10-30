@@ -559,9 +559,13 @@ func (name *AccountName) CalPrice() int64 {
 }
 
 func (name *AccountName) GetBigPrice() *big.Int {
+	basePrice := big.NewInt(0)
+	basePrice.Div(common.BaseCompany, big.NewInt(10))
+
 	price := name.CalPrice()
 
 	priceBig := big.NewInt(price)
 	priceBig.Mul(priceBig, common.BaseCompany)
+	priceBig.Add(priceBig, basePrice)
 	return priceBig
 }
