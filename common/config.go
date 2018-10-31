@@ -145,6 +145,12 @@ var (
 	// 注册别名的交易
 	SpecialTxRegisterName = big.NewInt(23)
 
+	// 转让别名的交易
+	SpecialTxTransferName = big.NewInt(24)
+
+	// 注销别名的交易
+	SpecialTxUnsubscribeName = big.NewInt(25)
+
 	/************期权交易类型**************/
 	//提现
 	SpecialTxWithdrawCash = big.NewInt(30)
