@@ -846,7 +846,7 @@ func CheckTransferNameTxStatus(caller common.Address, s types.SpecialTxInput, st
 	}
 
 	//判断该用户是否拥有此别名
-	if !state.hasName(caller, s.Message) {
+	if !state.HasName(caller, s.Message) {
 		return errors.New("name is not belong to you")
 	}
 
@@ -863,7 +863,7 @@ func CheckUnsubscribeNameTxStatus(caller common.Address, s types.SpecialTxInput,
 	}
 
 	//判断该用户是否拥有此别名
-	if !state.hasName(caller, s.Message) {
+	if !state.HasName(caller, s.Message) {
 		return errors.New("name is not belong to you")
 	}
 
