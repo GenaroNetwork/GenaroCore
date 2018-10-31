@@ -386,6 +386,15 @@ func (self *StateDB) IsNameAccountExist(name string) (bool, error) {
 	return true, nil
 }
 
+// 判断用户是否拥有此别名
+func (self *StateDB) HasName(addr common.Address, name string) bool {
+	nameAddr, err := self.GetNameAccount(name)
+	if err != nil || addr != nameAddr{
+		return false
+	}
+	return true
+}
+
 // Suicide marks the given account as suicided.
 // This clears the account balance.
 //
