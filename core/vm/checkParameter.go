@@ -831,3 +831,41 @@ func CheckSetNameTxStatus(caller common.Address, s types.SpecialTxInput, state S
 
 	return nil
 }
+
+func CheckTransferNameTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if len(s.Message) == 0 {
+		return errors.New("name is null")
+	}
+
+	if len(s.Message) > common.HashLength {
+		return errors.New("name is too long")
+	}
+
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
+	//判断该用户是否拥有此别名
+	if !state.hasName(caller, s.Message) {
+		return errors.New("name is not belong to you")
+	}
+
+	return nil
+}
+
+func CheckUnsubscribeNameTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if len(s.Message) == 0 {
+		return errors.New("name is null")
+	}
+
+	if len(s.Message) > common.HashLength {
+		return errors.New("name is too long")
+	}
+
+	//判断该用户是否拥有此别名
+	if !state.hasName(caller, s.Message) {
+		return errors.New("name is not belong to you")
+	}
+
+	return nil
+}
