@@ -300,6 +300,8 @@ type SynchronizeShareKey struct {
 	ShareKeyId       string         `json:"shareKeyId"`
 	RecipientAddress common.Address `json:"recipientAddress"`
 	FromAccount      common.Address `json:"fromAccount"`
+	MailHash		string			`json:"mail_hash"`
+	MailSize		int				`json:"mail_size"`
 }
 
 type BucketPropertie struct {

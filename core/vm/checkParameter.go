@@ -120,6 +120,9 @@ func CheckSynchronizeShareKeyParameter(s types.SpecialTxInput, state StateDB, ge
 	if s.SynchronizeShareKey.Shareprice.ToInt().Cmp(big.NewInt(0)) < 0 {
 		return errors.New("Parameter Shareprice  is less than zero")
 	}
+	if len(s.SynchronizeShareKey.MailHash) > 67 {
+		return errors.New("Parameter MailHash  error")
+	}
 	return nil
 }
 
