@@ -324,7 +324,7 @@ func registerName(evm *EVM, s types.SpecialTxInput, caller common.Address) error
 }
 
 func transferNameTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckSetNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckTransferNameTxStatus(caller, s, (*evm).StateDB); err != nil {
 		return err
 	}
 
@@ -338,7 +338,7 @@ func transferNameTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Addres
 }
 
 func unsubscribeNameTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckSetNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+	if err := CheckUnsubscribeNameTxStatus(caller, s, (*evm).StateDB); err != nil {
 		return err
 	}
 
