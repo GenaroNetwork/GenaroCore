@@ -202,6 +202,6 @@ var (
 	BackStackListMax    = uint64(20)   // 最大退注长度
 	CoinRewardsRatio    = uint64(50)   // 币息收益比率
 	StorageRewardsRatio = uint64(50)   // 存储收益比率
-	RatioPerYear        = uint64(7)    // 年收益比率
+	RatioPerYear        = uint64(1)    // 年收益比率
 	BlockLogLenth       = uint64(300000)
 )
