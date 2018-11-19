@@ -134,7 +134,7 @@ func CheckUnlockSharedKeyParameter(s types.SpecialTxInput, state StateDB, caller
 	shareKeyId := s.SynchronizeShareKey.ShareKeyId
 
 	getSharedFile := state.GetSharedFile(caller, shareKeyId)
-	if big.NewInt(0) == getSharedFile.Shareprice.ToInt() {
+	if nil == getSharedFile.Shareprice || big.NewInt(0) == getSharedFile.Shareprice.ToInt() {
 		return nil
 	}
 	if balance.Cmp(getSharedFile.Shareprice.ToInt()) <= 0 {
