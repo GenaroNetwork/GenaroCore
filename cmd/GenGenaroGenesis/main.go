@@ -262,13 +262,13 @@ func main() {
 		EIP158Block:    big.NewInt(0),
 		ByzantiumBlock: big.NewInt(0),
 		Genaro: &params.GenaroConfig{
-			Epoch:               86400,               //the number of blocks in one committee term
-			Period:              1,                   // Number of seconds between blocks to enforce
-			BlockInterval:       10,                  //a peer create BlockInterval blocks one time
+			Epoch:               43200,               //the number of blocks in one committee term
+			Period:              2,                   // Number of seconds between blocks to enforce
+			BlockInterval:       5,                  //a peer create BlockInterval blocks one time
 			ElectionPeriod:      1,                   //a committee list write time
 			ValidPeriod:         1,                   //a written committee list waiting time to come into force
 			CurrencyRates:       5,                   //interest rates of coin
-			CommitteeMaxSize:    101,                 //max number of committee member
+			CommitteeMaxSize:    31,                 //max number of committee member
 			OptionTxMemorySize:  20,                  //the number of save option tx
 			PromissoryNotePrice: PromissoryNotePrice, // Promissory Note Price
 			OfficialAddress:     OfficialAddress,

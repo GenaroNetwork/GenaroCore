@@ -23,12 +23,12 @@
   },
 
   "config": {
-    "PromissoryNoteEnable": true,
+    "PromissoryNoteEnable": false,
     "PromissoryNotePercentage": 90,
     "PromissoryNotePrice":  2000,
     "LastPromissoryNoteBlockNumber": 100000,
     "PromissoryNotePeriod": 10000,
-    "SurplusCoin": 175000000,
+    "SurplusCoin": 67500000,
     "SynStateAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
     "HeftAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
     "BindingAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
