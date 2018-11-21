@@ -277,7 +277,7 @@ func main() {
 	genesis := new(core.Genesis)
 	genesis.Config = genaroConfig
 	genesis.Difficulty = big.NewInt(1)
-	genesis.GasLimit = 50000000
+	genesis.GasLimit = 20000000
 	genesis.GasUsed = 0
 	genesis.Mixhash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
 	genesis.ParentHash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
