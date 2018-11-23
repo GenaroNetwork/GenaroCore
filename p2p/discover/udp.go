@@ -32,13 +32,14 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
 )
 
-const Version = 4
+const Version = 300
 
 // Errors
 var (
 	errPacketTooSmall   = errors.New("too small")
 	errBadHash          = errors.New("bad hash")
 	errExpired          = errors.New("expired")
+	errVersion          = errors.New("version is incorrect")
 	errUnsolicitedReply = errors.New("unsolicited reply")
 	errUnknownNode      = errors.New("unknown node")
 	errTimeout          = errors.New("RPC timeout")
@@ -77,6 +78,7 @@ type (
 
 	// pong is the reply to ping.
 	pong struct {
+		Version    uint
 		// This field should mirror the UDP envelope address
 		// of the ping packet, which provides a way to discover the
 		// the external address (after NAT).
@@ -583,7 +585,11 @@ func (req *ping) handle(t *udp, from *net.UDPAddr, fromID NodeID, mac []byte) er
 	if expired(req.Expiration) {
 		return errExpired
 	}
+	if req.Version != Version {
+		return errVersion
+	}
 	t.send(from, pongPacket, &pong{
+		Version:	Version,
 		To:         makeEndpoint(from, req.From.TCP),
 		ReplyTok:   mac,
 		Expiration: uint64(time.Now().Add(expiration).Unix()),
@@ -600,6 +606,9 @@ func (req *ping) name() string { return "PING/v4" }
 func (req *pong) handle(t *udp, from *net.UDPAddr, fromID NodeID, mac []byte) error {
 	if expired(req.Expiration) {
 		return errExpired
+	}
+	if req.Version != Version {
+		return errVersion
 	}
 	if !t.handleReply(fromID, pongPacket, req) {
 		return errUnsolicitedReply
