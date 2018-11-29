@@ -29,8 +29,8 @@ const (
 )
 
 var (
-	minRatio = common.Base*98/100
-	maxRatio = common.Base*102/100
+	minRatio = common.Base * 98 / 100
+	maxRatio = common.Base * 102 / 100
 )
 
 var (
@@ -563,10 +563,10 @@ func updateEpochRewards(state *state.StateDB) {
 	SetStorageActualRewards(state, big.NewInt(0))
 	// 将一届的实际收益加入总的实际收益
 	AddTotalActualRewards(state, coinrewards)
-	log.Info("this epoch coin rewards:\t"+coinrewards.String())
+	log.Info("this epoch coin rewards:\t" + coinrewards.String())
 	AddTotalActualRewards(state, storagerewards)
-	log.Info("this epoch storage rewards:\t"+storagerewards.String())
-	log.Info("Total Actual Rewards:\t"+GetTotalActualRewards(state).String())
+	log.Info("this epoch storage rewards:\t" + storagerewards.String())
+	log.Info("Total Actual Rewards:\t" + GetTotalActualRewards(state).String())
 }
 
 // 更新年收益参数

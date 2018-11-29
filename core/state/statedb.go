@@ -389,7 +389,7 @@ func (self *StateDB) IsNameAccountExist(name string) (bool, error) {
 // 判断用户是否拥有此别名
 func (self *StateDB) HasName(addr common.Address, name string) bool {
 	nameAddr, err := self.GetNameAccount(name)
-	if err != nil || addr != nameAddr{
+	if err != nil || addr != nameAddr {
 		return false
 	}
 	return true

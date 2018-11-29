@@ -78,7 +78,7 @@ type (
 
 	// pong is the reply to ping.
 	pong struct {
-		Version    uint
+		Version uint
 		// This field should mirror the UDP envelope address
 		// of the ping packet, which provides a way to discover the
 		// the external address (after NAT).
@@ -589,7 +589,7 @@ func (req *ping) handle(t *udp, from *net.UDPAddr, fromID NodeID, mac []byte) er
 		return errVersion
 	}
 	t.send(from, pongPacket, &pong{
-		Version:	Version,
+		Version:    Version,
 		To:         makeEndpoint(from, req.From.TCP),
 		ReplyTok:   mac,
 		Expiration: uint64(time.Now().Add(expiration).Unix()),
