@@ -25,8 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/accounts"
 	"github.com/GenaroNetwork/Genaro-Core/accounts/keystore"
@@ -47,7 +45,6 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"strconv"
 )
 
 const (
@@ -1647,43 +1644,7 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 
 	//deal special transaction
 	if *args.To == common.SpecialSyncAddress {
-		var s types.SpecialTxInput
-		if err := json.Unmarshal([]byte(args.ExtraData), &s); err != nil {
-			// 这里发现特殊交易的参数错误后，不反悔错误。错误的返回同意由tx_pool	.go 中的dispatchHandlerValidateTx方法处理返回
-			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
-		}
-		switch s.Type.ToInt().Uint64() {
-		case common.SpecialTxTypeMortgageInit.Uint64():
-			if len(s.SpecialTxTypeMortgageInit.MortgageTable) > 8 {
-				return nil
-			}
-			timeUnix := strconv.FormatInt(time.Now().Unix(), 10)
-			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
-			s.SpecialTxTypeMortgageInit.CreateTime = time.Now().Unix()
-			timeLimit := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt()
-			var tmp big.Int
-			tmp.Mul(timeLimit, big.NewInt(86400))
-			s.SpecialTxTypeMortgageInit.EndTime = tmp.Add(&tmp, big.NewInt(s.SpecialTxTypeMortgageInit.CreateTime)).Int64()
-			s.SpecialTxTypeMortgageInit.FileID = hex.EncodeToString(timeUnixSha256[:])
-			s.SpecialTxTypeMortgageInit.FromAccount = args.From
-			input, _ := json.Marshal(s)
-			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		case common.SpecialTxTypeSyncSidechainStatus.Uint64():
-			timeUnix := strconv.FormatInt(time.Now().Unix(), 10)
-			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
-			s.SpecialTxTypeMortgageInit.Dataversion = hex.EncodeToString(timeUnixSha256[:])
-			input, _ := json.Marshal(s)
-			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		case common.SynchronizeShareKey.Uint64():
-			timeUnix := strconv.FormatInt(time.Now().Unix(), 10)
-			timeUnixSha256 := sha256.Sum256([]byte(timeUnix))
-			s.SynchronizeShareKey.ShareKeyId = hex.EncodeToString(timeUnixSha256[:])
-			s.SynchronizeShareKey.FromAccount = args.From
-			input, _ := json.Marshal(s)
-			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
-		default:
-			return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
-		}
+		return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
 	}
 
 	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
