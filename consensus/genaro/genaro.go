@@ -594,6 +594,29 @@ func genCommitteeAccountBinding(thisstate *state.StateDB, commitee []common.Addr
 	return
 }
 
+// 根据总stake设置币息收益参数
+func updateCoinRewardsRatio(thisstate *state.StateDB, commiteeRank []common.Address) {
+	// 计算总stake
+	allStake := uint64(0)
+	for _, addr := range commiteeRank {
+		candidateInfo := thisstate.GetCandidateInfoWithAllSubAccounts(addr)
+		allStake += candidateInfo.Stake
+	}
+	surplusCoin := GetSurplusCoin(thisstate)
+	surplusCoin.Div(surplusCoin, common.BaseCompany)
+	coinRewardsRatio := allStake * 3 / 50 / surplusCoin.Uint64() / 2
+	if coinRewardsRatio < 2 {
+		coinRewardsRatio = 2
+	} else if coinRewardsRatio > 125 {
+		coinRewardsRatio = 125
+	}
+	log.Info("coinRewardsRatio update:", "ratio", coinRewardsRatio)
+	price := thisstate.GetGenaroPrice()
+	price.CoinRewardsRatio = coinRewardsRatio
+	thisstate.SetGenaroPrice(*price)
+
+}
+
 // 换届时的更新
 func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB) {
 	blockNumber := header.Number.Uint64()
@@ -606,18 +629,22 @@ func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thiss
 		candidateInfos := thisstate.GetCandidatesInfoWithAllSubAccounts()
 		genaroPrice := thisstate.GetGenaroPrice()
 		commiteeRank, proportion := state.RankWithLenth(candidateInfos, int(config.CommitteeMaxSize), genaroPrice.CommitteeMinStake)
+
 		var committeeAccountBinding map[common.Address][]common.Address
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
 			committeeAccountBinding = genCommitteeAccountBinding(thisstate, commiteeRank)
+			updateCoinRewardsRatio(thisstate, commiteeRank)
 		} else {
 			SetHeaderCommitteeRankList(header, commiteeRank[:config.CommitteeMaxSize], proportion[:config.CommitteeMaxSize])
 			committeeAccountBinding = genCommitteeAccountBinding(thisstate, commiteeRank[:config.CommitteeMaxSize])
+			updateCoinRewardsRatio(thisstate, commiteeRank[:config.CommitteeMaxSize])
 		}
 		SetCommitteeAccountBinding(header, committeeAccountBinding)
 		//CoinActualRewards and StorageActualRewards should update per epoch
 		updateEpochRewards(thisstate)
 	}
+
 	// 一年时间到
 	if blockNumber%(calEpochPerYear(config)*config.Epoch) == 0 {
 		//CoinActualRewards and StorageActualRewards should update per epoch, surplusCoin should update per year
