@@ -604,7 +604,7 @@ func updateCoinRewardsRatio(thisstate *state.StateDB, commiteeRank []common.Addr
 	}
 	surplusCoin := GetSurplusCoin(thisstate)
 	surplusCoin.Div(surplusCoin, common.BaseCompany)
-	coinRewardsRatio := allStake * 3 / 50 / surplusCoin.Uint64() / 2
+	coinRewardsRatio := allStake * 3 / 50 / surplusCoin.Uint64() / 2 * 10000
 	if coinRewardsRatio < 2 {
 		coinRewardsRatio = 2
 	} else if coinRewardsRatio > 125 {
