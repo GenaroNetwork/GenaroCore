@@ -37,7 +37,7 @@ The go-genaro project comes with several wrappers/executables found in the `cmd`
 
 ### Start miner
 
-    go-genaro --identity "test" --mine --etherbase "myaccount" --unlock "myaccount" --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "*" --datadir datadir --port "30303" --rpcapi "db,eth,net,web3,personal,admin,miner" --networkid 95518 console
+    go-genaro --identity "test" --mine --etherbase "myaccount" --unlock "myaccount" --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "*" --datadir datadir --port "30303" --rpcapi "db,eth,net,web3,personal,admin,miner" console
 
 ### Send synchronization transaction
 
