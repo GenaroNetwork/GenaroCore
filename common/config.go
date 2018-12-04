@@ -200,7 +200,7 @@ var (
 	MinStake            = uint64(5000) // 一次最小的押注额度
 	CommitteeMinStake   = uint64(5000) // 进入委员会需要的最小stake
 	BackStackListMax    = uint64(20)   // 最大退注长度
-	CoinRewardsRatio    = uint64(2)   // 币息收益比率
+	CoinRewardsRatio    = uint64(2)    // 币息收益比率
 	StorageRewardsRatio = uint64(1)    // 存储收益比率
 	RatioPerYear        = uint64(1)    // 年收益比率
 	BlockLogLenth       = uint64(500000)
