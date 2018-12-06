@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/binary"
-	"fmt"
 	"github.com/hashicorp/consul/api"
 	"log"
 	"time"
@@ -78,16 +77,16 @@ func TryLock(lock *api.Lock, delay int) bool {
 		chRet, err := lock.Lock(ch)
 		if err != nil && api.ErrLockHeld == err {
 			ok <- true
-			fmt.Println("has lock ok")
+			log.Println("has lock ok")
 		}
 		if err != nil {
 			log.Println(err)
 		}
 		if chRet != nil {
 			ok <- true
-			fmt.Println("lock ok")
+			log.Println("lock ok")
 		} else {
-			fmt.Println("lock failed")
+			log.Println("lock failed")
 		}
 	}()
 	go func() {
@@ -97,10 +96,10 @@ func TryLock(lock *api.Lock, delay int) bool {
 
 	select {
 	case <-ok:
-		fmt.Println("lock success!")
+		log.Println("lock success!")
 		return true
 	case <-timeout:
-		fmt.Println("lock timeout!")
+		log.Println("lock timeout!")
 		ch <- struct{}{}
 		return false
 	}
