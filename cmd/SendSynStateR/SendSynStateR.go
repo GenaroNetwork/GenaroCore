@@ -29,7 +29,6 @@ func initarg() {
 	flag.StringVar(&rpcurl, "u", "http://127.0.0.1:8545", "rpc url")
 	flag.StringVar(&SynStateAccount, "a", "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73", "state syn account")
 	flag.StringVar(&consulAddr, "h", "127.0.0.1:8500", "consul address")
-	flag.StringVar(&consulAddr, "p", "127.0.0.1:8500", "password")
 	flag.Parse()
 }
 
@@ -92,6 +91,7 @@ func SynState(client *utils.ConsulClient) bool {
 			logPrint("syn state is exist")
 			return false
 		}
+		utils.AccountUnlock(rpcurl, SynStateAccount, SynStateAccountPasswd)
 		ret, err := utils.SendSynState(rpcurl, synBlockHash, SynStateAccount)
 		if err != nil {
 			logPrint(err.Error())
@@ -119,7 +119,6 @@ func main() {
 	initarg()
 	fmt.Printf("Please enter your account password: ")
 	fmt.Scanln(&SynStateAccountPasswd)
-	utils.AccountUnlock(rpcurl, SynStateAccount, SynStateAccountPasswd)
 
 	client, err := utils.NewClient(consulAddr)
 	if err != nil {
