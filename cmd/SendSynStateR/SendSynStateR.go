@@ -17,6 +17,7 @@ import (
 var rpcurl string
 var delaytime int64
 var SynStateAccount string
+var SynStateAccountPasswd string
 var consulAddr string
 
 func logPrint(msg string) {
@@ -28,6 +29,7 @@ func initarg() {
 	flag.StringVar(&rpcurl, "u", "http://127.0.0.1:8545", "rpc url")
 	flag.StringVar(&SynStateAccount, "a", "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73", "state syn account")
 	flag.StringVar(&consulAddr, "h", "127.0.0.1:8500", "consul address")
+	flag.StringVar(&consulAddr, "p", "127.0.0.1:8500", "password")
 	flag.Parse()
 }
 
@@ -115,6 +117,9 @@ func sigDeal(lock *api.Lock) {
 
 func main() {
 	initarg()
+	fmt.Printf("Please enter your account password: ")
+	fmt.Scanln(&SynStateAccountPasswd)
+	utils.AccountUnlock(rpcurl, SynStateAccount, SynStateAccountPasswd)
 
 	client, err := utils.NewClient(consulAddr)
 	if err != nil {

@@ -138,3 +138,15 @@ func CheckRecipt(url string, txHash string) (bool, error) {
 	}
 	return true, nil
 }
+
+func AccountUnlock(url string, SynStateAccount string, SynStateAccountPasswd string) error {
+	ret, err := HttpPost(url, "application/json", `{"jsonrpc": "2.0","method": "personal_unlockAccount","params": ["`+SynStateAccount+`","`+SynStateAccountPasswd+`",null],"id": 1}`)
+	if err != nil {
+		return err
+	}
+	err = checkError(ret)
+	if err != nil {
+		return err
+	}
+	return nil
+}
