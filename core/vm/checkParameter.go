@@ -111,21 +111,34 @@ func CheckSynchronizeShareKeyParameter(s types.SpecialTxInput, state StateDB, ge
 		return errors.New("Account is Contract")
 	}
 
-	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
+	if len(s.SynchronizeShareKey.ShareKeyId) == 0 {
 		return errors.New("Parameter ShareKeyId  error")
 	}
-	if len(s.SynchronizeShareKey.ShareKey) > 0 {
+	if len(s.SynchronizeShareKey.ShareKey) == 0 {
 		return errors.New("Parameter ShareKey  error")
 	}
 	if s.SynchronizeShareKey.Shareprice.ToInt().Cmp(big.NewInt(0)) < 0 {
 		return errors.New("Parameter Shareprice  is less than zero")
 	}
+	if len(s.SynchronizeShareKey.MailHash) > 67 {
+		return errors.New("Parameter MailHash  error")
+	}
 	return nil
 }
 
-func CheckUnlockSharedKeyParameter(s types.SpecialTxInput) error {
-	if len(s.SynchronizeShareKey.ShareKeyId) != 64 {
+func CheckUnlockSharedKeyParameter(s types.SpecialTxInput, state StateDB, caller common.Address) error {
+	if len(s.SynchronizeShareKey.ShareKeyId) == 0 {
 		return errors.New("Parameter ShareKeyId  error")
+	}
+	balance := state.GetBalance(caller)
+	shareKeyId := s.SynchronizeShareKey.ShareKeyId
+
+	getSharedFile := state.GetSharedFile(caller, shareKeyId)
+	if nil == getSharedFile.Shareprice || big.NewInt(0) == getSharedFile.Shareprice.ToInt() {
+		return nil
+	}
+	if balance.Cmp(getSharedFile.Shareprice.ToInt()) <= 0 {
+		return errors.New("Insufficient balance")
 	}
 	return nil
 }
@@ -739,5 +752,70 @@ func WithdrawCash(caller common.Address, state StateDB, blockNum *big.Int) error
 	if beforPromissoryNotesNum <= 0 {
 		return errors.New("The number of cashable notes available is 0")
 	}
+	return nil
+}
+
+func CheckSetNameTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if len(s.Message) == 0 {
+		return errors.New("name is null")
+	}
+	if len(s.Message) > common.HashLength {
+		return errors.New("name is too long")
+	}
+	exist, err := state.IsNameAccountExist(s.Message)
+	if err != nil {
+		return err
+	}
+	if exist {
+		return errors.New("name is exist")
+	}
+
+	var name types.AccountName
+	name.SetString(s.Message)
+	priceBig := name.GetBigPrice()
+
+	balance := state.GetBalance(caller)
+	if priceBig.Cmp(balance) > 0 {
+		return errors.New("There is not enough balance")
+	}
+
+	return nil
+}
+
+func CheckTransferNameTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if len(s.Message) == 0 {
+		return errors.New("name is null")
+	}
+
+	if len(s.Message) > common.HashLength {
+		return errors.New("name is too long")
+	}
+
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+
+	//判断该用户是否拥有此别名
+	if !state.HasName(caller, s.Message) {
+		return errors.New("name is not belong to you")
+	}
+
+	return nil
+}
+
+func CheckUnsubscribeNameTxStatus(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if len(s.Message) == 0 {
+		return errors.New("name is null")
+	}
+
+	if len(s.Message) > common.HashLength {
+		return errors.New("name is too long")
+	}
+
+	//判断该用户是否拥有此别名
+	if !state.HasName(caller, s.Message) {
+		return errors.New("name is not belong to you")
+	}
+
 	return nil
 }

@@ -31,10 +31,6 @@ var (
 	DefaultOneDayMortgageGes *big.Int
 )
 
-var (
-	OfficialAddress Address = HexToAddress("0xad188b762f9e3ef76c972960b80c9dc99b9cfc73")
-)
-
 /*
 Some special address prepared for special transactions.
 */
@@ -58,9 +54,11 @@ var (
 	ForbidBackStakeSaveAddress Address = HexToAddress("0x9000000000000000000000000000000000000000")
 
 	OptionTxBeginSaveAddress Address = HexToAddress("0xa000000000000000000000000000000000000000")
+
+	NameSpaceSaveAddress Address = HexToAddress("0xb000000000000000000000000000000000000000")
 )
 
-var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress}
+var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress, NameSpaceSaveAddress}
 
 var (
 	SpecialTxTypeStakeSync = big.NewInt(1)
@@ -107,6 +105,12 @@ var (
 
 	SpecialTxAddCoinpool = big.NewInt(22)
 
+	SpecialTxRegisterName = big.NewInt(23)
+
+	SpecialTxTransferName = big.NewInt(24)
+
+	SpecialTxUnsubscribeName = big.NewInt(25)
+
 	SpecialTxWithdrawCash = big.NewInt(30)
 
 	SpecialTxRevoke = big.NewInt(31)
@@ -138,8 +142,8 @@ var (
 	MinStake            = uint64(5000)
 	CommitteeMinStake   = uint64(5000)
 	BackStackListMax    = uint64(20)
-	CoinRewardsRatio    = uint64(50)
-	StorageRewardsRatio = uint64(50)
-	RatioPerYear        = uint64(7)
-	BlockLogLenth       = uint64(300000)
+	CoinRewardsRatio    = uint64(2)
+	StorageRewardsRatio = uint64(1)
+	RatioPerYear        = uint64(2)
+	BlockLogLenth       = uint64(500000)
 )

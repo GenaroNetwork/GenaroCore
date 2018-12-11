@@ -37,7 +37,7 @@ The go-genaro project comes with several wrappers/executables found in the `cmd`
 
 ### Start miner
 
-    go-genaro --identity "test" --mine --etherbase "myaccount" --unlock "myaccount" --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "*" --datadir datadir --port "30303" --rpcapi "db,eth,net,web3,personal,admin,miner" --networkid 95518 console
+    go-genaro --identity "test" --mine --etherbase "myaccount" --unlock "myaccount" --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "*" --datadir datadir --port "30303" --rpcapi "db,eth,net,web3,personal,admin,miner" console
 
 ### Send synchronization transaction
 
@@ -50,7 +50,13 @@ If you need to use the new features of Genaro network, you need to compile the c
 You can get more development information from the [yellow book](https://github.com/GenaroNetwork/genaro-document).
 
 ## Useful links
-Our [official network](https://gnxtech.io).
+Our [official network](https://genaro.network/).
+
+## Main Network
+To see [mainnet](./mainnet).
+
+## Test Network
+To see [testnet](./testnet).
 
 ## License
 

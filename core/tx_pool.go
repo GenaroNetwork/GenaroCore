@@ -660,7 +660,7 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64():
 		return vm.CheckSyncFileSharePublicKeyTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.UnlockSharedKey.Uint64():
-		return vm.CheckUnlockSharedKeyParameter(s)
+		return vm.CheckUnlockSharedKeyParameter(s, pool.currentState, caller)
 	case common.SpecialTxTypePunishment.Uint64():
 		return vm.CheckPunishmentTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeBackStake.Uint64():
@@ -685,6 +685,12 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 		return vm.CheckSetGlobalVar(caller, s, pool.chainconfig.Genaro)
 	case common.SpecialTxAddCoinpool.Uint64():
 		return vm.CheckAddCoinpool(caller, s, pool.currentState)
+	case common.SpecialTxRegisterName.Uint64():
+		return vm.CheckSetNameTxStatus(caller, s, pool.currentState)
+	case common.SpecialTxTransferName.Uint64():
+		return vm.CheckTransferNameTxStatus(caller, s, pool.currentState)
+	case common.SpecialTxUnsubscribeName.Uint64():
+		return vm.CheckUnsubscribeNameTxStatus(caller, s, pool.currentState)
 	case common.SpecialTxPublishOption.Uint64():
 		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())
 	case common.SpecialTxRevoke.Uint64():

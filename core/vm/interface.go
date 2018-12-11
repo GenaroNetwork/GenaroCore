@@ -116,7 +116,7 @@ type StateDB interface {
 
 	UpdateFileSharePublicKey(common.Address, string) bool
 	UnlockSharedKey(common.Address, string) bool
-
+	GetSharedFile(common.Address, string) types.SynchronizeShareKey
 	UpdateBucketApplyPrice(common.Address, *hexutil.Big) bool
 	GetBucketApplyPrice() *big.Int
 
@@ -173,6 +173,12 @@ type StateDB interface {
 	CarriedOutPromissoryNotes(common.Hash, common.Address, uint64) types.PromissoryNotesOptionTx
 	TurnBuyPromissoryNotes(common.Hash, *hexutil.Big, common.Address, uint64) bool
 	GetBeforPromissoryNotesNum(common.Address, uint64) uint64
+
+	// 别名
+	GetNameAccount(name string) (addr common.Address, err error)
+	SetNameAccount(name string, addr common.Address) (err error)
+	IsNameAccountExist(name string) (bool, error)
+	HasName(common.Address, string) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

@@ -29,9 +29,8 @@ const (
 )
 
 var (
-//coinRewardsRatio				 = common.Base*50/100
-//storageRewardsRatio				 = common.Base*50/100
-//ratioPerYear					 = common.Base*7/100
+	minRatio = common.Base * 98 / 100
+	maxRatio = common.Base * 102 / 100
 )
 
 var (
@@ -418,7 +417,7 @@ func SetPreCoinActualRewards(state *state.StateDB, coinrewards *big.Int) {
 
 func GetPreCoinActualRewards(state *state.StateDB) *big.Int {
 	rewardsValues := state.GetRewardsValues()
-	return rewardsValues.PreStorageActualRewards
+	return rewardsValues.PreCoinActualRewards
 }
 
 func GetStorageActualRewards(state *state.StateDB) *big.Int {
@@ -503,7 +502,10 @@ func updateEpochRewards(state *state.StateDB) {
 	SetCoinActualRewards(state, big.NewInt(0))
 	SetStorageActualRewards(state, big.NewInt(0))
 	AddTotalActualRewards(state, coinrewards)
+	log.Info("this epoch coin rewards:\t" + coinrewards.String())
 	AddTotalActualRewards(state, storagerewards)
+	log.Info("this epoch storage rewards:\t" + storagerewards.String())
+	log.Info("Total Actual Rewards:\t" + GetTotalActualRewards(state).String())
 }
 
 func updateEpochYearRewards(state *state.StateDB) {
@@ -526,19 +528,43 @@ func genCommitteeAccountBinding(thisstate *state.StateDB, commitee []common.Addr
 	return
 }
 
+func updateCoinRewardsRatio(thisstate *state.StateDB, commiteeRank []common.Address) {
+	allStake := uint64(0)
+	for _, addr := range commiteeRank {
+		candidateInfo := thisstate.GetCandidateInfoWithAllSubAccounts(addr)
+		allStake += candidateInfo.Stake
+	}
+	surplusCoin := GetSurplusCoin(thisstate)
+	surplusCoin.Div(surplusCoin, common.BaseCompany)
+	coinRewardsRatio := 10000 * allStake * 3 / 50 / surplusCoin.Uint64() / 2
+	if coinRewardsRatio < 2 {
+		coinRewardsRatio = 2
+	} else if coinRewardsRatio > 125 {
+		coinRewardsRatio = 125
+	}
+	log.Info("coinRewardsRatio update:", "ratio", coinRewardsRatio)
+	price := thisstate.GetGenaroPrice()
+	price.CoinRewardsRatio = coinRewardsRatio
+	thisstate.SetGenaroPrice(*price)
+
+}
+
 func updateSpecialBlock(config *params.GenaroConfig, header *types.Header, thisstate *state.StateDB) {
 	blockNumber := header.Number.Uint64()
 	if blockNumber%config.Epoch == 0 {
 		candidateInfos := thisstate.GetCandidatesInfoWithAllSubAccounts()
 		genaroPrice := thisstate.GetGenaroPrice()
 		commiteeRank, proportion := state.RankWithLenth(candidateInfos, int(config.CommitteeMaxSize), genaroPrice.CommitteeMinStake)
+
 		var committeeAccountBinding map[common.Address][]common.Address
 		if uint64(len(candidateInfos)) <= config.CommitteeMaxSize {
 			SetHeaderCommitteeRankList(header, commiteeRank, proportion)
 			committeeAccountBinding = genCommitteeAccountBinding(thisstate, commiteeRank)
+			updateCoinRewardsRatio(thisstate, commiteeRank)
 		} else {
 			SetHeaderCommitteeRankList(header, commiteeRank[:config.CommitteeMaxSize], proportion[:config.CommitteeMaxSize])
 			committeeAccountBinding = genCommitteeAccountBinding(thisstate, commiteeRank[:config.CommitteeMaxSize])
+			updateCoinRewardsRatio(thisstate, commiteeRank[:config.CommitteeMaxSize])
 		}
 		SetCommitteeAccountBinding(header, committeeAccountBinding)
 		//CoinActualRewards and StorageActualRewards should update per epoch
@@ -623,6 +649,11 @@ func getCoinCofficient(config *params.GenaroConfig, coinrewards, surplusRewards 
 	//get coefficient
 	planrewards.Mul(planrewards, big.NewInt(int64(common.Base)))
 	coinRatio := planrewards.Div(planrewards, coinrewards).Uint64()
+	if coinRatio < minRatio {
+		coinRatio = minRatio
+	} else if coinRatio > maxRatio {
+		coinRatio = maxRatio
+	}
 	return coinRatio
 }
 
@@ -642,6 +673,11 @@ func getStorageCoefficient(config *params.GenaroConfig, storagerewards, surplusR
 	//get coefficient
 	planrewards.Mul(planrewards, big.NewInt(int64(common.Base)))
 	storageRatio := planrewards.Div(planrewards, storagerewards).Uint64()
+	if storageRatio < minRatio {
+		storageRatio = minRatio
+	} else if storageRatio > maxRatio {
+		storageRatio = maxRatio
+	}
 	return storageRatio
 }
 

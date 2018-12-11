@@ -425,6 +425,19 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
 		new web3._extend.Method({
+			name: 'getAccountByName',
+			call: 'eth_getAccountByName',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputString,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getNamePrice',
+			call: 'eth_getNamePrice',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputString]
+			outputFormatter: web3._extend.utils.toDecimal
+		}),
+		new web3._extend.Method({
 			name: 'getStake',
 			call: 'eth_getStake',
 			params: 2,

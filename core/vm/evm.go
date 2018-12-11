@@ -219,7 +219,6 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 
 func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 	var err error
-	// 解析数据
 	var s types.SpecialTxInput
 	err = json.Unmarshal(input, &s)
 	if err != nil {
@@ -270,6 +269,12 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		err = setGlobalVar(evm, s, caller)
 	case common.SpecialTxAddCoinpool.Uint64():
 		err = addCoinpool(evm, s, caller)
+	case common.SpecialTxRegisterName.Uint64():
+		err = registerName(evm, s, caller)
+	case common.SpecialTxTransferName.Uint64():
+		err = transferNameTxStatus(evm, s, caller)
+	case common.SpecialTxUnsubscribeName.Uint64():
+		err = unsubscribeNameTxStatus(evm, s, caller)
 	case common.SpecialTxRevoke.Uint64():
 		err = revokePromissoryNotesTx(evm, s, caller)
 	case common.SpecialTxWithdrawCash.Uint64():
@@ -293,6 +298,54 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func registerName(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	err := (*evm).StateDB.SetNameAccount(s.Message, caller)
+	if err != nil {
+		return err
+	}
+
+	var name types.AccountName
+	name.SetString(s.Message)
+	priceBig := name.GetBigPrice()
+
+	(*evm).StateDB.SubBalance(caller, priceBig)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, priceBig)
+
+	return nil
+}
+
+func transferNameTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckTransferNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	transferTarget := common.HexToAddress(s.Address)
+	err := (*evm).StateDB.SetNameAccount(s.Message, transferTarget)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func unsubscribeNameTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckUnsubscribeNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	err := (*evm).StateDB.SetNameAccount(s.Message, common.Address{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
@@ -597,7 +650,7 @@ func userPunishment(evm *EVM, s types.SpecialTxInput, caller common.Address) err
 }
 
 func UnlockSharedKey(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
-	if err := CheckUnlockSharedKeyParameter(s); nil != err {
+	if err := CheckUnlockSharedKeyParameter(s, (*evm).StateDB, caller); nil != err {
 		return err
 	}
 	if !(*evm).StateDB.UnlockSharedKey(caller, s.SynchronizeShareKey.ShareKeyId) {

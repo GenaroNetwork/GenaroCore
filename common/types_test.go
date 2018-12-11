@@ -163,3 +163,10 @@ func TestAddressMod(t *testing.T) {
 	testAddr := HexToAddress("0xa000000000000000000000000000000000000000")
 	t.Log(testAddr.Mod(60))
 }
+
+func TestHashToAddress(t *testing.T) {
+	testAddr := HexToAddress("0xa000000000000000000000000000000000000000")
+	hash := testAddr.Hash()
+	t.Log(hash.String())
+	t.Log(hash.Address().String())
+}

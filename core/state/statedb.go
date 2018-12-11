@@ -23,7 +23,9 @@ import (
 	"sort"
 	"sync"
 
+	"bytes"
 	"encoding/hex"
+	"errors"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
@@ -341,6 +343,56 @@ func (self *StateDB) SetState(addr common.Address, key common.Hash, value common
 	if stateObject != nil {
 		stateObject.SetState(self.db, key, value)
 	}
+}
+
+// 获取别名对应的账号
+func (self *StateDB) GetNameAccount(name string) (addr common.Address, err error) {
+	var accountName types.AccountName
+	err = accountName.SetString(name)
+	if err != nil {
+		return
+	}
+	addr = self.GetState(common.NameSpaceSaveAddress, accountName.ToHash()).Address()
+	return
+}
+
+// 设置账号的别名
+func (self *StateDB) SetNameAccount(name string, addr common.Address) (err error) {
+	if len(name) > common.HashLength {
+		return errors.New("name is too long")
+	}
+	var accountName types.AccountName
+	err = accountName.SetString(name)
+	if err != nil {
+		return
+	}
+	nonce := self.GetNonce(common.NameSpaceSaveAddress)
+	if nonce == 0 {
+		self.SetNonce(common.NameSpaceSaveAddress, 1)
+	}
+	self.SetState(common.NameSpaceSaveAddress, accountName.ToHash(), addr.Hash())
+	return
+}
+
+// 判断别名是否已存在
+func (self *StateDB) IsNameAccountExist(name string) (bool, error) {
+	addr, err := self.GetNameAccount(name)
+	if err != nil {
+		return true, err
+	}
+	if 0 == bytes.Compare(addr.Hash().Bytes(), common.Hash{}.Bytes()) {
+		return false, nil
+	}
+	return true, nil
+}
+
+// 判断用户是否拥有此别名
+func (self *StateDB) HasName(addr common.Address, name string) bool {
+	nameAddr, err := self.GetNameAccount(name)
+	if err != nil || addr != nameAddr {
+		return false
+	}
+	return true
 }
 
 // Suicide marks the given account as suicided.
@@ -1091,6 +1143,10 @@ func (self *StateDB) UnlockSharedKey(address common.Address, shareKeyId string) 
 			return false
 		}
 		if "" != synchronizeShareKey.ShareKeyId && 0 == synchronizeShareKey.Status {
+			balance := self.GetBalance(address)
+			if balance.Cmp(synchronizeShareKey.Shareprice.ToInt()) <= 0 {
+				return false
+			}
 			stateObject.SubBalance(synchronizeShareKey.Shareprice.ToInt())
 			FromAccountstateObject := self.GetOrNewStateObject(synchronizeShareKey.FromAccount)
 			FromAccountstateObject.AddBalance(synchronizeShareKey.Shareprice.ToInt())
@@ -1098,6 +1154,14 @@ func (self *StateDB) UnlockSharedKey(address common.Address, shareKeyId string) 
 		return true
 	}
 	return false
+}
+
+func (self *StateDB) GetSharedFile(address common.Address, shareKeyId string) types.SynchronizeShareKey {
+	stateObject := self.GetOrNewStateObject(address)
+	if stateObject != nil {
+		return stateObject.UnlockSharedKey(shareKeyId)
+	}
+	return types.SynchronizeShareKey{}
 }
 
 func (self *StateDB) CheckUnlockSharedKey(address common.Address, shareKeyId string) bool {
