@@ -50,7 +50,13 @@ If you need to use the new features of Genaro network, you need to compile the c
 You can get more development information from the [yellow book](https://github.com/GenaroNetwork/genaro-document).
 
 ## Useful links
-Our [official network](https://gnxtech.io).
+Our [official network](https://genaro.network/).
+
+## Main Network
+To see [mainnet](./mainnet).
+
+## Test Network
+To see [testnet](./testnet).
 
 ## License
 
