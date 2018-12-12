@@ -450,7 +450,6 @@ type RewardsValues struct {
 	PreSurplusCoin          *big.Int `json:"PreSurplusCoin"`
 }
 
-// 账号别名
 type AccountName [common.HashLength]byte
 
 func (name *AccountName) Bytes() []byte { return name[:] }

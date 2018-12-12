@@ -345,7 +345,6 @@ func (self *StateDB) SetState(addr common.Address, key common.Hash, value common
 	}
 }
 
-// 获取别名对应的账号
 func (self *StateDB) GetNameAccount(name string) (addr common.Address, err error) {
 	var accountName types.AccountName
 	err = accountName.SetString(name)
@@ -356,7 +355,6 @@ func (self *StateDB) GetNameAccount(name string) (addr common.Address, err error
 	return
 }
 
-// 设置账号的别名
 func (self *StateDB) SetNameAccount(name string, addr common.Address) (err error) {
 	if len(name) > common.HashLength {
 		return errors.New("name is too long")
@@ -374,7 +372,6 @@ func (self *StateDB) SetNameAccount(name string, addr common.Address) (err error
 	return
 }
 
-// 判断别名是否已存在
 func (self *StateDB) IsNameAccountExist(name string) (bool, error) {
 	addr, err := self.GetNameAccount(name)
 	if err != nil {
@@ -386,7 +383,6 @@ func (self *StateDB) IsNameAccountExist(name string) (bool, error) {
 	return true, nil
 }
 
-// 判断用户是否拥有此别名
 func (self *StateDB) HasName(addr common.Address, name string) bool {
 	nameAddr, err := self.GetNameAccount(name)
 	if err != nil || addr != nameAddr {

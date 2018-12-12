@@ -795,7 +795,6 @@ func CheckTransferNameTxStatus(caller common.Address, s types.SpecialTxInput, st
 		return errors.New("param [address] missing or can't be null string")
 	}
 
-	//判断该用户是否拥有此别名
 	if !state.HasName(caller, s.Message) {
 		return errors.New("name is not belong to you")
 	}
@@ -812,7 +811,6 @@ func CheckUnsubscribeNameTxStatus(caller common.Address, s types.SpecialTxInput,
 		return errors.New("name is too long")
 	}
 
-	//判断该用户是否拥有此别名
 	if !state.HasName(caller, s.Message) {
 		return errors.New("name is not belong to you")
 	}
