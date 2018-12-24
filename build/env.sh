@@ -11,10 +11,10 @@ fi
 workspace="$PWD/build/_workspace"
 root="$PWD"
 ethdir="$workspace/src/github.com/GenaroNetwork"
-if [ ! -L "$ethdir/Genaro-Core" ]; then
+if [ ! -L "$ethdir/GenaroCore" ]; then
     mkdir -p "$ethdir"
     cd "$ethdir"
-    ln -s ../../../../../. Genaro-Core
+    ln -s ../../../../../. GenaroCore
     cd "$root"
 fi
 
@@ -23,8 +23,8 @@ GOPATH="$workspace"
 export GOPATH
 
 # Run the command inside the workspace.
-cd "$ethdir/Genaro-Core"
-PWD="$ethdir/Genaro-Core"
+cd "$ethdir/GenaroCore"
+PWD="$ethdir/GenaroCore"
 
 # Launch the arguments with the configured environment.
 exec "$@"
