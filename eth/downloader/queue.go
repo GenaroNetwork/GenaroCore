@@ -362,12 +362,14 @@ func (q *queue) Results(block bool) []*fetchResult {
 		q.active.Wait()
 		nproc = q.countProcessableItems()
 	}
+
 	// Since we have a batch limit, don't pull more into "dangling" memory
 	if nproc > maxResultsProcess {
 		nproc = maxResultsProcess
 	}
 	results := make([]*fetchResult, nproc)
 	copy(results, q.resultCache[:nproc])
+
 	if len(results) > 0 {
 		// Mark results as done before dropping them from the cache.
 		for _, result := range results {
@@ -398,6 +400,7 @@ func (q *queue) Results(block bool) []*fetchResult {
 			q.resultSize = common.StorageSize(blockCacheSizeWeight)*size + (1-common.StorageSize(blockCacheSizeWeight))*q.resultSize
 		}
 	}
+
 	return results
 }
 

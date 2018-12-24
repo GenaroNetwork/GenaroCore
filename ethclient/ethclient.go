@@ -394,6 +394,7 @@ func (ec *Client) PendingCodeAt(ctx context.Context, account common.Address) ([]
 	var result hexutil.Bytes
 	err := ec.c.CallContext(ctx, &result, "eth_getCode", account, "pending")
 	return result, err
+
 }
 
 // PendingNonceAt returns the account nonce of the given account in the pending state.
@@ -476,6 +477,42 @@ func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) er
 	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", common.ToHex(data))
 }
 
+func (ec *Client) GetTraffic(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_getTraffic", account, toBlockNumArg(blockNumber))
+	return (*big.Int)(&result), err
+}
+
+func (ec *Client) GetBuckets(ctx context.Context, account common.Address, blockNumber *big.Int) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+	err := ec.c.CallContext(ctx, &result, "eth_getBuckets", account, toBlockNumArg(blockNumber))
+	return result, err
+}
+
+func (ec *Client) GetStake(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_getStake", account, toBlockNumArg(blockNumber))
+	return (*big.Int)(&result), err
+}
+
+func (ec *Client) GetHeft(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_getHeft", account, toBlockNumArg(blockNumber))
+	return (*big.Int)(&result), err
+}
+
+func (ec *Client) GetSubAccounts(ctx context.Context, account common.Address, blockNumber *big.Int) ([]common.Address, error) {
+	var result []common.Address
+	err := ec.c.CallContext(ctx, &result, "eth_getSubAccounts", account, toBlockNumArg(blockNumber))
+	return result, err
+}
+
+func (ec *Client) GetGlobalVar(ctx context.Context, blockNumber *big.Int) (*types.GenaroPrice, error) {
+	var result *types.GenaroPrice
+	err := ec.c.CallContext(ctx, &result, "eth_getGlobalVar", toBlockNumArg(blockNumber))
+	return result, err
+}
+
 func toCallArg(msg ethereum.CallMsg) interface{} {
 	arg := map[string]interface{}{
 		"from": msg.From,
@@ -494,4 +531,11 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
 	}
 	return arg
+}
+
+// Forking tool's client for the Ethereum RPC API
+func (ec *Client) AccountAttributes(ctx context.Context, account common.Address) (*big.Int, error) {
+	var result hexutil.Big
+	err := ec.c.CallContext(ctx, &result, "eth_accountAttributes", account, "pending")
+	return (*big.Int)(&result), err
 }

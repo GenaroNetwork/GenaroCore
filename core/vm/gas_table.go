@@ -293,6 +293,14 @@ func gasBalance(gt params.GasTable, evm *EVM, contract *Contract, stack *Stack, 
 	return gt.Balance, nil
 }
 
+func gasStorageAttribution(gt params.GasTable, evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
+	return gt.StorageAttribution, nil
+}
+
+func gasDataVersion(gt params.GasTable, evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
+	return gt.StorageAttribution, nil
+}
+
 func gasExtCodeSize(gt params.GasTable, evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize uint64) (uint64, error) {
 	return gt.ExtcodeSize, nil
 }

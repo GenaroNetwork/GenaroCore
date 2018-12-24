@@ -20,6 +20,8 @@ import (
 	"math/big"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 )
 
@@ -38,6 +40,7 @@ type StateDB interface {
 	GetCode(common.Address) []byte
 	SetCode(common.Address, []byte)
 	GetCodeSize(common.Address) int
+	IsContract(addr common.Address) bool
 
 	AddRefund(uint64)
 	GetRefund() uint64
@@ -62,6 +65,120 @@ type StateDB interface {
 	AddPreimage(common.Hash, []byte)
 
 	ForEachStorage(common.Address, func(common.Hash, common.Hash) bool)
+
+	UpdateHeft(common.Address, uint64, uint64) bool
+	GetHeft(common.Address) (uint64, error)
+	GetHeftLog(common.Address) types.NumLogs
+	GetHeftRangeDiff(common.Address, uint64, uint64) uint64
+
+	UpdateStake(common.Address, uint64, uint64) bool
+	DeleteStake(common.Address, uint64, uint64) (bool, uint64)
+	GetStake(common.Address) (uint64, error)
+	GetStakeLog(common.Address) types.NumLogs
+	GetStakeRangeDiff(common.Address, uint64, uint64) uint64
+
+	AddCandidate(common.Address) bool
+	DelCandidate(candidate common.Address) bool
+	GetCandidates() state.Candidates
+	GetCandidatesInfoInRange(uint64, uint64) []state.CandidateInfo
+	IsCandidateExist(candidate common.Address) bool
+
+	UpdateBucketProperties(common.Address, string, uint64, uint64, uint64, uint64) bool
+	UpdateBucket(common.Address, types.BucketPropertie) bool
+	GetStorageSize(common.Address, [32]byte) (uint64, error)
+	GetStorageGasPrice(common.Address, [32]byte) (uint64, error)
+	GetStorageGasUsed(common.Address, [32]byte) (uint64, error)
+	GetStorageGas(common.Address, [32]byte) (uint64, error)
+	SpecialTxTypeMortgageInit(common.Address, types.SpecialTxTypeMortgageInit) bool
+	SpecialTxTypeSyncSidechainStatus(common.Address, types.SpecialTxTypeMortgageInit) (map[common.Address]*big.Int, bool)
+	UpdateTraffic(common.Address, uint64) bool
+
+	GetTraffic(common.Address) uint64
+
+	GetBuckets(common.Address) (map[string]interface{}, error)
+
+	//根据用户id和fileID,dataVersion获取交易日志
+	TxLogByDataVersionRead(common.Address, [32]byte, string) (map[common.Address]*hexutil.Big, error)
+	//根据用户id和fileID开启定时同步日志接口
+	TxLogBydataVersionUpdate(common.Address, [32]byte, common.Address) bool
+
+	SyncStakeNode(common.Address, string) error
+	GetStorageNodes(addr common.Address) []string
+	SyncNode2Address(common.Address, string, string) error
+	GetAddressByNode(string) string
+
+	AddAlreadyBackStack(backStack common.AlreadyBackStake) bool
+	GetAlreadyBackStakeList() (bool, common.BackStakeList)
+	SetAlreadyBackStakeList(common.BackStakeList) bool
+	IsAlreadyBackStake(addr common.Address) bool
+
+	SynchronizeShareKey(common.Address, types.SynchronizeShareKey) bool
+
+	UpdateFileSharePublicKey(common.Address, string) bool
+	UnlockSharedKey(common.Address, string) bool
+	GetSharedFile(common.Address, string) types.SynchronizeShareKey
+	UpdateBucketApplyPrice(common.Address, *hexutil.Big) bool
+	GetBucketApplyPrice() *big.Int
+
+	UpdateTrafficApplyPrice(common.Address, *hexutil.Big) bool
+	GetTrafficApplyPrice() *big.Int
+
+	UpdateStakePerNodePrice(common.Address, *hexutil.Big) bool
+	GetStakePerNodePrice() *big.Int
+
+	GetGenaroPrice() *types.GenaroPrice
+	SetGenaroPrice(genaroPrice types.GenaroPrice) bool
+	UpdateOneDayGesCost(common.Address, *hexutil.Big) bool
+	UpdateOneDaySyncLogGsaCost(common.Address, *hexutil.Big) bool
+
+	GetOneDayGesCost() *big.Int
+	GetOneDaySyncLogGsaCost() *big.Int
+
+	AddLastRootState(statehash common.Hash, blockNumber uint64) bool
+	SetLastSynBlock(blockNumber uint64, blockHash common.Hash) bool
+	GetLastSynState() *types.LastSynState
+
+	UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) bool
+	GetMainAccount(subAccount common.Address) *common.Address
+	IsBindingAccount(account common.Address) bool
+	GetSubAccountsCount(mainAccount common.Address) int
+	IsBindingSubAccount(account common.Address) bool
+	IsBindingMainAccount(account common.Address) bool
+	DelSubAccountBinding(subAccount common.Address) bool
+	DelMainAccountBinding(mainAccount common.Address) []common.Address
+	GetMainAccounts() map[common.Address][]common.Address
+
+	AddAccountInForbidBackStakeList(address common.Address) bool
+	DelAccountInForbidBackStakeList(address common.Address) bool
+	IsAccountExistInForbidBackStakeList(address common.Address) bool
+	GetForbidBackStakeList() types.ForbidBackStakeList
+
+	UnbindNode(common.Address, string) error
+	UbindNode2Address(common.Address, string) error
+
+	GetRewardsValues() *types.RewardsValues
+	SetRewardsValues(rewardsValues types.RewardsValues) bool
+
+	PromissoryNotesWithdrawCash(common.Address, uint64) uint64
+	GetPromissoryNotes(address common.Address) types.PromissoryNotes
+	AddPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
+	DelPromissoryNote(address common.Address, promissoryNote types.PromissoryNote) bool
+
+	GetOptionTxTable(common.Hash, uint64) *types.OptionTxTable
+	GetOptionTxTableByAddress(common.Address) *types.OptionTxTable
+	DelTxInOptionTxTable(common.Hash, uint64) bool
+	AddTxInOptionTxTable(common.Hash, types.PromissoryNotesOptionTx, uint64) bool
+	SetTxStatusInOptionTxTable(common.Hash, bool, uint64) bool
+	BuyPromissoryNotes(common.Hash, common.Address, uint64) types.PromissoryNotesOptionTx
+	CarriedOutPromissoryNotes(common.Hash, common.Address, uint64) types.PromissoryNotesOptionTx
+	TurnBuyPromissoryNotes(common.Hash, *hexutil.Big, common.Address, uint64) bool
+	GetBeforPromissoryNotesNum(common.Address, uint64) uint64
+
+	// 别名
+	GetNameAccount(name string) (addr common.Address, err error)
+	SetNameAccount(name string, addr common.Address) (err error)
+	IsNameAccountExist(name string) (bool, error)
+	HasName(common.Address, string) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM

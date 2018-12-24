@@ -25,9 +25,11 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 	"github.com/GenaroNetwork/Genaro-Core/event"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/metrics"
@@ -61,6 +63,10 @@ var (
 	// ErrInsufficientFunds is returned if the total cost of executing a transaction
 	// is higher than the balance of the user's account.
 	ErrInsufficientFunds = errors.New("insufficient funds for gas * price + value")
+
+	// ErrInsufficientFundsForSpecialTx is returned if the total cost of executing a transaction
+	// is higher than the balance of the user's account.
+	ErrInsufficientFundsForSpecialTx = errors.New("insufficient funds for special transaction except gas * price + value")
 
 	// ErrIntrinsicGas is returned if the transaction is specified to use less gas
 	// than required to start the invocation.
@@ -586,6 +592,30 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if pool.currentState.GetBalance(from).Cmp(tx.Cost()) < 0 {
 		return ErrInsufficientFunds
 	}
+
+	var s types.SpecialTxInput
+	bucketsMap := make(map[string]interface{})
+	if nil != tx.To() {
+		if common.SpecialSyncAddress == *tx.To() {
+			err := pool.dispatchHandlerValidateTx(tx.Data(), from)
+			if err != nil {
+				return err
+			}
+
+			json.Unmarshal(tx.Data(), &s)
+			if s.Type.ToInt().Uint64() == common.SpecialTxBucketSupplement.Uint64() {
+				bucketsMap, _ = pool.currentState.GetBuckets(common.HexToAddress(s.Address))
+			}
+		}
+	}
+
+	currentPrice := pool.currentState.GetGenaroPrice()
+	totalCost := new(big.Int).Add(tx.Cost(), tx.SpecialCost(currentPrice, bucketsMap))
+	//log.Info(fmt.Sprintf("total cost:%s", totalCost.String()))
+	if pool.currentState.GetBalance(from).Cmp(totalCost) < 0 {
+		return ErrInsufficientFundsForSpecialTx
+	}
+
 	intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, pool.homestead)
 	if err != nil {
 		return err
@@ -594,6 +624,90 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrIntrinsicGas
 	}
 	return nil
+}
+
+func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Address) error {
+	var err error
+	var s types.SpecialTxInput
+	err = json.Unmarshal(input, &s)
+	if err != nil {
+		return errors.New("special tx error： the extraData parameters of the wrong format")
+	}
+
+	if nil == s.Type {
+		return errors.New("special tx error: miss param [type]")
+	}
+
+	switch s.Type.ToInt().Uint64() {
+	case common.SpecialTxTypeStakeSync.Uint64():
+		return vm.CheckStakeTx(s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxTypeHeftSync.Uint64():
+		return vm.CheckSyncHeftTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxTypeSpaceApply.Uint64():
+		return vm.CheckApplyBucketTx(s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxBucketSupplement.Uint64():
+		return vm.CheckBucketSupplement(s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxTypeMortgageInit.Uint64():
+		return vm.CheckspecialTxTypeMortgageInitParameter(s, s.SpecialTxTypeMortgageInit.FromAccount)
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64():
+		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxTypeTrafficApply.Uint64():
+		return vm.CheckTrafficTx(s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxTypeSyncNode.Uint64():
+		return vm.CheckSyncNodeTx(caller, s, pool.currentState)
+	case common.SynchronizeShareKey.Uint64():
+		return vm.CheckSynchronizeShareKeyParameter(s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64():
+		return vm.CheckSyncFileSharePublicKeyTx(s, pool.currentState, pool.chainconfig.Genaro)
+	case common.UnlockSharedKey.Uint64():
+		return vm.CheckUnlockSharedKeyParameter(s, pool.currentState, caller)
+	case common.SpecialTxTypePunishment.Uint64():
+		return vm.CheckPunishmentTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxTypeBackStake.Uint64():
+		return vm.CheckBackStakeTx(caller, pool.currentState)
+	case common.SpecialTxTypePriceRegulation.Uint64():
+		return vm.CheckPriceRegulation(caller, s)
+	case common.SpecialTxSynState.Uint64():
+		return vm.CheckSynStateTx(caller, pool.currentState)
+	case common.SpecialTxUnbindNode.Uint64():
+		existNodes := pool.currentState.GetStorageNodes(caller)
+		return vm.CheckUnbindNodeTx(caller, s, existNodes)
+	case common.SpecialTxAccountBinding.Uint64():
+		return vm.CheckAccountBindingTx(caller, s, pool.currentState)
+	case common.SpecialTxAccountCancelBinding.Uint64():
+		_, err := vm.CheckAccountCancelBindingTx(caller, s, pool.currentState)
+		return err
+	case common.SpecialTxAddAccountInForbidBackStakeList.Uint64():
+		return vm.CheckAddAccountInForbidBackStakeListTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxDelAccountInForbidBackStakeList.Uint64():
+		return vm.CheckDelAccountInForbidBackStakeListTx(caller, s, pool.currentState, pool.chainconfig.Genaro)
+	case common.SpecialTxSetGlobalVar.Uint64():
+		return vm.CheckSetGlobalVar(caller, s, pool.chainconfig.Genaro)
+	case common.SpecialTxAddCoinpool.Uint64():
+		return vm.CheckAddCoinpool(caller, s, pool.currentState)
+	case common.SpecialTxRegisterName.Uint64():
+		return vm.CheckSetNameTxStatus(caller, s, pool.currentState)
+	case common.SpecialTxTransferName.Uint64():
+		return vm.CheckTransferNameTxStatus(caller, s, pool.currentState)
+	case common.SpecialTxUnsubscribeName.Uint64():
+		return vm.CheckUnsubscribeNameTxStatus(caller, s, pool.currentState)
+	case common.SpecialTxPublishOption.Uint64():
+		return vm.CheckPublishOption(caller, s, pool.currentState, pool.chain.CurrentBlock().Number())
+	case common.SpecialTxRevoke.Uint64():
+		return vm.CheckPromissoryNoteRevoke(caller, s, pool.currentState, pool.chain.CurrentBlock().Number(), pool.chainconfig.Genaro.OptionTxMemorySize)
+	case common.SpecialTxSetOptionTxStatus.Uint64():
+		return vm.CheckSetOptionTxStatus(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
+	case common.SpecialTxBuyPromissoryNotes.Uint64():
+		return vm.CheckBuyPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
+	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
+		return vm.CheckCarriedOutPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
+		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
+	case common.SpecialTxWithdrawCash.Uint64():
+		return vm.WithdrawCash(caller, pool.currentState, pool.chain.CurrentBlock().Number())
+
+	}
+	return errors.New("undefined type of special transaction")
 }
 
 // add validates a transaction and inserts it into the non-executable queue for

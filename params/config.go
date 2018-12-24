@@ -24,8 +24,9 @@ import (
 )
 
 var (
-	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Mainnet genesis hash to enforce below configs on
-	TestnetGenesisHash = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d") // Testnet genesis hash to enforce below configs on
+	MainnetGenesisHash   = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3") // Mainnet genesis hash to enforce below configs on
+	TestnetGenesisHash   = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d") // Testnet genesis hash to enforce below configs on
+	GenaronetGenesisHash = common.HexToHash("0xc0aa984d1548c40a8b9f25d4346659ebedf50b10816005fcebe0f2fbf5236c48") // Genaronet genesis hash to enforce below configs on
 )
 
 var (
@@ -41,7 +42,32 @@ var (
 		EIP158Block:         big.NewInt(2675000),
 		ByzantiumBlock:      big.NewInt(4370000),
 		ConstantinopleBlock: nil,
-		Ethash:              new(EthashConfig),
+		Genaro: &GenaroConfig{
+			Epoch:            2000, //the number of blocks in one committee term
+			BlockInterval:    1,    //a peer create BlockInterval blocks one time
+			ElectionPeriod:   1,    //a committee list write time
+			ValidPeriod:      1,    //a written committee list waiting time to come into force
+			CurrencyRates:    5,    //interest rates of coin
+			CommitteeMaxSize: 101,  //max number of committee member
+		},
+	}
+
+	GenaroChainConfig = &ChainConfig{
+		ChainId:        big.NewInt(300),
+		HomesteadBlock: big.NewInt(1),
+		EIP150Block:    big.NewInt(2),
+		EIP150Hash:     common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
+		EIP155Block:    big.NewInt(3),
+		ByzantiumBlock: big.NewInt(4),
+		Genaro: &GenaroConfig{
+			Epoch:            86400, //the number of blocks in one committee term
+			Period:           1,
+			BlockInterval:    10,  //a peer create BlockInterval blocks one time
+			ElectionPeriod:   1,   //a committee list write time
+			ValidPeriod:      1,   //a written committee list waiting time to come into force
+			CurrencyRates:    5,   //interest rates of coin
+			CommitteeMaxSize: 101, //max number of committee member
+		},
 	}
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
@@ -82,16 +108,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -121,6 +147,7 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+	Genaro *GenaroConfig `json:"genaro,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -142,6 +169,25 @@ func (c *CliqueConfig) String() string {
 	return "clique"
 }
 
+// GenaroConfig is the consensus engine configs for SPOR/PoS.
+type GenaroConfig struct {
+	Epoch               uint64 `json:"epoch"`               //the number of blocks in one committee term
+	Period              uint64 `json:"period"`              // Number of seconds between blocks to enforce
+	BlockInterval       uint64 `json:"blockInterval"`       //a peer create BlockInterval blocks one time
+	ElectionPeriod      uint64 `json:"electionPeriod"`      //a committee list write time
+	ValidPeriod         uint64 `json:"validPeriod"`         //a written committee list waiting time to come into force
+	CurrencyRates       uint64 `json:"currencyRates"`       //interest rates of coin
+	CommitteeMaxSize    uint64 `json:"committeeMaxSize"`    //max number of committee member
+	OptionTxMemorySize  uint64 `json:"optionTxMemorySize"`  //the number of save option tx
+	PromissoryNotePrice uint64 `json:"PromissoryNotePrice"` // Promissory Note Price
+	OfficialAddress     string `json:"OfficialAddress"`
+}
+
+// String implements the stringer interface, returning the consensus engine details.
+func (c *GenaroConfig) String() string {
+	return "genaro"
+}
+
 // String implements the fmt.Stringer interface.
 func (c *ChainConfig) String() string {
 	var engine interface{}
@@ -150,6 +196,8 @@ func (c *ChainConfig) String() string {
 		engine = c.Ethash
 	case c.Clique != nil:
 		engine = c.Clique
+	case c.Genaro != nil:
+		engine = c.Genaro
 	default:
 		engine = "unknown"
 	}

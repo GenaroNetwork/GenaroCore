@@ -17,12 +17,17 @@
 package vm
 
 import (
+	"encoding/json"
+	"errors"
 	"math/big"
 	"sync/atomic"
 	"time"
 
+	"fmt"
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
 )
 
@@ -35,7 +40,8 @@ type (
 	TransferFunc    func(StateDB, common.Address, common.Address, *big.Int)
 	// GetHashFunc returns the nth block hash in the blockchain
 	// and is used by the BLOCKHASH EVM op code.
-	GetHashFunc func(uint64) common.Hash
+	GetHashFunc     func(uint64) common.Hash
+	GetSentinelFunc func(uint64) uint64
 )
 
 // run runs the given contract and takes care of running precompiles with a fallback to the byte code interpreter.
@@ -149,7 +155,6 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 	if !evm.Context.CanTransfer(evm.StateDB, caller.Address(), value) {
 		return nil, gas, ErrInsufficientBalance
 	}
-
 	var (
 		to       = AccountRef(addr)
 		snapshot = evm.StateDB.Snapshot()
@@ -160,11 +165,28 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 			precompiles = PrecompiledContractsByzantium
 		}
 		if precompiles[addr] == nil && evm.ChainConfig().IsEIP158(evm.BlockNumber) && value.Sign() == 0 {
+			// Calling a non existing account, don't do antything, but ping the tracer
+			if evm.vmConfig.Debug && evm.depth == 0 {
+				evm.vmConfig.Tracer.CaptureStart(caller.Address(), addr, false, input, gas, value)
+				evm.vmConfig.Tracer.CaptureEnd(ret, 0, 0, nil)
+			}
 			return nil, gas, nil
 		}
 		evm.StateDB.CreateAccount(addr)
 	}
-	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
+
+	//If transactions are special, they are treated separately according to their types.
+	if to.Address() == common.SpecialSyncAddress {
+		err := dispatchHandler(evm, caller.Address(), input)
+		if err != nil {
+			return nil, gas, err
+		}
+
+		OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+		evm.Transfer(evm.StateDB, caller.Address(), OfficialAddress, value)
+	} else {
+		evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
+	}
 
 	// Initialise a new contract and set the code that is to be used by the EVM.
 	// The contract is a scoped environment for this execution context only.
@@ -193,6 +215,729 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		}
 	}
 	return ret, contract.Gas, err
+}
+
+func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
+	var err error
+	var s types.SpecialTxInput
+	err = json.Unmarshal(input, &s)
+	if err != nil {
+		return errors.New("special tx error： the extraData parameters of the wrong format")
+	}
+	switch s.Type.ToInt().Uint64() {
+	case common.SpecialTxTypeStakeSync.Uint64():
+		err = updateStake(evm, s, caller)
+	case common.SpecialTxTypeHeftSync.Uint64():
+		err = updateHeft(evm, s, caller)
+	case common.SpecialTxTypeSpaceApply.Uint64():
+		err = updateStorageProperties(evm, s, caller)
+	case common.SpecialTxBucketSupplement.Uint64():
+		err = bucketSupplement(evm, s, caller)
+	case common.SpecialTxTypeMortgageInit.Uint64():
+		err = specialTxTypeMortgageInit(evm, s, caller)
+	case common.SpecialTxTypeSyncSidechainStatus.Uint64():
+		err = SpecialTxTypeSyncSidechainStatus(evm, s, caller)
+	case common.SpecialTxTypeTrafficApply.Uint64():
+		err = updateTraffic(evm, s, caller)
+	case common.SpecialTxTypeSyncNode.Uint64():
+		err = updateStakeNode(evm, s, caller)
+	case common.SynchronizeShareKey.Uint64():
+		err = SynchronizeShareKey(evm, s, caller)
+	case common.SpecialTxTypeSyncFielSharePublicKey.Uint64():
+		err = updateFileShareSecretKey(evm, s, caller)
+	case common.UnlockSharedKey.Uint64():
+		err = UnlockSharedKey(evm, s, caller)
+	case common.SpecialTxTypePunishment.Uint64():
+		err = userPunishment(evm, s, caller)
+	case common.SpecialTxTypeBackStake.Uint64():
+		err = userBackStake(evm, caller)
+	case common.SpecialTxTypePriceRegulation.Uint64():
+		err = genaroPriceRegulation(evm, s, caller)
+	case common.SpecialTxSynState.Uint64():
+		err = SynState(evm, s, caller)
+	case common.SpecialTxUnbindNode.Uint64():
+		err = unbindNode(evm, s, caller)
+	case common.SpecialTxAccountBinding.Uint64():
+		err = accountBinding(evm, s, caller)
+	case common.SpecialTxAccountCancelBinding.Uint64():
+		err = accountCancelBinding(evm, s, caller)
+	case common.SpecialTxAddAccountInForbidBackStakeList.Uint64():
+		err = addAccountInForbidBackStakeList(evm, s, caller)
+	case common.SpecialTxDelAccountInForbidBackStakeList.Uint64():
+		err = delAccountInForbidBackStakeList(evm, s, caller)
+	case common.SpecialTxSetGlobalVar.Uint64():
+		err = setGlobalVar(evm, s, caller)
+	case common.SpecialTxAddCoinpool.Uint64():
+		err = addCoinpool(evm, s, caller)
+	case common.SpecialTxRegisterName.Uint64():
+		err = registerName(evm, s, caller)
+	case common.SpecialTxTransferName.Uint64():
+		err = transferNameTxStatus(evm, s, caller)
+	case common.SpecialTxUnsubscribeName.Uint64():
+		err = unsubscribeNameTxStatus(evm, s, caller)
+	case common.SpecialTxRevoke.Uint64():
+		err = revokePromissoryNotesTx(evm, s, caller)
+	case common.SpecialTxWithdrawCash.Uint64():
+		err = PromissoryNotesWithdrawCash(evm, caller)
+	case common.SpecialTxPublishOption.Uint64():
+		err = publishOption(evm, s, caller)
+	case common.SpecialTxSetOptionTxStatus.Uint64():
+		err = setOptionTxStatus(evm, s, caller)
+	case common.SpecialTxBuyPromissoryNotes.Uint64():
+		err = buyPromissoryNotes(evm, s, caller)
+	case common.SpecialTxCarriedOutPromissoryNotes.Uint64():
+		err = CarriedOutPromissoryNotes(evm, s, caller)
+	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
+		err = turnBuyPromissoryNotes(evm, s, caller)
+	default:
+		err = errors.New("undefined type of special transaction")
+	}
+
+	if err != nil && common.SpecialTxSynState.Uint64() != s.Type.ToInt().Uint64() {
+		log.Info(fmt.Sprintf("special transaction error: %s", err))
+		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
+	}
+	return err
+}
+
+func registerName(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	err := (*evm).StateDB.SetNameAccount(s.Message, caller)
+	if err != nil {
+		return err
+	}
+
+	var name types.AccountName
+	name.SetString(s.Message)
+	priceBig := name.GetBigPrice()
+
+	(*evm).StateDB.SubBalance(caller, priceBig)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, priceBig)
+
+	return nil
+}
+
+func transferNameTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckTransferNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	transferTarget := common.HexToAddress(s.Address)
+	err := (*evm).StateDB.SetNameAccount(s.Message, transferTarget)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func unsubscribeNameTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckUnsubscribeNameTxStatus(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+
+	err := (*evm).StateDB.SetNameAccount(s.Message, common.Address{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setOptionTxStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetOptionTxStatus(caller, s, (*evm).StateDB, (*evm).chainConfig.Genaro.OptionTxMemorySize); err != nil {
+		return err
+	}
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	(*evm).StateDB.SetTxStatusInOptionTxTable(s.OrderId, s.IsSell, optionTxMemorySize)
+
+	return nil
+}
+
+func publishOption(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckPublishOption(caller, s, (*evm).StateDB, (*evm).BlockNumber); err != nil {
+		return err
+	}
+	var promissoryNote types.PromissoryNote
+	promissoryNote.RestoreBlock = s.RestoreBlock
+	promissoryNote.Num = s.TxNum
+
+	optionHash := types.GenOptionTxHash(caller, (*evm).StateDB.GetNonce(caller))
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	if (*evm).StateDB.DelPromissoryNote(caller, promissoryNote) {
+		var promissoryNotesOptionTx types.PromissoryNotesOptionTx
+		promissoryNotesOptionTx.TxNum = s.TxNum
+		promissoryNotesOptionTx.RestoreBlock = s.RestoreBlock
+		promissoryNotesOptionTx.PromissoryNotesOwner = caller
+		promissoryNotesOptionTx.IsSell = true
+		promissoryNotesOptionTx.PromissoryNoteTxPrice = s.PromissoryNoteTxPrice.ToInt()
+		promissoryNotesOptionTx.OptionPrice = s.OptionPrice.ToInt()
+		(*evm).StateDB.AddTxInOptionTxTable(optionHash, promissoryNotesOptionTx, optionTxMemorySize)
+	}
+
+	return nil
+}
+
+func revokePromissoryNotesTx(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckPromissoryNoteRevoke(caller, s, (*evm).StateDB, (*evm).BlockNumber, (*evm).chainConfig.Genaro.OptionTxMemorySize); err != nil {
+		return err
+	}
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	optionTxTable := (*evm).StateDB.GetOptionTxTable(s.OrderId, optionTxMemorySize)
+	promissoryNotesOptionTx := (*optionTxTable)[s.OrderId]
+
+	if (*evm).StateDB.DelTxInOptionTxTable(s.OrderId, optionTxMemorySize) {
+		var promissoryNote types.PromissoryNote
+		promissoryNote.Num = promissoryNotesOptionTx.TxNum
+		promissoryNote.RestoreBlock = promissoryNotesOptionTx.RestoreBlock
+		(*evm).StateDB.AddPromissoryNote(caller, promissoryNote)
+	}
+
+	return nil
+}
+
+func delAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckDelAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+	account := common.HexToAddress(s.Address)
+	ok := (*evm).StateDB.DelAccountInForbidBackStakeList(account)
+	if !ok {
+		return errors.New("Delete Account In Forbid BackStake List failed")
+	}
+	return nil
+}
+
+func addAccountInForbidBackStakeList(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckAddAccountInForbidBackStakeListTx(caller, s, (*evm).StateDB, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+	account := common.HexToAddress(s.Address)
+	ok := (*evm).StateDB.AddAccountInForbidBackStakeList(account)
+	if !ok {
+		return errors.New("Add Account In Forbid BackStake List failed")
+	}
+	return nil
+}
+
+func unbindNode(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	existNodes := (*evm).StateDB.GetStorageNodes(caller)
+	if err := CheckUnbindNodeTx(caller, s, existNodes); err != nil {
+		return err
+	}
+
+	var err error = nil
+	err = (*evm).StateDB.UnbindNode(caller, s.NodeID)
+
+	if err == nil {
+		node2UserAccountIndexAddress := common.StakeNode2StakeAddress
+		(*evm).StateDB.UbindNode2Address(node2UserAccountIndexAddress, s.NodeID)
+	}
+
+	return nil
+}
+
+func accountBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	err := CheckAccountBindingTx(caller, s, (*evm).StateDB)
+	if err != nil {
+		return err
+	}
+
+	mainAddr := common.HexToAddress(s.Address)
+	subAddr := common.HexToAddress(s.Message)
+	if !(*evm).StateDB.UpdateAccountBinding(mainAddr, subAddr) {
+		return errors.New("binding failed")
+	}
+
+	if !(*evm).StateDB.DelCandidate(subAddr) {
+		return errors.New("DelCandidate failed")
+	}
+
+	return nil
+}
+
+func accountCancelBinding(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	t, err := CheckAccountCancelBindingTx(caller, s, (*evm).StateDB)
+	if err != nil {
+		return err
+	}
+
+	switch t {
+	case 1:
+		subAccounts := (*evm).StateDB.DelMainAccountBinding(caller)
+		for _, subAccount := range subAccounts {
+			(*evm).StateDB.AddCandidate(subAccount)
+		}
+	case 2:
+		ok := (*evm).StateDB.DelSubAccountBinding(caller)
+		if ok {
+			(*evm).StateDB.AddCandidate(caller)
+		}
+	case 3:
+		subAddr := common.HexToAddress(s.Address)
+		ok := (*evm).StateDB.DelSubAccountBinding(subAddr)
+		if ok {
+			(*evm).StateDB.AddCandidate(subAddr)
+		}
+	default:
+		return errors.New("Account Cancel Binding failed")
+	}
+	return nil
+}
+
+func genaroPriceRegulation(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckPriceRegulation(caller, s); err != nil {
+		return err
+	}
+
+	if caller != common.GenaroPriceAddress {
+		return errors.New("caller address of this transaction is not invalid")
+	}
+
+	if s.StakeValuePerNode != nil {
+		if ok := (*evm).StateDB.UpdateStakePerNodePrice(caller, s.StakeValuePerNode); !ok {
+			return errors.New("update the price of stakePerNode fail")
+		}
+	}
+
+	if s.BucketApplyGasPerGPerDay != nil {
+		if ok := (*evm).StateDB.UpdateBucketApplyPrice(caller, s.BucketApplyGasPerGPerDay); !ok {
+			return errors.New("update the price of bucketApply fail")
+		}
+	}
+
+	if s.TrafficApplyGasPerG != nil {
+		if ok := (*evm).StateDB.UpdateTrafficApplyPrice(caller, s.TrafficApplyGasPerG); !ok {
+			return errors.New("update the price of trafficApply fail")
+		}
+	}
+
+	if s.OneDayMortgageGes != nil {
+		if ok := (*evm).StateDB.UpdateOneDayGesCost(caller, s.OneDayMortgageGes); !ok {
+			return errors.New("update the price of OneDayGesCost fail")
+		}
+	}
+
+	if s.OneDaySyncLogGsaCost != nil {
+		if ok := (*evm).StateDB.UpdateOneDaySyncLogGsaCost(caller, s.OneDaySyncLogGsaCost); !ok {
+			return errors.New("update the price of OneDaySyncLogGsaCost fail")
+		}
+	}
+
+	return nil
+}
+
+func addCoinpool(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckAddCoinpool(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	rewardsValues := (*evm).StateDB.GetRewardsValues()
+	rewardsValues.SurplusCoin.Add(rewardsValues.SurplusCoin, s.AddCoin.ToInt())
+	ok := (*evm).StateDB.SetRewardsValues(*rewardsValues)
+	if ok {
+		(*evm).StateDB.SubBalance(caller, s.AddCoin.ToInt())
+		return nil
+	}
+	return errors.New("addCoinpool fail")
+}
+
+func setGlobalVar(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetGlobalVar(caller, s, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+	genaroPrice := (*evm).StateDB.GetGenaroPrice()
+	if s.StorageRewardsRatio != 0 {
+		genaroPrice.StorageRewardsRatio = s.StorageRewardsRatio
+	}
+	if s.CoinRewardsRatio != 0 {
+		genaroPrice.CoinRewardsRatio = s.CoinRewardsRatio
+	}
+	if s.RatioPerYear != 0 {
+		genaroPrice.RatioPerYear = s.RatioPerYear
+	}
+	if s.BackStackListMax != 0 {
+		genaroPrice.BackStackListMax = s.BackStackListMax
+	}
+	if s.CommitteeMinStake != 0 {
+		genaroPrice.CommitteeMinStake = s.CommitteeMinStake
+	}
+	if s.MinStake != 0 {
+		genaroPrice.MinStake = s.MinStake
+	}
+	if s.MaxBinding != 0 {
+		genaroPrice.MaxBinding = s.MaxBinding
+	}
+	if len(s.SynStateAccount) > 0 {
+		genaroPrice.SynStateAccount = s.SynStateAccount
+	}
+
+	if len(s.HeftAccount) > 0 {
+		genaroPrice.HeftAccount = s.HeftAccount
+	}
+
+	if len(s.BindingAccount) > 0 {
+		genaroPrice.BindingAccount = s.BindingAccount
+	}
+
+	ok := (*evm).StateDB.SetGenaroPrice(*genaroPrice)
+	if !ok {
+		return errors.New("setGlobalVar fail")
+	}
+	return nil
+}
+
+func SynState(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	err := CheckSynStateTx(caller, (*evm).StateDB)
+	if err != nil {
+		return err
+	}
+	lastSynState := (*evm).StateDB.GetLastSynState()
+	blockHash := common.HexToHash(s.Message)
+	blockNum, ok := lastSynState.LastRootStates[blockHash]
+	if ok {
+		(*evm).StateDB.SetLastSynBlock(blockNum, blockHash)
+		return nil
+	} else {
+		return errors.New("SynState fail")
+	}
+}
+
+func userBackStake(evm *EVM, caller common.Address) error {
+	err := CheckBackStakeTx(caller, (*evm).StateDB)
+	if err != nil {
+		return err
+	}
+
+	var backStake = common.AlreadyBackStake{
+		Addr:            caller,
+		BackBlockNumber: evm.BlockNumber.Uint64(),
+	}
+	ok := (*evm).StateDB.AddAlreadyBackStack(backStake)
+	if !ok {
+		return errors.New("userBackStake fail")
+	}
+	ok = (*evm).StateDB.DelCandidate(caller)
+	if !ok {
+		return errors.New("DelCandidate fail")
+	}
+	return nil
+}
+
+func userPunishment(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+
+	if err := CheckPunishmentTx(caller, s, evm.StateDB, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+	adress := common.HexToAddress(s.Address)
+	var actualPunishment uint64
+	var ok bool
+	if ok, actualPunishment = (*evm).StateDB.DeleteStake(adress, s.Stake, evm.BlockNumber.Uint64()); !ok {
+		return errors.New("delete user's stake fail")
+	}
+	amount := new(big.Int).Mul(common.BaseCompany, new(big.Int).SetUint64(actualPunishment))
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, amount)
+	return nil
+}
+
+func UnlockSharedKey(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckUnlockSharedKeyParameter(s, (*evm).StateDB, caller); nil != err {
+		return err
+	}
+	if !(*evm).StateDB.UnlockSharedKey(caller, s.SynchronizeShareKey.ShareKeyId) {
+		return errors.New("update  chain UnlockSharedKey fail")
+	}
+	return nil
+}
+
+func SynchronizeShareKey(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSynchronizeShareKeyParameter(s, evm.StateDB, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+	s.SynchronizeShareKey.Status = 0
+	s.SynchronizeShareKey.FromAccount = caller
+	if !(*evm).StateDB.SynchronizeShareKey(s.SynchronizeShareKey.RecipientAddress, s.SynchronizeShareKey) {
+		return errors.New("update  chain SynchronizeShareKey fail")
+	}
+	return nil
+}
+
+func updateFileShareSecretKey(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSyncFileSharePublicKeyTx(s, evm.StateDB, evm.chainConfig.Genaro); nil != err {
+		return err
+	}
+	adress := common.HexToAddress(s.Address)
+	if !(*evm).StateDB.UpdateFileSharePublicKey(adress, s.FileSharePublicKey) {
+		return errors.New("update user's public key fail")
+	}
+	return nil
+}
+
+func updateStakeNode(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+
+	if err := CheckSyncNodeTx(caller, s, (*evm).StateDB); nil != err {
+		return err
+	}
+
+	var err error = nil
+	err = (*evm).StateDB.SyncStakeNode(caller, s.NodeID)
+
+	if err == nil {
+		node2UserAccountIndexAddress := common.StakeNode2StakeAddress
+		(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.NodeID, caller.String())
+	}
+
+	return err
+}
+
+func SpecialTxTypeSyncSidechainStatus(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, evm.StateDB, evm.chainConfig.Genaro); nil != err {
+		return err
+	}
+
+	restlt, flag := (*evm).StateDB.SpecialTxTypeSyncSidechainStatus(s.SpecialTxTypeMortgageInit.FromAccount, s.SpecialTxTypeMortgageInit)
+	if false == flag {
+		return errors.New("update cross chain SpecialTxTypeMortgageInit fail")
+	}
+	for k, v := range restlt {
+		(*evm).StateDB.AddBalance(k, v)
+	}
+	return nil
+}
+
+func specialTxTypeMortgageInit(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckspecialTxTypeMortgageInitParameter(s, caller); nil != err {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
+	sumMortgageTable := new(big.Int)
+	mortgageTable := s.SpecialTxTypeMortgageInit.MortgageTable
+	if len(mortgageTable) > 8 {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
+	zero := big.NewInt(0)
+	for _, v := range mortgageTable {
+		if v.ToInt().Cmp(zero) < 0 {
+			return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+		}
+		sumMortgageTable = sumMortgageTable.Add(sumMortgageTable, v.ToInt())
+	}
+	s.SpecialTxTypeMortgageInit.MortgagTotal = sumMortgageTable
+	if !(*evm).StateDB.SpecialTxTypeMortgageInit(caller, s.SpecialTxTypeMortgageInit) {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
+	if s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Cmp(zero) < 0 {
+		return errors.New("update  chain SpecialTxTypeMortgageInit fail")
+	}
+	temp := s.SpecialTxTypeMortgageInit.TimeLimit.ToInt().Mul(s.SpecialTxTypeMortgageInit.TimeLimit.ToInt(), big.NewInt(int64(len(mortgageTable))))
+	timeLimitGas := temp.Mul(temp, (*evm).StateDB.GetOneDayGesCost())
+
+	sumMortgageTable.Add(sumMortgageTable, timeLimitGas)
+	(*evm).StateDB.SubBalance(caller, sumMortgageTable)
+
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, timeLimitGas)
+	return nil
+}
+
+func bucketSupplement(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckBucketSupplement(s, (*evm).StateDB, (*evm).chainConfig.Genaro); err != nil {
+		return err
+	}
+
+	address := common.HexToAddress(s.Address)
+	bucketsMap, _ := (*evm).StateDB.GetBuckets(address)
+	currentPrice := (*evm).StateDB.GetGenaroPrice()
+	currentCost := s.SpecialCost(currentPrice, bucketsMap)
+	totalGas := new(big.Int).Set(&currentCost)
+	log.Info(fmt.Sprintf("evm bucketSupplement cost:%s", totalGas.String()))
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
+
+	var bucket types.BucketPropertie
+	b, _ := bucketsMap[s.BucketID]
+	bucketInDb := b.(types.BucketPropertie)
+
+	bucket.BucketId = bucketInDb.BucketId
+	bucket.Backup = bucketInDb.Backup
+	bucket.TimeStart = bucketInDb.TimeStart
+	bucket.Size = bucketInDb.Size + s.Size
+	bucket.TimeEnd = bucketInDb.TimeEnd + s.Duration
+
+	if (*evm).StateDB.UpdateBucket(address, bucket) {
+		(*evm).StateDB.SubBalance(caller, totalGas)
+		OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+		(*evm).StateDB.AddBalance(OfficialAddress, totalGas)
+	}
+	return nil
+}
+
+func updateStorageProperties(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckApplyBucketTx(s, evm.StateDB, (*evm).chainConfig.Genaro); err != nil {
+		return err
+	}
+	adress := common.HexToAddress(s.Address)
+
+	currentPrice := (*evm).StateDB.GetGenaroPrice()
+	currentCost := s.SpecialCost(currentPrice, nil)
+	totalGas := new(big.Int).Set(&currentCost)
+	log.Info(fmt.Sprintf("evm bucketApply cost:%s", totalGas.String()))
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
+
+	for _, b := range s.Buckets {
+		bucketId := b.BucketId
+		if len(bucketId) != 64 {
+			return errors.New("the length of bucketId must be 64")
+		}
+
+		if b.TimeStart >= b.TimeEnd {
+			return errors.New("endTime must larger then startTime")
+		}
+
+		if !(*evm).StateDB.UpdateBucketProperties(adress, bucketId, b.Size, b.Backup, b.TimeStart, b.TimeEnd) {
+			return errors.New("update user's bucket fail")
+		}
+	}
+
+	(*evm).StateDB.SubBalance(caller, totalGas)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, totalGas)
+
+	return nil
+}
+
+func updateHeft(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSyncHeftTx(caller, s, evm.StateDB, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+
+	adress := common.HexToAddress(s.Address)
+	if !(evm.StateDB).UpdateHeft(adress, s.Heft, evm.BlockNumber.Uint64()) {
+		return errors.New("update user's heft fail")
+	}
+	return nil
+}
+
+func updateTraffic(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+
+	if err := CheckTrafficTx(s, evm.StateDB, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+
+	adress := common.HexToAddress(s.Address)
+
+	currentPrice := (*evm).StateDB.GetGenaroPrice()
+	currentCost := s.SpecialCost(currentPrice, nil)
+	totalGas := new(big.Int).Set(&currentCost)
+	log.Info(fmt.Sprintf("evm trafficApply cost:%s", totalGas.String()))
+
+	// Fail if we're trying to use more than the available balance
+	if !evm.Context.CanTransfer(evm.StateDB, caller, totalGas) {
+		return ErrInsufficientBalance
+	}
+
+	if !(*evm).StateDB.UpdateTraffic(adress, s.Traffic) {
+		return errors.New("update user's teraffic fail")
+	}
+
+	(*evm).StateDB.SubBalance(caller, totalGas)
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	(*evm).StateDB.AddBalance(OfficialAddress, totalGas)
+
+	return nil
+}
+
+func updateStake(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckStakeTx(s, evm.StateDB, evm.chainConfig.Genaro); err != nil {
+		return err
+	}
+
+	// the unit of stake is GNX， one stake means one GNX
+	currentCost := s.SpecialCost(nil, nil)
+	amount := new(big.Int).Set(&currentCost)
+
+	// judge if there is enough balance to stake（balance must larger than stake value)
+	if !evm.Context.CanTransfer(evm.StateDB, caller, amount) {
+		return ErrInsufficientBalance
+	}
+
+	adress := common.HexToAddress(s.Address)
+	if !(*evm).StateDB.UpdateStake(adress, s.Stake, evm.BlockNumber.Uint64()) {
+		return errors.New("update sentinel's stake fail")
+
+	}
+	// 加入候选名单
+	if !(*evm).StateDB.AddCandidate(adress) {
+		return errors.New("add candidate fail")
+	}
+	(*evm).StateDB.SubBalance(caller, amount)
+	return nil
+}
+
+func PromissoryNotesWithdrawCash(evm *EVM, caller common.Address) error {
+	blockNumber := evm.BlockNumber.Uint64()
+	withdrawCashNum := (*evm).StateDB.PromissoryNotesWithdrawCash(caller, blockNumber)
+	if withdrawCashNum <= 0 {
+		return errors.New("WithdrawCash error")
+	}
+	promissoryPrice := big.NewInt(int64(evm.chainConfig.Genaro.PromissoryNotePrice * withdrawCashNum))
+	promissoryPrice.Mul(promissoryPrice, common.BaseCompany)
+	(*evm).StateDB.AddBalance(caller, promissoryPrice)
+	return nil
+}
+
+func buyPromissoryNotes(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.BuyPromissoryNotes(s.OrderId, caller, optionTxMemorySize)
+	if result.TxNum > 0 {
+		//result.OptionPrice.Mul(result.OptionPrice,big.NewInt(int64(result.TxNum)))
+		//result.OptionPrice.Mul(result.OptionPrice,common.BaseCompany)
+		(*evm).StateDB.AddBalance(result.PromissoryNotesOwner, result.OptionPrice)
+		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
+func CarriedOutPromissoryNotes(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.CarriedOutPromissoryNotes(s.OrderId, caller, optionTxMemorySize)
+	if result.TxNum > 0 {
+		result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice, big.NewInt(int64(result.TxNum)))
+		//result.PromissoryNoteTxPrice.Mul(result.PromissoryNoteTxPrice,common.BaseCompany)
+		(*evm).StateDB.AddBalance(result.PromissoryNotesOwner, result.OptionPrice)
+		(*evm).StateDB.SubBalance(caller, result.OptionPrice)
+	}
+	return nil
+}
+
+func turnBuyPromissoryNotes(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+
+	optionTxMemorySize := (*evm).chainConfig.Genaro.OptionTxMemorySize
+
+	result := (*evm).StateDB.TurnBuyPromissoryNotes(s.OrderId, s.OptionPrice, caller, optionTxMemorySize)
+	if false == result {
+		errors.New("update error")
+	}
+	return nil
 }
 
 // CallCode executes the contract associated with the addr with the given input

@@ -35,7 +35,9 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/event"
 	"github.com/GenaroNetwork/Genaro-Core/log"
 	"github.com/GenaroNetwork/Genaro-Core/params"
+	"github.com/pkg/errors"
 	"gopkg.in/fatih/set.v0"
+	"strings"
 )
 
 const (
@@ -50,6 +52,8 @@ const (
 	// chainSideChanSize is the size of channel listening to ChainSideEvent.
 	chainSideChanSize = 10
 )
+
+var SynError = errors.New("need SynState")
 
 // Agent can register themself with the worker
 type Agent interface {
@@ -125,6 +129,9 @@ type worker struct {
 	// atomic status counters
 	mining int32
 	atWork int32
+
+	// atomic work status
+	workIdx int32
 }
 
 func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase common.Address, eth Backend, mux *event.TypeMux) *worker {
@@ -150,9 +157,11 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, coinbase com
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
+
 	go worker.update()
 
 	go worker.wait()
+
 	worker.commitNewWork()
 
 	return worker
@@ -250,7 +259,10 @@ func (self *worker) update() {
 		select {
 		// Handle ChainHeadEvent
 		case <-self.chainHeadCh:
-			self.commitNewWork()
+			err := self.commitNewWork()
+			if err != nil && strings.EqualFold(err.Error(), SynError.Error()) {
+				atomic.StoreInt32(&self.workIdx, 0)
+			}
 
 		// Handle ChainSideEvent
 		case ev := <-self.chainSideCh:
@@ -266,7 +278,6 @@ func (self *worker) update() {
 				acc, _ := types.Sender(self.current.signer, ev.Tx)
 				txs := map[common.Address]types.Transactions{acc: {ev.Tx}}
 				txset := types.NewTransactionsByPriceAndNonce(self.current.signer, txs)
-
 				self.current.commitTransactions(self.mux, txset, self.chain, self.coinbase)
 				self.currentMu.Unlock()
 			} else {
@@ -289,7 +300,7 @@ func (self *worker) update() {
 
 func (self *worker) wait() {
 	for {
-		mustCommitNewWork := true
+		//mustCommitNewWork := true
 		for result := range self.recv {
 			atomic.AddInt32(&self.atWork, -1)
 
@@ -315,10 +326,10 @@ func (self *worker) wait() {
 				continue
 			}
 			// check if canon block and write transactions
-			if stat == core.CanonStatTy {
-				// implicit by posting ChainHeadEvent
-				mustCommitNewWork = false
-			}
+			//if stat == core.CanonStatTy {
+			//	// implicit by posting ChainHeadEvent
+			//	mustCommitNewWork = false
+			//}
 			// Broadcast the block and announce chain insertion event
 			self.mux.Post(core.NewMinedBlockEvent{Block: block})
 			var (
@@ -334,9 +345,9 @@ func (self *worker) wait() {
 			// Insert the block into the set of pending ones to wait for confirmations
 			self.unconfirmed.Insert(block.NumberU64(), block.Hash())
 
-			if mustCommitNewWork {
-				self.commitNewWork()
-			}
+			//if mustCommitNewWork {
+			//	self.commitNewWork()
+			//}
 		}
 	}
 }
@@ -386,13 +397,16 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 	return nil
 }
 
-func (self *worker) commitNewWork() {
+func (self *worker) commitNewWork() error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.uncleMu.Lock()
 	defer self.uncleMu.Unlock()
 	self.currentMu.Lock()
 	defer self.currentMu.Unlock()
+
+	// set status
+	atomic.StoreInt32(&self.workIdx, 1)
 
 	tstart := time.Now()
 	parent := self.chain.CurrentBlock()
@@ -422,7 +436,7 @@ func (self *worker) commitNewWork() {
 	}
 	if err := self.engine.Prepare(self.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
-		return
+		return err
 	}
 	// If we are care about TheDAO hard-fork check whether to override the extra-data or not
 	if daoBlock := self.config.DAOForkBlock; daoBlock != nil {
@@ -441,20 +455,35 @@ func (self *worker) commitNewWork() {
 	err := self.makeCurrent(parent, header)
 	if err != nil {
 		log.Error("Failed to create mining context", "err", err)
-		return
+		return err
 	}
 	// Create the current work task and check any fork transitions needed
 	work := self.current
 	if self.config.DAOForkSupport && self.config.DAOForkBlock != nil && self.config.DAOForkBlock.Cmp(header.Number) == 0 {
 		misc.ApplyDAOHardFork(work.state)
 	}
+
 	pending, err := self.eth.TxPool().Pending()
 	if err != nil {
 		log.Error("Failed to fetch pending transactions", "err", err)
-		return
+		return err
 	}
 	txs := types.NewTransactionsByPriceAndNonce(self.current.signer, pending)
 	work.commitTransactions(self.mux, txs, self.chain, self.coinbase)
+
+	if self.config.Genaro != nil {
+		// check if has Syn State
+		lastSynState := work.state.GetLastSynState()
+		if lastSynState != nil {
+			if header.Number.Uint64()-lastSynState.LastSynBlockNum > common.SynBlockLen+1 {
+				log.Error("need SynState")
+				return SynError
+			}
+		} else {
+			log.Error("lastSynState nil")
+			return errors.New("lastSynState nil")
+		}
+	}
 
 	// compute uncles for the new block.
 	var (
@@ -478,17 +507,20 @@ func (self *worker) commitNewWork() {
 	for _, hash := range badUncles {
 		delete(self.possibleUncles, hash)
 	}
+
 	// Create the new block to seal with the consensus engine
 	if work.Block, err = self.engine.Finalize(self.chain, header, work.state, work.txs, uncles, work.receipts); err != nil {
 		log.Error("Failed to finalize block for sealing", "err", err)
-		return
+		return err
 	}
+
 	// We only care about logging if we're actually mining.
 	if atomic.LoadInt32(&self.mining) == 1 {
 		log.Info("Commit new mining work", "number", work.Block.Number(), "txs", work.tcount, "uncles", len(uncles), "elapsed", common.PrettyDuration(time.Since(tstart)))
 		self.unconfirmed.Shift(work.Block.NumberU64() - 1)
 	}
 	self.push(work)
+	return nil
 }
 
 func (self *worker) commitUncle(work *Work, uncle *types.Header) error {
@@ -554,7 +586,6 @@ func (env *Work) commitTransactions(mux *event.TypeMux, txs *types.TransactionsB
 			// Reorg notification data race between the transaction pool and miner, skip account =
 			log.Trace("Skipping account with hight nonce", "sender", from, "nonce", tx.Nonce())
 			txs.Pop()
-
 		case nil:
 			// Everything ok, collect the logs and shift in the next transaction from the same account
 			coalescedLogs = append(coalescedLogs, logs...)

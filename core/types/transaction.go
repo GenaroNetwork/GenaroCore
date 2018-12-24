@@ -24,6 +24,7 @@ import (
 	"math/big"
 	"sync/atomic"
 
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
@@ -256,6 +257,23 @@ func (tx *Transaction) Cost() *big.Int {
 	total := new(big.Int).Mul(tx.data.Price, new(big.Int).SetUint64(tx.data.GasLimit))
 	total.Add(total, tx.data.Amount)
 	return total
+}
+
+// SpecialCost returns total cost for special transaction
+// if current transaction is normal transaction, return zero.
+func (tx *Transaction) SpecialCost(currentPrice *GenaroPrice, bucketsMap map[string]interface{}) *big.Int {
+	var ret = big.NewInt(0)
+	if tx.Data() == nil {
+		return ret
+	}
+	var s SpecialTxInput
+	err := json.Unmarshal(tx.Data(), &s)
+	if err == nil {
+		cost := s.SpecialCost(currentPrice, bucketsMap)
+		ret.Set(&cost)
+		return ret
+	}
+	return ret
 }
 
 func (tx *Transaction) RawSignatureValues() (*big.Int, *big.Int, *big.Int) {

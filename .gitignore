@@ -46,3 +46,15 @@ profile.cov
 /dashboard/assets/package-lock.json
 
 **/yarn-error.log
+
+
+#automatedScript/
+automatedScript/fileName
+cmd/GenGenaroGenesis/genesis.json
+automatedScript/chainNode/
+automatedScript/nohupNodeLog/
+automatedScript/bootnode/
+automatedScript/genaro.json
+cmd/GenGenaroGenesis/GenGenaroGenesis
+cmd/bootnode/bootnode
+cmd/bootnode/bootnode.key

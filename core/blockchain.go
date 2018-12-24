@@ -30,6 +30,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/mclock"
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
@@ -43,6 +44,7 @@ import (
 	"github.com/GenaroNetwork/Genaro-Core/trie"
 	"github.com/hashicorp/golang-lru"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
+	"strings"
 )
 
 var (
@@ -965,6 +967,16 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 		// Split same-difficulty blocks by number, then at random
 		reorg = block.NumberU64() < currentBlock.NumberU64() || (block.NumberU64() == currentBlock.NumberU64() && mrand.Float64() < 0.5)
 	}
+	if bc.chainConfig.Genaro != nil {
+		blockExtra := genaro.UnmarshalToExtra(block.Header())
+		currentBlockExtra := genaro.UnmarshalToExtra(currentBlock.Header())
+		if blockExtra.LastSynBlockNum < currentBlockExtra.LastSynBlockNum {
+			reorg = false
+		} else if blockExtra.LastSynBlockNum == currentBlockExtra.LastSynBlockNum && !strings.EqualFold(blockExtra.LastSynBlockHash.String(), currentBlockExtra.LastSynBlockHash.String()) {
+			reorg = false
+		}
+	}
+
 	if reorg {
 		// Reorganise the chain if the parent is not the head block
 		if block.ParentHash() != currentBlock.Hash() {
@@ -1530,6 +1542,15 @@ func (bc *BlockChain) GetBlockHashesFromHash(hash common.Hash, max uint64) []com
 // caching it (associated with its hash) if found.
 func (bc *BlockChain) GetHeaderByNumber(number uint64) *types.Header {
 	return bc.hc.GetHeaderByNumber(number)
+}
+
+// GetStateDB return a stateDB
+func (bc *BlockChain) GetStateDB(root common.Hash) *state.StateDB {
+	statedb, err := bc.StateAt(root)
+	if err != nil {
+		return nil
+	}
+	return statedb
 }
 
 // Config retrieves the blockchain's chain configuration.

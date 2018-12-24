@@ -25,13 +25,16 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/accounts"
 	"github.com/GenaroNetwork/Genaro-Core/accounts/keystore"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/common/math"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/ethash"
+	"github.com/GenaroNetwork/Genaro-Core/consensus/genaro"
 	"github.com/GenaroNetwork/Genaro-Core/core"
+	"github.com/GenaroNetwork/Genaro-Core/core/state"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/core/vm"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
@@ -194,6 +197,35 @@ func (s *PublicAccountAPI) Accounts() []common.Address {
 		}
 	}
 	return addresses
+}
+
+// Candidates returns the collection of accounts who has staked
+func (s *PublicBlockChainAPI) GetCandidates(ctx context.Context, blockNr rpc.BlockNumber) []common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetCandidates()
+}
+
+// get commitees by rank
+func (s *PublicBlockChainAPI) GetCommitteeRank(ctx context.Context, blockNr rpc.BlockNumber) []common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	committees, _ := state.GetCommitteeRank(0, uint64(blockNr))
+	return committees
+}
+
+// get MainAccount by rank
+func (s *PublicBlockChainAPI) GetMainAccountRank(ctx context.Context, blockNr rpc.BlockNumber) []common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	committees, _ := state.GetMainAccountRank()
+	return committees
 }
 
 // PrivateAccountAPI provides an API to access accounts managed by this node.
@@ -502,6 +534,198 @@ func (s *PublicBlockChainAPI) GetBalance(ctx context.Context, address common.Add
 	return b, state.Error()
 }
 
+func (s *PublicBlockChainAPI) GetLastRootStates(ctx context.Context, blockNr rpc.BlockNumber) (lastRootStates map[common.Hash]uint64, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	lastSynState := state.GetLastSynState()
+	if lastSynState != nil {
+		lastRootStates = lastSynState.LastRootStates
+		return
+	}
+	return
+}
+
+type BlockInfo struct {
+	BlockNum  uint64
+	BlockHash common.Hash
+}
+
+func (s *PublicBlockChainAPI) GetLastSynBlock(ctx context.Context, blockNr rpc.BlockNumber) (blockInfo BlockInfo, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	lastSynState := state.GetLastSynState()
+	if lastSynState != nil {
+		blockInfo.BlockNum = lastSynState.LastSynBlockNum
+		blockInfo.BlockHash = lastSynState.LastSynBlockHash
+		return
+	}
+	return
+}
+
+// get head extra data
+func (s *PublicBlockChainAPI) GetExtra(ctx context.Context, blockNr rpc.BlockNumber) (extra *genaro.ExtraData, err error) {
+	block, err := s.b.BlockByNumber(ctx, blockNr)
+	if err != nil {
+		return
+	}
+	extra = genaro.UnmarshalToExtra(block.Header())
+	return
+
+}
+
+func (s *PublicBlockChainAPI) GetAlreadyBackStakeList(ctx context.Context, blockNr rpc.BlockNumber) (backStackList common.BackStakeList, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	ok, backStackList := state.GetAlreadyBackStakeList()
+	if ok {
+		return
+	} else {
+		err = errors.New("GetAlreadyBackStakeList failed")
+	}
+	return
+}
+
+func (s *PublicBlockChainAPI) GetSubAccounts(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (accounts []common.Address, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	return state.GetSubAccounts(address), nil
+}
+
+func (s *PublicBlockChainAPI) GetMainAccount(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (account *common.Address, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	return state.GetMainAccount(address), nil
+}
+
+func (s *PublicBlockChainAPI) GetGlobalVar(ctx context.Context, blockNr rpc.BlockNumber) *types.GenaroPrice {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetGenaroPrice()
+}
+
+func (s *PublicBlockChainAPI) GetRewardsValues(ctx context.Context, blockNr rpc.BlockNumber) *types.RewardsValues {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetRewardsValues()
+}
+
+func (s *PublicBlockChainAPI) GetAccountByName(ctx context.Context, name string, blockNr rpc.BlockNumber) *common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	exist, err := state.IsNameAccountExist(name)
+	if err != nil {
+		return nil
+	}
+	if !exist {
+		return nil
+	}
+	addr, err := state.GetNameAccount(name)
+	if err != nil {
+		return nil
+	}
+	return &addr
+
+}
+
+// get account name price
+func (s *PublicBlockChainAPI) GetNamePrice(name string) *big.Int {
+	var accountName types.AccountName
+	accountName.SetString(name)
+	return accountName.GetBigPrice()
+}
+
+// GetStake returns the stake of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetStake(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i, err := state.GetStake(address)
+	if err != nil {
+		return
+	}
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// getStakeRangeDiff returns the stakeRangeDiff of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetStakeRangeDiff(ctx context.Context, address common.Address, blockNrStart rpc.BlockNumber, blockNrEnd rpc.BlockNumber, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i := state.GetStakeRangeDiff(address, uint64(blockNrStart), uint64(blockNrEnd))
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// GetHeft returns the heft of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetHeft(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i, err := state.GetHeft(address)
+	if err != nil {
+		return
+	}
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// GetHeftRangeDiff returns the HeftRangeDiff of ether for the given address in the state of the
+// given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
+// block numbers are also allowed.
+func (s *PublicBlockChainAPI) GetHeftRangeDiff(ctx context.Context, address common.Address, blockNrStart rpc.BlockNumber, blockNrEnd rpc.BlockNumber, blockNr rpc.BlockNumber) (b *big.Int, err error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	i := state.GetHeftRangeDiff(address, uint64(blockNrStart), uint64(blockNrEnd))
+	b = new(big.Int)
+	b.SetUint64(i)
+	err = state.Error()
+	return
+}
+
+// only use in genaro
+func (s *PublicBlockChainAPI) GetGenaroCodeHash(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (GenaroCodeHash string) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return
+	}
+	GenaroCodeHash = state.GetGenaroCodeHash(address)
+	return
+}
+
 // GetBlockByNumber returns the requested block. When blockNr is -1 the chain head is returned. When fullTx is true all
 // transactions in the block are returned in full detail, otherwise only the transaction hash is returned.
 func (s *PublicBlockChainAPI) GetBlockByNumber(ctx context.Context, blockNr rpc.BlockNumber, fullTx bool) (map[string]interface{}, error) {
@@ -599,6 +823,14 @@ func (s *PublicBlockChainAPI) GetStorageAt(ctx context.Context, address common.A
 	}
 	res := state.GetState(address, common.HexToHash(key))
 	return res[:], state.Error()
+}
+
+func (s *PublicBlockChainAPI) GetAccountData(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*state.Account, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return state.GetAccountData(address), nil
 }
 
 // CallArgs represents the arguments for a call.
@@ -727,6 +959,43 @@ func (s *PublicBlockChainAPI) EstimateGas(ctx context.Context, args CallArgs) (h
 		}
 	}
 	return hexutil.Uint64(hi), nil
+}
+
+func (s *PublicBlockChainAPI) GetTraffic(ctx context.Context, address common.Address) (uint64, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return 0, err
+	}
+	b := state.GetTraffic(address)
+	return b, state.Error()
+}
+
+func (s *PublicBlockChainAPI) GetBuckets(ctx context.Context, address common.Address) (map[string]interface{}, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	return state.GetBuckets(address)
+}
+
+func (s *PublicBlockChainAPI) GetStorageNodes(ctx context.Context, address common.Address) ([]string, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil, err
+	}
+
+	nodes := state.GetStorageNodes(address)
+	return nodes, state.Error()
+}
+
+func (s *PublicBlockChainAPI) GetFileSharePublicKey(ctx context.Context, address common.Address) (string, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return "", err
+	}
+
+	nodes := state.GetFileSharePublicKey(address)
+	return nodes, state.Error()
 }
 
 // ExecutionResult groups all structured logs emitted by the EVM
@@ -968,6 +1237,202 @@ func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberAndIndex(ctx conte
 	return nil
 }
 
+// GetTransactionByBlockNumberRange returns the transaction of special type from  startblocknumber to endblocknumber.
+func (s *PublicTransactionPoolAPI) GetTransactionByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber, txType *big.Int) ([]*RPCTransaction, error) {
+	var specialTx []*RPCTransaction
+	if startBlockNr > endBlockNr {
+		return nil, errors.New("startBlockNumber can't larger than endBlockNumber")
+	}
+	var maxRange int64 = 86400
+	var currentRange = endBlockNr.Int64() - startBlockNr.Int64()
+	if currentRange > maxRange {
+		return nil, errors.New("the span between the start block number and the end block number is greater than 86400")
+	}
+
+	for i := startBlockNr; i <= endBlockNr; i++ {
+		if block, _ := s.b.BlockByNumber(ctx, i); block != nil {
+			txs := block.Transactions()
+			currentBlockTx := dealSpecialTransactionWithType(block, txs, txType)
+			specialTx = append(specialTx, currentBlockTx...)
+		}
+	}
+	return specialTx, nil
+}
+
+func dealSpecialTransactionWithType(b *types.Block, txs types.Transactions, txType *big.Int) []*RPCTransaction {
+	var specialTx []*RPCTransaction
+	for i := 0; i < len(txs); i++ {
+		if txWithType(txs[i], txType) {
+			rpcTx := newRPCTransaction(txs[i], b.Hash(), b.NumberU64(), uint64(i))
+			specialTx = append(specialTx, rpcTx)
+		}
+	}
+	return specialTx
+}
+
+func txWithType(tx *types.Transaction, txType *big.Int) bool {
+	if tx.Data() == nil || len(tx.Data()) == 0 {
+		return false
+	}
+	var s types.SpecialTxInput
+	err := json.Unmarshal(tx.Data(), &s)
+	if err != nil {
+		return false
+	}
+	return s.Type.ToInt().Uint64() == txType.Uint64()
+}
+
+type rpcTrafficInfo struct {
+	NodeId  string      `json:"address"`
+	Traffic uint64      `json:"traffic"`
+	Hash    common.Hash `json:"hash"`
+}
+
+// GetTrafficTxInfo get informations of special transaction of traffic apply
+func (s *PublicTransactionPoolAPI) GetTrafficTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]*rpcTrafficInfo, error) {
+	rpcTx, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeTrafficApply)
+	if err != nil {
+		return nil, err
+	}
+	var retArr []*rpcTrafficInfo
+	for _, tx := range rpcTx {
+		if transactionReceipt, err := s.GetTransactionReceipt(ctx, tx.Hash); err == nil && transactionReceipt != nil {
+			if status, ok := transactionReceipt["status"]; ok && uint(status.(hexutil.Uint)) == types.ReceiptStatusSuccessful {
+				var s types.SpecialTxInput
+				json.Unmarshal([]byte(tx.Input), &s)
+				r := new(rpcTrafficInfo)
+				r.NodeId = s.Address
+				r.Traffic = s.Traffic
+				r.Hash = tx.Hash
+				retArr = append(retArr, r)
+			}
+		}
+	}
+	return retArr, nil
+}
+
+type rpcBucketPropertie struct {
+	NodeId    string      `json:"address"`
+	BucketId  string      `json:"bucketId"`
+	TimeStart uint64      `json:"timeStart"`
+	TimeEnd   uint64      `json:"timeEnd"`
+	Backup    uint64      `json:"backup"`
+	Size      uint64      `json:"size"`
+	Hash      common.Hash `json:"hash"`
+}
+
+// GetBucketTxInfo get informations of special transaction of bucket apply
+func (s *PublicTransactionPoolAPI) GetBucketTxInfo(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]*rpcBucketPropertie, error) {
+	rpcTx, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeSpaceApply)
+	if err != nil {
+		return nil, err
+	}
+	var retArr []*rpcBucketPropertie
+	for _, tx := range rpcTx {
+		if transactionReceipt, err := s.GetTransactionReceipt(ctx, tx.Hash); err == nil && transactionReceipt != nil {
+			if status, ok := transactionReceipt["status"]; ok && uint(status.(hexutil.Uint)) == types.ReceiptStatusSuccessful {
+				var s types.SpecialTxInput
+				json.Unmarshal([]byte(tx.Input), &s)
+				for _, v := range s.Buckets {
+					r := new(rpcBucketPropertie)
+					r.BucketId = v.BucketId
+					r.TimeStart = v.TimeStart
+					r.TimeEnd = v.TimeEnd
+					r.Backup = v.Backup
+					r.Size = v.Size
+					r.NodeId = s.Address
+					r.Hash = tx.Hash
+					retArr = append(retArr, r)
+				}
+			}
+		}
+	}
+	return retArr, nil
+}
+
+type bucketSupplement struct {
+	BucketID string      `json:"bucketId"`
+	Size     uint64      `json:"size"`
+	Duration uint64      `json:"duration"`
+	Address  string      `json:"address"`
+	Hash     common.Hash `json:"hash"`
+	BlockNum uint64      `json:"blockNum"`
+}
+
+func (s *PublicTransactionPoolAPI) GetBucketSupplementTx(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]bucketSupplement, error) {
+	var retArr []bucketSupplement
+
+	rpcTx, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxBucketSupplement)
+	if err != nil {
+		return nil, err
+	}
+	for _, tx := range rpcTx {
+		if transactionReceipt, err := s.GetTransactionReceipt(ctx, tx.Hash); err == nil && transactionReceipt != nil {
+			if status, ok := transactionReceipt["status"]; ok && uint(status.(hexutil.Uint)) == types.ReceiptStatusSuccessful {
+				var s types.SpecialTxInput
+				json.Unmarshal([]byte(tx.Input), &s)
+				var bucketSup bucketSupplement
+				bucketSup.Size = s.Size
+				bucketSup.Duration = s.Duration
+				bucketSup.BucketID = s.BucketID
+				bucketSup.Address = s.Address
+				bucketSup.Hash = tx.Hash
+				bucketSup.BlockNum = tx.BlockNumber.ToInt().Uint64()
+				retArr = append(retArr, bucketSup)
+			}
+		}
+	}
+
+	return retArr, nil
+}
+
+func (s *PublicTransactionPoolAPI) GetGenaroPrice(ctx context.Context, blockNr rpc.BlockNumber) map[string]string {
+	genaroPriceMap := make(map[string]string)
+	genaroPriceMap["bucketPricePerGperDay"] = common.DefaultBucketApplyGasPerGPerDay.String()
+	genaroPriceMap["trafficPricePerG"] = common.DefaultTrafficApplyGasPerG.String()
+	genaroPriceMap["stakeValuePerNode"] = common.DefaultStakeValuePerNode.String()
+	genaroPriceMap["oneDayMortgageGes"] = common.DefaultOneDayMortgageGes.String()
+	genaroPriceMap["oneDaySyncLogGsaCost"] = common.DefaultOneDaySyncLogGsaCost.String()
+
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return genaroPriceMap
+	}
+
+	if genaroPrice := state.GetGenaroPrice(); genaroPrice != nil {
+		if genaroPrice.BucketApplyGasPerGPerDay != nil {
+			genaroPriceMap["bucketPricePerGperDay"] = genaroPrice.BucketApplyGasPerGPerDay.String()
+		}
+		if genaroPrice.TrafficApplyGasPerG != nil {
+			genaroPriceMap["trafficPricePerG"] = genaroPrice.TrafficApplyGasPerG.String()
+		}
+
+		if genaroPrice.BucketApplyGasPerGPerDay != nil {
+			genaroPriceMap["stakeValuePerNode"] = genaroPrice.StakeValuePerNode.String()
+		}
+
+		if genaroPrice.OneDayMortgageGes != nil {
+			genaroPriceMap["oneDayMortgageGes"] = genaroPrice.OneDayMortgageGes.String()
+		}
+
+		if genaroPrice.OneDaySyncLogGsaCost != nil {
+			genaroPriceMap["oneDaySyncLogGsaCost"] = genaroPrice.OneDaySyncLogGsaCost.String()
+		}
+	}
+
+	return genaroPriceMap
+}
+
+func (s *PublicTransactionPoolAPI) GetAddressByNode(ctx context.Context, str string) string {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	var retS string
+	if state == nil || err != nil {
+		return retS
+	}
+	retS = state.GetAddressByNode(str)
+	return retS
+}
+
 // GetTransactionByBlockHashAndIndex returns the transaction for the given block hash and index.
 func (s *PublicTransactionPoolAPI) GetTransactionByBlockHashAndIndex(ctx context.Context, blockHash common.Hash, index hexutil.Uint) *RPCTransaction {
 	if block, _ := s.b.GetBlock(ctx, blockHash); block != nil {
@@ -1064,6 +1529,7 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 		"contractAddress":   nil,
 		"logs":              receipt.Logs,
 		"logsBloom":         receipt.Bloom,
+		"extraInfo":         receipt.ExtraInfo,
 	}
 
 	// Assign receipt status or post state.
@@ -1109,8 +1575,9 @@ type SendTxArgs struct {
 	Nonce    *hexutil.Uint64 `json:"nonce"`
 	// We accept "data" and "input" for backwards-compatibility reasons. "input" is the
 	// newer name and should be preferred by clients.
-	Data  *hexutil.Bytes `json:"data"`
-	Input *hexutil.Bytes `json:"input"`
+	Data      *hexutil.Bytes `json:"data"`
+	Input     *hexutil.Bytes `json:"input"`
+	ExtraData string         `json:"extraData"`
 }
 
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
@@ -1164,6 +1631,16 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	if args.To == nil {
 		return types.NewContractCreation(uint64(*args.Nonce), (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 	}
+
+	if args.ExtraData == "" {
+		return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
+	}
+
+	//deal special transaction
+	if *args.To == common.SpecialSyncAddress {
+		return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), []byte(args.ExtraData))
+	}
+
 	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 }
 
@@ -1211,7 +1688,6 @@ func (s *PublicTransactionPoolAPI) SendTransaction(ctx context.Context, args Sen
 	}
 	// Assemble the transaction and sign with the wallet
 	tx := args.toTransaction()
-
 	var chainID *big.Int
 	if config := s.b.ChainConfig(); config.IsEIP155(s.b.CurrentBlock().Number()) {
 		chainID = config.ChainId
@@ -1475,4 +1951,153 @@ func (s *PublicNetAPI) PeerCount() hexutil.Uint {
 // Version returns the current ethereum protocol version.
 func (s *PublicNetAPI) Version() string {
 	return fmt.Sprintf("%d", s.networkVersion)
+}
+
+func (s *PublicBlockChainAPI) AccountAttributes(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (types.GenaroData, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return types.GenaroData{}, err
+	}
+	result := state.GetAccountAttributes(address)
+	return result, state.Error()
+}
+
+func (s *PublicBlockChainAPI) GetLogSwitch(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) map[string]types.SpecialTxTypeMortgageInit {
+	accountAttributes, _ := s.AccountAttributes(ctx, address, rpc.BlockNumber(-1))
+	return accountAttributes.SpecialTxTypeMortgageInitArr
+}
+
+func (s *PublicBlockChainAPI) GetLogSwitchByAddressAndFileID(ctx context.Context, args string) map[common.Address]map[string]bool {
+	var addressAndFileID map[common.Address][]string
+	var result map[common.Address]map[string]bool
+	json.Unmarshal([]byte(args), &addressAndFileID)
+	for k, v := range addressAndFileID {
+		accountAttributes := s.GetLogSwitch(ctx, k, rpc.BlockNumber(-1))
+		if nil == accountAttributes {
+			continue
+		}
+		for _, fileID := range v {
+			resultTmp := accountAttributes[fileID]
+			if 0 == len(resultTmp.AuthorityTable) {
+				continue
+			}
+			if nil == result {
+				result = make(map[common.Address]map[string]bool)
+			}
+			if result[k] == nil {
+				result[k] = make(map[string]bool)
+			}
+			result[k][fileID] = resultTmp.LogSwitch
+		}
+	}
+	return result
+}
+
+func (s *PublicTransactionPoolAPI) GetMortgageInitByBlockNumberRange(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]types.SpecialTxTypeMortgageInit, error) {
+	result, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SpecialTxTypeMortgageInit)
+	if err != nil {
+		return nil, err
+	}
+	var specialTxTypeMortgageInit types.SpecialTxInput
+	var resultArr []types.SpecialTxTypeMortgageInit
+	for _, v := range result {
+		json.Unmarshal(v.Input, &specialTxTypeMortgageInit)
+		transactionReceipt, err := s.GetTransactionReceipt(ctx, v.Hash)
+		if nil == err && nil != transactionReceipt {
+			resultArr = append(resultArr, specialTxTypeMortgageInit.SpecialTxTypeMortgageInit)
+		}
+	}
+	return resultArr, nil
+}
+
+func (s *PublicBlockChainAPI) DataVersionRead(ctx context.Context, address common.Address, blockNr rpc.BlockNumber, fileID [32]byte, dataVersion string) (map[common.Address]*hexutil.Big, error) {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil, err
+	}
+	result, error := state.TxLogByDataVersionRead(address, fileID, dataVersion)
+	return result, error
+}
+
+func (s *PublicTransactionPoolAPI) GetSynchronizeShareKey(ctx context.Context, startBlockNr rpc.BlockNumber, endBlockNr rpc.BlockNumber) ([]types.SynchronizeShareKey, error) {
+	result, err := s.GetTransactionByBlockNumberRange(ctx, startBlockNr, endBlockNr, common.SynchronizeShareKey)
+	if err != nil {
+		return nil, err
+	}
+	var synchronizeShareKey types.SpecialTxInput
+	var resultArr []types.SynchronizeShareKey
+	for _, v := range result {
+		json.Unmarshal(v.Input, &synchronizeShareKey)
+		transactionReceipt, err := s.GetTransactionReceipt(ctx, v.Hash)
+		if nil == err && nil != transactionReceipt {
+			resultArr = append(resultArr, synchronizeShareKey.SynchronizeShareKey)
+		}
+	}
+	return resultArr, nil
+}
+
+func (s *PublicBlockChainAPI) CheckUnlockSharedKey(ctx context.Context, address common.Address, shareKeyId string) bool {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return false
+	}
+	return state.CheckUnlockSharedKey(address, shareKeyId)
+}
+
+// get All Promissory NotesNum
+func (s *PublicBlockChainAPI) GetAllPromissoryNotesNum(ctx context.Context, address common.Address) uint64 {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return uint64(0)
+	}
+	return state.GetAllPromissoryNotesNum(address)
+}
+
+// get Befor Promissory Notes
+func (s *PublicBlockChainAPI) GetBeforPromissoryNotesNum(ctx context.Context, address common.Address) uint64 {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return uint64(0)
+	}
+	return state.GetBeforPromissoryNotesNum(address, s.BlockNumber().Uint64())
+}
+
+// get All Promissory Notes
+func (s *PublicBlockChainAPI) GetPromissoryNotes(ctx context.Context, address common.Address) types.PromissoryNotes {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil
+	}
+	return state.GetPromissoryNotes(address)
+}
+
+func (s *PublicBlockChainAPI) GetOptionTx(ctx context.Context, address common.Address) types.OptionTxTable {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, rpc.LatestBlockNumber)
+	if state == nil || err != nil {
+		return nil
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	optionTxMemorySize := s.b.ChainConfig().Genaro.OptionTxMemorySize
+	optionTxTableRet := make(types.OptionTxTable)
+
+	for i := int64(0); i < int64(optionTxMemorySize); i++ {
+		optionSaveAddr := common.GetOptionSaveAddrByPos(i)
+		optionTxTable := state.GetOptionTxTableByAddress(optionSaveAddr)
+		if optionTxTable != nil {
+			txTableMap := *optionTxTable
+			for k, v := range txTableMap {
+				if v.PromissoryNotesOwner == address {
+					optionTxTableRet[k] = v
+				}
+			}
+		}
+	}
+
+	return optionTxTableRet
 }

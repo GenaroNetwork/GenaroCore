@@ -71,6 +71,13 @@ const (
 )
 
 const (
+	// 0x21 range - user-defined opcode
+	//SENC OpCode = 0x21 + iota
+	DATA_VERSION_READ OpCode = 0x21 + iota
+	DATA_VERSION_UPDATE
+)
+
+const (
 	// 0x30 range - closure state
 	ADDRESS OpCode = 0x30 + iota
 	BALANCE
@@ -87,6 +94,9 @@ const (
 	EXTCODECOPY
 	RETURNDATASIZE
 	RETURNDATACOPY
+
+	// user-defined opcode
+	STORAGE_GAS_PRICE = 0x3f
 )
 
 const (
@@ -97,6 +107,12 @@ const (
 	NUMBER
 	DIFFICULTY
 	GASLIMIT
+
+	// user-defined opcode
+	//0x46
+	STORAGE_GAS_USED
+	//0x47
+	SENTINEL_HEFT
 )
 
 const (
@@ -113,6 +129,12 @@ const (
 	MSIZE
 	GAS
 	JUMPDEST
+
+	// user-defined opcode
+	//0x5c
+	STORAGE_GAS
+	//0x5d
+	SSIZE
 )
 
 const (
@@ -245,6 +267,10 @@ var opCodeToString = map[OpCode]string{
 
 	// 0x20 range - crypto
 	SHA3: "SHA3",
+	// user-defined opcode
+	//SENC:               "SENC",
+	DATA_VERSION_READ:   "DATA_VERSION_READ",
+	DATA_VERSION_UPDATE: "DATA_VERSION_UPDATE",
 
 	// 0x30 range - closure state
 	ADDRESS:        "ADDRESS",
@@ -262,6 +288,8 @@ var opCodeToString = map[OpCode]string{
 	EXTCODECOPY:    "EXTCODECOPY",
 	RETURNDATASIZE: "RETURNDATASIZE",
 	RETURNDATACOPY: "RETURNDATACOPY",
+	// user-defined opcode
+	STORAGE_GAS_PRICE: "STORAGE_GAS_PRICE",
 
 	// 0x40 range - block operations
 	BLOCKHASH:  "BLOCKHASH",
@@ -270,6 +298,9 @@ var opCodeToString = map[OpCode]string{
 	NUMBER:     "NUMBER",
 	DIFFICULTY: "DIFFICULTY",
 	GASLIMIT:   "GASLIMIT",
+	// user-defined opcode
+	SENTINEL_HEFT:    "SENTINEL_HEFT",
+	STORAGE_GAS_USED: "STORAGE_GAS_USED",
 
 	// 0x50 range - 'storage' and execution
 	POP: "POP",
@@ -286,6 +317,10 @@ var opCodeToString = map[OpCode]string{
 	MSIZE:    "MSIZE",
 	GAS:      "GAS",
 	JUMPDEST: "JUMPDEST",
+
+	// user-defined opcode
+	STORAGE_GAS: "STORAGE_GAS",
+	SSIZE:       "SSIZE",
 
 	// 0x60 range - push
 	PUSH1:  "PUSH1",
@@ -522,6 +557,16 @@ var stringToOp = map[string]OpCode{
 	"CALLCODE":       CALLCODE,
 	"REVERT":         REVERT,
 	"SELFDESTRUCT":   SELFDESTRUCT,
+
+	// user-defined opcode
+	"SENTINEL_HEFT":     SENTINEL_HEFT,
+	"STORAGE_GAS_USED":  STORAGE_GAS_USED,
+	"STORAGE_GAS_PRICE": STORAGE_GAS_PRICE,
+	//"SENC":               SENC,
+	"DATA_VERSION_READ":   DATA_VERSION_READ,
+	"DATA_VERSION_UPDATE": DATA_VERSION_UPDATE,
+	"STORAGE_GAS":         STORAGE_GAS,
+	"SSIZE":               SSIZE,
 }
 
 func StringToOp(str string) OpCode {

@@ -17,6 +17,7 @@
 package core
 
 import (
+	"encoding/json"
 	"github.com/GenaroNetwork/Genaro-Core/common"
 	"github.com/GenaroNetwork/Genaro-Core/consensus"
 	"github.com/GenaroNetwork/Genaro-Core/consensus/misc"
@@ -75,9 +76,9 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, receipt.Logs...)
 	}
+
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
 	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts)
-
 	return receipts, allLogs, *usedGas, nil
 }
 
@@ -97,6 +98,7 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	vmenv := vm.NewEVM(context, statedb, config, cfg)
 	// Apply the transaction to the current state (included in the env)
 	_, gas, failed, err := ApplyMessage(vmenv, msg, gp)
+
 	if err != nil {
 		return nil, 0, err
 	}
@@ -112,6 +114,27 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	// Create a new receipt for the transaction, storing the intermediate root and gas used by the tx
 	// based on the eip phase, we're passing wether the root touch-delete accounts.
 	receipt := types.NewReceipt(root, failed, *usedGas)
+
+	//extraCost for special Tx
+	if nil != msg.To() {
+		if *msg.To() == common.SpecialSyncAddress {
+			if !failed {
+				var s types.SpecialTxInput
+				err = json.Unmarshal(msg.Data(), &s)
+				if err == nil {
+					currentPrice := vmenv.StateDB.GetGenaroPrice()
+
+					bucketsMap := make(map[string]interface{})
+					if s.Type.ToInt().Uint64() == common.SpecialTxBucketSupplement.Uint64() {
+						bucketsMap, _ = vmenv.StateDB.GetBuckets(common.HexToAddress(s.Address))
+					}
+
+					costInfo := s.SpecialCost(currentPrice, bucketsMap)
+					receipt.ExtraInfo = costInfo.String()
+				}
+			}
+		}
+	}
 	receipt.TxHash = tx.Hash()
 	receipt.GasUsed = gas
 	// if the transaction created a contract, store the creation address in the receipt.
@@ -123,4 +146,15 @@ func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common
 	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 
 	return receipt, gas, err
+}
+
+// ProcessStakeTxAfter attempts to add stake to stateDB and some global variable
+// no check because it must be invoked after tx has been processed.
+func ProcessStakeTxAfter(tx *types.Transaction, statedb *state.StateDB) {
+
+}
+
+// verify the tx(trusted pubkey) and add sentinel to stateDB or some global variable
+func ProcessSentineTx(tx *types.Transaction, statedb *state.StateDB) {
+
 }

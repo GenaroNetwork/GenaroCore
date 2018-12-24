@@ -22,6 +22,7 @@ import (
 	"math/big"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
 	"github.com/GenaroNetwork/Genaro-Core/common/math"
 	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
@@ -483,6 +484,70 @@ func opCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack 
 	return nil, nil
 }
 
+//todo 实现自定义指令对应函数功能
+func opDataVerisonRead(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	address, fileId, dataVersion := stack.pop(), stack.pop(), stack.pop()
+	//address, offset1, size1,offset2,size2,retOffset:= stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	//fileId := string(memory.Get(offset1.Int64(),size1.Int64()))
+	//dataVersion := string(memory.Get(offset2.Int64(),size2.Int64()))
+	var txLog map[common.Address]*hexutil.Big
+	var err error
+	var fileIdArr [32]byte
+	math.U256(fileId)
+	math.U256(dataVersion)
+	byteArr := (fileId).Bytes()
+	for i, v := range byteArr {
+		fileIdArr[i] = v
+	}
+	//txLog,err = evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address),fileIdArr,strconv.FormatInt(dataVersion.Int64(),10))
+	txLog, err = evm.StateDB.TxLogByDataVersionRead(common.BigToAddress(address), fileIdArr, dataVersion.String())
+	var i int
+	var zeroAddress common.Address
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(1))
+		for k, v := range txLog {
+			stack.push(evm.interpreter.intPool.get().SetUint64(v.ToInt().Uint64()))
+			stack.push(k.Big())
+			i++
+		}
+		for i < 8 {
+			stack.push(evm.interpreter.intPool.getZero())
+			stack.push(zeroAddress.Big())
+			i++
+		}
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+		i = 0
+		for i < 8 {
+			stack.push(evm.interpreter.intPool.getZero())
+			stack.push(zeroAddress.Big())
+			i++
+		}
+	}
+	evm.interpreter.intPool.put(address, fileId, dataVersion)
+	return nil, nil
+}
+
+func opDataVerisonUpdate(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	address, fileId := stack.pop(), stack.pop()
+	//address, offset, size ,switchValue := stack.pop(),stack.pop(),stack.pop(),stack.pop()
+	//fileId := string(memory.Get(offset.Int64(),size.Int64()))
+	var fileIdArr [32]byte
+	math.U256(fileId)
+	byteArr := (fileId).Bytes()
+	for i, v := range byteArr {
+		fileIdArr[i] = v
+	}
+	OfficialAddress := common.HexToAddress(evm.chainConfig.Genaro.OfficialAddress)
+	ret := evm.StateDB.TxLogBydataVersionUpdate(common.BigToAddress(address), fileIdArr, OfficialAddress)
+	if ret == true {
+		stack.push(evm.interpreter.intPool.get().SetUint64(1))
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
+	return nil, nil
+}
+
 func opExtCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	var (
 		addr       = common.BigToAddress(stack.pop())
@@ -499,6 +564,26 @@ func opExtCodeCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, sta
 
 func opGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(evm.interpreter.intPool.get().Set(evm.GasPrice))
+	return nil, nil
+}
+
+//todo 实现自定义指令对应函数功能
+func opStorageGasprice(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	address, bucketId := stack.pop(), stack.pop()
+	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	var bucketIdArr [32]byte
+	math.U256(bucketId)
+	byteArr := (bucketId).Bytes()
+	for i, v := range byteArr {
+		bucketIdArr[i] = v
+	}
+	storageGasPrice, err := evm.StateDB.GetStorageGasPrice(common.BigToAddress(address), bucketIdArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasPrice))
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
@@ -537,6 +622,37 @@ func opDifficulty(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stac
 
 func opGasLimit(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(math.U256(evm.interpreter.intPool.get().SetUint64(evm.GasLimit)))
+	return nil, nil
+}
+
+//todo 实现自定义指令对应函数功能
+func opStorageGasUsed(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	address, bucketId := stack.pop(), stack.pop()
+	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	var bucketIdArr [32]byte
+	math.U256(bucketId)
+	byteArr := (bucketId).Bytes()
+	for i, v := range byteArr {
+		bucketIdArr[i] = v
+	}
+	storageGasUsed, err := evm.StateDB.GetStorageGasUsed(common.BigToAddress(address), bucketIdArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGasUsed))
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
+	return nil, nil
+}
+
+func opSentinelHeft(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	address := stack.pop()
+	heft, err := evm.StateDB.GetHeft(common.BigToAddress(address))
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(heft))
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
@@ -628,8 +744,49 @@ func opMsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 	return nil, nil
 }
 
+//todo 实现自定义指令对应函数功能
+func opSsize(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	address, bucketId := stack.pop(), stack.pop()
+	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	var bucketIdArr [32]byte
+	math.U256(bucketId)
+	byteArr := (bucketId).Bytes()
+	for i, v := range byteArr {
+		bucketIdArr[i] = v
+	}
+	sSize, err := evm.StateDB.GetStorageSize(common.BigToAddress(address), bucketIdArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(sSize))
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
+	return nil, nil
+}
+
 func opGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	stack.push(evm.interpreter.intPool.get().SetUint64(contract.Gas))
+	return nil, nil
+}
+
+// todo 实现自定义指令对应函数功能
+// 获取交易的StorageGas,获取后压入栈中
+func opStorageGas(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	address, bucketId := stack.pop(), stack.pop()
+	//address, offset, size := stack.pop(),stack.pop(),stack.pop()
+	//bucketId := string(memory.Get(offset.Int64(),size.Int64()))
+	var bucketIdArr [32]byte
+	math.U256(bucketId)
+	byteArr := (bucketId).Bytes()
+	for i, v := range byteArr {
+		bucketIdArr[i] = v
+	}
+	storageGas, err := evm.StateDB.GetStorageGas(common.BigToAddress(address), bucketIdArr)
+	if err == nil {
+		stack.push(evm.interpreter.intPool.get().SetUint64(storageGas))
+	} else {
+		stack.push(evm.interpreter.intPool.getZero())
+	}
 	return nil, nil
 }
 
@@ -680,6 +837,7 @@ func opCall(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Sta
 	if value.Sign() != 0 {
 		gas += params.CallStipend
 	}
+
 	ret, returnGas, err := evm.Call(contract, toAddr, args, gas, value)
 	if err != nil {
 		stack.push(evm.interpreter.intPool.getZero())

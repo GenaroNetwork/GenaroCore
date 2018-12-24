@@ -18,16 +18,23 @@ package state
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
 
 	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/Genaro-Core/core/types"
 	"github.com/GenaroNetwork/Genaro-Core/crypto"
 	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/pkg/errors"
+	"sort"
+	"time"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
+var ErrSyncNode = errors.New("no enough stake value to sync node")
 
 type Code []byte
 
@@ -102,6 +109,125 @@ type Account struct {
 	Balance  *big.Int
 	Root     common.Hash // merkle root of the storage trie
 	CodeHash []byte
+}
+
+type Candidates []common.Address
+
+func (self *Candidates) isExist(addr common.Address) bool {
+	for _, addrIn := range *self {
+		if bytes.Compare(addrIn.Bytes(), addr.Bytes()) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func (self *Candidates) DelCandidate(addr common.Address) {
+	for i, addrIn := range *self {
+		if bytes.Compare(addrIn.Bytes(), addr.Bytes()) == 0 {
+			(*self) = append((*self)[:i], (*self)[i+1:]...)
+		}
+	}
+}
+
+type CandidateInfo struct {
+	Signer common.Address // peer address
+	Heft   uint64         // the sentinel of the peer
+	//TODO May need to convert big int
+	Stake uint64 // the stake of the peer
+	Point uint64
+}
+
+type CandidateInfos []CandidateInfo
+
+func (c CandidateInfos) Len() int {
+	return len(c)
+}
+
+func (c CandidateInfos) Swap(i, j int) {
+	c[i].Signer, c[j].Signer = c[j].Signer, c[i].Signer
+	c[i].Heft, c[j].Heft = c[j].Heft, c[i].Heft
+	c[i].Stake, c[j].Stake = c[j].Stake, c[i].Stake
+	c[i].Point, c[j].Point = c[j].Point, c[i].Point
+}
+
+func (c CandidateInfos) Less(i, j int) bool {
+	return c[i].Point < c[j].Point
+}
+
+func (c CandidateInfos) Apply() {
+	totleHeft := uint64(0)
+	totleStake := uint64(0)
+	for _, candidate := range c {
+		totleHeft += candidate.Heft
+		totleStake += candidate.Stake
+	}
+	//TODO define how to get point
+	for i, candidate := range c {
+		if candidate.Heft == 0 {
+			c[i].Point = 0
+		} else {
+			c[i].Point = candidate.Stake*common.Base/totleStake + candidate.Heft*common.Base/totleHeft
+		}
+	}
+}
+
+func Rank(candidateInfos CandidateInfos) ([]common.Address, []uint64) {
+	candidateInfos.Apply()
+	sort.Sort(sort.Reverse(candidateInfos))
+	committeeRank := make([]common.Address, len(candidateInfos))
+	proportion := make([]uint64, len(candidateInfos))
+	total := uint64(0)
+	for _, c := range candidateInfos {
+		total += c.Stake
+	}
+	if total == 0 {
+		return committeeRank, proportion
+	}
+	for i, c := range candidateInfos {
+		committeeRank[i] = c.Signer
+		proportion[i] = c.Stake * uint64(common.Base) / total
+	}
+	return committeeRank, proportion
+}
+
+func RankWithLenth(candidateInfos CandidateInfos, lenth int, committeeMinStake uint64) ([]common.Address, []uint64) {
+	candidateInfos.Apply()
+	for i := 0; i < len(candidateInfos); i++ {
+		if candidateInfos[i].Stake < committeeMinStake {
+			candidateInfos = append(candidateInfos[:i], candidateInfos[i+1:]...)
+			i--
+		}
+	}
+
+	sort.Sort(sort.Reverse(candidateInfos))
+	rankLenth := lenth
+	if len(candidateInfos) < rankLenth {
+		rankLenth = len(candidateInfos)
+	}
+	committeeRank := make([]common.Address, rankLenth)
+	proportion := make([]uint64, rankLenth)
+	total := uint64(0)
+
+	for i := 0; i < rankLenth; i++ {
+		total += candidateInfos[i].Stake
+	}
+	if total == 0 {
+		return committeeRank, proportion
+	}
+	for i := 0; i < rankLenth; i++ {
+		committeeRank[i] = candidateInfos[i].Signer
+		proportion[i] = candidateInfos[i].Stake * uint64(common.Base) / total
+	}
+	return committeeRank, proportion
+}
+
+type FilePropertie struct {
+	StorageGas      uint64 `json:"sgas"`
+	StorageGasUsed  uint64 `json:"sGasUsed"`
+	StorageGasPrice uint64 `josn:"sGasPrice"`
+	// Ssize represents Storage Size
+	Ssize uint64 `json:"sSize"`
 }
 
 // newObject creates a state object.
@@ -190,6 +316,7 @@ func (self *stateObject) GetState(db Database, key common.Hash) common.Hash {
 	if (value != common.Hash{}) {
 		self.cachedStorage[key] = value
 	}
+
 	return value
 }
 
@@ -206,7 +333,6 @@ func (self *stateObject) SetState(db Database, key, value common.Hash) {
 func (self *stateObject) setState(key, value common.Hash) {
 	self.cachedStorage[key] = value
 	self.dirtyStorage[key] = value
-
 	if self.onDirty != nil {
 		self.onDirty(self.Address())
 		self.onDirty = nil
@@ -315,12 +441,25 @@ func (c *stateObject) Address() common.Address {
 	return c.address
 }
 
+// if empty return true
+func CheckCodeEmpty(codeHash []byte) bool {
+	if bytes.Equal(codeHash, emptyCodeHash) || len(codeHash) != 32 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (self *stateObject) IsContract() bool {
+	return !CheckCodeEmpty(self.CodeHash())
+}
+
 // Code returns the contract code associated with this object, if any.
 func (self *stateObject) Code(db Database) []byte {
 	if self.code != nil {
 		return self.code
 	}
-	if bytes.Equal(self.CodeHash(), emptyCodeHash) {
+	if CheckCodeEmpty(self.CodeHash()) {
 		return nil
 	}
 	code, err := db.ContractCode(self.addrHash, common.BytesToHash(self.CodeHash()))
@@ -339,6 +478,16 @@ func (self *stateObject) SetCode(codeHash common.Hash, code []byte) {
 		prevcode: prevcode,
 	})
 	self.setCode(codeHash, code)
+}
+
+// only used in genaro genesis init
+func (self *stateObject) SetCodeHash(codeHash []byte) {
+	self.data.CodeHash = codeHash[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
 }
 
 func (self *stateObject) setCode(codeHash common.Hash, code []byte) {
@@ -384,4 +533,1548 @@ func (self *stateObject) Nonce() uint64 {
 // interface. Interfaces are awesome.
 func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
+}
+
+// update heft and add heft log
+func (self *stateObject) UpdateHeft(heft uint64, blockNumber uint64) {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		genaroData = types.GenaroData{
+			Heft: heft,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.Heft = heft
+	}
+	if genaroData.HeftLog == nil {
+		genaroData.HeftLog = *new(types.NumLogs)
+	}
+	var newLog types.NumLog
+	newLog.Num = heft
+	newLog.BlockNum = blockNumber
+	genaroData.HeftLog.Add(newLog)
+
+	if blockNumber > common.BlockLogLenth {
+		genaroData.HeftLog.Del(blockNumber - common.BlockLogLenth)
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) GetHeft() uint64 {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.Heft
+	}
+
+	return 0
+}
+
+func (self *stateObject) GetHeftLog() types.NumLogs {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.HeftLog
+	}
+
+	return nil
+}
+
+func (self *stateObject) GetHeftRangeDiff(blockNumStart uint64, blockNumEnd uint64) uint64 {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.HeftLog.GetRangeDiff(blockNumStart, blockNumEnd)
+	}
+
+	return 0
+}
+
+// update stake and add stake log
+func (self *stateObject) UpdateStake(stake uint64, blockNumber uint64) {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		genaroData = types.GenaroData{
+			Stake: stake,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.Stake += stake
+	}
+	if genaroData.StakeLog == nil {
+		genaroData.StakeLog = *new(types.NumLogs)
+	}
+	var newLog types.NumLog
+	newLog.Num = genaroData.Stake
+	newLog.BlockNum = blockNumber
+	genaroData.StakeLog.Add(newLog)
+
+	if blockNumber > common.BlockLogLenth {
+		genaroData.StakeLog.Del(blockNumber - common.BlockLogLenth)
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) DeleteStake(stake uint64, blockNumber uint64) uint64 {
+	var currentPunishment uint64
+	var genaroData types.GenaroData
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+
+		if genaroData.Stake <= stake {
+			currentPunishment = genaroData.Stake
+			genaroData.Stake = 0
+		} else {
+			currentPunishment = stake
+			genaroData.Stake -= stake
+		}
+
+		var newLog types.NumLog
+		newLog.Num = genaroData.Stake
+		newLog.BlockNum = blockNumber
+		genaroData.StakeLog.Add(newLog)
+
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+	return currentPunishment
+}
+
+func (self *stateObject) GetStake() uint64 {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.Stake
+	}
+
+	return 0
+}
+
+func (self *stateObject) GetStakeLog() types.NumLogs {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.StakeLog
+	}
+
+	return nil
+}
+
+func (self *stateObject) GetStakeRangeDiff(blockNumStart uint64, blockNumEnd uint64) uint64 {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.StakeLog.GetRangeDiff(blockNumStart, blockNumEnd)
+	}
+
+	return 0
+}
+
+func (self *stateObject) AddCandidate(candidate common.Address) {
+	var candidates Candidates
+	if self.data.CodeHash == nil {
+		candidates = *new(Candidates)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &candidates)
+	}
+	if !candidates.isExist(candidate) {
+		candidates = append(candidates, candidate)
+		b, _ := json.Marshal(candidates)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) IsCandidateExist(candidate common.Address) bool {
+	var candidates Candidates
+	if self.data.CodeHash == nil {
+		candidates = *new(Candidates)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &candidates)
+	}
+
+	return candidates.isExist(candidate)
+}
+
+func (self *stateObject) DelCandidate(candidate common.Address) {
+	var candidates Candidates
+	if self.data.CodeHash == nil {
+		candidates = *new(Candidates)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &candidates)
+	}
+
+	if candidates.isExist(candidate) {
+		candidates.DelCandidate(candidate)
+		b, _ := json.Marshal(candidates)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) GetCandidates() Candidates {
+	if self.data.CodeHash != nil {
+		var candidates Candidates
+		json.Unmarshal(self.data.CodeHash, &candidates)
+		return candidates
+	}
+	return nil
+}
+
+func (self *stateObject) AddAccountInForbidBackStakeList(addr common.Address) {
+	var forbidList types.ForbidBackStakeList
+	if self.data.CodeHash == nil {
+		forbidList = *new(types.ForbidBackStakeList)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+	}
+	if !forbidList.IsExist(addr) {
+		forbidList.Add(addr)
+		b, _ := json.Marshal(forbidList)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) IsAccountExistInForbidBackStakeList(addr common.Address) bool {
+	var forbidList types.ForbidBackStakeList
+	if self.data.CodeHash == nil {
+		forbidList = *new(types.ForbidBackStakeList)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+	}
+
+	return forbidList.IsExist(addr)
+}
+
+func (self *stateObject) DelAccountInForbidBackStakeList(addr common.Address) {
+	var forbidList types.ForbidBackStakeList
+	if self.data.CodeHash == nil {
+		forbidList = *new(types.ForbidBackStakeList)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+	}
+
+	if forbidList.IsExist(addr) {
+		forbidList.Del(addr)
+		b, _ := json.Marshal(forbidList)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) GetForbidBackStakeList() types.ForbidBackStakeList {
+	if self.data.CodeHash != nil {
+		var forbidList types.ForbidBackStakeList
+		json.Unmarshal(self.data.CodeHash, &forbidList)
+		return forbidList
+	}
+	return nil
+}
+
+func (self *stateObject) AddAlreadyBackStack(backStake common.AlreadyBackStake) {
+	var backStakes common.BackStakeList
+	if self.data.CodeHash == nil {
+		backStakes = *new(common.BackStakeList)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &backStakes)
+	}
+	if !backStakes.IsExist(backStake) {
+		backStakes = append(backStakes, backStake)
+
+		b, _ := json.Marshal(backStakes)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) GetAlreadyBackStakeList() common.BackStakeList {
+	if self.data.CodeHash != nil {
+		var backStakes common.BackStakeList
+		json.Unmarshal(self.data.CodeHash, &backStakes)
+		return backStakes
+	}
+	return nil
+}
+
+func (self *stateObject) SetAlreadyBackStakeList(backStakes common.BackStakeList) {
+	b, _ := json.Marshal(backStakes)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) UpdateBucketProperties(buckid string, szie uint64, backup uint64, timestart uint64, timeend uint64) {
+	var bpArr []*types.BucketPropertie
+	bp := new(types.BucketPropertie)
+	if buckid != "" {
+		bp.BucketId = buckid
+	}
+	if szie != 0 {
+		bp.Size = szie
+	}
+	if backup != 0 {
+		bp.Backup = backup
+	}
+	if timestart != 0 {
+		bp.TimeStart = timestart
+	}
+	if timeend != 0 {
+		bp.TimeEnd = timeend
+	}
+	bpArr = append(bpArr, bp)
+
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		genaroData = types.GenaroData{
+			Buckets: bpArr,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.Buckets == nil {
+			genaroData.Buckets = bpArr
+		} else {
+			genaroData.Buckets = append(genaroData.Buckets, bpArr...)
+		}
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) UpdateBucket(bucket types.BucketPropertie) bool {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.Buckets != nil {
+			for k, v := range genaroData.Buckets {
+				if v.BucketId == bucket.BucketId {
+					bp := new(types.BucketPropertie)
+					bp.BucketId = bucket.BucketId
+					bp.TimeEnd = bucket.TimeEnd
+					bp.TimeStart = bucket.TimeStart
+					bp.Size = bucket.Size
+					bp.Backup = bucket.Backup
+					genaroData.Buckets[k] = bp
+					break
+				}
+			}
+		}
+
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+		return true
+	}
+	return false
+}
+
+func (self *stateObject) getBucketPropertie(bucketID string) *types.BucketPropertie {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.Buckets != nil {
+			for _, v := range genaroData.Buckets {
+				if v.BucketId == bucketID {
+					return v
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (self *stateObject) GetStorageSize(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
+		return bp.Size
+	}
+	return 0
+}
+
+func (self *stateObject) GetStorageGasPrice(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
+		return bp.Backup
+	}
+	return 0
+}
+
+func (self *stateObject) GetStorageGasUsed(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
+		return bp.Backup * bp.Size
+	}
+	return 0
+}
+
+func (self *stateObject) GetStorageGas(bucketID string) uint64 {
+	if bp := self.getBucketPropertie(bucketID); bp != nil {
+		return bp.TimeEnd - bp.TimeStart
+	}
+	return 0
+}
+
+func (self *stateObject) UpdateTraffic(traffic uint64) {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		genaroData = types.GenaroData{
+			Traffic: traffic,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.Traffic += traffic
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) GetTraffic() uint64 {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.Traffic
+	}
+
+	return 0
+}
+
+func (self *stateObject) GetBuckets() map[string]interface{} {
+	rtMap := make(map[string]interface{})
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if genaroData.Buckets != nil {
+			for _, v := range genaroData.Buckets {
+				rtMap[v.BucketId] = *v
+			}
+		}
+	}
+	return rtMap
+}
+
+func (self *stateObject) GetStorageNodes() []string {
+	if self.data.CodeHash == nil {
+		return nil
+	}
+
+	var genaroData types.GenaroData
+	if err := json.Unmarshal(self.data.CodeHash, &genaroData); err != nil {
+		return nil
+	}
+
+	return genaroData.Node
+}
+
+//Cross-chain storage processing
+func (self *stateObject) SpecialTxTypeMortgageInit(specialTxTypeMortgageInit types.SpecialTxTypeMortgageInit) bool {
+	var genaroData types.GenaroData
+	if len(specialTxTypeMortgageInit.AuthorityTable) != len(specialTxTypeMortgageInit.MortgageTable) {
+		return false
+	}
+	for k, _ := range specialTxTypeMortgageInit.AuthorityTable {
+		if _, ok := specialTxTypeMortgageInit.MortgageTable[k]; !ok {
+			return false
+		}
+	}
+	if nil == self.data.CodeHash {
+		genaroData = types.GenaroData{
+			SpecialTxTypeMortgageInitArr: map[string]types.SpecialTxTypeMortgageInit{specialTxTypeMortgageInit.FileID: specialTxTypeMortgageInit},
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SpecialTxTypeMortgageInitArr {
+			genaroData.SpecialTxTypeMortgageInitArr = map[string]types.SpecialTxTypeMortgageInit{specialTxTypeMortgageInit.FileID: specialTxTypeMortgageInit}
+		} else {
+			genaroData.SpecialTxTypeMortgageInitArr[specialTxTypeMortgageInit.FileID] = specialTxTypeMortgageInit
+		}
+	}
+	genaroData.SpecialTxTypeMortgageInit = types.SpecialTxTypeMortgageInit{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
+}
+
+func (self *stateObject) GetAccountAttributes() types.GenaroData {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData
+	}
+	return types.GenaroData{}
+}
+
+func (self *stateObject) SpecialTxTypeSyncSidechainStatus(SpecialTxTypeSyncSidechainStatus types.SpecialTxTypeMortgageInit) (map[common.Address]*big.Int, bool) {
+	var genaroData types.GenaroData
+	AddBalance := make(map[common.Address]*big.Int)
+	if nil == self.data.CodeHash {
+		return nil, false
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		fileID := SpecialTxTypeSyncSidechainStatus.FileID
+		result := genaroData.SpecialTxTypeMortgageInitArr[fileID]
+		if 0 == len(result.MortgageTable) || len(result.MortgageTable) != len(result.AuthorityTable) ||
+			len(result.MortgageTable) != len(SpecialTxTypeSyncSidechainStatus.Sidechain) {
+			return nil, false
+		}
+		if result.EndTime > time.Now().Unix() && false == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate {
+			if 0 == len(result.SidechainStatus) {
+				result.SidechainStatus = make(map[string]map[common.Address]*hexutil.Big)
+			}
+			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
+		} else if true == SpecialTxTypeSyncSidechainStatus.Terminate && false == result.Terminate {
+			if 0 == len(result.SidechainStatus) {
+				result.SidechainStatus = make(map[string]map[common.Address]*hexutil.Big)
+			}
+			result.SidechainStatus[SpecialTxTypeSyncSidechainStatus.Dataversion] = SpecialTxTypeSyncSidechainStatus.Sidechain
+			useMortgagTotal := new(big.Int)
+			zero := big.NewInt(0)
+			for k, v := range SpecialTxTypeSyncSidechainStatus.Sidechain {
+				if common.ReadWrite == result.AuthorityTable[k] || common.Write == result.AuthorityTable[k] {
+					if v.ToInt().Cmp(zero) < 0 {
+						return nil, false
+					}
+					if result.MortgageTable[k].ToInt().Cmp(v.ToInt()) > -1 {
+						AddBalance[k] = v.ToInt()
+						useMortgagTotal.Add(useMortgagTotal, v.ToInt())
+					} else {
+						AddBalance[k] = result.MortgageTable[k].ToInt()
+						useMortgagTotal.Add(useMortgagTotal, result.MortgageTable[k].ToInt())
+					}
+				}
+			}
+			AddBalance[result.FromAccount] = result.MortgagTotal.Sub(result.MortgagTotal, useMortgagTotal)
+			result.Terminate = true
+		} else {
+			return nil, false
+		}
+		genaroData.SpecialTxTypeMortgageInitArr[fileID] = result
+	}
+	genaroData.SpecialTxTypeMortgageInit = types.SpecialTxTypeMortgageInit{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return AddBalance, true
+}
+
+func (self *stateObject) TxLogBydataVersionUpdate(fileID string) (types.SpecialTxTypeMortgageInit, bool) {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		accountAttributes := genaroData.SpecialTxTypeMortgageInitArr
+		resultTmp := accountAttributes[fileID]
+		if true == resultTmp.Terminate || resultTmp.EndTime < time.Now().Unix() {
+			return types.SpecialTxTypeMortgageInit{}, false
+		}
+		if 0 == len(resultTmp.AuthorityTable) {
+			return types.SpecialTxTypeMortgageInit{}, false
+		}
+		resultTmp.LogSwitch = true
+		genaroData.SpecialTxTypeMortgageInitArr[fileID] = resultTmp
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+		return resultTmp, true
+	}
+	return types.SpecialTxTypeMortgageInit{}, false
+}
+
+func (self *stateObject) TxLogByDataVersionRead(fileID, dataVersion string) (map[common.Address]*hexutil.Big, error) {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		accountAttributes := genaroData.SpecialTxTypeMortgageInitArr
+		resultTmp := accountAttributes[fileID]
+		if 0 == len(resultTmp.AuthorityTable) {
+			return nil, nil
+		}
+		return resultTmp.SidechainStatus[dataVersion], nil
+	}
+	return nil, nil
+}
+
+func (self *stateObject) SyncStakeNode(s string) error {
+	var err error
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		err = ErrSyncNode
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.Node = append(genaroData.Node, s)
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+
+	}
+	return err
+}
+
+func (self *stateObject) SyncNode2Address(s string, address string) error {
+	d := make(map[string]string)
+	if self.data.CodeHash == nil {
+		d[s] = address
+	} else {
+		json.Unmarshal(self.data.CodeHash, &d)
+		d[s] = address
+	}
+	b, _ := json.Marshal(d)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return nil
+}
+
+func (self *stateObject) GetAddressByNode(s string) string {
+	if self.data.CodeHash == nil {
+		return ""
+	} else {
+		d := make(map[string]string)
+		err := json.Unmarshal(self.data.CodeHash, &d)
+		if err != nil {
+			return ""
+		}
+		if v, ok := d[s]; !ok {
+			return ""
+		} else {
+			return v
+		}
+	}
+}
+
+func (self *stateObject) SynchronizeShareKey(synchronizeShareKey types.SynchronizeShareKey) bool {
+	var genaroData types.GenaroData
+	if nil == self.data.CodeHash {
+		genaroData = types.GenaroData{
+			SynchronizeShareKeyArr: map[string]types.SynchronizeShareKey{synchronizeShareKey.ShareKeyId: synchronizeShareKey},
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			genaroData.SynchronizeShareKeyArr = map[string]types.SynchronizeShareKey{synchronizeShareKey.ShareKeyId: synchronizeShareKey}
+		} else {
+			genaroData.SynchronizeShareKeyArr[synchronizeShareKey.ShareKeyId] = synchronizeShareKey
+		}
+	}
+	genaroData.SynchronizeShareKey = types.SynchronizeShareKey{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
+}
+
+func (self *stateObject) UpdateFileSharePublicKey(publicKey string) {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		genaroData = types.GenaroData{
+			FileSharePublicKey: publicKey,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.FileSharePublicKey = publicKey
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) GetFileSharePublicKey() string {
+	if self.data.CodeHash == nil {
+		return ""
+	}
+
+	var genaroData types.GenaroData
+	if err := json.Unmarshal(self.data.CodeHash, &genaroData); err != nil {
+		return ""
+	}
+
+	return genaroData.FileSharePublicKey
+}
+
+func (self *stateObject) UnlockSharedKey(shareKeyId string) types.SynchronizeShareKey {
+	var genaroData types.GenaroData
+	var synchronizeShareKey types.SynchronizeShareKey
+	if nil == self.data.CodeHash {
+		return types.SynchronizeShareKey{}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			return types.SynchronizeShareKey{}
+		} else {
+			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
+			if 1 == synchronizeShareKey.Status {
+				return synchronizeShareKey
+			}
+			synchronizeShareKey.Status = 1
+			genaroData.SynchronizeShareKeyArr[shareKeyId] = synchronizeShareKey
+			synchronizeShareKey.Status = 0
+		}
+	}
+	genaroData.SynchronizeShareKey = types.SynchronizeShareKey{}
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return synchronizeShareKey
+}
+
+func (self *stateObject) CheckUnlockSharedKey(shareKeyId string) bool {
+	var genaroData types.GenaroData
+	var synchronizeShareKey types.SynchronizeShareKey
+	if nil == self.data.CodeHash {
+		return false
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		if nil == genaroData.SynchronizeShareKeyArr {
+			return false
+		} else {
+			synchronizeShareKey = genaroData.SynchronizeShareKeyArr[shareKeyId]
+			if 1 == synchronizeShareKey.Status {
+				return true
+			}
+
+		}
+	}
+	return false
+}
+
+func (self *stateObject) UpdateBucketApplyPrice(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil {
+		genaroPrice = types.GenaroPrice{
+			BucketApplyGasPerGPerDay: price,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.BucketApplyGasPerGPerDay = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) GetBucketApplyPrice() *big.Int {
+	if self.data.CodeHash != nil {
+		var genaroPrice types.GenaroPrice
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		if genaroPrice.BucketApplyGasPerGPerDay != nil {
+			return genaroPrice.BucketApplyGasPerGPerDay.ToInt()
+		}
+	}
+
+	return common.DefaultBucketApplyGasPerGPerDay
+}
+
+func (self *stateObject) UpdateTrafficApplyPrice(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil {
+		genaroPrice = types.GenaroPrice{
+			TrafficApplyGasPerG: price,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.TrafficApplyGasPerG = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) AddLastRootState(statehash common.Hash, blockNumber uint64) {
+	var lastSynState types.LastSynState
+	if self.data.CodeHash == nil {
+		lastSynState = types.LastSynState{
+			LastRootStates:  make(map[common.Hash]uint64),
+			LastSynBlockNum: 0,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &lastSynState)
+	}
+
+	lastSynState.AddLastSynState(statehash, blockNumber)
+
+	b, _ := json.Marshal(lastSynState)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) UpdateAccountBinding(mainAccount common.Address, subAccount common.Address) {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	}
+	if bindingTable.MainAccounts == nil {
+		bindingTable.MainAccounts = make(map[common.Address][]common.Address)
+	}
+	if bindingTable.SubAccounts == nil {
+		bindingTable.SubAccounts = make(map[common.Address]common.Address)
+	}
+
+	bindingTable.UpdateBinding(mainAccount, subAccount)
+
+	b, _ := json.Marshal(bindingTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) DelSubAccountBinding(subAccount common.Address) bool {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return false
+	}
+
+	if bindingTable.IsSubAccountExist(subAccount) {
+		bindingTable.DelSubAccount(subAccount)
+
+		b, _ := json.Marshal(bindingTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+		return true
+	}
+	return false
+}
+
+func (self *stateObject) DelMainAccountBinding(mainAccount common.Address) []common.Address {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return nil
+	}
+
+	if bindingTable.IsMainAccountExist(mainAccount) {
+		subAccounts := bindingTable.DelMainAccount(mainAccount)
+
+		b, _ := json.Marshal(bindingTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+		return subAccounts
+	}
+	return nil
+}
+
+func (self *stateObject) GetSubAccounts(mainAccount common.Address) []common.Address {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return nil
+	}
+	if bindingTable.IsMainAccountExist(mainAccount) {
+		return bindingTable.MainAccounts[mainAccount]
+	}
+
+	return nil
+}
+
+func (self *stateObject) GetSubAccountsCount(mainAccount common.Address) int {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return 0
+	}
+
+	return bindingTable.GetSubAccountSizeInMainAccount(mainAccount)
+}
+
+func (self *stateObject) GetMainAccounts() map[common.Address][]common.Address {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return nil
+	}
+
+	return bindingTable.MainAccounts
+}
+
+func (self *stateObject) GetMainAccount(subAccount common.Address) *common.Address {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return nil
+	}
+
+	if bindingTable.IsSubAccountExist(subAccount) {
+		mainAccount := bindingTable.SubAccounts[subAccount]
+		return &mainAccount
+	}
+
+	return nil
+}
+
+func (self *stateObject) IsBindingAccount(account common.Address) bool {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return false
+	}
+
+	return bindingTable.IsAccountInBinding(account)
+}
+
+func (self *stateObject) IsMainAccount(account common.Address) bool {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return false
+	}
+
+	return bindingTable.IsMainAccountExist(account)
+}
+
+func (self *stateObject) IsSubAccount(account common.Address) bool {
+	var bindingTable types.BindingTable
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &bindingTable)
+	} else {
+		return false
+	}
+
+	return bindingTable.IsSubAccountExist(account)
+}
+
+func (self *stateObject) GetTrafficApplyPrice() *big.Int {
+
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.TrafficApplyGasPerG != nil {
+			return genaroPrice.TrafficApplyGasPerG.ToInt()
+		}
+	}
+	return common.DefaultTrafficApplyGasPerG
+}
+
+func (self *stateObject) UpdateStakePerNodePrice(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil {
+		genaroPrice = types.GenaroPrice{
+			StakeValuePerNode: price,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.StakeValuePerNode = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) SetLastSynBlock(blockNumber uint64, blockHash common.Hash) {
+	var lastsynState types.LastSynState
+	if self.data.CodeHash == nil {
+		lastsynState = types.LastSynState{
+			LastRootStates:  make(map[common.Hash]uint64),
+			LastSynBlockNum: 0,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &lastsynState)
+	}
+
+	lastsynState.LastSynBlockNum = blockNumber
+	lastsynState.LastSynBlockHash = blockHash
+
+	b, _ := json.Marshal(lastsynState)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) GetStakePerNodePrice() *big.Int {
+
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.StakeValuePerNode != nil {
+			return genaroPrice.StakeValuePerNode.ToInt()
+		}
+	}
+
+	return common.DefaultTrafficApplyGasPerG
+}
+
+func (self *stateObject) GetGenaroPrice() *types.GenaroPrice {
+	if self.data.CodeHash != nil {
+		var genaroPrice types.GenaroPrice
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		return &genaroPrice
+	}
+	return nil
+}
+
+func (self *stateObject) SetGenaroPrice(genaroPrice types.GenaroPrice) {
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) UpdateOneDayGesCost(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil {
+		genaroPrice = types.GenaroPrice{
+			OneDayMortgageGes: price,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.OneDayMortgageGes = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) UpdateOneDaySyncLogGsaCost(price *hexutil.Big) {
+	var genaroPrice types.GenaroPrice
+	if self.data.CodeHash == nil {
+		genaroPrice = types.GenaroPrice{
+			OneDaySyncLogGsaCost: price,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroPrice)
+		genaroPrice.OneDaySyncLogGsaCost = price
+	}
+
+	b, _ := json.Marshal(genaroPrice)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) GetOneDayGesCost() *big.Int {
+
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.OneDayMortgageGes != nil {
+			return genaroPrice.OneDayMortgageGes.ToInt()
+		}
+	}
+
+	return common.DefaultOneDayMortgageGes
+}
+
+func (self *stateObject) GetOneDaySyncLogGsaCost() *big.Int {
+	genaroPrice := self.GetGenaroPrice()
+	if genaroPrice != nil {
+		if genaroPrice.OneDaySyncLogGsaCost != nil {
+			return genaroPrice.OneDaySyncLogGsaCost.ToInt()
+		}
+	}
+	return common.DefaultOneDaySyncLogGsaCost
+}
+func (self *stateObject) GetLastSynState() *types.LastSynState {
+	if self.data.CodeHash != nil {
+		var lastSynState types.LastSynState
+		json.Unmarshal(self.data.CodeHash, &lastSynState)
+		return &lastSynState
+	}
+	return nil
+}
+
+func (self *stateObject) UnbindNode(nodeId string) error {
+	var err error
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		err = errors.New("no node of this account")
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+
+		var a []string
+		for k, v := range genaroData.Node {
+			if v == nodeId {
+				a = append(genaroData.Node[:k], genaroData.Node[k+1:]...)
+			}
+		}
+		genaroData.Node = a
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+
+	}
+	return err
+}
+
+func (self *stateObject) UbindNode2Address(nodeId string) error {
+	d := make(map[string]string)
+	if self.data.CodeHash == nil {
+		return nil
+	} else {
+		json.Unmarshal(self.data.CodeHash, &d)
+		delete(d, nodeId)
+	}
+	b, _ := json.Marshal(d)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return nil
+}
+
+func (self *stateObject) GetRewardsValues() *types.RewardsValues {
+	var rewardsValues types.RewardsValues
+	if self.data.CodeHash == nil {
+		return nil
+	} else {
+		json.Unmarshal(self.data.CodeHash, &rewardsValues)
+	}
+	return &rewardsValues
+}
+
+func (self *stateObject) SetRewardsValues(rewardsValues types.RewardsValues) {
+	b, _ := json.Marshal(rewardsValues)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) PromissoryNotesWithdrawCash(blockNumber uint64) uint64 {
+	var genaroData types.GenaroData
+	var promissoryNotesNum uint64
+	if self.data.CodeHash == nil {
+		return 0
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		promissoryNotesNum = genaroData.PromissoryNotes.DelBefor(blockNumber)
+		if 0 == promissoryNotesNum {
+			return promissoryNotesNum
+		}
+		b, _ := json.Marshal(genaroData)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+
+	}
+	return promissoryNotesNum
+}
+
+func (self *stateObject) GetAllPromissoryNotesNum() uint64 {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		return uint64(0)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetAllNum()
+	}
+	return uint64(0)
+}
+
+func (self *stateObject) GetBeforPromissoryNotesNum(blockNumber uint64) uint64 {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		return uint64(0)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return genaroData.PromissoryNotes.GetBefor(blockNumber)
+	}
+	return uint64(0)
+}
+
+func (self *stateObject) AddPromissoryNote(promissoryNote types.PromissoryNote) {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		promissoryNotes := new(types.PromissoryNotes)
+		promissoryNotes.Add(promissoryNote)
+		genaroData.PromissoryNotes = *promissoryNotes
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.PromissoryNotes.Add(promissoryNote)
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+}
+
+func (self *stateObject) DelPromissoryNote(promissoryNote types.PromissoryNote) bool {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		return false
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+	}
+	promissoryNotes := genaroData.PromissoryNotes
+	if !(&promissoryNotes).Del(promissoryNote) {
+		return false
+	}
+	genaroData.PromissoryNotes = promissoryNotes
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+
+	return true
+}
+
+func (self *stateObject) GetPromissoryNotes() types.PromissoryNotes {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		return nil
+	} else {
+		err := json.Unmarshal(self.data.CodeHash, &genaroData)
+		if err != nil {
+			return nil
+		}
+		return genaroData.PromissoryNotes
+	}
+}
+
+func (self *stateObject) GetOptionTxTable() *types.OptionTxTable {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil {
+		return nil
+	} else {
+		err := json.Unmarshal(self.data.CodeHash, &optionTxTable)
+		if err != nil {
+			return nil
+		}
+	}
+	return &optionTxTable
+}
+
+func (self *stateObject) DelTxInOptionTxTable(hash common.Hash) {
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash == nil {
+		optionTxTable = *new(types.OptionTxTable)
+	} else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+
+	if _, ok := optionTxTable[hash]; ok {
+		delete(optionTxTable, hash)
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) AddTxInOptionTxTable(hash common.Hash, promissoryNotesOptionTx types.PromissoryNotesOptionTx) {
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+
+	if _, ok := optionTxTable[hash]; !ok {
+		optionTxTable[hash] = promissoryNotesOptionTx
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) SetTxStatusInOptionTxTable(hash common.Hash, status bool) {
+	optionTxTable := make(types.OptionTxTable)
+	if self.data.CodeHash != nil {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	if promissoryNotesOptionTx, ok := optionTxTable[hash]; ok {
+		promissoryNotesOptionTx.IsSell = status
+		optionTxTable[hash] = promissoryNotesOptionTx
+		b, _ := json.Marshal(optionTxTable)
+		self.code = nil
+		self.data.CodeHash = b[:]
+		self.dirtyCode = true
+		if self.onDirty != nil {
+			self.onDirty(self.Address())
+			self.onDirty = nil
+		}
+	}
+}
+
+func (self *stateObject) BuyPromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil {
+		return types.PromissoryNotesOptionTx{}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	buyPromissoryNotes := optionTxTable[orderId]
+
+	if true != buyPromissoryNotes.IsSell {
+		return types.PromissoryNotesOptionTx{}
+	}
+	if 0 >= buyPromissoryNotes.TxNum {
+		return types.PromissoryNotesOptionTx{}
+	}
+	var tmpAddr common.Address
+	var turnBuy = 0
+	if true == buyPromissoryNotes.IsSell && tmpAddr != buyPromissoryNotes.OptionOwner {
+		tmpAddr = buyPromissoryNotes.OptionOwner
+		turnBuy = 1
+	}
+	buyPromissoryNotes.IsSell = false
+	buyPromissoryNotes.OptionOwner = address
+	optionTxTable[orderId] = buyPromissoryNotes
+	b, _ := json.Marshal(optionTxTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	if 1 == turnBuy {
+		buyPromissoryNotes.PromissoryNotesOwner = tmpAddr
+	}
+	return buyPromissoryNotes
+}
+
+func (self *stateObject) DeletePromissoryNotes(orderId common.Hash, address common.Address) types.PromissoryNotesOptionTx {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil {
+		return types.PromissoryNotesOptionTx{}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	buyPromissoryNotes := optionTxTable[orderId]
+	if false != buyPromissoryNotes.IsSell {
+		return types.PromissoryNotesOptionTx{}
+	}
+	if 0 >= buyPromissoryNotes.TxNum {
+		return types.PromissoryNotesOptionTx{}
+	}
+	if buyPromissoryNotes.OptionOwner != address {
+		return types.PromissoryNotesOptionTx{}
+	}
+	delete(optionTxTable, orderId)
+	fmt.Println(optionTxTable)
+	b, _ := json.Marshal(optionTxTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return buyPromissoryNotes
+
+}
+
+func (self *stateObject) TurnBuyPromissoryNotes(orderId common.Hash, optionPrice *hexutil.Big, address common.Address) bool {
+	var optionTxTable types.OptionTxTable
+	if self.data.CodeHash == nil {
+		return false
+	} else {
+		json.Unmarshal(self.data.CodeHash, &optionTxTable)
+	}
+	buyPromissoryNotes := optionTxTable[orderId]
+	if buyPromissoryNotes.OptionOwner != address {
+		return false
+	}
+	if 0 >= buyPromissoryNotes.TxNum {
+		return false
+	}
+	buyPromissoryNotes.IsSell = true
+	buyPromissoryNotes.OptionPrice = optionPrice.ToInt()
+	optionTxTable[orderId] = buyPromissoryNotes
+	b, _ := json.Marshal(optionTxTable)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
 }

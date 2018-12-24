@@ -40,6 +40,7 @@ import (
 //go:generate gencodec -type GenesisAccount -field-override genesisAccountMarshaling -out gen_genesis_account.go
 
 var errGenesisNoConfig = errors.New("genesis has no chain configuration")
+var GenesisSpecialAddr = common.StringToAddress("0x5858585858585858")
 
 // Genesis specifies the header fields, state of a genesis block. It also defines hard
 // fork switch-over blocks through the chain configuration.
@@ -62,6 +63,7 @@ type Genesis struct {
 }
 
 // GenesisAlloc specifies the initial state that is part of the genesis block.
+// Use a special address store init-committee
 type GenesisAlloc map[common.Address]GenesisAccount
 
 func (ga *GenesisAlloc) UnmarshalJSON(data []byte) error {
@@ -81,6 +83,7 @@ type GenesisAccount struct {
 	Code       []byte                      `json:"code,omitempty"`
 	Storage    map[common.Hash]common.Hash `json:"storage,omitempty"`
 	Balance    *big.Int                    `json:"balance" gencodec:"required"`
+	CodeHash   []byte                      `json:"CodeHash,omitempty"` // genaro data
 	Nonce      uint64                      `json:"nonce,omitempty"`
 	PrivateKey []byte                      `json:"secretKey,omitempty"` // for tests
 }
@@ -158,8 +161,10 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 	stored := GetCanonicalHash(db, 0)
 	if (stored == common.Hash{}) {
 		if genesis == nil {
-			log.Info("Writing default main-net genesis block")
-			genesis = DefaultGenesisBlock()
+			//log.Info("Writing default main-net genesis block")
+			//genesis = DefaultGenesisBlock()
+			log.Info("Writing genaro genesis block")
+			genesis = DefaultGenaroGenesisBlock()
 		} else {
 			log.Info("Writing custom genesis block")
 		}
@@ -168,7 +173,12 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 	}
 
 	// Check whether the genesis block is already written.
+	log.Info("before genesis@genesis.go:176")
+	if genesis == nil {
+		log.Info("genesis is nil@genesis.go:178")
+	}
 	if genesis != nil {
+		log.Info("before entering genesis.ToBlock@genesis.go:181")
 		hash := genesis.ToBlock(nil).Hash()
 		if hash != stored {
 			return genesis.Config, hash, &GenesisMismatchError{stored, hash}
@@ -189,9 +199,13 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 	// Special case: don't change the existing config of a non-mainnet chain if no new
 	// config is supplied. These chains would get AllProtocolChanges (and a compat error)
 	// if we just continued here.
-	if genesis == nil && stored != params.MainnetGenesisHash {
+	/*if genesis == nil && stored != params.MainnetGenesisHash {
+		return storedcfg, stored, nil
+	}*/
+	if genesis == nil && stored != params.GenaronetGenesisHash {
 		return storedcfg, stored, nil
 	}
+	log.Info("after params.GenaronetGenesisHash@genesis.go:208")
 
 	// Check config compatibility and write the config. Compatibility errors
 	// are returned to the caller unless we're already at block zero.
@@ -210,6 +224,8 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	switch {
 	case g != nil:
 		return g.Config
+	case ghash == params.GenaronetGenesisHash:
+		return params.GenaroChainConfig
 	case ghash == params.MainnetGenesisHash:
 		return params.MainnetChainConfig
 	case ghash == params.TestnetGenesisHash:
@@ -223,12 +239,19 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 // to the given database (or discards it if nil).
 func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	if db == nil {
-		db, _ = ethdb.NewMemDatabase()
+		db = ethdb.NewMemDatabase()
 	}
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(db))
 	for addr, account := range g.Alloc {
 		statedb.AddBalance(addr, account.Balance)
-		statedb.SetCode(addr, account.Code)
+		// check genaro data
+		if account.CodeHash != nil {
+			fmt.Printf("SetCodeHash address:%v, codehash:%v @genesis.go:260", addr, account.CodeHash)
+			statedb.SetCodeHash(addr, account.CodeHash)
+		} else {
+			statedb.SetCode(addr, account.Code)
+		}
+
 		statedb.SetNonce(addr, account.Nonce)
 		for key, value := range account.Storage {
 			statedb.SetState(addr, key, value)
@@ -317,6 +340,18 @@ func DefaultGenesisBlock() *Genesis {
 		GasLimit:   5000,
 		Difficulty: big.NewInt(17179869184),
 		Alloc:      decodePrealloc(mainnetAllocData),
+	}
+}
+
+// DefaultGenaroGenesisBlock returns the Ethereum genaro net genesis block.
+func DefaultGenaroGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.GenaroChainConfig,
+		Nonce:      0,
+		ExtraData:  hexutil.MustDecode("0x7b22636f6d6d697474656552616e6b223a5b22307838316365653764333436353935653035353263366466333864643366363166366535383032643130222c22307831613731393465623134306532396530396663653638386432653836663238326436613833653639222c22307837376637633566646533636534666131333763343862336637323262313764373732326333393234222c22307864333165623265613264376263313563356230666537393232666162346462306134663831383761222c22307861643138386237363266396533656637366339373239363062383063396463393962396366633733225d2c2265564d44617461223a6e756c6c2c227369676e6174757265223a6e756c6c2c22726174696f223a5b313530302c323030302c323530302c333030302c313030305d7d"),
+		GasLimit:   0x4c4b40,
+		Difficulty: big.NewInt(1),
+		Alloc:      decodePrealloc(genaroAllocData),
 	}
 }
 

@@ -1788,7 +1788,31 @@ var ETH_UNITS = [
     'Nether',
     'Dether',
     'Vether',
-    'Uether'
+    'Uether',
+
+    'an',
+    'kan',
+    'Man',
+    'Gan',
+    'femtognx',
+    'picognx',
+    'nanognx',
+    'micrognx',
+    'millignx',
+    'gnx',
+    'Mgnx',
+    'Ggnx',
+    'Tgnx',
+    'Pgnx',
+    'Egnx',
+    'Zgnx',
+    'Ygnx',
+    'Ngnx',
+    'Dgnx',
+    'Vgnx',
+    'Ugnx'
+
+
 ];
 
 module.exports = {
@@ -1910,7 +1934,25 @@ var unitMap = {
     'grand':        '1000000000000000000000',
     'mether':       '1000000000000000000000000',
     'gether':       '1000000000000000000000000000',
-    'tether':       '1000000000000000000000000000000'
+    'tether':       '1000000000000000000000000000000',
+
+    'an':           '1',
+    'kan':          '1000',
+    'Kan':          '1000',
+    'femtognx':     '1000',
+    'man':          '1000000',
+    'Man':          '1000000',
+    'picognx':      '1000000',
+    'gan':          '1000000000',
+    'Gan':          '1000000000',
+    'nanognx':      '1000000000',
+    'micrognx':     '1000000000000',
+    'millignx':     '1000000000000000',
+    'gnx':          '1000000000000000000',
+    'kgnx':         '1000000000000000000000',
+    'mgnx':         '1000000000000000000000000',
+    'ggnx':         '1000000000000000000000000000',
+    'tgnx':         '1000000000000000000000000000000'
 };
 
 /**
@@ -2165,6 +2207,33 @@ var fromWei = function(number, unit) {
 };
 
 /**
+ * Takes a number of wei and converts it to any other ether unit.
+ *
+ * Possible units are:
+ *   SI Short   SI Full     Effigy       Other
+ * - kan       femtognx     babbage
+ * - man       picognx      lovelace
+ * - gan       nanognx      shannon      nano
+ * - --        micrognx     szabo        micro
+ * - --        millignx     finney       milli
+ * - gnx       --           --
+ * - kgnx                   --          grand
+ * - mgnx
+ * - ggnx
+ * - tgnx
+ *
+ * @method fromAn
+ * @param {Number|String} number can be a number, number string or a HEX of a decimal
+ * @param {String} unit the unit to convert to, default ether
+ * @return {String|Object} When given a BigNumber object it returns one as well, otherwise a number
+ */
+var fromAn = function(number, unit) {
+    var returnValue = toBigNumber(number).dividedBy(getValueOfUnit(unit));
+
+    return isBigNumber(number) ? returnValue : returnValue.toString(10);
+};
+
+/**
  * Takes a number of a unit and converts it to wei.
  *
  * Possible units are:
@@ -2187,6 +2256,35 @@ var fromWei = function(number, unit) {
  * @return {String|Object} When given a BigNumber object it returns one as well, otherwise a number
 */
 var toWei = function(number, unit) {
+    var returnValue = toBigNumber(number).times(getValueOfUnit(unit));
+
+    return isBigNumber(number) ? returnValue : returnValue.toString(10);
+};
+
+
+/**
+ * Takes a number of a unit and converts it to wei.
+ *
+ * Possible units are:
+ *   SI Short   SI Full        Effigy       Other
+ * - kan       femtognx     babbage
+ * - man       picognx      lovelace
+ * - gan       nanognx      shannon      nano
+ * - --        micrognx     szabo        micro
+ * - --        micrognx     szabo        micro
+ * - --        millignx     finney       milli
+ * - gnx       --           --
+ * - kgnx                   --           grand
+ * - mgnx
+ * - ggnx
+ * - tgnx
+ *
+ * @method toAn
+ * @param {Number|String|BigNumber} number can be a number, number string or a HEX of a decimal
+ * @param {String} unit the unit to convert from, default ether
+ * @return {String|Object} When given a BigNumber object it returns one as well, otherwise a number
+ */
+var toAn = function(number, unit) {
     var returnValue = toBigNumber(number).times(getValueOfUnit(unit));
 
     return isBigNumber(number) ? returnValue : returnValue.toString(10);
@@ -2454,7 +2552,9 @@ module.exports = {
     extractDisplayName: extractDisplayName,
     extractTypeName: extractTypeName,
     toWei: toWei,
+    toAn: toAn,
     fromWei: fromWei,
+    fromAn: fromAn,
     toBigNumber: toBigNumber,
     toTwosComplement: toTwosComplement,
     toAddress: toAddress,
@@ -2576,7 +2676,9 @@ Web3.prototype.toDecimal = utils.toDecimal;
 Web3.prototype.fromDecimal = utils.fromDecimal;
 Web3.prototype.toBigNumber = utils.toBigNumber;
 Web3.prototype.toWei = utils.toWei;
+Web3.prototype.toAn = utils.toAn;
 Web3.prototype.fromWei = utils.fromWei;
+Web3.prototype.fromAn = utils.fromAn;
 Web3.prototype.isAddress = utils.isAddress;
 Web3.prototype.isChecksumAddress = utils.isChecksumAddress;
 Web3.prototype.toChecksumAddress = utils.toChecksumAddress;
@@ -3768,6 +3870,9 @@ var inputTransactionFormatter = function (options){
     return options;
 };
 
+var inputString = function (options) {
+    return options
+}
 /**
  * Formats the output of a transaction to its proper values
  *
@@ -3960,7 +4065,8 @@ module.exports = {
     outputBlockFormatter: outputBlockFormatter,
     outputLogFormatter: outputLogFormatter,
     outputPostFormatter: outputPostFormatter,
-    outputSyncingFormatter: outputSyncingFormatter
+    outputSyncingFormatter: outputSyncingFormatter,
+    inputString: inputString
 };
 
 
@@ -5267,9 +5373,155 @@ Object.defineProperty(Eth.prototype, 'defaultAccount', {
 });
 
 var methods = function () {
+    var getAccountData = new Method({
+        name: 'getAccountData',
+        call: 'eth_getAccountData',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+    });
+
     var getBalance = new Method({
         name: 'getBalance',
         call: 'eth_getBalance',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: utils.toDecimal
+    });
+
+    var getCandidates = new Method({
+            name: 'getCandidates',
+            call: 'eth_getCandidates',
+            params: 1,
+            inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getRewardsValues = new Method({
+        name: 'getRewardsValues',
+        call: 'eth_getRewardsValues',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getGlobalVar = new Method({
+        name: 'getGlobalVar',
+        call: 'eth_getGlobalVar',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getSubAccounts = new Method({
+        name: 'getSubAccounts',
+        call: 'eth_getSubAccounts',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getMainAccount = new Method({
+        name: 'getMainAccount',
+        call: 'eth_getMainAccount',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter,formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getCommitteeRank = new Method({
+        name: 'getCommitteeRank',
+        call: 'eth_getCommitteeRank',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getMainAccountRank = new Method({
+        name: 'getMainAccountRank',
+        call: 'eth_getMainAccountRank',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getAlreadyBackStakeList = new Method({
+        name: 'getAlreadyBackStakeList',
+        call: 'eth_getAlreadyBackStakeList',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getLastRootStates = new Method({
+        name: 'getLastRootStates',
+        call: 'eth_getLastRootStates',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getLastSynBlock = new Method({
+        name: 'getLastSynBlock',
+        call: 'eth_getLastSynBlock',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getExtra = new Method({
+        name: 'getExtra',
+        call: 'eth_getExtra',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getAccountByName = new Method({
+        name: 'getAccountByName',
+        call: 'eth_getAccountByName',
+        params: 2,
+        inputFormatter: [utils.toString(),formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getBalance = new Method({
+        name: 'getNamePrice',
+        call: 'eth_getNamePrice',
+        params: 1,
+        inputFormatter: [utils.toString()],
+        outputFormatter: utils.toDecimal
+    });
+
+    var getStake = new Method({
+        name: 'getStake',
+        call: 'eth_getStake',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
+    var getStakeRangeDiff = new Method({
+        name: 'getStakeRangeDiff',
+        call: 'eth_getStakeRangeDiff',
+        params: 4,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
+    var getHeft = new Method({
+        name: 'getHeft',
+        call: 'eth_getHeft',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
+    var getHeftRangeDiff = new Method({
+        name: 'getHeftRangeDiff',
+        call: 'eth_getHeftRangeDiff',
+        params: 4,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    });
+
+    var getGenaroCodeHash = new Method({
+        name: 'getGenaroCodeHash',
+        call: 'eth_getGenaroCodeHash',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+    });
+
+    var getStake = new Method({
+        name: 'getStake',
+        call: 'eth_getStake',
         params: 2,
         inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
         outputFormatter: formatters.outputBigNumberFormatter
@@ -5433,6 +5685,7 @@ var methods = function () {
 
     return [
         getBalance,
+        getStake,
         getStorageAt,
         getCode,
         getBlock,
@@ -5454,7 +5707,25 @@ var methods = function () {
         compileLLL,
         compileSerpent,
         submitWork,
-        getWork
+        getWork,
+        getStake,
+        getStakeRangeDiff,
+        getHeft,
+        getHeftRangeDiff,
+        getCandidates,
+        getCommitteeRank,
+        getGenaroCodeHash,
+        getLastRootStates,
+        getLastSynBlock,
+        getExtra,
+        getAlreadyBackStakeList,
+        getSubAccounts,
+        getMainAccount,
+        getGlobalVar,
+        getRewardsValues,
+        getMainAccountRank,
+        getAccountData,
+        getAccountByName
     ];
 };
 

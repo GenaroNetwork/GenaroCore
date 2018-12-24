@@ -395,6 +395,128 @@ web3._extend({
 	property: 'eth',
 	methods: [
 		new web3._extend.Method({
+			name: 'getAccountData',
+			call: 'eth_getAccountData',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getAlreadyBackStakeList',
+			call: 'eth_getAlreadyBackStakeList',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getRewardsValues',
+			call: 'eth_getRewardsValues',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getGlobalVar',
+			call: 'eth_getGlobalVar',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getBuckets',
+			call: 'eth_getBuckets',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getAccountByName',
+			call: 'eth_getAccountByName',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputString,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getNamePrice',
+			call: 'eth_getNamePrice',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputString]
+			outputFormatter: web3._extend.utils.toDecimal
+		}),
+		new web3._extend.Method({
+			name: 'getStake',
+			call: 'eth_getStake',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getHeft',
+			call: 'eth_getHeft',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getGenaroPrice',
+			call: 'eth_getGenaroPrice',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getSubAccounts',
+			call: 'eth_getSubAccounts',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getMainAccount',
+			call: 'eth_getMainAccount',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+        	name: 'getCandidates',
+        	call: 'eth_getCandidates',
+        	params: 1,
+        	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+        	name: 'getCommitteeRank',
+        	call: 'eth_getCommitteeRank',
+        	params: 1,
+        	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+        	name: 'getMainAccountRank',
+        	call: 'eth_getMainAccountRank',
+        	params: 1,
+        	inputFormatter: [web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getTraffic',
+			call: 'eth_getTraffic',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getMortgageInitByBlockNumberRange',
+			call: 'eth_getMortgageInitByBlockNumberRange',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter,web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getLogSwitchByAddressAndFileID',
+			call: 'eth_getLogSwitchByAddressAndFileID',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputString]
+		}),
+		new web3._extend.Method({
+			name: 'getSynchronizeShareKey',
+			call: 'eth_getSynchronizeShareKey',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter,web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+
+		new web3._extend.Method({
+			name: 'getStorageNodes',
+			call: 'eth_getStorageNodes',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'sign',
 			call: 'eth_sign',
 			params: 2,
@@ -431,6 +553,36 @@ web3._extend({
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
 		}),
+		new web3._extend.Method({
+			name: 'checkUnlockSharedKey',
+			call: 'eth_checkUnlockSharedKey',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputString]
+		}),
+		new web3._extend.Method({
+			name: 'getAllPromissoryNotesNum',
+			call: 'eth_getAllPromissoryNotesNum',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getBeforPromissoryNotesNum',
+			call: 'eth_getBeforPromissoryNotesNum',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getPromissoryNotes',
+			call: 'eth_getPromissoryNotes',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getOptionTx',
+			call: 'eth_getOptionTx',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		})
 	],
 	properties: [
 		new web3._extend.Property({
