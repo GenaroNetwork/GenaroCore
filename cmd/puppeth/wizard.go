@@ -30,9 +30,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core"
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core"
+	"github.com/GenaroNetwork/GenaroCore/log"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

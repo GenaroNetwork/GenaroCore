@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/common/math"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/GenaroCore/common/math"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
 	"testing"
 )
 

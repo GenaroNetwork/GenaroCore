@@ -27,8 +27,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts"
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/accounts"
+	"github.com/GenaroNetwork/GenaroCore/common"
 	"github.com/cespare/cp"
 	"github.com/davecgh/go-spew/spew"
 )

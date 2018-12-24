@@ -19,8 +19,8 @@ package les
 import (
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
 )
 
 type ltrInfo struct {

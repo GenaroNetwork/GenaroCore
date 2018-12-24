@@ -25,14 +25,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/mclock"
-	"github.com/GenaroNetwork/Genaro-Core/event"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discv5"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/nat"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/netutil"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/mclock"
+	"github.com/GenaroNetwork/GenaroCore/event"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
+	"github.com/GenaroNetwork/GenaroCore/p2p/discv5"
+	"github.com/GenaroNetwork/GenaroCore/p2p/nat"
+	"github.com/GenaroNetwork/GenaroCore/p2p/netutil"
 )
 
 const (

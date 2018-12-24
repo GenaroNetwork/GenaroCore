@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
 )
 
 // Method represents a callable given a `Name` and whether the method is a constant.

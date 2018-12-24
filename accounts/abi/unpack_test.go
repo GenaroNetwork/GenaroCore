@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/common"
 	"github.com/stretchr/testify/require"
 )
 

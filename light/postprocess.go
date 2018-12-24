@@ -22,15 +22,15 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/bitutil"
-	"github.com/GenaroNetwork/Genaro-Core/core"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/ethdb"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/params"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"github.com/GenaroNetwork/Genaro-Core/trie"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/bitutil"
+	"github.com/GenaroNetwork/GenaroCore/core"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/ethdb"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/GenaroCore/trie"
 )
 
 const (

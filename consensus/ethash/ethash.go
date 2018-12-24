@@ -32,10 +32,10 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/GenaroNetwork/Genaro-Core/consensus"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/metrics"
-	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"github.com/GenaroNetwork/GenaroCore/consensus"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/metrics"
+	"github.com/GenaroNetwork/GenaroCore/rpc"
 	mmap "github.com/edsrzf/mmap-go"
 	"github.com/hashicorp/golang-lru/simplelru"
 )

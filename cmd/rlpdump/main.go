@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
 )
 
 var (

@@ -25,17 +25,17 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"github.com/GenaroNetwork/Genaro-Core/core"
-	"github.com/GenaroNetwork/Genaro-Core/core/state"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/miner"
-	"github.com/GenaroNetwork/Genaro-Core/params"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
-	"github.com/GenaroNetwork/Genaro-Core/rpc"
-	"github.com/GenaroNetwork/Genaro-Core/trie"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/core"
+	"github.com/GenaroNetwork/GenaroCore/core/state"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/miner"
+	"github.com/GenaroNetwork/GenaroCore/params"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
+	"github.com/GenaroNetwork/GenaroCore/rpc"
+	"github.com/GenaroNetwork/GenaroCore/trie"
 )
 
 // PublicEthereumAPI provides an API to access Ethereum full node-related

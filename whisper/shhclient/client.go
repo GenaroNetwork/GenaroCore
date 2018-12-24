@@ -19,10 +19,10 @@ package shhclient
 import (
 	"context"
 
-	"github.com/GenaroNetwork/Genaro-Core"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"github.com/GenaroNetwork/Genaro-Core/rpc"
-	whisper "github.com/GenaroNetwork/Genaro-Core/whisper/whisperv6"
+	"github.com/GenaroNetwork/GenaroCore"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/rpc"
+	whisper "github.com/GenaroNetwork/GenaroCore/whisper/whisperv6"
 )
 
 // Client defines typed wrappers for the Whisper v6 RPC API.

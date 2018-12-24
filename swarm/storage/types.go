@@ -24,9 +24,9 @@ import (
 	"io"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro-Core/bmt"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
+	"github.com/GenaroNetwork/GenaroCore/bmt"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/crypto/sha3"
 )
 
 type Hasher func() hash.Hash

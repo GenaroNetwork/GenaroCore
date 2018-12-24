@@ -23,9 +23,9 @@ import (
 	"sort"
 
 	"bytes"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/log"
 )
 
 // nonceHeap is a heap.Interface implementation over 64bit unsigned integers for

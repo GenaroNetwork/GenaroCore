@@ -23,11 +23,11 @@ package ens
 import (
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/contracts/ens/contract"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/GenaroCore/accounts/abi/bind"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/contracts/ens/contract"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
 )
 
 var (

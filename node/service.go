@@ -19,11 +19,11 @@ package node
 import (
 	"reflect"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts"
-	"github.com/GenaroNetwork/Genaro-Core/ethdb"
-	"github.com/GenaroNetwork/Genaro-Core/event"
-	"github.com/GenaroNetwork/Genaro-Core/p2p"
-	"github.com/GenaroNetwork/Genaro-Core/rpc"
+	"github.com/GenaroNetwork/GenaroCore/accounts"
+	"github.com/GenaroNetwork/GenaroCore/ethdb"
+	"github.com/GenaroNetwork/GenaroCore/event"
+	"github.com/GenaroNetwork/GenaroCore/p2p"
+	"github.com/GenaroNetwork/GenaroCore/rpc"
 )
 
 // ServiceContext is a collection of service independent options inherited from

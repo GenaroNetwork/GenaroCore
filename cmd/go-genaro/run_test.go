@@ -22,7 +22,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/internal/cmdtest"
+	"github.com/GenaroNetwork/GenaroCore/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
 )
 

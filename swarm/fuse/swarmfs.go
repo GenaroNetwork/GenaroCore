@@ -17,7 +17,7 @@
 package fuse
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
+	"github.com/GenaroNetwork/GenaroCore/swarm/api"
 	"sync"
 	"time"
 )

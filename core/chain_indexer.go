@@ -23,11 +23,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/ethdb"
-	"github.com/GenaroNetwork/Genaro-Core/event"
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/ethdb"
+	"github.com/GenaroNetwork/GenaroCore/event"
+	"github.com/GenaroNetwork/GenaroCore/log"
 )
 
 // ChainIndexerBackend defines the methods needed to process chain segments in

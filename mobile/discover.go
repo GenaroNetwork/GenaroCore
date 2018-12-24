@@ -22,7 +22,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discv5"
+	"github.com/GenaroNetwork/GenaroCore/p2p/discv5"
 )
 
 // Enode represents a host on the network.

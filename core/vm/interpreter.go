@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/GenaroNetwork/Genaro-Core/common/math"
-	"github.com/GenaroNetwork/Genaro-Core/params"
+	"github.com/GenaroNetwork/GenaroCore/common/math"
+	"github.com/GenaroNetwork/GenaroCore/params"
 )
 
 // Config are the configuration options for the Interpreter

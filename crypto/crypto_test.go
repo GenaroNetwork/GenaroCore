@@ -25,7 +25,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/common"
 	"log"
 )
 

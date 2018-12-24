@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
+	"github.com/GenaroNetwork/GenaroCore/cmd/utils"
 	"github.com/hashicorp/consul/api"
 	"github.com/tidwall/gjson"
 	"log"

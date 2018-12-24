@@ -21,7 +21,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/GenaroNetwork/Genaro-Core/event"
+	"github.com/GenaroNetwork/GenaroCore/event"
 )
 
 // Manager is an overarching account manager that can communicate with various

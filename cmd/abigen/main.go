@@ -24,8 +24,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/common/compiler"
+	"github.com/GenaroNetwork/GenaroCore/accounts/abi/bind"
+	"github.com/GenaroNetwork/GenaroCore/common/compiler"
 )
 
 var (

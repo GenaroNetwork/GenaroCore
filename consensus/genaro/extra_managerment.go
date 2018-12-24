@@ -2,8 +2,8 @@ package genaro
 
 import (
 	"encoding/json"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
 )
 
 // the field "extra" store the json of ExtraData

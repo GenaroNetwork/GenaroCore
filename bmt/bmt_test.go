@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
+	"github.com/GenaroNetwork/GenaroCore/crypto/sha3"
 )
 
 const (

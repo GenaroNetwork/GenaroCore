@@ -27,12 +27,12 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
-	"github.com/GenaroNetwork/Genaro-Core/dashboard"
-	"github.com/GenaroNetwork/Genaro-Core/eth"
-	"github.com/GenaroNetwork/Genaro-Core/node"
-	"github.com/GenaroNetwork/Genaro-Core/params"
-	whisper "github.com/GenaroNetwork/Genaro-Core/whisper/whisperv6"
+	"github.com/GenaroNetwork/GenaroCore/cmd/utils"
+	"github.com/GenaroNetwork/GenaroCore/dashboard"
+	"github.com/GenaroNetwork/GenaroCore/eth"
+	"github.com/GenaroNetwork/GenaroCore/node"
+	"github.com/GenaroNetwork/GenaroCore/params"
+	whisper "github.com/GenaroNetwork/GenaroCore/whisper/whisperv6"
 	"github.com/naoina/toml"
 )
 

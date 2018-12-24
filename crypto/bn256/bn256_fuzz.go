@@ -22,8 +22,8 @@ import (
 	"bytes"
 	"math/big"
 
-	cloudflare "github.com/GenaroNetwork/Genaro-Core/crypto/bn256/cloudflare"
-	google "github.com/GenaroNetwork/Genaro-Core/crypto/bn256/google"
+	cloudflare "github.com/GenaroNetwork/GenaroCore/crypto/bn256/cloudflare"
+	google "github.com/GenaroNetwork/GenaroCore/crypto/bn256/google"
 )
 
 // FuzzAdd fuzzez bn256 addition between the Google and Cloudflare libraries.

@@ -22,14 +22,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/contracts/ens"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/node"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/network"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/services/swap"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/storage"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/contracts/ens"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/node"
+	"github.com/GenaroNetwork/GenaroCore/swarm/network"
+	"github.com/GenaroNetwork/GenaroCore/swarm/services/swap"
+	"github.com/GenaroNetwork/GenaroCore/swarm/storage"
 )
 
 const (

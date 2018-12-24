@@ -26,14 +26,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/contracts/chequebook"
-	"github.com/GenaroNetwork/Genaro-Core/contracts/chequebook/contract"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/services/swap/swap"
+	"github.com/GenaroNetwork/GenaroCore/accounts/abi/bind"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/contracts/chequebook"
+	"github.com/GenaroNetwork/GenaroCore/contracts/chequebook/contract"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/swarm/services/swap/swap"
 )
 
 // SwAP       Swarm Accounting Protocol with

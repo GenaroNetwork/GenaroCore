@@ -24,8 +24,8 @@ import (
 	"reflect"
 
 	"bytes"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/crypto/sha3"
 )
 
 const (

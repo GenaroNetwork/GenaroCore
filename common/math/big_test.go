@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/common"
 )
 
 func TestHexOrDecimal256(t *testing.T) {

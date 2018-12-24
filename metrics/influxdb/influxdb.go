@@ -6,7 +6,7 @@ import (
 	uurl "net/url"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/metrics"
+	"github.com/GenaroNetwork/GenaroCore/metrics"
 	"github.com/influxdata/influxdb/client"
 )
 

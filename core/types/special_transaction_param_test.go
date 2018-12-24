@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/common"
 	"strings"
 	"testing"
 )

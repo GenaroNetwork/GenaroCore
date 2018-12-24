@@ -5,7 +5,7 @@ package whisperv6
 import (
 	"encoding/json"
 
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
 )
 
 var _ = (*newMessageOverride)(nil)

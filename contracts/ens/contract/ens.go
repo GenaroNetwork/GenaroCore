@@ -6,12 +6,12 @@ package contract
 import (
 	"strings"
 
-	ethereum "github.com/GenaroNetwork/Genaro-Core"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/abi/bind"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/event"
+	ethereum "github.com/GenaroNetwork/GenaroCore"
+	"github.com/GenaroNetwork/GenaroCore/accounts/abi"
+	"github.com/GenaroNetwork/GenaroCore/accounts/abi/bind"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/event"
 )
 
 // ENSABI is the input ABI used to generate the binding from.

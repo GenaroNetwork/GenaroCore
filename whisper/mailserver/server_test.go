@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	whisper "github.com/GenaroNetwork/Genaro-Core/whisper/whisperv6"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	whisper "github.com/GenaroNetwork/GenaroCore/whisper/whisperv6"
 )
 
 const powRequirement = 0.00001

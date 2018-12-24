@@ -24,9 +24,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
-	"github.com/GenaroNetwork/Genaro-Core/swarm/api"
-	swarm "github.com/GenaroNetwork/Genaro-Core/swarm/api/client"
+	"github.com/GenaroNetwork/GenaroCore/cmd/utils"
+	"github.com/GenaroNetwork/GenaroCore/swarm/api"
+	swarm "github.com/GenaroNetwork/GenaroCore/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

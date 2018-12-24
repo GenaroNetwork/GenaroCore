@@ -25,14 +25,14 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/accounts"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/keystore"
-	"github.com/GenaroNetwork/Genaro-Core/accounts/usbwallet"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/p2p"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/discover"
+	"github.com/GenaroNetwork/GenaroCore/accounts"
+	"github.com/GenaroNetwork/GenaroCore/accounts/keystore"
+	"github.com/GenaroNetwork/GenaroCore/accounts/usbwallet"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/p2p"
+	"github.com/GenaroNetwork/GenaroCore/p2p/discover"
 )
 
 const (

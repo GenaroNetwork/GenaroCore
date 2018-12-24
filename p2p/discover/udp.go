@@ -25,11 +25,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/log"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/nat"
-	"github.com/GenaroNetwork/Genaro-Core/p2p/netutil"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/GenaroCore/log"
+	"github.com/GenaroNetwork/GenaroCore/p2p/nat"
+	"github.com/GenaroNetwork/GenaroCore/p2p/netutil"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
 )
 
 const Version = 300

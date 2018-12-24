@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
+	"github.com/GenaroNetwork/GenaroCore/common"
 	"github.com/davecgh/go-spew/spew"
 )
 

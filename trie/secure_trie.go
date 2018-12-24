@@ -19,8 +19,8 @@ package trie
 import (
 	"fmt"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/log"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all

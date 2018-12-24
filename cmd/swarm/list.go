@@ -22,8 +22,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/GenaroNetwork/Genaro-Core/cmd/utils"
-	swarm "github.com/GenaroNetwork/Genaro-Core/swarm/api/client"
+	"github.com/GenaroNetwork/GenaroCore/cmd/utils"
+	swarm "github.com/GenaroNetwork/GenaroCore/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

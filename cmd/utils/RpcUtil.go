@@ -2,8 +2,8 @@ package utils
 
 import (
 	"errors"
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/common/hexutil"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
 	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"net/http"

@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/common/math"
+	"github.com/GenaroNetwork/GenaroCore/common/math"
 	"math/big"
 )
 

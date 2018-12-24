@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/log"
+	"github.com/GenaroNetwork/GenaroCore/log"
 )
 
 // explorerDockerfile is the Dockerfile required to run a block explorer.

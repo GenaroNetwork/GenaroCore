@@ -21,8 +21,8 @@ package geth
 import (
 	"math/big"
 
-	"github.com/GenaroNetwork/Genaro-Core/core/types"
-	"github.com/GenaroNetwork/Genaro-Core/ethclient"
+	"github.com/GenaroNetwork/GenaroCore/core/types"
+	"github.com/GenaroNetwork/GenaroCore/ethclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.

@@ -17,8 +17,8 @@
 package les
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/metrics"
-	"github.com/GenaroNetwork/Genaro-Core/p2p"
+	"github.com/GenaroNetwork/GenaroCore/metrics"
+	"github.com/GenaroNetwork/GenaroCore/p2p"
 )
 
 var (

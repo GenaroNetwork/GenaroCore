@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/core/vm"
+	"github.com/GenaroNetwork/GenaroCore/core/vm"
 )
 
 func TestState(t *testing.T) {

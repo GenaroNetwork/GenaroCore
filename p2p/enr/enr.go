@@ -35,9 +35,9 @@ import (
 	"io"
 	"sort"
 
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
-	"github.com/GenaroNetwork/Genaro-Core/crypto/sha3"
-	"github.com/GenaroNetwork/Genaro-Core/rlp"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
+	"github.com/GenaroNetwork/GenaroCore/crypto/sha3"
+	"github.com/GenaroNetwork/GenaroCore/rlp"
 )
 
 const SizeLimit = 300 // maximum encoded size of a node record in bytes

@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event

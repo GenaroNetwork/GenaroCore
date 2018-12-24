@@ -1,8 +1,8 @@
 package genaro
 
 import (
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/consensus"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/consensus"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting

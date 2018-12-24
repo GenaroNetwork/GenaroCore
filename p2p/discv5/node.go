@@ -30,8 +30,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GenaroNetwork/Genaro-Core/common"
-	"github.com/GenaroNetwork/Genaro-Core/crypto"
+	"github.com/GenaroNetwork/GenaroCore/common"
+	"github.com/GenaroNetwork/GenaroCore/crypto"
 )
 
 // Node represents a host on the network.

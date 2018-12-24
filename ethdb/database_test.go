@@ -25,7 +25,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GenaroNetwork/Genaro-Core/ethdb"
+	"github.com/GenaroNetwork/GenaroCore/ethdb"
 )
 
 func newTestLDB() (*ethdb.LDBDatabase, func()) {
