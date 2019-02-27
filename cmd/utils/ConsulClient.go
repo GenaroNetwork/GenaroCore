@@ -78,9 +78,11 @@ func TryLock(lock *api.Lock, delay int) bool {
 		if err != nil && api.ErrLockHeld == err {
 			ok <- true
 			log.Println("has lock ok")
+			return
 		}
 		if err != nil {
 			log.Println(err)
+			return
 		}
 		if chRet != nil {
 			ok <- true

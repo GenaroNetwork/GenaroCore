@@ -259,10 +259,12 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB, genaroConfig *
 		return errors.New("param [ msg ] missing or can't be null")
 	}
 
-	_, err := strconv.Atoi(s.Message)
+	timeInt, err := strconv.Atoi(s.Message)
 	if err != nil {
 		return errors.New("param [ msg ] is not timestamp")
 	}
+
+	txTime := time.Unix(int64(timeInt), 0)
 
 	adress := common.HexToAddress(s.Address)
 	if isSpecialAddress(adress, genaroConfig.OptionTxMemorySize) {
@@ -280,7 +282,7 @@ func CheckBucketSupplement(s types.SpecialTxInput, state StateDB, genaroConfig *
 
 	if b, ok := buckets[s.BucketID]; ok {
 		bucketInDb := b.(types.BucketPropertie)
-		if bucketInDb.TimeEnd <= uint64(time.Now().Unix()) {
+		if bucketInDb.TimeEnd <= uint64(txTime.Unix()) {
 			return errors.New("the bucket corresponding to the bucketId has has been expired")
 		}
 	} else {

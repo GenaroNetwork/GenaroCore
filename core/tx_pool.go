@@ -647,10 +647,10 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 		return vm.CheckApplyBucketTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxBucketSupplement.Uint64():
 		return vm.CheckBucketSupplement(s, pool.currentState, pool.chainconfig.Genaro)
-	case common.SpecialTxTypeMortgageInit.Uint64():
-		return vm.CheckspecialTxTypeMortgageInitParameter(s, s.SpecialTxTypeMortgageInit.FromAccount)
-	case common.SpecialTxTypeSyncSidechainStatus.Uint64():
-		return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, pool.currentState, pool.chainconfig.Genaro)
+	//case common.SpecialTxTypeMortgageInit.Uint64():
+	//	return vm.CheckspecialTxTypeMortgageInitParameter(s, s.SpecialTxTypeMortgageInit.FromAccount)
+	//case common.SpecialTxTypeSyncSidechainStatus.Uint64():
+	//	return vm.CheckSpecialTxTypeSyncSidechainStatusParameter(s, caller, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeTrafficApply.Uint64():
 		return vm.CheckTrafficTx(s, pool.currentState, pool.chainconfig.Genaro)
 	case common.SpecialTxTypeSyncNode.Uint64():

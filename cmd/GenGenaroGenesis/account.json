@@ -3,7 +3,7 @@
     "0xae606fcc95866f068a8f6750ad56ec14e46e8446": {
       "balance": "40000000000000000000000",
       "heft": 2000,
-      "stake": 40000
+      "stake": 5000
     },
     "0xc1b2e1fc9d2099f5930a669c9ad65509433550d6": {
       "balance": "500000000000000000000000",
@@ -13,9 +13,24 @@
     "0x0de2d12fa9c0a5687b330e2de3361e632f52c643": {
       "balance": "300000000000000000000000",
       "heft": 3000,
-      "stake": 6000
+      "stake": 600000
     },
     "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73": {
+      "balance": "20000000000000000000000000",
+      "heft": 7000,
+      "stake": 6000
+    },
+    "0xd34e1ea1577819495b4ec7c2fbf600f72f386ec5": {
+      "balance": "20000000000000000000000000",
+      "heft": 7000,
+      "stake": 6000
+    },
+    "0xd34e1ea1577819495b4ec7c2fbf600f72f386ec6": {
+      "balance": "20000000000000000000000000",
+      "heft": 7000,
+      "stake": 6000
+    },
+    "0xd34e1ea1577819495b4ec7c2fbf600f72f386ec7": {
       "balance": "20000000000000000000000000",
       "heft": 7000,
       "stake": 6000
@@ -32,6 +47,7 @@
     "SynStateAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
     "HeftAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
     "BindingAccount": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
-    "OfficialAddress": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73"
+    "OfficialAddress": "0xad188b762f9e3ef76c972960b80c9dc99b9cfc73",
+    "SigAddresses": "0xae606fcc95866f068a8f6750ad56ec14e46e8446,0xc1b2e1fc9d2099f5930a669c9ad65509433550d6,0x0de2d12fa9c0a5687b330e2de3361e632f52c643,0xad188b762f9e3ef76c972960b80c9dc99b9cfc73,0xd34e1ea1577819495b4ec7c2fbf600f72f386ec5"
   }
 }

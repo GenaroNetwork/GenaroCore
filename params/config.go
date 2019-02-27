@@ -171,16 +171,18 @@ func (c *CliqueConfig) String() string {
 
 // GenaroConfig is the consensus engine configs for SPOR/PoS.
 type GenaroConfig struct {
-	Epoch               uint64 `json:"epoch"`               //the number of blocks in one committee term
-	Period              uint64 `json:"period"`              // Number of seconds between blocks to enforce
-	BlockInterval       uint64 `json:"blockInterval"`       //a peer create BlockInterval blocks one time
-	ElectionPeriod      uint64 `json:"electionPeriod"`      //a committee list write time
-	ValidPeriod         uint64 `json:"validPeriod"`         //a written committee list waiting time to come into force
-	CurrencyRates       uint64 `json:"currencyRates"`       //interest rates of coin
-	CommitteeMaxSize    uint64 `json:"committeeMaxSize"`    //max number of committee member
-	OptionTxMemorySize  uint64 `json:"optionTxMemorySize"`  //the number of save option tx
-	PromissoryNotePrice uint64 `json:"PromissoryNotePrice"` // Promissory Note Price
-	OfficialAddress     string `json:"OfficialAddress"`
+	Epoch               uint64   `json:"epoch"`               //the number of blocks in one committee term
+	Period              uint64   `json:"period"`              // Number of seconds between blocks to enforce
+	BlockInterval       uint64   `json:"blockInterval"`       //a peer create BlockInterval blocks one time
+	ElectionPeriod      uint64   `json:"electionPeriod"`      //a committee list write time
+	ValidPeriod         uint64   `json:"validPeriod"`         //a written committee list waiting time to come into force
+	CurrencyRates       uint64   `json:"currencyRates"`       //interest rates of coin
+	CommitteeMaxSize    uint64   `json:"committeeMaxSize"`    //max number of committee member
+	OptionTxMemorySize  uint64   `json:"optionTxMemorySize"`  //the number of save option tx
+	PromissoryNotePrice uint64   `json:"PromissoryNotePrice"` // Promissory Note Price
+	OfficialAddress     string   `json:"OfficialAddress"`
+	PropBlock           *big.Int `json:"PropBlock,omitempty"` // Prop HF block
+	TurnBlock           *big.Int `json:"TurnBlock,omitempty"` // Turn HF block
 }
 
 // String implements the stringer interface, returning the consensus engine details.
@@ -243,6 +245,14 @@ func (c *ChainConfig) IsByzantium(num *big.Int) bool {
 
 func (c *ChainConfig) IsConstantinople(num *big.Int) bool {
 	return isForked(c.ConstantinopleBlock, num)
+}
+
+func (g *GenaroConfig) IsProp(num *big.Int) bool {
+	return isForked(g.PropBlock, num)
+}
+
+func (g *GenaroConfig) IsTurn(num *big.Int) bool {
+	return isForked(g.TurnBlock, num)
 }
 
 // GasTable returns the gas table corresponding to the current phase (homestead or homestead reprice).

@@ -233,10 +233,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		err = updateStorageProperties(evm, s, caller)
 	case common.SpecialTxBucketSupplement.Uint64():
 		err = bucketSupplement(evm, s, caller)
-	case common.SpecialTxTypeMortgageInit.Uint64():
-		err = specialTxTypeMortgageInit(evm, s, caller)
-	case common.SpecialTxTypeSyncSidechainStatus.Uint64():
-		err = SpecialTxTypeSyncSidechainStatus(evm, s, caller)
+	//case common.SpecialTxTypeMortgageInit.Uint64():
+	//	err = specialTxTypeMortgageInit(evm, s, caller)
+	//case common.SpecialTxTypeSyncSidechainStatus.Uint64():
+	//	err = SpecialTxTypeSyncSidechainStatus(evm, s, caller)
 	case common.SpecialTxTypeTrafficApply.Uint64():
 		err = updateTraffic(evm, s, caller)
 	case common.SpecialTxTypeSyncNode.Uint64():

@@ -174,6 +174,9 @@ func parseRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) {
 	if err := json.Unmarshal(incomingMsg, &in); err != nil {
 		return nil, false, &invalidMessageError{err.Error()}
 	}
+	if strings.HasPrefix(in.Method, "gnx") {
+		in.Method = strings.Replace(in.Method, "gnx", "eth", 1)
+	}
 
 	if err := checkReqId(in.Id); err != nil {
 		return nil, false, &invalidMessageError{err.Error()}
@@ -221,6 +224,10 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 	var in []jsonRequest
 	if err := json.Unmarshal(incomingMsg, &in); err != nil {
 		return nil, false, &invalidMessageError{err.Error()}
+	}
+
+	for i, _ := range in {
+		in[i].Method = strings.Replace(in[i].Method, "gnx", "eth", 1)
 	}
 
 	requests := make([]rpcRequest, len(in))

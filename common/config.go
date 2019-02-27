@@ -137,6 +137,10 @@ var SynBlockLen = uint64(6)
 var BackStakePeriod = uint64(5)
 var Base = uint64(100000)
 
+var PropBlock = uint64(2150000)
+
+var TurnBlock = uint64(2735000)
+
 var (
 	MaxBinding          = uint64(10)
 	MinStake            = uint64(5000)

@@ -611,12 +611,24 @@ func (g *Genaro) Finalize(chain consensus.ChainReader, header *types.Header, sta
 		state.AddLastRootState(header.ParentHash, header.Number.Uint64()-1)
 	}
 
+	// 出块委员会的快照获取
 	snap, err := g.snapshot(chain, GetTurnOfCommiteeByBlockNumber(g.config, header.Number.Uint64()), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	proportion := snap.Committee[snap.CommitteeRank[blockNumber%snap.CommitteeSize]]
+	index := uint64(0)
+	if (g.config.TurnBlock == nil && blockNumber >= common.TurnBlock) || g.config.IsTurn(header.Number) {
+		index = uint64(snap.getInturnRank(blockNumber))
+	} else {
+		index = (blockNumber / g.config.BlockInterval) % snap.CommitteeSize
+	}
+	proportion := uint64(0)
+	if (g.config.PropBlock == nil && blockNumber >= common.PropBlock) || g.config.IsProp(header.Number) {
+		proportion = snap.Committee[snap.CommitteeRank[index]]
+	} else {
+		proportion = snap.Committee[snap.CommitteeRank[blockNumber%snap.CommitteeSize]]
+	}
 
 	//  coin interest reward
 	accumulateInterestRewards(g.config, state, header, proportion, blockNumber, snap.CommitteeSize, snap.CommitteeAccountBinding)
