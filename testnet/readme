@@ -4,8 +4,7 @@ go-genaro --datadir /root/data init genaro.json
 [
 if not work
 rm -rf /root/data
-wget https://github.com/GenaroNetwork/GenaroCore/releases/download/testnet-init/go-genaro-test-init
-go-genaro-test-init --datadir /root/data init genaro.json
+go-genaro --datadir /root/data init genaro-test.json
 ]
 
 run node:
