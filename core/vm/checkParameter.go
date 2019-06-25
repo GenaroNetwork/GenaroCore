@@ -819,3 +819,17 @@ func CheckUnsubscribeNameTxStatus(caller common.Address, s types.SpecialTxInput,
 
 	return nil
 }
+
+func CheckSetProfitAccount(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+	return nil
+}
+
+func CheckSetShadowAccount(caller common.Address, s types.SpecialTxInput, state StateDB) error {
+	if s.Address == "" {
+		return errors.New("param [address] missing or can't be null string")
+	}
+	return nil
+}

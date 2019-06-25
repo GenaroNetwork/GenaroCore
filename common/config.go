@@ -126,6 +126,13 @@ var (
 	SpecialTxTurnBuyPromissoryNotes = big.NewInt(37)
 
 	SpecialTxBucketSupplement = big.NewInt(41)
+
+	// 设置收益账号
+	SpecialTxSetProfitAccount = big.NewInt(50)
+
+	// 设置影子账号
+	SpecialTxSetShadowAccount = big.NewInt(51)
+
 )
 
 var ReadWrite int = 0

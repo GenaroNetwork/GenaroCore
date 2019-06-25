@@ -395,6 +395,18 @@ web3._extend({
 	property: 'eth',
 	methods: [
 		new web3._extend.Method({
+			name: 'getShadowAccount',
+			call: 'eth_getShadowAccount',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getProfitAccount',
+			call: 'eth_getProfitAccount',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter,web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
 			name: 'getAccountData',
 			call: 'eth_getAccountData',
 			params: 2,

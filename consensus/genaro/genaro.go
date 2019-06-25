@@ -711,11 +711,11 @@ func settleInterestRewards(state *state.StateDB, coinbase common.Address, reward
 		accountReward.Set(reward)
 		accountReward.Mul(accountReward, big.NewInt(int64(stake)))
 		accountReward.Div(accountReward, big.NewInt(int64(totleStake)))
-		state.AddBalance(subAccount, accountReward)
+		AddProfit(state, subAccount, accountReward)
 		surplusReward.Sub(surplusReward, accountReward)
 	}
 
-	state.AddBalance(coinbase, surplusReward)
+	AddProfit(state, coinbase, surplusReward)
 }
 
 // AccumulateInterestRewards credits the reward to the block author by coin  interest
@@ -762,10 +762,20 @@ func accumulateInterestRewards(config *params.GenaroConfig, state *state.StateDB
 	if ok {
 		settleInterestRewards(state, header.Coinbase, reward, subAccounts)
 	} else {
-		state.AddBalance(header.Coinbase, reward)
+		AddProfit(state, header.Coinbase, reward)
 	}
 	AddCoinActualRewards(state, reward)
 	return nil
+}
+
+// 统一的收益函数
+func AddProfit(state *state.StateDB, saddr common.Address, reward *big.Int) {
+	paddr := state.GetProfitAccount(saddr)
+	if (paddr == nil || *paddr == common.Address{}) {
+		state.AddBalance(saddr, reward)
+	} else {
+		state.AddBalance(*paddr, reward)
+	}
 }
 
 // AccumulateStorageRewards credits the reward to the sentinel owner
@@ -819,7 +829,7 @@ func accumulateStorageRewards(config *params.GenaroConfig, state *state.StateDB,
 		reward := big.NewInt(0)
 		reward.Mul(planRewards, big.NewInt(int64(contributes[i])))
 		reward.Div(planRewards, big.NewInt(int64(total)))
-		state.AddBalance(c, reward)
+		AddProfit(state, c, reward)
 		AddStorageActualRewards(state, reward)
 	}
 	return nil

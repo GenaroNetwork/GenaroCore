@@ -1597,3 +1597,35 @@ func (self *StateDB) TurnBuyPromissoryNotes(orderId common.Hash, optionPrice *he
 	}
 	return false
 }
+
+func (self *StateDB) GetProfitAccount(id common.Address) *common.Address {
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetProfitAccount()
+	}
+	return nil
+}
+
+func (self *StateDB) SetProfitAccount(saddr,paddr common.Address) bool {
+	stateObject := self.getStateObject(saddr)
+	if stateObject != nil {
+		return stateObject.UpdateProfitAccount(paddr)
+	}
+	return false
+}
+
+func (self *StateDB) GetShadowAccount(id common.Address) *common.Address {
+	stateObject := self.getStateObject(id)
+	if stateObject != nil {
+		return stateObject.GetShadowAccount()
+	}
+	return nil
+}
+
+func (self *StateDB) SetShadowAccount(saddr,paddr common.Address) bool {
+	stateObject := self.getStateObject(saddr)
+	if stateObject != nil {
+		return stateObject.UpdateShadowAccount(paddr)
+	}
+	return false
+}

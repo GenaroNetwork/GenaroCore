@@ -650,6 +650,26 @@ func (s *PublicBlockChainAPI) GetNamePrice(name string) *big.Int {
 	return accountName.GetBigPrice()
 }
 
+func (s *PublicBlockChainAPI) GetProfitAccount(ctx context.Context, address common.Address, blockNr rpc.BlockNumber)*common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	profitAccount := state.GetProfitAccount(address)
+
+	return profitAccount
+}
+
+func (s *PublicBlockChainAPI) GetShadowAccount(ctx context.Context, address common.Address, blockNr rpc.BlockNumber)*common.Address {
+	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
+	if state == nil || err != nil {
+		return nil
+	}
+	shadowAccount := state.GetShadowAccount(address)
+
+	return shadowAccount
+}
+
 // GetStake returns the stake of ether for the given address in the state of the
 // given block number. The rpc.LatestBlockNumber and rpc.PendingBlockNumber meta
 // block numbers are also allowed.

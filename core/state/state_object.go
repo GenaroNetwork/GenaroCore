@@ -2078,3 +2078,67 @@ func (self *stateObject) TurnBuyPromissoryNotes(orderId common.Hash, optionPrice
 	}
 	return true
 }
+
+func (self *stateObject) GetProfitAccount() *common.Address {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return &genaroData.ProfitAccount
+	}
+
+	return nil
+}
+
+func (self *stateObject) UpdateProfitAccount(profitAccount common.Address) bool {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		genaroData = types.GenaroData{
+			ProfitAccount: profitAccount,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.ProfitAccount = profitAccount
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
+}
+
+func (self *stateObject) GetShadowAccount() *common.Address {
+	if self.data.CodeHash != nil {
+		var genaroData types.GenaroData
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		return &genaroData.ShadowAccount
+	}
+
+	return nil
+}
+
+func (self *stateObject) UpdateShadowAccount(shadowAccount common.Address) bool {
+	var genaroData types.GenaroData
+	if self.data.CodeHash == nil {
+		genaroData = types.GenaroData{
+			ShadowAccount: shadowAccount,
+		}
+	} else {
+		json.Unmarshal(self.data.CodeHash, &genaroData)
+		genaroData.ShadowAccount = shadowAccount
+	}
+
+	b, _ := json.Marshal(genaroData)
+	self.code = nil
+	self.data.CodeHash = b[:]
+	self.dirtyCode = true
+	if self.onDirty != nil {
+		self.onDirty(self.Address())
+		self.onDirty = nil
+	}
+	return true
+}

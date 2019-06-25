@@ -5373,6 +5373,18 @@ Object.defineProperty(Eth.prototype, 'defaultAccount', {
 });
 
 var methods = function () {
+    var GetShadowAccount = new Method({
+        name: 'getShadowAccount',
+        call: 'eth_getShadowAccount',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+    });
+    var GetProfitAccount = new Method({
+        name: 'getProfitAccount',
+        call: 'eth_getProfitAccount',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+    });
     var getAccountData = new Method({
         name: 'getAccountData',
         call: 'eth_getAccountData',
@@ -5725,7 +5737,9 @@ var methods = function () {
         getRewardsValues,
         getMainAccountRank,
         getAccountData,
-        getAccountByName
+        getAccountByName,
+        GetProfitAccount,
+        GetShadowAccount
     ];
 };
 

@@ -705,7 +705,10 @@ func (pool *TxPool) dispatchHandlerValidateTx(input []byte, caller common.Addres
 		return vm.CheckTurnBuyPromissoryNotes(caller, s, pool.currentState, pool.chainconfig.Genaro.OptionTxMemorySize)
 	case common.SpecialTxWithdrawCash.Uint64():
 		return vm.WithdrawCash(caller, pool.currentState, pool.chain.CurrentBlock().Number())
-
+	case common.SpecialTxSetProfitAccount.Uint64():
+		return vm.CheckSetProfitAccount(caller, s, pool.currentState)
+	case common.SpecialTxSetShadowAccount.Uint64():
+		return vm.CheckSetShadowAccount(caller, s, pool.currentState)
 	}
 	return errors.New("undefined type of special transaction")
 }

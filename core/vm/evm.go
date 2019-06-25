@@ -289,6 +289,10 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		err = CarriedOutPromissoryNotes(evm, s, caller)
 	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
 		err = turnBuyPromissoryNotes(evm, s, caller)
+	case common.SpecialTxSetProfitAccount.Uint64(): 
+		err = setProfitAccount(evm, s, caller)
+	case common.SpecialTxSetShadowAccount.Uint64(): 
+		err = setShadowAccount(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
 	}
@@ -298,6 +302,30 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		log.Info(fmt.Sprintf("special transaction param：%s", string(input)))
 	}
 	return err
+}
+
+func setShadowAccount(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetShadowAccount(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	shadowAccount := common.HexToAddress(s.Address)
+	ok := (*evm).StateDB.SetShadowAccount(caller, shadowAccount)
+	if !ok {
+		return errors.New("Set Shadow Account failed")
+	}
+	return nil
+}
+
+func setProfitAccount(evm *EVM, s types.SpecialTxInput, caller common.Address) error {
+	if err := CheckSetProfitAccount(caller, s, (*evm).StateDB); err != nil {
+		return err
+	}
+	profitAccount := common.HexToAddress(s.Address)
+	ok := (*evm).StateDB.SetProfitAccount(caller, profitAccount)
+	if !ok {
+		return errors.New("Set Profit Account failed")
+	}
+	return nil
 }
 
 func registerName(evm *EVM, s types.SpecialTxInput, caller common.Address) error {

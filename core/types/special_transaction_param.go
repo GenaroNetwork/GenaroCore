@@ -276,6 +276,8 @@ type GenaroData struct {
 	SynchronizeShareKeyArr       map[string]SynchronizeShareKey       `json:"synchronizeShareKeyArr"`
 	SynchronizeShareKey          SynchronizeShareKey                  `json:"synchronizeShareKey"`
 	PromissoryNotes              PromissoryNotes                      `json:"PromissoryNotes"`
+	ProfitAccount                common.Address                       `json:"ProfitAccount"`
+	ShadowAccount                common.Address                       `json:"ShadowAccount"`
 }
 
 type SynchronizeShareKey struct {

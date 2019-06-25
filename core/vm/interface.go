@@ -179,6 +179,11 @@ type StateDB interface {
 	SetNameAccount(name string, addr common.Address) (err error)
 	IsNameAccountExist(name string) (bool, error)
 	HasName(common.Address, string) bool
+
+	// 收益账号
+	GetProfitAccount(id common.Address) *common.Address
+	SetProfitAccount(saddr,paddr common.Address) bool
+	SetShadowAccount(saddr,paddr common.Address) bool
 }
 
 // CallContext provides a basic interface for the EVM calling conventions. The EVM EVM
