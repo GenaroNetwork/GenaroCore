@@ -580,15 +580,15 @@ func WritePreimages(db ethdb.Database, number uint64, preimages map[common.Hash]
 }
 
 // GetBlockChainVersion reads the version number from db.
-func GetBlockChainVersion(db DatabaseReader) int {
-	var vsn uint
+func GetBlockChainVersion(db DatabaseReader) uint64 {
+	var vsn uint64
 	enc, _ := db.Get([]byte("BlockchainVersion"))
 	rlp.DecodeBytes(enc, &vsn)
-	return int(vsn)
+	return vsn
 }
 
 // WriteBlockChainVersion writes vsn as the version number to db.
-func WriteBlockChainVersion(db ethdb.Putter, vsn int) {
+func WriteBlockChainVersion(db ethdb.Putter, vsn uint64) {
 	enc, _ := rlp.EncodeToBytes(uint(vsn))
 	db.Put([]byte("BlockchainVersion"), enc)
 }
