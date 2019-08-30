@@ -1363,7 +1363,12 @@ func (d *Downloader) importBlockResults(results []*fetchResult) error {
 	//	}
 	//}
 	if index, err := d.blockchain.InsertChain(blocks); err != nil {
-		log.Debug("Downloaded item processing failed", "number", results[index].Header.Number, "hash", results[index].Header.Hash(), "err", err)
+		//log.Debug("Downloaded item processing failed", "number", results[index].Header.Number, "hash", results[index].Header.Hash(), "err", err)
+                if index < len(results) {
+                        log.Debug("Downloaded item processing failed", "number", results[index].Header.Number, "hash", results[index].Header.Hash(), "err", err)
+                } else {
+                        log.Debug("Downloaded item processing failed on sidechain import", "index", index, "err", err)
+                }
 		return errInvalidChain
 	}
 	return nil
