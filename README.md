@@ -4,7 +4,7 @@ Fork from [go-ethereum](https://github.com/ethereum/go-ethereum/tree/v1.8.3).
 
 ## Building the source
 
-Building geth requires both a Go (version 1.10 or later) and a C compiler.
+Building go-genaro requires both a Go (version 1.10 or later) and a C compiler.
 You can install them using your favourite package manager.
 Once the dependencies are installed, run
 
@@ -25,7 +25,7 @@ The go-genaro project comes with several wrappers/executables found in the `cmd`
 | `SendSynState` | Send synchronization transaction. |
 | `others` | To see go-ethereum. |
 
-## Running a go-genaro blockchain
+## Running a go-genaro privete blockchain
 
 ### Generate genesis json
 
@@ -38,6 +38,8 @@ The go-genaro project comes with several wrappers/executables found in the `cmd`
 ### Start miner
 
     go-genaro --identity "test" --mine --etherbase "myaccount" --unlock "myaccount" --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "*" --datadir datadir --port "30303" --rpcapi "db,eth,net,web3,personal,admin,miner" console
+    
+    ...> input your password
 
 ### Send synchronization transaction
 
@@ -52,10 +54,11 @@ You can get more development information from the [yellow book](https://github.c
 ## Useful links
 Our [official network](https://genaro.network/).
 
-## Main Network
+## Join our network
+### Main Network
 To see [mainnet](./mainnet).
 
-## Test Network
+### Test Network
 To see [testnet](./testnet).
 
 ## License
