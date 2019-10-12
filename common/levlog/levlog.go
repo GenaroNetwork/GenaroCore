@@ -4,6 +4,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"encoding/binary"
 	"sync"
+	"github.com/syndtr/goleveldb/leveldb/errors"
 )
 
 var (
@@ -27,5 +28,19 @@ type Levlog struct {
 	DbLock     *sync.RWMutex
 	FirstIndex int64
 	NowIndex   int64
+}
+
+func (levlog *Levlog) getNowIndex() (int64, error) {
+	var nowIndex int64 = 0
+	val, err := levlog.DB.Get(NOW_INDEX_B, nil)
+	if err != nil && err != errors.ErrNotFound {
+		return 0, err
+	} else if err == nil {
+		nowIndex = BytesToInt64(val)
+	} else {
+		nowIndex = 0
+		levlog.DB.Put(NOW_INDEX_B, Int64ToBytes(nowIndex), nil)
+	}
+	return nowIndex, nil
 }
 
