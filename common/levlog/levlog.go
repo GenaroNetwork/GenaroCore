@@ -49,3 +49,7 @@ func (levlog *Levlog) getNowIndex() (int64, error) {
 func (levlog *Levlog) GetFirstPageNum() int64 {
 	return levlog.FirstIndex/PageSize
 }
+
+func (levlog *Levlog) GetLastPageNum() int64 {
+	return levlog.NowIndex/PageSize
+}
