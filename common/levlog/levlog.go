@@ -12,6 +12,8 @@ var (
 	FIR_INDEX_B = []byte("FIR_INDEX")
 )
 
+const PageSize int64 = 20
+
 func Int64ToBytes(i int64) []byte {
 	var buf = make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(i))
@@ -43,4 +45,5 @@ func (levlog *Levlog) getNowIndex() (int64, error) {
 	}
 	return nowIndex, nil
 }
+
 
