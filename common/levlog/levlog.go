@@ -32,6 +32,21 @@ type Levlog struct {
 	NowIndex   int64
 }
 
+func (levlog *Levlog) getFirstIndex() (int64, error) {
+	var firIndex int64 = 0
+
+	val, err := levlog.DB.Get(FIR_INDEX_B, nil)
+	if err != nil && err != errors.ErrNotFound {
+		return 0, err
+	} else if err == nil {
+		firIndex = BytesToInt64(val)
+	} else {
+		firIndex = 0
+		levlog.DB.Put(FIR_INDEX_B, Int64ToBytes(firIndex), nil)
+	}
+	return firIndex, nil
+}
+
 func (levlog *Levlog) getNowIndex() (int64, error) {
 	var nowIndex int64 = 0
 	val, err := levlog.DB.Get(NOW_INDEX_B, nil)
