@@ -52,6 +52,10 @@ func GenLevlog(dbdir string) (*Levlog, error) {
 	return levlog, nil
 }
 
+func (levlog *Levlog) Close() {
+	levlog.DB.Close()
+}
+
 func (levlog *Levlog) getFirstIndex() (int64, error) {
 	var firIndex int64 = 0
 
