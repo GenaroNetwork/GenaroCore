@@ -32,6 +32,26 @@ type Levlog struct {
 	NowIndex   int64
 }
 
+func GenLevlog(dbdir string) (*Levlog, error) {
+	levlog := new(Levlog)
+	var err error
+	levlog.DB, err = leveldb.OpenFile(dbdir, nil)
+	if err != nil {
+		return nil, err
+	}
+	levlog.Dbdir = dbdir
+	levlog.DbLock = new(sync.RWMutex)
+	levlog.NowIndex, err = levlog.getNowIndex()
+	if err != nil {
+		return nil, err
+	}
+	levlog.FirstIndex, err = levlog.getFirstIndex()
+	if err != nil {
+		return nil, err
+	}
+	return levlog, nil
+}
+
 func (levlog *Levlog) getFirstIndex() (int64, error) {
 	var firIndex int64 = 0
 
