@@ -73,6 +73,20 @@ func (levlog *Levlog) Log(logstr string) error {
 	return nil
 }
 
+func (levlog *Levlog) GetLogsInPage(page int64) ([]string, error) {
+	start := page * PageSize
+	end := (page + 1) * PageSize
+
+	if start < levlog.FirstIndex || start > levlog.NowIndex {
+		return nil, errors.New("page not exist")
+	}
+	if end > levlog.NowIndex {
+		end = levlog.NowIndex
+	}
+
+	return levlog.GetLogs(start, end)
+}
+
 func (levlog *Levlog) GetLogs(start int64, end int64) ([]string, error) {
 	if start < levlog.FirstIndex || end > levlog.NowIndex || start >= end {
 		return nil, errors.New("Exceeding the scope")
