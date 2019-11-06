@@ -56,6 +56,23 @@ func (levlog *Levlog) Close() {
 	levlog.DB.Close()
 }
 
+func (levlog *Levlog) Log(logstr string) error {
+	levlog.DbLock.Lock()
+	defer levlog.DbLock.Unlock()
+
+	err := levlog.DB.Put(Int64ToBytes(levlog.NowIndex), []byte(logstr), nil)
+	if err != nil {
+		return err
+	}
+	levlog.NowIndex++
+
+	err = levlog.DB.Put(NOW_INDEX_B, Int64ToBytes(levlog.NowIndex), nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (levlog *Levlog) getFirstIndex() (int64, error) {
 	var firIndex int64 = 0
 
