@@ -73,6 +73,24 @@ func (levlog *Levlog) Log(logstr string) error {
 	return nil
 }
 
+func (levlog *Levlog) GetLogs(start int64, end int64) ([]string, error) {
+	if start < levlog.FirstIndex || end > levlog.NowIndex || start >= end {
+		return nil, errors.New("Exceeding the scope")
+	}
+	levlog.DbLock.RLock()
+	defer levlog.DbLock.RUnlock()
+
+	ret := make([]string, end-start)
+	for i := start; i < end; i++ {
+		val, err := levlog.DB.Get(Int64ToBytes(i), nil)
+		if err != nil {
+			return nil, err
+		}
+		ret[i-start] = string(val)
+	}
+	return ret, nil
+}
+
 func (levlog *Levlog) getFirstIndex() (int64, error) {
 	var firIndex int64 = 0
 
