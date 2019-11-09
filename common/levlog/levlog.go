@@ -133,6 +133,25 @@ func (levlog *Levlog) GetLog(idx int64) (string, error) {
 	return string(val), nil
 }
 
+func (levlog *Levlog) DelFirstPage() error {
+	if levlog.NowIndex-levlog.FirstIndex < 50 {
+		return errors.New("log lesser 50")
+	}
+
+	levlog.DbLock.Lock()
+	defer levlog.DbLock.Unlock()
+
+	for i := levlog.FirstIndex; i < levlog.FirstIndex+PageSize; i++ {
+		err := levlog.DB.Delete(Int64ToBytes(i), nil)
+		if err != nil {
+			return err
+		}
+	}
+	levlog.FirstIndex = levlog.FirstIndex + PageSize
+	err := levlog.DB.Put(FIR_INDEX_B, Int64ToBytes(levlog.FirstIndex), nil)
+	return err
+}
+
 func (levlog *Levlog) getNowIndex() (int64, error) {
 	var nowIndex int64 = 0
 	val, err := levlog.DB.Get(NOW_INDEX_B, nil)
