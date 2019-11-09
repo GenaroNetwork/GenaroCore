@@ -120,6 +120,19 @@ func (levlog *Levlog) getFirstIndex() (int64, error) {
 	return firIndex, nil
 }
 
+func (levlog *Levlog) GetLog(idx int64) (string, error) {
+	if idx < levlog.FirstIndex || idx >= levlog.NowIndex {
+		return "", errors.New("Exceeding the scope")
+	}
+	levlog.DbLock.RLock()
+	defer levlog.DbLock.RUnlock()
+	val, err := levlog.DB.Get(Int64ToBytes(idx), nil)
+	if err != nil {
+		return "", err
+	}
+	return string(val), nil
+}
+
 func (levlog *Levlog) getNowIndex() (int64, error) {
 	var nowIndex int64 = 0
 	val, err := levlog.DB.Get(NOW_INDEX_B, nil)
