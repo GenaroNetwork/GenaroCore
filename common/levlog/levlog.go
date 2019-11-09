@@ -1,10 +1,10 @@
 package levlog
 
 import (
-	"github.com/syndtr/goleveldb/leveldb"
 	"encoding/binary"
-	"sync"
+	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
+	"sync"
 )
 
 var (
@@ -167,9 +167,9 @@ func (levlog *Levlog) getNowIndex() (int64, error) {
 }
 
 func (levlog *Levlog) GetFirstPageNum() int64 {
-	return levlog.FirstIndex/PageSize
+	return levlog.FirstIndex / PageSize
 }
 
 func (levlog *Levlog) GetLastPageNum() int64 {
-	return levlog.NowIndex/PageSize
+	return levlog.NowIndex / PageSize
 }
