@@ -105,6 +105,8 @@ func (levlog *Levlog) GetLogs(start int64, end int64) ([]string, error) {
 	return ret, nil
 }
 
+
+
 func (levlog *Levlog) getFirstIndex() (int64, error) {
 	var firIndex int64 = 0
 
