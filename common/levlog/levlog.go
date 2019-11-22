@@ -173,5 +173,5 @@ func (levlog *Levlog) GetFirstPageNum() int64 {
 }
 
 func (levlog *Levlog) GetLastPageNum() int64 {
-	return levlog.NowIndex / PageSize
+	return levlog.NowIndex / PageSize - 1
 }
