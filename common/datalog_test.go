@@ -43,14 +43,20 @@ func TestLog1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer dlog.Close()
 
 	start := time.Now()
 	for i:=0;i<50000;i++{
 		dlog.Log("LOG:"+strconv.Itoa(i))
 
 	}
-	t.Log("50000 cost time:")
+	t.Log("50000 log cost time:")
+	t.Log(time.Since(start))
+
+	start = time.Now()
+	for i:=int64(0);i<50000;i++{
+		dlog.GetLog(i)
+	}
+	t.Log("50000 get cost time:")
 	t.Log(time.Since(start))
 
 }
