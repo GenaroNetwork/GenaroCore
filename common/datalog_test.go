@@ -4,6 +4,7 @@ import (
 	"testing"
 	"strconv"
 	"os"
+	"time"
 )
 
 func TestLog(t *testing.T) {
@@ -32,5 +33,24 @@ func TestLog(t *testing.T) {
 
 	first := dlog.GetFirstPageNum()
 	t.Log(first)
+}
+
+func TestLog1(t *testing.T) {
+	dbdir := "/tmp/db"
+	InitDataLogDir(dbdir)
+	os.RemoveAll(dbdir)
+	dlog, err := GetLog()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer dlog.Close()
+
+	start := time.Now()
+	for i:=0;i<50000;i++{
+		dlog.Log("LOG:"+strconv.Itoa(i))
+
+	}
+	t.Log("50000 cost time:")
+	t.Log(time.Since(start))
 
 }
