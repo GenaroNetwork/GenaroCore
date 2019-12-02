@@ -30,6 +30,7 @@ type Levlog struct {
 	DbLock     *sync.RWMutex
 	FirstIndex int64
 	NowIndex   int64
+	Namespace  string
 }
 
 func GenLevlog(dbdir string) (*Levlog, error) {
@@ -105,8 +106,6 @@ func (levlog *Levlog) GetLogs(start int64, end int64) ([]string, error) {
 	return ret, nil
 }
 
-
-
 func (levlog *Levlog) getFirstIndex() (int64, error) {
 	var firIndex int64 = 0
 
@@ -173,5 +172,5 @@ func (levlog *Levlog) GetFirstPageNum() int64 {
 }
 
 func (levlog *Levlog) GetLastPageNum() int64 {
-	return levlog.NowIndex / PageSize - 1
+	return levlog.NowIndex/PageSize - 1
 }
