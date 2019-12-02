@@ -1,6 +1,7 @@
 package levlog
 
 import (
+	"bytes"
 	"encoding/binary"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
@@ -64,6 +65,17 @@ func (levlog *Levlog) SetNamespace(namespace string) {
 
 func (levlog *Levlog) GetNamespace() string {
 	return levlog.namespace
+}
+
+func keytrans(namespace string, key int64) []byte {
+	var buffer bytes.Buffer
+	buffer.Write([]byte(namespace))
+	buffer.Write(Int64ToBytes(key))
+	return buffer.Bytes()
+}
+
+func (levlog *Levlog) keytrans(key int64) []byte {
+	return keytrans(levlog.namespace, key)
 }
 
 func (levlog *Levlog) Log(logstr string) error {
