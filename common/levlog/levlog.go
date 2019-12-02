@@ -30,7 +30,7 @@ type Levlog struct {
 	DbLock     *sync.RWMutex
 	FirstIndex int64
 	NowIndex   int64
-	Namespace  string
+	namespace  string
 }
 
 func GenLevlog(dbdir string) (*Levlog, error) {
@@ -50,11 +50,20 @@ func GenLevlog(dbdir string) (*Levlog, error) {
 	if err != nil {
 		return nil, err
 	}
+	levlog.namespace = ""
 	return levlog, nil
 }
 
 func (levlog *Levlog) Close() {
 	levlog.DB.Close()
+}
+
+func (levlog *Levlog) SetNamespace(namespace string) {
+	levlog.namespace = namespace
+}
+
+func (levlog *Levlog) GetNamespace() string {
+	return levlog.namespace
 }
 
 func (levlog *Levlog) Log(logstr string) error {
