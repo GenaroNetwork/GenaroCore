@@ -332,7 +332,7 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 
 	//paramAddress := common.HexToAddress(s.Address)
 	if caller != common.BindingNodeIdAddress {
-		return errors.New("The transaction address must be 0xebb97ad3ca6b4f609da161c0b2b0eaa4ad58f3e8")
+		return errors.New("The transaction address must be "+common.BindingNodeIdAddress.String())
 	}
 
 	if db.GetAddressByNode(s.NodeID) != "" {
