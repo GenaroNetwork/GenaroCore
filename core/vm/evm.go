@@ -289,9 +289,9 @@ func dispatchHandler(evm *EVM, caller common.Address, input []byte) error {
 		err = CarriedOutPromissoryNotes(evm, s, caller)
 	case common.SpecialTxTurnBuyPromissoryNotes.Uint64():
 		err = turnBuyPromissoryNotes(evm, s, caller)
-	case common.SpecialTxSetProfitAccount.Uint64(): 
+	case common.SpecialTxSetProfitAccount.Uint64():
 		err = setProfitAccount(evm, s, caller)
-	case common.SpecialTxSetShadowAccount.Uint64(): 
+	case common.SpecialTxSetShadowAccount.Uint64():
 		err = setShadowAccount(evm, s, caller)
 	default:
 		err = errors.New("undefined type of special transaction")
@@ -717,11 +717,11 @@ func updateStakeNode(evm *EVM, s types.SpecialTxInput, caller common.Address) er
 	}
 
 	var err error = nil
-	err = (*evm).StateDB.SyncStakeNode(caller, s.NodeID)
+	err = (*evm).StateDB.SyncStakeNode(common.HexToAddress(s.Address), s.NodeID)
 
 	if err == nil {
 		node2UserAccountIndexAddress := common.StakeNode2StakeAddress
-		(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.NodeID, caller.String())
+		(*evm).StateDB.SyncNode2Address(node2UserAccountIndexAddress, s.NodeID, common.HexToAddress(s.Address).String())
 	}
 
 	return err

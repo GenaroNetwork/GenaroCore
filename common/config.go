@@ -56,6 +56,8 @@ var (
 	OptionTxBeginSaveAddress Address = HexToAddress("0xa000000000000000000000000000000000000000")
 
 	NameSpaceSaveAddress Address = HexToAddress("0xb000000000000000000000000000000000000000")
+
+	BindingNodeIdAddress Address = HexToAddress("0xe25de09fb1afd3cacfad2e91cf5d5f2862597667")
 )
 
 var SpecialAddressList = []Address{CandidateSaveAddress, BackStakeAddress, LastSynStateSaveAddress, StakeNode2StakeAddress, GenaroPriceAddress, SpecialSyncAddress, RewardsSaveAddress, BindingSaveAddress, ForbidBackStakeSaveAddress, NameSpaceSaveAddress}

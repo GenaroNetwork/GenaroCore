@@ -6,9 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GenaroNetwork/GenaroCore/common"
-	"github.com/GenaroNetwork/GenaroCore/common/hexutil"
 	"github.com/GenaroNetwork/GenaroCore/core/types"
-	"github.com/GenaroNetwork/GenaroCore/crypto"
 	"github.com/GenaroNetwork/GenaroCore/params"
 	"golang.org/x/crypto/ripemd160"
 	"math/big"
@@ -320,45 +318,45 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	if s.NodeID == "" {
 		return errors.New("param [nodeId] missing ")
 	}
-	if s.Sign == "" {
-		return errors.New("param [sign] missing ")
-	}
+	//if s.Sign == "" {
+	//	return errors.New("param [sign] missing ")
+	//}
 
-	stake, _ := db.GetStake(caller)
-	existNodes := db.GetStorageNodes(caller)
+	stake, _ := db.GetStake(common.HexToAddress(s.Address))
+	existNodes := db.GetStorageNodes(common.HexToAddress(s.Address))
 	stakeVlauePerNode := db.GetStakePerNodePrice()
 
 	if len(s.NodeID) == 0 {
 		return errors.New("length of nodeId must larger then 0")
 	}
 
-	paramAddress := common.HexToAddress(s.Address)
-	if caller != paramAddress {
-		return errors.New("address in param is not equal with callerAddress of this Tx")
+	//paramAddress := common.HexToAddress(s.Address)
+	if caller != common.BindingNodeIdAddress {
+		return errors.New("The transaction address must be 0xebb97ad3ca6b4f609da161c0b2b0eaa4ad58f3e8")
 	}
 
 	if db.GetAddressByNode(s.NodeID) != "" {
 		return errors.New("the input node have been bound by themselves or others")
 	}
 
-	msg := s.NodeID + s.Address
-
-	sig, err := hexutil.Decode(s.Sign)
-	if err != nil {
-		return errors.New("sign without 0x prefix")
-	}
-
-	recoveredPub, err := crypto.SigToPub(crypto.Keccak256([]byte(msg)), sig)
-	if err != nil {
-		return errors.New("ECRecover error when valid sign")
-	}
-
-	pubKey := crypto.CompressPubkey(recoveredPub)
-
-	genNodeID := generateNodeId(pubKey)
-	if genNodeID != s.NodeID {
-		return errors.New("sign valid error, nodeId mismatch")
-	}
+	//msg := s.NodeID + s.Address
+	//
+	//sig, err := hexutil.Decode(s.Sign)
+	//if err != nil {
+	//	//return errors.New("sign without 0x prefix")
+	//}
+	//
+	//recoveredPub, err := crypto.SigToPub(crypto.Keccak256([]byte(msg)), sig)
+	//if err != nil {
+	//	//return errors.New("ECRecover error when valid sign")
+	//}
+	//
+	//pubKey := crypto.CompressPubkey(recoveredPub)
+	//
+	//genNodeID := generateNodeId(pubKey)
+	//if genNodeID != s.NodeID {
+	//	//return errors.New("sign valid error, nodeId mismatch")
+	//}
 
 	var nodeNum int = 1
 	if existNodes != nil {
@@ -371,7 +369,7 @@ func CheckSyncNodeTx(caller common.Address, s types.SpecialTxInput, db StateDB) 
 	currentStake := new(big.Int).Mul(new(big.Int).SetUint64(stake), common.BaseCompany)
 
 	if needStakeVale.Cmp(currentStake) == 1 {
-		return errors.New("none enough stake to synchronize node")
+		//return errors.New("none enough stake to synchronize node")
 	}
 	return nil
 }
